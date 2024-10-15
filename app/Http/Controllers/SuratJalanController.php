@@ -342,16 +342,17 @@ class SuratJalanController extends Controller
             return response()->json(['message' => 'ID is required'], 400);
         }
         try {
-            // Hapus data terkait di tabel invoice
-            $relatedInvoices = Invoice::where('id_transaksi', $id)->get();
-            foreach ($relatedInvoices as $invoice) {
-                $invoice->delete();
-            }
+            // Ini penyebab invoice juga terhapus
+            // $relatedInvoices = Invoice::where('id_transaksi', $id)->get();
+            // foreach ($relatedInvoices as $invoice) {
+            //     $invoice->delete();
+            // }
 
-            $transaction = Transaction::find($id);
-            if ($transaction) {
+            $transactions = Transaction::where('id_surat_jalan', $id)->get();
+            foreach ($transactions as $transaction) {
                 $transaction->delete();
             }
+    
 
             $suratJalan = SuratJalan::find($id);
             if ($suratJalan) {
