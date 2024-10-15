@@ -155,7 +155,7 @@
                 $('#harga_jual').val(jual);
                 $('#harga_beli').val(beli);
                 $('#profit').val(margin);
-                document.getElementById('barang').innerHTML = nama_barang + ' (' + satuan_jual + ')';
+                document.getElementById('barang').innerHTML = nama_barang + ' (' + 'Harga' + ' PER -' + satuan_jual + ')';
                 my_modal_5.showModal();
             }
 
@@ -194,6 +194,7 @@
                     });
                 }
             }
+            
         </script>
     </x-slot:script>
 </x-Layout.layout>
