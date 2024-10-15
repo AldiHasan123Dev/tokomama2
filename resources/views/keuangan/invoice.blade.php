@@ -28,7 +28,7 @@
     <script type="text/ecmascript" src="{{ asset('assets/js/grid.locale-en.js') }}"></script>
     <script type="text/ecmascript" src="{{ asset('assets/js/jquery.jqGrid.min.js') }}"></script>
     <script>
-       $(document).ready(function () {
+$(document).ready(function () {
     $("#surat_jalan_table").jqGrid({
         url: "{{ route('invoice.data') }}", // URL server-side
         datatype: "json",                   // Format data
@@ -81,13 +81,14 @@
             const searchField = $("#surat_jalan_table").jqGrid('getGridParam', 'searchField');
             const searchString = $("#surat_jalan_table").jqGrid('getGridParam', 'searchString');
             const searchOper = $("#surat_jalan_table").jqGrid('getGridParam', 'searchOper');
+            console.log("Field:", searchField, "String:", searchString, "Operator:", searchOper);
 
             // Update postData with search parameters
             $("#surat_jalan_table").jqGrid('setGridParam', {
                 postData: {
                     invoice: "1",
                     nd: "1728893317025",
-                    _search: "true", // Set to true for search
+                    _search: "false", // Set to true for search
                     searchField: searchField,
                     searchString: searchString,
                     searchOper: searchOper,
@@ -97,6 +98,7 @@
         }
     });
 });
+
 
         </script>
 </x-Layout.layout>
