@@ -116,34 +116,38 @@
                 my_modal_5.showModal();
             }
 
-            function deleteData(id) {
-                if (confirm('Apakah anda yakin akan menghapus data ini?')) {
-    // Konfirmasi kedua
-    if (confirm('DATA YANG AKAN DIHAPUS INI, AKAN HILANG PERMANEN DAN TIDAK BISA DIKEMBALIKAN LAGI, APAKAH ANDA YAKIN?')) {
-        $.ajax({
-            method: 'POST',
-            url: "{{ route('surat-jalan.data.delete') }}",
-            data: { 
-                id: id
-            },
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function(response) {
-                alert("Data Surat Jalan berhasil dihapus!");
-                table.ajax.reload(); // Menggunakan reload pada tabel Anda
-            },
-            error: function(xhr, status, error) {
-                console.log('Error:', error);
-                console.log('Status:', status);
-                console.dir(xhr);
-                console.log('Response:', xhr.responseJSON);
-            }
-        });
-    } else {
-        // Jika pengguna menolak konfirmasi kedua
-        alert("Penghapusan dibatalkan.");
+function deleteData(id) {
+    // Menampilkan ID yang akan dihapus
+    console.log("ID yang akan dihapus:", id);
+
+    if (confirm('Apakah anda yakin akan menghapus data ini?')) {
+        // Konfirmasi kedua
+        if (confirm('DATA YANG AKAN DIHAPUS INI, AKAN HILANG PERMANEN DAN TIDAK BISA DIKEMBALIKAN LAGI, APAKAH ANDA YAKIN?')) {
+            $.ajax({
+                method: 'POST',
+                url: "{{ route('surat-jalan.data.delete') }}",
+                data: { 
+                    id: id
+                },
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function(response) {
+                    alert("Data Surat Jalan berhasil dihapus!");
+                    table.ajax.reload(); // Menggunakan reload pada tabel Anda
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error:', error);
+                    console.log('Status:', status);
+                    console.dir(xhr);
+                    console.log('Response:', xhr.responseJSON);
+                }
+            });
+        } else {
+            // Jika pengguna menolak konfirmasi kedua
+            alert("Penghapusan dibatalkan.");
+        }
     }
 }
-            }
+
 
     
 
