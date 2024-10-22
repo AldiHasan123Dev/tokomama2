@@ -31,21 +31,10 @@
             padding: 0px;
         }
     </style>
-    <form action="{{ route('surat-jalan.store') }}" target="_blank" method="post" class="grid grid-cols-3 gap-3"
-        id="reset">
+    <form action="{{ route('surat-jalan.store') }}" target="_blank" method="post" class="grid grid-cols-3 gap-3" id="reset">
         <div class="card w-fit bg-base-100 shadow-xl">
             <div class="card-body">
                 <h2 class="card-title">Form Surat Jalan</h2>
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
                 <div>
                     @csrf
                     {{-- <div>
@@ -67,13 +56,12 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="kepada" name="kepada" list="ekspedisi_list" required />
+                                    id="kepada" name="kepada" list="ekspedisi_list" required autocomplete="off" oninput="this.value = this.value.toUpperCase();" />
                                 <datalist id="ekspedisi_list">
                                     @foreach ($ekspedisi as $item)
-                                        <option data-id="{{ $item->id }}" data-alamat="{{ $item->alamat }}"
-                                            data-kota="{{ $item->kota }}" value="{{ $item->nama }}">
-                                            {{ $item->nama }}
-                                        </option>
+                                    <option data-id="{{$item->id}}" data-alamat="{{$item->alamat}}"
+                                        data-kota="{{ $item->kota }}" value="{{ $item->nama }}">{{ $item->nama }}
+                                    </option>
                                     @endforeach
                                 </datalist>
                             </label>
@@ -116,7 +104,7 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="nama_kapal" name="nama_kapal" required />
+                                    id="nama_kapal" name="nama_kapal" required  oninput="this.value = this.value.toUpperCase();"/>
                             </label>
                         </div>
                         <div>
@@ -126,7 +114,7 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="no_cont" name="no_cont" required />
+                                    id="no_cont" name="no_cont"  oninput="this.value = this.value.toUpperCase();" required />
                             </label>
                         </div>
                         <div>
@@ -136,7 +124,7 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="no_seal" name="no_seal" required />
+                                    id="no_seal" name="no_seal"  oninput="this.value = this.value.toUpperCase();" required />
                             </label>
                         </div>
                         <div>
@@ -146,12 +134,11 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="no_pol" name="no_pol" list="no_pol_list" />
+                                    id="no_pol" name="no_pol" list="no_pol_list" autocomplete="off" oninput="this.value = this.value.toUpperCase();" />
                                 <input type="hidden" name="id_nopol" id="id_nopol">
                                 <datalist id="no_pol_list">
                                     @foreach ($nopol as $np)
-                                        <option data-id="{{ $np->id }}}" value="{{ $np->nopol }}">
-                                            {{ $np->nopol }}</option>
+                                    <option data-id="{{ $np->id }}}" value="{{ $np->nopol }}">{{ $np->nopol }}</option>
                                     @endforeach
                                 </datalist>
                             </label>
@@ -163,7 +150,7 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="no_po" name="no_po" value="-" required />
+                                    id="no_po" name="no_po" value="-"  oninput="this.value = this.value.toUpperCase();" required />
                             </label>
                         </div>
                         <div>
@@ -173,24 +160,21 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="no_job" name="no_job" required />
+                                    id="no_job" name="no_job" required oninput="this.value = this.value.toUpperCase();"/>
                             </label>
                         </div>
                         <div>
                             <label class="form-control w-full max-w-xs">
                                 <div class="label">
-                                    <span class="label-text">Tujuan/NamaCustomer <span
-                                            class="text-red-500">*</span></span>
+                                    <span class="label-text">Tujuan/NamaCustomer <span class="text-red-500">*</span></span>
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="tujuan" name="tujuan" list="customer_list" required
-                                    autocomplete="off" />
+                                    id="tujuan" name="tujuan" list="customer_list" required autocomplete="off"  oninput="this.value = this.value.toUpperCase();"/>
                                 <input type="hidden" name="id_customer" id="id_customer">
                                 <datalist id="customer_list">
                                     @foreach ($customer as $mb)
-                                        <option data-id="{{ $mb->id }}" value="{{ $mb->nama }}">
-                                            {{ $mb->nama }}</option>
+                                    <option data-id="{{$mb->id}}" value="{{ $mb->nama }}">{{ $mb->nama }}</option>
                                     @endforeach
                                 </datalist>
                             </label>
@@ -202,7 +186,7 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="kota_pengirim" name="kota_pengirim" value="Surabaya" required />
+                                    id="kota_pengirim" name="kota_pengirim" value="Surabaya"  oninput="this.value = this.value.toUpperCase();" required />
                             </label>
                         </div>
                         <div>
@@ -212,7 +196,7 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="nama_pengirim" name="nama_pengirim" value="FIRDA" required />
+                                    id="nama_pengirim" name="nama_pengirim" value="FIRDA"  oninput="this.value = this.value.toUpperCase();" required />
                             </label>
                         </div>
                         <div>
@@ -222,7 +206,7 @@
                                 </div>
                                 <input type="text"
                                     class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="nama_penerima" name="nama_penerima" value="IFAN" required />
+                                    id="nama_penerima" name="nama_penerima" value="IFAN"  oninput="this.value = this.value.toUpperCase();" required />
                             </label>
                         </div>
                         <div>
@@ -267,17 +251,16 @@
                             </thead>
                             <tbody id="tbody-list-barang">
                                 @php
-                                    $q = 5;
+                                $q = 5;
                                 @endphp
                                 <input type="hidden" name="q" id="q" value="{{ $q }}">
                                 @for ($i = 1; $i <= $q; $i++)
-                                    <input type="hidden" name="nama_satuan[]"
-                                        id="nama_satuan-{{ $i }}" />
-                                    <tr>
-                                        <td class="text-center">{{ $i }}</td>
-                                        <td>
-                                            <select name="barang[]" id="barang-{{ $i }}"
-                                                class="form-control my-0" style="width: 300px; border:none">
+                                <input type="hidden" name="nama_satuan[]" id="nama_satuan-{{ $i }}" />
+                                <tr>
+                                    <td class="text-center">{{ $i }}</td>
+                                    <td>
+                                       <select name="barang[]" id="barang-{{ $i }}"
+                                                class="select2 form-control my-0" style="width: 300px; border:none">
                                                 <option value=""></option>
                                                 @foreach ($barang as $item)
                                                     <option value="{{ $item->id }}">{{ $item->nama }} ||
@@ -285,83 +268,66 @@
                                                         {{ $item->kode_objek }}</option>
                                                 @endforeach
                                             </select>
-                                        </td>
-                                        <td>
-                                            <input type="number" style="width:120px" onchange="inputBarang()"
-                                                name="jumlah_beli[]" id="jumlah_beli-{{ $i }}"
-                                                class="form-control">
-                                        </td>
-                                        <td>
-                                            <select name="satuan_beli[]" id="satuan_beli-{{ $i }}"
-                                                onchange="inputBarang()" class="form-control my-0"
-                                                style="width: 150px; height: 190px; border:none">
+                                    </td>
+                                    <td>
+                                        <input type="number" style="width:120px" onchange="inputBarang()" name="jumlah_beli[]" id="jumlah_beli-{{ $i }}"
+                                            class="form-control">
+                                    </td>
+                                    <td>
+                                        <select name="satuan_beli[]" id="satuan_beli-{{ $i }}"
+                                                onchange="inputBarang()" class=" m-1 form-select"
+                                                >
                                                 <option value=""></option>
                                                 @foreach ($satuan as $item)
                                                     <option value="{{ $item->nama_satuan }}">{{ $item->nama_satuan }}
                                                     </option>
                                                 @endforeach
                                             </select>
-                                        </td>
-                                        <td>
-                                            <input type="number" style="width:120px" onchange="inputBarang()"
-                                                name="jumlah_jual[]" id="jumlah_jual-{{ $i }}"
-                                                class="form-control" readonly>
-                                        </td>
-                                        <td>
-                                            <input type="text" style="width:120px" onchange="inputBarang()"
-                                                name="satuan_jual[]" id="satuan_jual-{{ $i }}"
-                                                class="form-control" placeholder="(ZAK, BALL, KARTON, DLL)"
-                                                list="satuan_jual_list" autocomplete="off" readonly>
-                                        </td>
-                                        <td>
-                                            <select name="supplier[]" id="supplier-{{ $i }}"
-                                                class="form-control my-0" style="width: 230px; border:none">
-                                                <option value=""></option>
-                                                @foreach ($supplier as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input type="text" style="width:120px" onchange="inputBarang()"
-                                                name="keterangan[]" id="keterangan-{{ $i }}"
-                                                class="form-control">
-                                        </td>
-                                    </tr>
+                                    </td>
+                                    <td>
+                                        <input type="number" style="width:120px" onchange="inputBarang()" name="jumlah_jual[]" id="jumlah_jual-{{ $i }}" class="form-control" readonly>
+                                    </td>
+                                    <td>
+                                        <input type="text" style="width:120px" onchange="inputBarang()" name="satuan_jual[]" id="satuan_jual-{{ $i }}" class="m-1 form-control" placeholder="(ZAK, BALL, KARTON, DLL)" list="satuan_jual_list" autocomplete="off" readonly>
+                                    </td>
+                                    <td>
+                                        <select  name="supplier[]" id="supplier-{{ $i }}" class="select2 form-control my-0" style="width: 230px; border:none">
+                                            <option value=""></option>
+                                            @foreach ($supplier as $item)
+                                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" style="width:120px" onchange="inputBarang()" name="keterangan[]" id="keterangan-{{ $i }}" class="form-control">
+                                    </td>
+                                </tr>
                                 @endfor
                             </tbody>
                         </table>
                         <datalist id="barang_id">
                             @foreach ($barang as $mb)
-                                <option data-id="{{ $mb->id }}" data-value="{{ $mb->value }}"
-                                    data-satuan="{{ $mb->nama_satuan }}" data-nama="{{ $mb->nama_singkat }}"
-                                    value="{{ $mb->id }}">{{ $mb->id }} - {{ $mb->nama_singkat }}
-                                    ({{ $mb->nama_satuan }})</option>
+                            <option data-id="{{$mb->id}}" data-value="{{ $mb->value }}" data-satuan="{{ $mb->nama_satuan }}" data-nama="{{ $mb->nama_singkat }}" value="{{ $mb->id }}" >{{ $mb->id }} - {{ $mb->nama_singkat }} ({{ $mb->nama_satuan }})</option>
                             @endforeach
                         </datalist>
                         <datalist id="barang_list">
                             @foreach ($barang as $mb)
-                                <option data-id="{{ $mb->id }}" data-value="{{ $mb->value }}"
-                                    data-satuan="{{ $mb->nama_satuan }}" value="{{ $mb->nama }}">
-                                    {{ $mb->nama_singkat }} ({{ $mb->nama_satuan }})</option>
+                            <option data-id="{{$mb->id}}" data-value="{{ $mb->value }}" data-satuan="{{ $mb->nama_satuan }}" value="{{ $mb->nama }}" >{{ $mb->nama_singkat }} ({{ $mb->nama_satuan }})</option>
                             @endforeach
                         </datalist>
                         <datalist id="satuan_beli_list">
                             @foreach ($satuan as $st)
-                                <option data-id="{{ $st->id }}" value="{{ $st->nama_satuan }}">
-                                    {{ $st->nama_satuan }}</option>
+                            <option data-id="{{$st->id}}" value="{{ $st->nama_satuan }}">{{ $st->nama_satuan }}</option>
                             @endforeach
                         </datalist>
                         <datalist id="satuan_jual_list">
                             @foreach ($satuan as $st)
-                                <option data-id="{{ $st->id }}" value="{{ $st->nama_satuan }}">
-                                    {{ $st->nama_satuan }}</option>
+                            <option data-id="{{$st->id}}" value="{{ $st->nama_satuan }}">{{ $st->nama_satuan }}</option>
                             @endforeach
                         </datalist>
                         <datalist id="supplier_list">
                             @foreach ($supplier as $sp)
-                                <option data-id="{{ $sp->id }}" data-nama="{{ $sp->nama }}"
-                                    value="{{ $sp->nama }}">{{ $sp->nama }}</option>
+                            <option data-id="{{$sp->id}}" data-nama="{{ $sp->nama }}" value="{{$sp->nama}}">{{$sp->nama}}</option>
                             @endforeach
                         </datalist>
                     </div>
@@ -404,17 +370,17 @@
                         <tr>
                             <th class="text-center border border-black" rowspan="7"
                                 style="vertical-align: top; padding-top: 20px; line-height: 1.5rem">
-                                @for ($i = 1; $i < 5; $i++) <span id="txt_nomor{{$i}}"></span><br>
+                                @for($i = 1; $i < 5; $i++) <span id="txt_nomor{{$i}}"></span><br>
                                     @endfor
                             </th>
                             <td class="text-center border border-black" rowspan="7"
                                 style="vertical-align: top; padding-top: 20px; line-height: 1.5rem">
-                                @for ($i = 1; $i < 5; $i++) <span id="txt_jumlah{{ $i }}"></span><br>
+                                @for($i = 1; $i < 5; $i++) <span id="txt_jumlah{{ $i }}"></span><br>
                                     @endfor
                             </td>
                             <td class="text-center border border-black" rowspan="7"
                                 style="vertical-align: top; padding-top: 20px; line-height: 1.5rem">
-                                @for ($i = 1; $i < 5; $i++) <span id="txt_satuan{{ $i }}"></span><br>
+                                @for($i = 1; $i < 5; $i++) <span id="txt_satuan{{ $i }}"></span><br>
                                     @endfor
                             </td>
                             <td class="border border-black" id="barang-list">
@@ -477,10 +443,10 @@
     </form>
 
     <script>
-        $(function() {
-            $("select").selectize();
+        $(function () {
+            $(".select2").selectize();
         });
-        $('#kepada').on('input', function() {
+        $('#kepada').on('input', function () {
             var inputValue = $(this).val();
             var id = $("#ekspedisi_list option[value='" + inputValue + "']").data('id');
             var alamat = $("#ekspedisi_list option[value='" + inputValue + "']").data('alamat');
@@ -497,12 +463,12 @@
         //     $('#txt_kepada').text(inputValue);
         // });
 
-        $('#no_po').on('input', function() {
+        $('#no_po').on('input', function () {
             var inputValue = $(this).val();
             $('#txt_no_po').text(inputValue);
         });
 
-        $('#jenis_barang').on('input', function() {
+        $('#jenis_barang').on('input', function () {
             var inputValue = $(this).val();
             $('#txt_jenis_barang').text(inputValue);
             var text = $("#jenis_barang_list option[value='" + inputValue + "']").data('text');
@@ -512,32 +478,34 @@
 
         });
 
-        $('#nama_kapal').on('input', function() {
+        $('#nama_kapal').on('input', function () {
             var inputValue = $(this).val();
             $('#txt_nama_kapal').text(inputValue);
         });
 
-        $('#no_cont').on('input', function() {
+        $('#no_cont').on('input', function () {
             var inputValue = $(this).val();
             $('#txt_no_cont').text(inputValue);
         });
 
-        $('#no_seal').on('input', function() {
+        $('#no_seal').on('input', function () {
             var inputValue = $(this).val();
             $('#txt_no_seal').text(inputValue);
         });
 
-        $('#no_pol').on('input', function() {
+        $('#no_pol').on('input', function () {
             var inputValue = $(this).val();
+            var id = $("#no_pol_list option[value='" + inputValue + "']").data('id');
+            $('#id_customer').val(id);
             $('#txt_no_pol').text(inputValue);
         });
 
-        $('#no_job').on('input', function() {
+        $('#no_job').on('input', function () {
             var inputValue = $(this).val();
             $('#txt_no_job').text(inputValue);
         });
 
-        $('#tujuan').on('input', function() {
+        $('#tujuan').on('input', function () {
             var inputValue = $(this).val();
             var id = $("#customer_list option[value='" + inputValue + "']").data('id');
             $('#id_customer').val(id);
@@ -552,63 +520,64 @@
         //});
 
         //jquery ready function
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#txt_nomor_surat').text($('#nomor_surat').val());
             $('#txt_kota_pengirim').text($('#kota_pengirim').val());
             $('#txt_nama_pengirim').text($('#nama_pengirim').val());
             $('#txt_nama_penerima').text($('#nama_penerima').val());
             $('#txt_no_po').text($('#no_po').val());
+            $('#txt_no_pol').text($('#no_pol').val());
         });
 
         $("#kota_pengirim").on({
-            input: function() {
+            input: function () {
                 var inputValue = $(this).val();
                 $('#txt_kota_pengirim').text(inputValue);
             },
-            click: function() {
+            click: function () {
                 var inputValue = $(this).val();
                 $('#txt_kota_pengirim').text(inputValue);
             }
         });
 
         $("#tgl_sj").on({
-            input: function() {
-                var inputValue = $(this).val();
-                let newData = new Date(inputValue).toLocaleDateString('id-ID', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit'
-                });
-                $('#txt_tgl_sj').text(newData);
-            },
-            click: function() {
-                var inputValue = $(this).val();
-                let newData = new Date(inputValue).toLocaleDateString('id-ID', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit'
-                });
-                $('#txt_tgl_sj').text(newData);
-            }
+            input: function () {
+            var inputValue = $(this).val();
+            let newData = new Date(inputValue).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            });
+            $('#txt_tgl_sj').text(newData);
+        },
+            click: function () {
+            var inputValue = $(this).val();
+            let newData = new Date(inputValue).toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit'
+            });
+            $('#txt_tgl_sj').text(newData);
+        }
         });
 
         $("#nama_pengirim").on({
-            input: function() {
+            input: function () {
                 var inputValue = $(this).val();
                 $('#txt_nama_pengirim').text(inputValue);
             },
-            click: function() {
+            click: function () {
                 var inputValue = $(this).val();
                 $('#txt_nama_pengirim').text(inputValue);
             }
         });
 
         $("#nama_penerima").on({
-            input: function() {
+            input: function () {
                 var inputValue = $(this).val();
                 $('#txt_nama_penerima').text(inputValue);
             },
-            click: function() {
+            click: function () {
                 var inputValue = $(this).val();
                 $('#txt_nama_penerima').text(inputValue);
             }
@@ -616,14 +585,14 @@
 
         let q = 5;
 
-        $('#btn_tambah').click(function() {
-            q++;
-            var html = `
+            $('#btn_tambah').click(function() {
+                q++;
+                var html = `
                                 <tr>
                                     <input type="hidden" name="nama_satuan[]" id="nama_satuan-${q}" />
                                     <td class="text-center">${q}</td>
                                     <td>
-                                        <select name="barang[]" id="barang-${q}" class="form-control my-0" style="width: 230px; border:none">
+                                        <select name="barang[]" id="barang-${q}" class="select2 form-control my-0" style="width: 300px; border:none">
                                             <option value=""></option>
                                             @foreach ($barang as $item)
                                             <option value="{{ $item->id }}">{{ $item->nama }} || {{ $item->nama_satuan }} || {{ $item->value }}</option>
@@ -635,8 +604,14 @@
                                             class="form-control">
                                     </td>
                                     <td>
-                                        <input type="text" style="width:120px" onchange="inputBarang()" name="satuan_beli[]" id="satuan_beli-${q}"
-                                            class="form-control" placeholder="(ZAK, BALL, KARTON, DLL)" list="satuan_beli_list" autocomplete="off">
+                                            <select name="satuan_beli[]" id="satuan_beli-${q}"
+                                                onchange="inputBarang()" class="m-1 form-select">
+                                                <option value=""></option>
+                                                @foreach ($satuan as $item)
+                                                    <option value="{{ $item->nama_satuan }}">{{ $item->nama_satuan }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                     </td>
                                     <td>
                                         <input type="number" style="width:120px" onchange="inputBarang()" name="jumlah_jual[]" id="jumlah_jual-${q}"
@@ -647,7 +622,7 @@
                                             class="form-control" placeholder="(ZAK, BALL, KARTON, DLL)" list="satuan_jual_list" autocomplete="off">
                                     </td>
                                     <td>
-                                        <select name="supplier[]" id="supplier-{{ $i }}" class="form-control my-0" style="width: 230px; border:none">
+                                        <select name="supplier[]" id="supplier-{{ $i }}" class="select2 form-control my-0" style="width: 230px; border:none">
                                             <option value=""></option>
                                             @foreach ($supplier as $item)
                                             <option value="{{ $item->id }}">{{ $item->nama }}</option>
@@ -658,17 +633,17 @@
                                         <input type="text" style="width:120px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}" class="form-control">
                                     </td>
                                 </tr>`;
-            $('#tbody-list-barang').append(html);
-            $("select").selectize();
-        });
+                $('#tbody-list-barang').append(html);
+                $(".select2").selectize();
+            });
 
         function inputBarang() {
-            for (let i = 1; i <= q; i++) {
+            for(let i = 1; i <= q; i++) {
                 const jumlah_beli = $('#jumlah_beli-' + i).val();
                 const satuan_beli = $('#satuan_beli-' + i).val();
-                const jumlah_jual = $('#jumlah_jual-' + i).val(jumlah_beli);
+                const jumlah_jual =  $('#jumlah_jual-' + i).val(jumlah_beli);
                 const satuan_jual = $('#satuan_jual-' + i).val(satuan_beli);
-
+                
             }
             let text = '';
             for (let i = 1; i <= q; i++) {
@@ -677,25 +652,25 @@
                 const jumlah_beli = $('#jumlah_beli-' + i).val();
                 const satuan_beli = $('#satuan_beli-' + i).val();
                 // const harga_beli = $('#harga_beli-' + i).val();
-                const jumlah_jual = $('#jumlah_jual-' + i).val();
+                const jumlah_jual =  $('#jumlah_jual-' + i).val();
                 const satuan_jual = $('#satuan_jual-' + i).val();
                 const keterangan = $('#keterangan-' + i).val();
                 // const harga_jual = $('#harga_jual-' + i).val();
                 const nama_barangs = $('#barang-' + i).find('option:selected').data('nama');
                 const value_barangs = $('#barang-' + i).find('option:selected').data('value');
                 const satuan_barangs = $('#barang-' + i).find('option:selected').data('satuan');
-                if (barang != '' && typeof(barang) != undefined) {
-                    $("#satuan_beli-" + i).prop('required', true);
-                    $("#satuan_jual-" + i).prop('required', true);
-                    $("#supplier-" + i).prop('required', true);
-
+                if (barang != '' && typeof (barang) != undefined) {
+                    $("#satuan_beli-" + i).prop('required',true);
+                    $("#satuan_jual-" + i).prop('required',true);
+                    $("#supplier-" + i).prop('required',true);
+                    
 
                     var id_barang = $("#barang_list option[value='" + barang + "']").data('id');
                     // console.log(id_barang)
                     var value_barang = $("#barang_list option[value='" + barang + "']").data('value');
                     var nama_satuan = $("#barang_list option[value='" + barang + "']").data('satuan');
                     $("#id_barang-" + i).val(id_barang);
-                    if (satuan_jual.includes(nama_satuan)) {
+                    if (satuan_jual.includes(nama_satuan)){
                         var total_jumlah = parseInt(jumlah_jual);
                     } else {
                         var total_jumlah = parseFloat(value_barang) * parseInt(jumlah_jual);
@@ -704,11 +679,11 @@
                     //console.log("Satuan jual = " + satuan_jual);
                     //console.log("Nama Satuan = " + nama_satuan);
                     // if(barang.includes("@")){
-                    if (satuan_jual.includes(nama_satuan)) {
-                        txt_total += `<p>${keterangan!=''?' = '+keterangan:''}</p>`;
-                    } else {
-                        txt_total += `<p>(Total: ${total_jumlah} ${nama_satuan} ${keterangan!=''?' = '+keterangan:''})</p>`;
-                    }
+                        if(satuan_jual.includes(nama_satuan)) {
+                            txt_total += `<p>${keterangan!=''?' = '+keterangan:''}</p>`;
+                        } else {
+                            txt_total += `<p>(Total: ${total_jumlah} ${nama_satuan} ${keterangan!=''?' = '+keterangan:''})</p>`;
+                        }
                     // }
                     text += `
                             <div class="flex justify-between mt-3">
@@ -717,28 +692,27 @@
                             </div>
                             ${txt_total}
                             `;
-                    $('#txt_nomor' + i).html(i);
+                            $('#txt_nomor' + i).html(i);
 
-                    // var test = $('#profit-' + i).val(jumlah_jual * harga_jual - jumlah_beli * harga_beli);
+                            // var test = $('#profit-' + i).val(jumlah_jual * harga_jual - jumlah_beli * harga_beli);
                 } else {
-                    $("#satuan_beli-" + i).prop('required', false);
-                    $("#satuan_jual-" + i).prop('required', false);
-                    $("#supplier-" + i).prop('required', false);
+                    $("#satuan_beli-" + i).prop('required',false);
+                    $("#satuan_jual-" + i).prop('required',false);
+                    $("#supplier-" + i).prop('required',false);
                 }
 
-                $('#jumlah_beli-' + i).on('input', function() {
+                $('#jumlah_beli-' + i).on('input', function () {
                     var inputValue = $(this).val();
                     $('#txt_jumlah' + i).html(inputValue);
                 });
 
-                $('#satuan_beli-' + i).on('input', function() {
+                $('#satuan_beli-' + i).on('input', function () {
                     var inputValue = $(this).val();
                     $('#txt_satuan' + i).html(inputValue);
                 });
 
             }
             $('#barang-list').html(text);
-
         }
     </script>
 

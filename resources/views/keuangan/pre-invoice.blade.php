@@ -16,8 +16,8 @@
                 <input type="hidden" name="id_transaksi" id="id_transaksi">
                 <div class="flex gap-2">
                     <div class="flex-gap-2">
-                        <label for="count">Jumlah Invoice</label>
-                        <input type="number" name="invoice_count" id="count" value="1"
+                        {{-- <label for="count">Jumlah Invoice</label> --}}
+                        <input type="hidden" name="invoice_count" id="count" value="1"
                             class="rounded-md form-control text-center" min="1" style="height: 28px">
                     </div>
                     <button type="submit" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">Buat Draf
@@ -115,10 +115,14 @@
                             hidden: true
                         },
                     ],
-                    viewrecords: true,
-                    autowidth: true,                    // Menyesuaikan lebar otomatis
-                    height: 'auto',   
-                    rowNum: 20,
+                    pager: "#sjPager",                    // Elemen pager
+        rowNum: 20,                          // Jumlah baris per halaman
+        rowList: [10, 20, 50],               // Opsi jumlah baris yang bisa dipilih
+        viewrecords: true,                   // Menampilkan informasi record
+        autowidth: true,                     // Menyesuaikan lebar otomatis
+        height: 'auto',                      // Tinggi tabel otomatis
+        loadonce: false,                     // Load data secara dinamis
+        serverPaging: true, 
                     pager: "#jqGridPager",
                     loadComplete: function(data) {
                         console.log('Data received from server:', data);

@@ -213,7 +213,13 @@
                                     {{ $item->transaksi->keterangan }} @endif)
                                 @endif
                             </td>
-                            <td class="text-center border border-black">{{ $no_cont ?? '-' }}</td>
+                            <td class="text-center border border-black">
+                                @if($i == 0 || ($i > 0 && ($i % 11 == 0))) {{-- Menampilkan $no_cont pada baris pertama dan setiap kelipatan 11 --}}
+                                    {{ $no_cont ?? '-' }}
+                                @else
+                                    -
+                                @endif
+                            </td>                    
                             <td class="text-center border border-black">{{ number_format($item->jumlah, 0, ',', '.') }} {{ $item->transaksi->satuan_jual }}</td>
                             <td class="border border-black" style="text-align: right;">{{ number_format($item->harga, 0, ',', '.') }}</td>
                             <td class="border border-black" style="text-align: right;">{{ number_format($item->harga * $item->jumlah, 0, ',', '.') }}</td>

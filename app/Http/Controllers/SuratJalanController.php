@@ -422,32 +422,57 @@ class SuratJalanController extends Controller
             ->toJson();
     }
 
-    public function dataTableSupplier()
-    {
-        $data = Transaction::query()->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')->orderBy('invoice_external');
+    public function dataTableSupplier(Request $request)
+{
+    // Ambil parameter pencarian
+    $searchTerm = $request->get('searchString', ''); // Ganti 'searchString' sesuai parameter yang diinginkan
 
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('nomor_surat', function ($row) {
-                return $row->suratJalan->nomor_surat;
-            })
-            ->addColumn('supplier', function ($row) {
-                return $row->suppliers->nama;
-            })
-            ->addColumn('invoice_external', function ($row) {
-                return $row->invoice_external;
-            })
-            ->addColumn('aksi', function ($row) {
-                $action = '';
-                $action = '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\')"   id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>';
+    // Ambil data dengan relasi yang diperlukan dan group by
+    $data = Transaction::with(['suratJalan', 'suppliers'])
+        ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external');
 
-                return '<div class="flex gap-3 mt-2">
-                            ' . $action . '
-                        </div>';
+    // Tambahkan filter pencarian
+    if (!empty($searchTerm)) {
+        $data->where(function($query) use ($searchTerm) {
+            $query->whereHas('suratJalan', function($q) use ($searchTerm) {
+                $q->where('nomor_surat', 'like', "%{$searchTerm}%");
             })
-            ->rawColumns(['aksi'])
-            ->make();
+            ->orWhereHas('suppliers', function($q) use ($searchTerm) {
+                $q->where('nama', 'like', "%{$searchTerm}%");
+            })
+            ->orWhere('invoice_external', 'like', "%{$searchTerm}%");
+        });
     }
+
+    // Hitung total record sebelum pagination
+    $totalRecords = $data->count();
+
+    // Ambil data untuk pagination
+    $currentPage = $request->get('page', 1); // Ambil halaman saat ini dari request, default 1
+    $perPage = $request->get('rows', 10); // Ambil jumlah baris per halaman dari request, default 10
+
+    // Paginate data
+    $data = $data->orderBy('invoice_external')->paginate($perPage, ['*'], 'page', $currentPage);
+
+    // Membuat array hasil untuk response JSON
+    $result = $data->getCollection()->map(function ($row, $index) use ($data) {
+        return [
+            'DT_RowIndex' => $data->currentPage() * $data->perPage() - $data->perPage() + $index + 1,
+            'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
+            'supplier' => $row->suppliers->nama ?? '-',
+            'invoice_external' => $row->invoice_external,
+            'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>'
+        ];
+    });
+
+    return response()->json([
+        'current_page' => $data->currentPage(), // Halaman saat ini
+        'last_page' => $data->lastPage(), // Total halaman
+        'total' => $totalRecords, // Total records
+        'data' => $result, // Data untuk halaman ini
+    ]);
+}
+
 
     public function editBarang()
     {

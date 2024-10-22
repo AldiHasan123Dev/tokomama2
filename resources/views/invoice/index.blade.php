@@ -6,7 +6,7 @@
     </style>
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Pengambilan Nomor Faktur Untuk Invoice</x-slot:tittle>
-        <form action="{{ route('invoice-transaksi.store') }}" method="post" id="form">
+        <form action="{{ route('preview.invoice') }}" method="post" id="form">
             @csrf
             
             <input type="date" name="tgl_invoice" value="{{ date('Y-m-d') }}">
@@ -23,7 +23,7 @@
                             <th>#</th>
                             <th>Nama Barang</th>
                             <th>Invoice</th>
-                            <th>Jumlah Barang ({{ $item->jumlah_jual }})</th>
+                            <th>Jumlah Barang ({{ $item->sisa }})</th>
                             <th>Harga Satuan</th>
                             <th>Total Harga</th>
                         </tr>
@@ -32,8 +32,8 @@
                         <tr>
                             <td>1</td>
                             <td>{{ $item->barang->nama }}</td>
-                            <td class="invoice-{{ $item->id }}">
-                                <select name="invoice[{{ $item->id }}][]" class="select w-full" id="">
+                            <td hidden class="invoice-{{ $item->id }}">
+                                <select hidden name="invoice[{{ $item->id }}][]" class="select w-full" id="">
                                     @for ($i = 0; $i < $invoice_count; $i++)
                                         <option value="{{ $i }}" {{ $i == 0 ? 'selected' : '' }}>Invoice Ke - {{ $i + 1 }}</option>
                                     @endfor
@@ -41,7 +41,7 @@
                             </td>
 
                             <!-- inputan quantity invoice -->
-                            <td><input onclick="this.select()" id="qty-{{ $item->id }}-1" class="qty-{{ $item->id }}" type="number" class="rounded-sm" onchange="inputBarang({{ $item->id }}, this.value,{{ $item->harga_jual }}, {{ $item->jumlah_jual }})" name="jumlah[{{ $item->id }}][]" id="jumlah" value="{{ $item->jumlah_jual }}"></td>
+                            <td><input onclick="this.select()" id="qty-{{ $item->id }}-1" class="qty-{{ $item->id }}" type="number" class="rounded-sm" onchange="inputBarang({{ $item->id }}, this.value,{{ $item->harga_jual }}, {{ $item->jumlah_jual }})" name="jumlah[{{ $item->id }}][]" id="jumlah" value="{{ $item->sisa }}"></td>
 
                             <!-- harga satuan -->
                             <td>{{ number_format($item->harga_jual) }}</td>
@@ -62,7 +62,8 @@
             </div>
             @endforeach
 
-        <button class="btn bg-green-500 font-semibold text-white w-full mt-3" type="submit" onclick="return confirm('Submit Invoice?')">Submit Invoice</button>
+        {{-- <button class="btn bg-green-500 font-semibold text-white w-full mt-3" type="submit" onclick="return confirm('Submit Invoice?')">Submit Invoice</button> --}}
+        <button class="btn bg-yellow-500 font-semibold text-white w-full mt-3" type="submit">Preview Invoice</button>
         </form>
     </x-keuangan.card-keuangan>
 

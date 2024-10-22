@@ -100,6 +100,7 @@ class KeuanganController extends Controller
     
     
     $id_barang = $transaksi->id_barang;
+
     $barang = Barang::where('id', $id_barang)->first();
     
     $satuan = Satuan::where('id', $barang->id_satuan)->first();
@@ -143,70 +144,69 @@ class KeuanganController extends Controller
 
     public function dataTable(Request $request)
     {
-        // Ambil data dengan eager loading dan urutkan berdasarkan 'created_at' DESC
-        $query = Invoice::with(['nsfp', 'transaksi'])
-            ->orderBy('created_at', 'desc'); // Menentukan urutan descending
+        // Ambil parameter pencarian
+        $searchTerm = $request->get('searchString', ''); // Ganti 'searchString' sesuai parameter yang diinginkan
     
-        // Tambahkan logika pencarian jika _search adalah true
-        if ($request->_search === 'true') {
-            // Ambil parameter pencarian
-            $searchField = $request['searchField'];
-            $searchString = $request['searchString'];
+        // Ambil data dengan urutan berdasarkan 'created_at' DESC dan groupBy 'invoice'
+        $data = Invoice::with(['nsfp', 'transaksi.barang']) // Eager loading relasi yang diperlukan
+            ->orderBy('created_at', 'desc');
     
-            if ($searchField && $searchString) {
-                $query->where(function ($q) use ($searchField, $searchString) {
-                    // Melakukan pencarian berdasarkan kolom yang relevan
-                    if ($searchField === 'invoice') {
-                        $q->where('invoice', 'LIKE', "%{$searchString}%");
-                    } elseif ($searchField === 'nsfp') {
-                        // Jika 'nsfp' adalah relasi, gunakan join atau whereHas
-                        $q->whereHas('nsfp', function($query) use ($searchString) {
-                            $query->where('nomor', 'LIKE', "%{$searchString}%");
-                        });
-                    }
-                    // Tambahkan kondisi pencarian lainnya jika diperlukan
-                });
-            }
+        // Tambahkan filter pencarian
+        if (!empty($searchTerm)) {
+            $data->where(function($query) use ($searchTerm) {
+                $query->whereHas('nsfp', function($q) use ($searchTerm) {
+                    $q->where('nomor', 'like', "%{$searchTerm}%");
+                })
+                ->orWhere('invoice', 'like', "%{$searchTerm}%");
+            });
         }
     
-        // Menghitung total record
-        $totalRecords = $query->count();
+        // Ambil semua data yang sudah difilter
+        $data = $data->get()->groupBy('invoice');
+        
+        // Hitung total record sebelum pagination
+        $totalRecords = $data->count();
     
-        // Ambil data dengan pagination
-        $data = $query->skip(($request->page - 1) * $request->rows)
-                      ->take($request->rows)
-                      ->get();
+        // Ambil data untuk pagination
+        $currentPage = $request->page; // Ambil halaman saat ini dari request, default 1
+        $perPage = $request->rows; // Ambil jumlah baris per halaman dari request, default 10
     
-        // Membuat array untuk data yang akan dikembalikan
-        $result = [];
-        $index = ($request->page - 1) * $request->rows;
-        foreach ($data as $row) {
+        // Hitung indeks untuk mengambil data yang benar
+        $index = ($currentPage - 1) * $perPage; // Indeks awal
+    
+        // Slice data untuk pagination
+        $paginatedData = $data->slice($index)->values();
+    
+        // Membuat array hasil untuk response JSON
+        $result = $paginatedData->map(function ($row) use (&$index) {
+            // Increment index untuk setiap baris
             $index++;
-            $result[] = [
-                'DT_RowIndex' => $index, // atau sesuai dengan ID unik Anda
-                'nsfp' => $row->nsfp->nomor ?? '-',
-                'invoice' => $row->invoice ?? '-',
-                'subtotal' => number_format($row->subtotal, 0, ',', '.'),
+    
+            return [
+                'DT_RowIndex' => $index,
+                'nsfp' => $row->first()->nsfp->nomor ?? '-',
+                'invoice' => $row->first()->invoice ?? '-',
+                'subtotal' => number_format($row->sum('subtotal'), 0, ',', '.'),
                 'ppn' => $this->calculatePPN($row),
                 'total' => $this->calculateTotal($row),
+                'index' => $index // Menyertakan index dalam hasil
             ];
-        }
+        });
     
-        // Mengembalikan data dalam format yang sesuai untuk jqGrid
         return response()->json([
-            'current_page' => $request->page,
-            'last_page' => ceil($totalRecords / $request->rows),
-            'total' => $totalRecords,
-            'data' => $result,
+               'current_page' => $request->page, // Halaman saat ini
+            'last_page' => ceil($totalRecords / $request->rows), // Total halaman
+            'total' => $totalRecords, // Total records
+            'data' => $result, // Data untuk halaman ini
         ]);
     }
     
     // Fungsi untuk menghitung PPN
     private function calculatePPN($row)
     {
-        $barang = $row->transaksi->barang ?? null;
+        $barang = $row->first()->transaksi->barang ?? null; // Ambil data barang
         if ($barang && $barang->status_ppn === 'ya') {
-            return number_format($row->subtotal * ($barang->value_ppn / 100), 0, ',', '.');
+            return number_format($row->sum('subtotal') * ($barang->value_ppn / 100), 0, ',', '.');
         } else {
             return 0;
         }
@@ -215,8 +215,8 @@ class KeuanganController extends Controller
     // Fungsi untuk menghitung Total
     private function calculateTotal($row)
     {
-        $subtotal = $row->subtotal;
-        $barang = $row->transaksi->barang ?? null;
+        $subtotal = $row->sum('subtotal');
+        $barang = $row->first()->transaksi->barang ?? null; // Ambil data barang
     
         if ($barang && $barang->status_ppn === 'ya') {
             return number_format($subtotal + ($subtotal * ($barang->value_ppn / 100)), 0, ',', '.');
@@ -224,6 +224,9 @@ class KeuanganController extends Controller
             return number_format($subtotal, 0, ',', '.');
         }
     }
+    
+
+    
     
 
     public function omzet()

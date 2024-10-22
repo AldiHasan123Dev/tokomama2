@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('surat-jalan', SuratJalanController::class);
     Route::resource('invoice-transaksi', InvoiceController::class);
+    Route::post('/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
 //    Route::resource('jurnal', JurnalController::class);
     Route::get('/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
     Route::get('/jurnal-edit', [JurnalController::class, 'edit'])->name('jurnal.edit');
