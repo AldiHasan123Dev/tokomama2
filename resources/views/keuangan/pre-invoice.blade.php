@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Pengambilan Nomor Faktur Untuk Invoice</x-slot:tittle>
+        <x-slot:tittle>SJ dan Stok Barang Belum Jadi Invoice</x-slot:tittle>
         <x-slot:button>
             <form action="{{ route('invoice-transaksi.index') }}" method="get" id="form">
                 <input type="hidden" name="id_transaksi" id="id_transaksi">

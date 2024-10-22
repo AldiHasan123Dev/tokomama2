@@ -206,7 +206,9 @@ class SuratJalanController extends Controller
         $this->autoInvoiceExternalJurnal($request);
     }
 
-    return redirect()->route('invoice-external.index');
+    return redirect()->route('invoice-external.index')
+    ->with('success', 'Invoice external berhasil diperbarui!');
+
 }
 
 
@@ -422,56 +424,72 @@ class SuratJalanController extends Controller
             ->toJson();
     }
 
+
     public function dataTableSupplier(Request $request)
-{
-    // Ambil parameter pencarian
-    $searchTerm = $request->get('searchString', ''); // Ganti 'searchString' sesuai parameter yang diinginkan
+    {
+        // Ambil parameter pencarian dari request
+        $searchTerm = $request->get('searchString', ''); // Untuk pencarian global
+        $currentPage = $request->page; // Halaman saat ini, default ke halaman 1
+         $perPage = $request->rows;// Jumlah baris per halaman, default 10
+    
+        // Ambil data dengan relasi yang diperlukan dan group by
+        $data = Transaction::with(['suratJalan', 'suppliers', 'barang'])
+            ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')->orderBy('created_at', 'desc');
+    
+        // Tambahkan filter pencarian jika ada
+        if (!empty($searchTerm)) {
+            $data->where(function ($query) use ($searchTerm) {
+                $query->whereHas('suratJalan', function ($q) use ($searchTerm) {
+                    $q->where('nomor_surat', 'like', "%{$searchTerm}%");
+                })
+                ->orWhereHas('suppliers', function ($q) use ($searchTerm) {
+                    $q->where('nama', 'like', "%{$searchTerm}%");
+                })
+                ->orWhere('invoice_external', 'like', "%{$searchTerm}%");
+            });
+        }
+    
+        // Hitung total record sebelum pagination (setelah pencarian diterapkan)
+        $totalRecords = $data->get()->count();
+    
+        // Ambil data untuk halaman saat ini dengan pagination
+        $paginatedData = $data->orderBy('invoice_external')
+            ->paginate($perPage, ['*'], 'page', $currentPage);
+            
+            // Membuat array hasil untuk response JSON
+            $result = $paginatedData->getCollection()->map(function ($row, $index) use ($paginatedData) {
+            $total = $row->harga_beli * $row->jumlah_beli;
+            $ppn = 0;
+            if($row->barang->status_ppn === 'ya'){
+                $value_ppn = $row->barang->value_ppn / 100;
+                // $ppn1 = $total * $value_ppn;
+                // $ppn = $ppn1 + $total;
+                 $ppn = $total * $value_ppn;
 
-    // Ambil data dengan relasi yang diperlukan dan group by
-    $data = Transaction::with(['suratJalan', 'suppliers'])
-        ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external');
+            }
+            return [
+                'DT_RowIndex' => $paginatedData->currentPage() * $paginatedData->perPage() - $paginatedData->perPage() + $index + 1,
+                'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
+                'harga_beli' => isset($row->harga_beli) ? number_format($row->harga_beli, 2, ',', '.') : '-',
+                'jumlah_beli' => $row->jumlah_beli ?? '-',
+                'total' =>  isset($total) ? number_format($total, 2, ',', '.') : '-',
+                'ppn' =>  isset($ppn) ? number_format($ppn, 2, ',', '.') : '-',
+                'supplier' => $row->suppliers->nama ?? '-',
+                'invoice_external' => $row->invoice_external,
+                'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->harga_beli . ', ' . $row->jumlah_beli . ', \'' . $row->barang->status_ppn . '\', ' . $row->barang->value_ppn . ')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
 
-    // Tambahkan filter pencarian
-    if (!empty($searchTerm)) {
-        $data->where(function($query) use ($searchTerm) {
-            $query->whereHas('suratJalan', function($q) use ($searchTerm) {
-                $q->where('nomor_surat', 'like', "%{$searchTerm}%");
-            })
-            ->orWhereHas('suppliers', function($q) use ($searchTerm) {
-                $q->where('nama', 'like', "%{$searchTerm}%");
-            })
-            ->orWhere('invoice_external', 'like', "%{$searchTerm}%");
+            ];
         });
+    
+        // Kembalikan response JSON dengan format yang sesuai untuk jqGrid
+        return response()->json([
+            'current_page' => $request->page, // Halaman saat ini
+            'last_page' => ceil($totalRecords / $request->rows), // Total halaman
+            'total' => $totalRecords, // Total record setelah filter
+            'data' => $result, // Data untuk halaman ini
+        ]);
     }
-
-    // Hitung total record sebelum pagination
-    $totalRecords = $data->count();
-
-    // Ambil data untuk pagination
-    $currentPage = $request->get('page', 1); // Ambil halaman saat ini dari request, default 1
-    $perPage = $request->get('rows', 10); // Ambil jumlah baris per halaman dari request, default 10
-
-    // Paginate data
-    $data = $data->orderBy('invoice_external')->paginate($perPage, ['*'], 'page', $currentPage);
-
-    // Membuat array hasil untuk response JSON
-    $result = $data->getCollection()->map(function ($row, $index) use ($data) {
-        return [
-            'DT_RowIndex' => $data->currentPage() * $data->perPage() - $data->perPage() + $index + 1,
-            'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
-            'supplier' => $row->suppliers->nama ?? '-',
-            'invoice_external' => $row->invoice_external,
-            'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>'
-        ];
-    });
-
-    return response()->json([
-        'current_page' => $data->currentPage(), // Halaman saat ini
-        'last_page' => $data->lastPage(), // Total halaman
-        'total' => $totalRecords, // Total records
-        'data' => $result, // Data untuk halaman ini
-    ]);
-}
+    
 
 
     public function editBarang()
