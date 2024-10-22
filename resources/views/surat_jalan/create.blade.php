@@ -31,7 +31,7 @@
             padding: 0px;
         }
     </style>
-    <form action="{{ route('surat-jalan.store') }}" target="_blank" method="post" class="grid grid-cols-3 gap-3" id="reset">
+    <form action="{{ route('surat-jalan.store') }}" target="_blank" method="post" class="grid grid-cols-3 gap-3" id="reset" onsubmit="return validateForm()">
         <div class="card w-fit bg-base-100 shadow-xl">
             <div class="card-body">
                 <h2 class="card-title">Form Surat Jalan</h2>
@@ -443,6 +443,37 @@
     </form>
 
     <script>
+        function validateForm() {
+        let valid = true;
+        let fields = [
+            {id: "kepada", name: "Ekspedisi"},
+            {id: "nama_kapal", name: "Nama Kapal"},
+            {id: "no_cont", name: "No. Cont"},
+            {id: "no_seal", name: "No. Seal"},
+            {id: "no_pol", name: "No. Pol"},
+            {id: "no_po", name: "No. PO"},
+            {id: "no_job", name: "No. Job"},
+            {id: "tujuan", name: "Tujuan/Nama Customer"},
+            {id: "kota_pengirim", name: "Kota Pengirim"},
+            {id: "nama_pengirim", name: "Nama Pengirim"},
+            {id: "nama_penerima", name: "Nama Penerima"},
+            {id: "tgl_sj", name: "Tanggal Surat Jalan"}
+        ];
+
+        fields.forEach(function(field) {
+            let input = document.getElementById(field.id);
+            if (input && input.value.trim() === "") {
+                alert(`Input ${field.name} tidak boleh kosong.`);
+                input.focus();
+                valid = false;
+                return false;
+            }
+        });
+
+        return valid;
+    }
+   
+    
         $(function () {
             $(".select2").selectize();
         });
