@@ -23,7 +23,7 @@
                             <th>#</th>
                             <th>Nama Barang</th>
                           
-                            <th>Jumlah Barang ({{ $item->sisa }})</th>
+                            <th>Jumlah Barang</th>
                             <th>Harga Satuan</th>
                             <th>Total Harga</th>
                         </tr>

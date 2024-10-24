@@ -98,6 +98,9 @@
             let jumlah = 0;
 
             let table1 = $('#table-tarif').DataTable({
+                order: [
+                    [0]
+                ],
                 pageLength: 100,
                 ajax: {
                     method: "POST",
@@ -127,6 +130,9 @@
             });
 
             let table2 = $('#table-non-tarif').DataTable({
+                order: [
+                    [0]
+                ],
                 pageLength: 100,
                 ajax: {
                     method: "POST",
