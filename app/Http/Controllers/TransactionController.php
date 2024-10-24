@@ -70,7 +70,7 @@ class TransactionController extends Controller
     public function dataTable()
     {
         $query = Transaction::query();
-        $query->with(['barang', 'suratJalan']);
+        $query->with(['barang', 'suratJalan'])->orderBy('created_at', 'desc');
         if(request('tarif')){
             $query->where('harga_jual','>',0);
             $query->where('harga_beli','>',0);
