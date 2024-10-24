@@ -529,14 +529,32 @@ class JurnalManualController extends Controller
         ]);
     }
 
-    public function transaksi(){
-        $data = Transaction::with(['suratJalan', 'suppliers'])
-        ->whereNull('invoice_external')
-        ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')
-        ->orderBy('invoice_external')
-        ->get(['id', 'id_surat_jalan', 'id_supplier']); 
+    public function transaksi(Request $request)
+    {
+        // Mengambil parameter pencarian dari request
+        $searchTerm = $request->get('search');
+    
+        // Membangun query untuk mengambil data transaksi
+        $query = Transaction::with(['suratJalan', 'suppliers'])
+            ->whereNull('invoice_external')
+            ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')
+            ->orderBy('invoice_external');
+    
+        // Jika ada parameter pencarian, tambahkan kondisi pencarian
+        if ($searchTerm) {
+            $query->whereHas('suratJalan', function ($q) use ($searchTerm) {
+                // Mencari nomor surat yang sesuai dengan input pencarian
+                $q->where('nomor_surat', 'like', '%' . $searchTerm . '%'); // Sesuaikan dengan nama kolom yang sesuai
+            });
+        }
+    
+        // Ambil data dengan query yang sudah dibangun
+        $data = $query->get(['id', 'id_surat_jalan', 'id_supplier']); 
+    
+        // Mengembalikan respons dalam format JSON
         return response()->json($data);
     }
+    
 
     public function Jurnalhutang(Request $request){
         $no_SJ = $request->id_surat_jalan;
@@ -576,7 +594,11 @@ class JurnalManualController extends Controller
                     'coa_id' => 63,
                     'nomor' => $nomor,
                     'tgl' => $time,
-                    'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  $item->jumlah_jual . ' ' .  $item->satuan_jual . ') '. $item->harga_beli . ' u/ ' .  $item->suratJalan->customer->nama,
+                    'keterangan' => 'Pembelian ' . $item->barang->nama . 
+                ' (' . number_format($item->jumlah_jual, 2, ',', '.') . ' ' . 
+                $item->satuan_jual . ' Harsat ' . 
+                number_format($item->harga_beli, 2, ',', '.') . ') ' . 
+                ' untuk ' . $item->suratJalan->customer->nama,
                     'debit' => $item->harga_beli * $item->jumlah_jual, // Debit diisi 0
                     'kredit' => 0, // Menggunakan total debit sebagai kredit
                     'invoice' => '',
@@ -592,7 +614,7 @@ class JurnalManualController extends Controller
                 'coa_id' => 10,
                 'nomor' => $nomor,
                 'tgl' => $time,
-                'keterangan' => 'PPN Masukkan ' . $core[0]->suratJalan->customer->nama . '(FP : ---)' ,
+                'keterangan' => 'PPN Masukkan ' . $core[0]->suppliers->nama . '(FP : ---)' ,
                 'debit' => $subtotalPPN, // Menyimpan subtotal sebagai debit
                 'kredit' =>  0,// Kredit diisi 0
                 'invoice' => '',
@@ -608,7 +630,7 @@ class JurnalManualController extends Controller
                 'coa_id' => 35,
                 'nomor' => $nomor,
                 'tgl' => $time,
-                'keterangan' => 'Hutang ' . $item->suratJalan->customer->nama,
+                'keterangan' => 'Hutang ' . $item->suppliers->nama,
                 'debit' => 0, // Menyimpan subtotal sebagai debit
                 'kredit' => $subtotal + $subtotalPPN, // Kredit diisi 0
                 'invoice' => '',
@@ -625,7 +647,11 @@ class JurnalManualController extends Controller
                 'coa_id' => 63,
                 'nomor' => $nomor,
                 'tgl' => $time,
-                'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  $item->jumlah_jual . ' ' .  $item->satuan_jual . ') '. $item->harga_beli . ' u/ ' .  $item->suratJalan->customer->nama,
+                'keterangan' => 'Pembelian ' . $item->barang->nama . 
+                ' (' . number_format($item->jumlah_jual, 2, ',', '.') . ' ' . 
+                $item->satuan_jual . ' Harsat ' . 
+                number_format($item->harga_beli, 2, ',', '.') . ') ' . 
+                ' untuk ' . $item->suratJalan->customer->nama,
                 'debit' => $item->harga_beli * $item->jumlah_jual, // Debit diisi 0
                 'kredit' => 0, // Menggunakan total debit sebagai kredit
                 'invoice' => '',
@@ -642,7 +668,7 @@ class JurnalManualController extends Controller
                     'coa_id' => 35,
                     'nomor' => $nomor,
                     'tgl' => $time,
-                    'keterangan' => 'Hutang ' . $item->suratJalan->customer->nama,
+                    'keterangan' => 'Hutang ' . $item->suppliers->nama,
                     'debit' => 0, // Menyimpan subtotal sebagai debit
                     'kredit' => $subtotal, // Kredit diisi 0
                     'invoice' => '',

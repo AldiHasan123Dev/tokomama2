@@ -141,6 +141,8 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::get('cetak-invoice', 'cetakInvoice')->name('keuangan.invoice.cetak');
     Route::get('cetak-invoicesp', 'cetakInvoicesp')->name('keuangan.invoicesp.cetak');
     Route::get('omzet', 'omzet')->name('keuangan.omzet');
+    Route::get('omzet-total', 'omzet_total')->name('keuangan.omzet-total');
+    Route::get('data-omzet-total', 'dataOmzeTotal')->name('keuangan.data-omzet-total');
     Route::get('omzet-list', 'dataTableOmzet')->name('keuangan.omzet.datatable');
     Route::post('omzet-export', 'OmzetExportExcel')->name('keuangan.omzet.exportexcel');
 });

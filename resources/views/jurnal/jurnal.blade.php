@@ -182,8 +182,8 @@
                             <td>{{ $d->no_akun }}</td>
                             <td>{{ $d->nama_akun }}</td>
                             <td> {{ $d->invoice == 0 ? '' : ($d->invoice ?? '-') }}</td>
-                            <td class="text-end">{{ number_format($d->debit, 2, ',', '.') }}</td>
-                            <td class="text-end">{{ number_format($d->kredit, 2, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($d->debit, 0, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($d->kredit, 0, ',', '.') }}</td>
                             <td>{{ $d->keterangan }}</td>
                             <td>
                                 {{ $d->invoice_external == 0 ? '' : ($d->invoice_external ?? '-') }}

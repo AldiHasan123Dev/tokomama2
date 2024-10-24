@@ -125,7 +125,7 @@
                         <tr>
                             <th style="text-align: left;">No.</th>
                             <th style="text-align: left;">Nama Barang</th>
-                            <th style="text-align: left;">No-Count</th>
+                            <th style="text-align: left;">No-Cont</th>
                             <th style="text-align: left;">Quantity</th>
                             <th style="text-align: right;">Harga Satuan(Rp)</th>
                             <th style="text-align: right;">Total</th>
@@ -169,7 +169,7 @@
                                         </td>
                                         
                                         <td style="text-align: left;">{{ $items['no_cont'][$idx] }}</td>
-                                        <td style="text-align: left;"> {{ $items['jumlah'][$idx] }} {{ $items['satuan_jual'][$idx] }}</td>
+                                        <td style="text-align: left;"> {{ number_format($items['jumlah'][$idx], 0, ',', '.') }} {{ $items['satuan_jual'][$idx] }}</td>
                                         <td style="text-align: right;">{{ number_format($items['harga_jual'][$idx], 0, ',', '.') }}</td>
                                         <td style="text-align: right;">{{ number_format($items['harga_jual'][$idx] * $items['jumlah'][$idx], 0, ',', '.') }}
                                         </td>
@@ -279,6 +279,21 @@
             
             </td>
         </tr>
+        <tr>
+            <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-right">TANGGAL</td>
+        </tr>
+        <tr>
+            <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-right m-5">{{ $tgl_inv1 }}</td>
+        </tr>
+            
             </tbody>
             </table>
             <form action="{{ route('invoice-transaksi.store') }}" method="post" id="form">  

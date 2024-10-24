@@ -40,7 +40,6 @@ class KeuanganController extends Controller
 
     function suratJalanStore(Request $request): RedirectResponse
     {
-        dd($request->all());
         SuratJalan::create($request->all());
         return redirect()->route('keuangan.pre-invoice');
     }
@@ -235,6 +234,110 @@ class KeuanganController extends Controller
         // dd($Jurnal);
         return view('keuangan.omzet');
     }
+    public function omzet_total()
+    {
+        $date = date('Y-m-d');
+        $month_number = date("n", strtotime($date));
+    
+        // Mendapatkan data invoice
+        $invoices = Invoice::selectRaw('DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+                                     YEAR(i.tgl_invoice) as year, 
+                                     COUNT(i.invoice) as invoice_count, 
+                                     SUM(t.harga_beli) as total_harga_beli, 
+                                     SUM(t.harga_jual) as total_harga_jual')
+            ->from('invoice as i')
+            ->join('transaksi as t', 'i.id', '=', 't.id')
+            ->groupBy('year', 'month') // Urutkan berdasarkan tahun dan bulan
+            ->orderBy('year', 'asc') // Urutkan berdasarkan tahun secara ascending
+            ->orderByRaw('MONTH(i.tgl_invoice) ASC') // Urutkan berdasarkan bulan secara ascending
+            ->get();
+    
+        // Mengorganisir data berdasarkan tahun
+        $invoiceData = [];
+        foreach ($invoices as $invoice) {
+            $total_profit = $invoice->total_harga_jual - $invoice->total_harga_beli;
+    
+            // Menyimpan data per tahun
+            $invoiceData[$invoice->year][] = [
+                'month' => $invoice->month,
+                'invoice_count' => $invoice->invoice_count,
+                'total_harga_beli' => $invoice->total_harga_beli,
+                'total_harga_jual' => $invoice->total_harga_jual,
+                'total_profit' => $total_profit,
+            ];
+        }
+    
+        // Menghitung total per tahun
+        $summaryData = [];
+        foreach ($invoiceData as $year => $dataPerYear) {
+            $summaryData[$year] = [
+                'total_invoice_count' => 0,
+                'total_harga_beli' => 0,
+                'total_harga_jual' => 0,
+                'total_profit' => 0,
+            ];
+    
+            foreach ($dataPerYear as $data) {
+                // Menambahkan total per tahun
+                $summaryData[$year]['total_invoice_count'] += $data['invoice_count'];
+                $summaryData[$year]['total_harga_beli'] += $data['total_harga_beli'];
+                $summaryData[$year]['total_harga_jual'] += $data['total_harga_jual'];
+                $summaryData[$year]['total_profit'] += $data['total_profit'];
+            }
+        }
+    
+        // Menyediakan array bulan
+        $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
+        // Mengembalikan view dengan data
+        return view('keuangan.omzet-total', compact('invoiceData', 'months', 'summaryData'));
+    }
+    
+    
+    public function dataOmzeTotal()
+{
+    $date = date('Y-m-d');
+    $month_number = date("n", strtotime($date));
+
+    $invoices = Invoice::selectRaw('DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+                                 YEAR(i.tgl_invoice) as year, 
+                                 COUNT(i.invoice) as invoice_count, 
+                                 SUM(t.harga_beli) as total_harga_beli, 
+                                 SUM(t.harga_jual) as total_harga_jual')
+    ->from('invoice as i')
+    ->join('transaksi as t', 'i.id', '=', 't.id')
+    ->groupBy('month', 'year') // Tambahkan 'year' di sini
+    ->orderByRaw('MONTH(i.tgl_invoice)') // Urutkan berdasarkan bulan
+    ->get();
+
+$invoiceData = $invoices->map(function($invoice) {
+    $total_profit = $invoice->total_harga_jual - $invoice->total_harga_beli; // Hitung total profit
+    return [
+        'month' => $invoice->month,
+        'year' => $invoice->year, // Tambahkan tahun
+        'invoice_count' => $invoice->invoice_count,
+        'total_harga_beli' => $invoice->total_harga_beli,
+        'total_harga_jual' => $invoice->total_harga_jual,
+        'total_profit' => $total_profit, // Tambahkan total profit
+    ];
+});
+
+
+    // Menghitung total invoice dari hasil yang dikelompokkan
+    $totalHargaBeli = $invoiceData->sum('total_harga_beli');
+    $totalHargaJual = $invoiceData->sum('total_harga_jual');
+    $totalInvoices = $invoiceData->sum('invoice_count');
+    $totalProfit = $totalHargaJual - $totalHargaBeli;
+
+    return response()->json([
+        'data' => $invoiceData,
+        'total_hargabeli' => $totalHargaBeli,
+        'totalhargajual' => $totalHargaJual,
+        'totalProfit' => $totalProfit,
+        'total_invoices' => $totalInvoices,
+    ]);
+}
+
 
     public function dataTableOmzet()
     {

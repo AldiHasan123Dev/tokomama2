@@ -401,7 +401,7 @@
         $(`#terapkan`).on('click', function() {
             // Ambil nilai dari pilihan template jurnal
             var selectedTemplate = $('#template').val();
-            
+
             // Cek apakah template jurnal sudah dipilih
             if (!selectedTemplate) {
                 alert('Silakan pilih template jurnal terlebih dahulu!');
@@ -415,13 +415,13 @@
 
 
         $(`#addBarisTemplate`).on('click', function() {
-        var templateSelected =$('#template').val();
-        if (!templateSelected){
-            alert('Anda belum memilih template jurnal')
-        } else {
-            addTemplate();
-        }
-    });
+            var templateSelected = $('#template').val();
+            if (!templateSelected) {
+                alert('Anda belum memilih template jurnal')
+            } else {
+                addTemplate();
+            }
+        });
 
         $('#reset').click(function(e) {
             location.reload();
@@ -571,7 +571,7 @@
                                 $(`#nominal-${currentNo}`).prop('readonly', true);
                                 $(`#invoice_external-${currentNo}`).prop('disabled', true);
                                 $(`#keterangan_buku_besar_pembantu-${currentNo}`).prop('disabled',
-                                true);
+                                    true);
                                 $(`#nominal-${currentNo}`).val(0);
                                 // updateTotalDebit(no - 1);
                                 // updateTotalKredit(no - 1);
@@ -587,7 +587,7 @@
                         no++;
                     }
 
-                    
+
                 },
 
                 error: function(xhr, status, error) {
@@ -832,10 +832,10 @@
         `;
             $(`#tableBody`).append(html);
 
-// Inisialisasi nilai awal saat halaman dimuat
-        $(document).ready(function() {
-            updateTotalBaris(); // Set nilai awal total baris
-        });
+            // Inisialisasi nilai awal saat halaman dimuat
+            $(document).ready(function() {
+                updateTotalBaris(); // Set nilai awal total baris
+            });
 
 
             let param = `
@@ -895,29 +895,30 @@
             bindInvoiceChange(newRowId);
             bindInvoiceExternalChange(newRowId);
         });
-        $('#simpan').click(function (e) {
-        var totaltd = $('#total_debit').val();
-        var totaltc = $('#total_credit').val();
-        var tipe = $('#tipe').val();
+        $('#simpan').click(function(e) {
+            var totaltd = $('#total_debit').val();
+            var totaltc = $('#total_credit').val();
+            var tipe = $('#tipe').val();
 
-        if(totaltd != totaltc) {
-            alert("Total Debit dan Kredit tidak sama");
-            return
-        } if(!tipe){
-            alert("Tipe Jurnal diisi terlebih dahulu")
-            return
-        }else{
-            if(confirm('Apakah anda yakin menyimpan data ?')){
-                $('#form-jurnal').submit();
+            if (totaltd != totaltc) {
+                alert("Total Debit dan Kredit tidak sama");
+                return
             }
-        }
-    });
+            if (!tipe) {
+                alert("Tipe Jurnal diisi terlebih dahulu")
+                return
+            } else {
+                if (confirm('Apakah anda yakin menyimpan data ?')) {
+                    $('#form-jurnal').submit();
+                }
+            }
+        });
     </script>
     <script>
-      $(document).ready(function() {
-    // Menampilkan modal saat tombol diklik
-    $('#ipt_jurhut').click(function() {
-        $('#jurhut').html(`
+        $(document).ready(function() {
+            // Menampilkan modal saat tombol diklik
+            $('#ipt_jurhut').click(function() {
+                $('#jurhut').html(`
             <dialog id="my_modal_5" class="modal">
                 <div class="modal-box w-11/12 max-w-2xl pl-10">
                     <form method="dialog">
@@ -928,7 +929,7 @@
                         @csrf
                         <label class="input border flex items-center gap-2 mt-3">
                             No Surat:
-                            <select class="border-none w-full" name="id_surat_jalan" id="m-sj" autofocus>
+                            <select  autofocus class="border-none w-full" name="id_surat_jalan" id="m-sj">
                                 <option value="" disabled selected>Pilih No Surat</option>
                             </select>
                             @error('id_surat_jalan')
@@ -965,78 +966,93 @@
             </dialog>
         `);
 
-        // Menampilkan modal
-        document.getElementById('my_modal_5').showModal();
+                // Menampilkan modal
+                document.getElementById('my_modal_5').showModal();
 
-        // Inisialisasi Select2 setelah modal ditampilkan
-        $('#m-sj').select2({
-            placeholder: "Pilih No Surat",
-            allowClear: true,
-            dropdownParent: $('#my_modal_5'), // Menentukan parent dropdown
-            ajax: {
-                url: "{{ route('jurnal-manual-transaksi') }}", // Ganti URL sesuai dengan endpoint API
-                dataType: 'json',
-                processResults: function(data) {
-                    console.log(data); // Cek apa yang diterima dari server
-                    return {
-                        results: data.map(function(item) {
+                // Inisialisasi Select2 setelah modal ditampilkan
+                $('#m-sj').select2({
+                    placeholder: "Pilih No Surat",
+                    allowClear: true,
+                    dropdownParent: $('#my_modal_5'), // Menentukan parent dropdown
+                    ajax: {
+                        url: "{{ route('jurnal-manual-transaksi') }}", // Ganti URL sesuai dengan endpoint API
+                        dataType: 'json',
+                        cache: true,
+                        delay: 250,
+                        data: function(params) {
                             return {
-                                id: item.id, // Nilai yang akan dikirimkan sebagai value
-                                id_surat_jalan: item.id_surat_jalan,
-                                text: item.surat_jalan.nomor_surat, // Teks yang akan ditampilkan di dropdown
-                                nama_supplier: item.suppliers.nama, // Ambil nama supplier
-                                id_supplier: item.id_supplier // Menyimpan id_supplier untuk dikirim
+                                search: params.term // Mengirimkan input pencarian ke server
                             };
-                        })
-                    };
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    console.log('Error: ' + textStatus + ' - ' + errorThrown); // Tambahkan log error
-                }
-            }
-        });
+                        },
+                        processResults: function(data) {
+                            console.log(data); // Cek apa yang diterima dari server
 
-        $('#jurhutForm').on('submit', function(e) {
-                    let invoiceExternal = $('#invoice_external').val().trim();
-                    if (invoiceExternal === "") {
-                        e.preventDefault(); // Mencegah pengiriman form
-                        alert("Invoice supplier diisi terlebih dahulu"); // Menampilkan alert
+                            // Sortir data berdasarkan nomor_surat secara alfabetis
+                            data.sort(function(a, b) {
+                                var suratA = a.surat_jalan.nomor_surat.toLowerCase();
+                                var suratB = b.surat_jalan.nomor_surat.toLowerCase();
+                                return suratA.localeCompare(
+                                suratB); // Menggunakan localeCompare untuk perbandingan yang lebih baik
+                            });
+
+                            // Proses hasil menjadi format yang dibutuhkan oleh Select2
+                            return {
+                                results: data.map(function(item) {
+                                    return {
+                                        id: item
+                                        .id, // Nilai yang akan dikirimkan sebagai value
+                                        id_surat_jalan: item.id_surat_jalan,
+                                        text: item.surat_jalan
+                                        .nomor_surat, // Teks yang akan ditampilkan di dropdown
+                                        nama_supplier: item.suppliers
+                                        .nama, // Ambil nama supplier
+                                        id_supplier: item
+                                            .id_supplier // Menyimpan id_supplier untuk dikirim
+                                    };
+                                })
+                            };
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.log('Error: ' + textStatus + ' - ' +
+                            errorThrown); // Tambahkan log error
+                        }
                     }
                 });
-        // Menutup modal ketika tombol '✕' diklik
-        $('#close-modal').click(function() {
-            document.getElementById('my_modal_5').close(); // Menutup modal
+                $('#close-modal').click(function() {
+                    document.getElementById('my_modal_5').close(); // Menutup modal
+                });
+                // Event listener untuk perubahan pada dropdown
+                $('#m-sj').on('select2:select', function(e) {
+                    var data = e.params.data; // Ambil data yang dipilih
+                    if (!data) {
+                        alert('Nomor Surat tidak tersedia!'); // Tampilkan pesan jika data tidak ada
+                        $('#nama-supplier').val(''); // Kosongkan nama supplier
+                        $('#input-id-surat-jalan').val(''); // Kosongkan hidden input
+                        $('#input-id-supplier').val(''); // Kosongkan hidden input
+                        $('#input-id').val(''); // Kosongkan hidden input
+                        return;
+                    }
+
+                    // Menampilkan data yang dipilih
+                    console.log('ID :', data.id);
+                    console.log('ID Surat Jalan:', data.id_surat_jalan);
+                    console.log('Nomor Surat:', data.text); // Ambil nomor surat
+                    console.log('ID Supplier:', data.id_supplier);
+                    console.log('Nama Supplier:', data.nama_supplier); // Ambil nama supplier
+
+                    // Masukkan nama supplier ke dalam input
+                    $('#nama-supplier').val(data.nama_supplier);
+
+                    // Set nilai untuk hidden inputs
+                    $('#input-id-surat-jalan').val(data
+                    .id_surat_jalan); // Set id_surat_jalan ke hidden input
+                    $('#input-id-supplier').val(data
+                    .id_supplier); // Set id_supplier ke hidden input
+                    $('#input-id').val(data.id); // Set id ke hidden input
+                });
+
+            });
         });
-
-        // Event listener untuk perubahan pada dropdown
-        $('#m-sj').on('select2:select', function(e) {
-            var data = e.params.data; // Ambil data yang dipilih
-            if (!data) {
-                alert('Nomor Surat tidak tersedia!'); // Tampilkan pesan jika data tidak ada
-                $('#nama-supplier').val(''); // Kosongkan nama supplier
-                $('#input-id-surat-jalan').val(''); // Kosongkan hidden input
-                $('#input-id-supplier').val(''); // Kosongkan hidden input
-                $('#input-id').val(''); // Kosongkan hidden input
-                return;
-            }
-            console.log('ID :', data.id);
-            console.log('ID Surat Jalan:', data.id_surat_jalan);
-            console.log('Nomor Surat:', data.text); // Ambil nomor surat
-            console.log('ID Supplier:', data.id_supplier);
-            console.log('Nama Supplier:', data.nama_supplier); // Ambil nama supplier
-
-            // Masukkan nama supplier ke dalam input
-            $('#nama-supplier').val(data.nama_supplier);
-
-            // Set nilai untuk hidden inputs
-            $('#input-id-surat-jalan').val(data.id_surat_jalan); // Set id_surat_jalan ke hidden input
-            $('#input-id-supplier').val(data.id_supplier); // Set id_supplier ke hidden input
-            $('#input-id').val(data.id); // Set id ke hidden input
-        });
-    });
-});
-
-
     </script>
 
 </x-Layout.layout>

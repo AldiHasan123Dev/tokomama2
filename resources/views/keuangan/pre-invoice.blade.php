@@ -16,7 +16,6 @@
                 <input type="hidden" name="id_transaksi" id="id_transaksi">
                 <div class="flex gap-2">
                     <div class="flex-gap-2">
-                        {{-- <label for="count">Jumlah Invoice</label> --}}
                         <input type="hidden" name="invoice_count" id="count" value="1"
                             class="rounded-md form-control text-center" min="1" style="height: 28px">
                     </div>
@@ -28,6 +27,10 @@
 
         <div class="overflow-x-auto">
             <div class="table-responsive">
+                <!-- Checkbox "Select All" di luar tabel -->
+                <div class="mb-2">
+                    <input type="checkbox" class="m-2" id="select-all" /> Pilih Semua
+                </div>
                 <table class="table" id="table-getfaktur"></table>
                 <div id="jqGridPager"></div>
             </div>
@@ -45,14 +48,19 @@
                     url: "{{ route('invoice.pre-invoice') }}", // Ganti dengan URL API yang benar
                     mtype: "GET",
                     datatype: "json",
-                    colModel: [{
+                    colModel: [
+                        {
                             name: 'checkbox',
                             index: 'checkbox',
                             label: 'Pilih',
                             width: 50,
-                            align: 'center'
+                            align: 'center',
+                            formatter: function() {
+                                return '<input type="checkbox" class="row-checkbox" />'; // Checkbox untuk setiap baris
+                            }
                         },
                         {
+                            search: true,
                             name: 'DT_RowIndex',
                             index: 'DT_RowIndex',
                             label: 'No.',
@@ -60,51 +68,61 @@
                             align: 'center'
                         },
                         {
+                            search: true,
                             name: 'nomor_surat',
                             index: 'nomor_surat',
                             label: 'Nomor Surat'
                         },
                         {
+                            search: true,
                             name: 'customer',
                             index: 'customer',
                             label: 'Customer'
                         },
                         {
+                            search: true,
                             name: 'nama_barang',
                             index: 'nama_barang',
                             label: 'Nama Barang'
                         },
                         {
+                            search: true,
                             name: 'sisa',
                             index: 'sisa',
                             label: 'Sisa'
                         },
                         {
+                            search: true,
                             name: 'harga_jual',
                             index: 'harga_jual',
                             label: 'Harga Jual'
                         },
                         {
+                            search: true,
                             name: 'subtotal',
                             index: 'subtotal',
                             label: 'Subtotal'
                         },
                         {
+                            search: true,
                             name: 'nama_kapal',
                             index: 'nama_kapal',
                             label: 'Nama Kapal'
                         },
                         {
+                            search: true,
                             name: 'no_cont',
                             index: 'no_cont',
-                            label: 'No. Kontainer'
+                            label: 'No. Count'
                         },
                         {
+                            search: true,
                             name: 'no_seal',
                             index: 'no_seal',
                             label: 'No. Seal'
                         },
                         {
+                            search: true,
                             name: 'no_pol',
                             index: 'no_pol',
                             label: 'No. Pol'
@@ -115,38 +133,54 @@
                             hidden: true
                         },
                     ],
-                    pager: "#sjPager",                    // Elemen pager
-        rowNum: 20,                          // Jumlah baris per halaman
-        rowList: [10, 20, 50],               // Opsi jumlah baris yang bisa dipilih
-        viewrecords: true,                   // Menampilkan informasi record
-        autowidth: true,                     // Menyesuaikan lebar otomatis
-        height: 'auto',                      // Tinggi tabel otomatis
-        loadonce: false,                     // Load data secara dinamis
-        serverPaging: true, 
                     pager: "#jqGridPager",
+                    rowNum: 20,
+                    rowList: [10, 20, 50],
+                    viewrecords: true,
+                    autowidth: true,
+                    height: 'auto',
+                    loadonce: true,
+                    serverPaging: true,
                     loadComplete: function(data) {
                         console.log('Data received from server:', data);
-                        console.log('Data structure:', data.data); // Memeriksa struktur data
+                        console.log('Data structure:', data.data);
                     },
                     jsonReader: {
-                        root: "data", // Pastikan ini sesuai dengan struktur JSON Anda
-                        page: "current_page", // Sesuaikan dengan halaman saat ini
-                        total: "total_pages", // Sesuaikan dengan total halaman
-                        records: "total_records", // Sesuaikan dengan total records
-                        id: "id" // Menggunakan field 'id' sebagai unique ID
-                    }
+                        root: "data",
+                        page: "current_page",
+                        total: "total_pages",
+                        records: "total_records",
+                        id: "id"
+                    },
                 });
 
-                // Menghandle form submit untuk mengambil ID transaksi yang dipilih
+                // Menambahkan filterToolbar
+                $("#table-getfaktur").jqGrid('navGrid', '#jqGridPager', {
+                    edit: false,
+                    add: false,
+                    del: false,
+                    search: false,
+                    refresh: true
+                });
+                $("#table-getfaktur").jqGrid('filterToolbar');
+
+                // Menghandle checkbox "Select All"
+                $('#select-all').change(function() {
+                    var checked = $(this).is(':checked');
+                    $('.row-checkbox').prop('checked', checked);
+                });
             });
+
+            // Menghandle form submit untuk mengambil ID transaksi yang dipilih
             $('#form').submit(function (e) {
                 e.preventDefault();
                 var ids = $("#table-getfaktur input:checkbox:checked").map(function(){
-                    return $(this).val();
+                    return $(this).closest('tr').find('td:last-child').text(); // Mengambil ID dari kolom terakhir
                 }).get();
                 $('#id_transaksi').val(ids);
                 this.submit();
             });
+
             // Menampilkan versi jQuery dan mengecek apakah jqGrid telah dimuat
             console.log('jQuery version:', $.fn.jquery);
             console.log('jqGrid loaded:', typeof $.fn.jqGrid !== 'undefined');
