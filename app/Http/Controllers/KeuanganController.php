@@ -262,7 +262,7 @@ class KeuanganController extends Controller
         $invoices = Invoice::selectRaw('DATE_FORMAT(i.tgl_invoice, "%M") as month, 
                         YEAR(i.tgl_invoice) as year, 
                         COUNT( i.invoice) as invoice_count, 
-                        SUM(t.harga_beli) as total_harga_beli, 
+                        SUM(t.harga_beli * t.jumlah_beli) as total_harga_beli, 
                         SUM(
                             CASE 
                                 WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11
@@ -298,7 +298,7 @@ class KeuanganController extends Controller
                 'invoice_count' => $invoice->invoice_count,
                 'total_harga_beli' => $invoice->total_harga_beli / 1000,
                 'total_harga_jual' => $invoice->total_harga_jual / 1000,
-                'total_profit' => $total_profit / 1000,
+                'total_profit' => $total_profit /1000 ,
                 'total_profit_percentage' => $total_profit_percentage, // Simpan persentase profit
             ];
         }

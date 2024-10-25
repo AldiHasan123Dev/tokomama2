@@ -8,7 +8,6 @@
     <meta content="Tailwind Admin & Dashboard Template" name="description">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content="Themesbrand" name="author">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ asset('/assets/img/logo_sb.svg') }}">
     <!-- Layout config Js -->
