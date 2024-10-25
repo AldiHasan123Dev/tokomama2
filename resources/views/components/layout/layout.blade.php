@@ -8,11 +8,12 @@
     <meta content="Tailwind Admin & Dashboard Template" name="description">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content="Themesbrand" name="author">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ asset('/assets/img/logo_sb.svg') }}">
     <!-- Layout config Js -->
     <!-- Icons CSS -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite('resources/css/app.css')
 
     <!-- ui jqgrid -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/css/ui.jqgrid.min.css">

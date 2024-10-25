@@ -255,28 +255,30 @@ class KeuanganController extends Controller
     // }
     public function omzet_total()
     {
+        // Mendapatkan tanggal saat ini
         $date = date('Y-m-d');
         $month_number = date("n", strtotime($date));
     
         // Mendapatkan data invoice dan transaksi terkait
-        $invoices = Invoice::selectRaw('DATE_FORMAT(i.tgl_invoice, "%M") as month, 
-                        YEAR(i.tgl_invoice) as year, 
-                        COUNT( i.invoice) as invoice_count, 
-                        SUM(t.harga_beli * t.jumlah_beli) as total_harga_beli, 
-                        SUM(
-                            CASE 
-                                WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11
-                                ELSE t.harga_jual * t.jumlah_jual
-                            END
-                        ) as total_harga_jual, 
-                        b.status_ppn')
-                        ->from('invoice as i')
-                        ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
-                        ->join('barang as b', 't.id_barang', '=', 'b.id') // Join dengan tabel barang untuk mendapatkan status_ppn
-                        ->groupBy('year', 'month', 'b.status_ppn') // Grup juga berdasarkan status_ppn
-                        ->orderBy('year', 'asc') // Urutkan berdasarkan tahun secara ascending
-                        ->orderByRaw('MONTH(i.tgl_invoice) ASC') // Urutkan berdasarkan bulan secara ascending
-                        ->get();
+        $invoices = Invoice::selectRaw('
+        DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+        YEAR(i.tgl_invoice) as year, 
+        COUNT(DISTINCT i.invoice) as invoice_count, 
+        SUM(t.harga_beli * t.jumlah_beli) as total_harga_beli, 
+        SUM(
+            CASE 
+                WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11
+                ELSE t.harga_jual * t.jumlah_jual
+            END
+        ) as total_harga_jual')
+    ->from('invoice as i')
+    ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+    ->join('barang as b', 't.id_barang', '=', 'b.id') // Join dengan tabel barang untuk mendapatkan status_ppn
+    ->groupBy('year', 'month') // Grup berdasarkan tahun dan bulan
+    ->orderBy('year', 'asc') // Urutkan berdasarkan tahun secara ascending
+    ->orderByRaw('MONTH(i.tgl_invoice) ASC') // Urutkan berdasarkan bulan secara ascending
+    ->get();
+
     
         // Mengorganisir data berdasarkan tahun
         $invoiceData = [];
@@ -286,11 +288,8 @@ class KeuanganController extends Controller
             // Hitung persentase profit
             $total_profit_percentage = 0;
             if ($invoice->total_harga_beli > 0) {
-                $total_profit_percentage = round(($total_profit / $invoice->total_harga_beli) * 100);
+                $total_profit_percentage = round(($total_profit / $invoice->total_harga_beli) * 100, 2);
             }
-
-            
-            
     
             // Menyimpan data per tahun
             $invoiceData[$invoice->year][] = [
@@ -298,8 +297,8 @@ class KeuanganController extends Controller
                 'invoice_count' => $invoice->invoice_count,
                 'total_harga_beli' => $invoice->total_harga_beli / 1000,
                 'total_harga_jual' => $invoice->total_harga_jual / 1000,
-                'total_profit' => $total_profit /1000 ,
-                'total_profit_percentage' => $total_profit_percentage, // Simpan persentase profit
+                'total_profit' => $total_profit / 1000,
+                'total_profit_percentage' => $total_profit_percentage,
             ];
         }
     
@@ -311,7 +310,7 @@ class KeuanganController extends Controller
                 'total_harga_beli' => 0,
                 'total_harga_jual' => 0,
                 'total_profit' => 0,
-                'total_profit_percentage' => 0, // Simpan juga persentase profit total
+                'total_profit_percentage' => 0,
             ];
     
             foreach ($dataPerYear as $data) {
@@ -319,26 +318,28 @@ class KeuanganController extends Controller
                 $summaryData[$year]['total_invoice_count'] += $data['invoice_count'];
                 $summaryData[$year]['total_harga_beli'] += $data['total_harga_beli'];
                 $summaryData[$year]['total_harga_jual'] += $data['total_harga_jual'];
-                $summaryData[$year]['total_profit'] = $summaryData[$year]['total_harga_jual'] - $summaryData[$year]['total_harga_beli'];
+            }
     
-                // Hitung persentase total profit
-                if ($summaryData[$year]['total_harga_beli'] > 0) {
-                    $summaryData[$year]['total_profit_percentage'] = 
-                        ($summaryData[$year]['total_profit'] / $summaryData[$year]['total_harga_jual']) * 100;
-                }
+            // Hitung total profit
+            $summaryData[$year]['total_profit'] = $summaryData[$year]['total_harga_jual'] - $summaryData[$year]['total_harga_beli'];
+    
+            // Hitung persentase total profit
+            if ($summaryData[$year]['total_harga_beli'] > 0) {
+                $summaryData[$year]['total_profit_percentage'] = 
+                    round(($summaryData[$year]['total_profit'] / $summaryData[$year]['total_harga_beli']) * 100, 2);
             }
         }
     
         // Menyediakan array bulan
-        $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        $months = [
+            'January', 'February', 'March', 'April', 'May', 
+            'June', 'July', 'August', 'September', 
+            'October', 'November', 'December'
+        ];
     
         // Mengembalikan view dengan data
         return view('keuangan.omzet-total', compact('invoiceData', 'months', 'summaryData'));
-    }
-    
-
-    
-    
+    }        
     
     public function dataOmzeTotal()
 {
