@@ -73,7 +73,7 @@
                             @endphp
                             <th class="text-center {{ $bgClass }}" colspan="4">{{ $month }}</th>
                         @endforeach
-                        <th class="text-center  bg-total" colspan="4">Total</th>
+                        <th class="text-center  bg-total" colspan="5">Total</th>
                     </tr>
                     <tr>
                         @foreach ($months as $index => $month)
@@ -104,6 +104,7 @@
                         <th class="text-center  bg-total">Beli</th>
                         <th class="text-center  bg-total">Jual</th>
                         <th class="text-center  bg-total">Profit</th>
+                        <th class="text-center  bg-total">%</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -132,16 +133,19 @@
                                     };
                                 @endphp
                                 <td class="text-center {{ $bgClass }}">{{ $data['invoice_count'] ?? 0 }}</td>
-                                <td class="text-center {{ $bgClass }}">{{ number_format($data['total_harga_beli'] ?? 0, 0, ',', '.') }}</td>
-                                <td class="text-center {{ $bgClass }}">{{ number_format($data['total_harga_jual'] ?? 0, 0, ',', '.') }}</td>
-                                <td class="text-center {{ $bgClass }}">{{ number_format($data['total_profit'] ?? 0, 0, ',', '.') }}</td>
+                                <td class="text-center {{ $bgClass }}">{{ number_format($data['total_harga_beli'] ?? 0, 0, ',', ',') }}</td>
+<td class="text-center {{ $bgClass }}">{{ number_format($data['total_harga_jual'] ?? 0, 0, ',', ',') }}</td>
+<td class="text-center {{ $bgClass }}">{{ number_format($data['total_profit'] ?? 0, 0, ',', ',') }}</td>
+
                             @endforeach
                            
                             <!-- Total per tahun -->
                             <td class="text-center  bg-total">{{ $summaryData[$year]['total_invoice_count'] ?? 0 }}</td>
-                            <td class="text-center  bg-total">{{ number_format($summaryData[$year]['total_harga_beli'] ?? 0, 0, ',', '.') }}</td>
-                            <td class="text-center  bg-total">{{ number_format($summaryData[$year]['total_harga_jual'] ?? 0, 0, ',', '.') }}</td>
-                            <td class="text-center bg-total">{{ number_format($summaryData[$year]['total_profit'] ?? 0, 0, ',', '.') }}</td>
+                            <td class="text-center  bg-total">{{ number_format($summaryData[$year]['total_harga_beli'] ?? 0, 0, ',', ',') }}</td>
+                            <td class="text-center  bg-total">{{ number_format($summaryData[$year]['total_harga_jual'] ?? 0, 0, ',', ',') }}</td>
+                            <td class="text-center bg-total">{{ number_format($summaryData[$year]['total_profit'] ?? 0, 0, ',', ',') }}</td>
+                            <td class="text-center bg-total">{{ number_format(round($summaryData[$year]['total_profit_percentage'] ?? 0, 1), 1, ',', '.') }}%</td>
+
                         </tr>
                     @endforeach
                 </tbody>
