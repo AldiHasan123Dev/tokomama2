@@ -264,20 +264,26 @@ class KeuanganController extends Controller
         DATE_FORMAT(i.tgl_invoice, "%M") as month, 
         YEAR(i.tgl_invoice) as year, 
         COUNT(DISTINCT i.invoice) as invoice_count, 
-        SUM(t.harga_beli * t.jumlah_beli) as total_harga_beli, 
         SUM(
             CASE 
-                WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11
+                WHEN b.status_ppn = "ya" THEN t.harga_beli * t.jumlah_beli * 1.11  -- Menghitung PPN untuk harga beli
+                ELSE t.harga_beli * t.jumlah_beli
+            END
+        ) as total_harga_beli, 
+        SUM(
+            CASE 
+                WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11  -- Menghitung PPN untuk harga jual
                 ELSE t.harga_jual * t.jumlah_jual
             END
         ) as total_harga_jual')
     ->from('invoice as i')
     ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
-    ->join('barang as b', 't.id_barang', '=', 'b.id') // Join dengan tabel barang untuk mendapatkan status_ppn
+    ->join('barang as b', 't.id_barang', '=', 'b.id') // Bergabung dengan tabel barang untuk mendapatkan status_ppn
     ->groupBy('year', 'month') // Grup berdasarkan tahun dan bulan
     ->orderBy('year', 'asc') // Urutkan berdasarkan tahun secara ascending
     ->orderByRaw('MONTH(i.tgl_invoice) ASC') // Urutkan berdasarkan bulan secara ascending
     ->get();
+
 
     
         // Mengorganisir data berdasarkan tahun

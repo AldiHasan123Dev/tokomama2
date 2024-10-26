@@ -1,207 +1,133 @@
 <x-Layout.layout>
-    <!-- jQuery -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
-        integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
-
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Laporan Omzet Total</x-slot:tittle>
         <style type="text/css">
-            /* Tambahan gaya jika diperlukan */
             body {
                 background-color: #f9f9f9;
-                /* Warna latar belakang halaman */
             }
 
             .table-container {
                 overflow-x: auto;
-                /* Mengaktifkan scroll horizontal */
                 margin-top: 20px;
-                /* Jarak atas jika perlu */
             }
 
-            .tg {
+            table {
                 border-collapse: collapse;
                 width: 100%;
+                margin: 0 auto; /* Center the table */
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
             }
 
-            .tg td,
-            .tg th {
-                border: 1px solid #ddd;
-                /* Border yang lebih halus */
+            th, td {
                 padding: 12px;
-                /* Padding lebih banyak */
+                text-align: center;
+                transition: background-color 0.3s ease; /* Transition for background color */
+            }
+
+            th {
+                background-color: #007bff;
+                color: rgb(4, 3, 3);
+                position: sticky;
+                top: 0; /* Make the header sticky */
+                z-index: 1; /* Ensure it stays above other elements */
+            }
+
+            tr:hover {
+                background-color: #a0a0a0; /* Change background on hover */
             }
 
             /* Kelas untuk warna latar belakang setiap bulan */
-            .bg-thn {
-                background-color: #e3f2fd;
-            }
-
-            /* Juni */
-            .bg-jan {
-                background-color: #fce4ec;
-            }
-
-            .bg-feb {
-                background-color: #f1f8e9;
-            }
-
-            .bg-mar {
-                background-color: #e1f5fe;
-            }
-
-            .bg-apr {
-                background-color: #fce4ec;
-            }
-
-            .bg-may {
-                background-color: #f1f8e9;
-            }
-
-            .bg-jun {
-                background-color: #e1f5fe;
-            }
-
-            .bg-jul {
-                background-color: #fce4ec;
-            }
-
-            .bg-aug {
-                background-color: #f1f8e9;
-            }
-
-            .bg-sep {
-                background-color: #e1f5fe;
-            }
-
-            .bg-oct {
-                background-color: #fce4ec;
-            }
-
-            .bg-nov {
-                background-color: #f1f8e9;
-            }
-
-            .bg-dec {
-                background-color: #e1f5fe;
-            }
-
-            .bg-total {
-                background-color: #ffe0b2;
-            }
-
-            /* Oktober */
+            .bg-thn { background-color: #e3f2fd; }
+            .bg-jan { background-color: #fce4ec; }
+            .bg-feb { background-color: #f1f8e9; }
+            .bg-mar { background-color: #e1f5fe; }
+            .bg-apr { background-color: #fce4ec; }
+            .bg-may { background-color: #f1f8e9; }
+            .bg-jun { background-color: #e1f5fe; }
+            .bg-jul { background-color: #fce4ec; }
+            .bg-aug { background-color: #f1f8e9; }
+            .bg-sep { background-color: #e1f5fe; }
+            .bg-oct { background-color: #fce4ec; }
+            .bg-nov { background-color: #f1f8e9; }
+            .bg-dec { background-color: #e1f5fe; }
+            .bg-total { background-color: #ffe0b2; }
         </style>
 
         <div class="table-container">
-            <table class="table table-bordered table-hover table-striped">
-                <thead class="table-primary">
+            <table>
+                <thead>
                     <tr>
-                        <th class="text-center bg-thn" rowspan="2">Tahun</th>
+                        <th class="bg-thn" rowspan="2">Tahun</th>
                         @foreach ($months as $index => $month)
                             @php
-                                // Menentukan kelas berdasarkan bulan untuk header
                                 $bgClass = match ($index) {
-                                    0 => 'bg-jan', // Januari
-                                    1 => 'bg-feb', // Februari
-                                    2 => 'bg-mar', // Maret
-                                    3 => 'bg-apr', // April
-                                    4 => 'bg-may', // Mei
-                                    5 => 'bg-jun', // Juni
-                                    6 => 'bg-jul', // Juli
-                                    7 => 'bg-aug', // Agustus
-                                    8 => 'bg-sep', // September
-                                    9 => 'bg-oct', // Oktober
-                                    10 => 'bg-nov', // November
-                                    11 => 'bg-dec', // Desember
-                                    default => '', // Default jika tidak ada
+                                    0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
+                                    3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 
+                                    6 => 'bg-jul', 7 => 'bg-aug', 8 => 'bg-sep', 
+                                    9 => 'bg-oct', 10 => 'bg-nov', 11 => 'bg-dec',
+                                    default => '',
                                 };
                             @endphp
-                            <th class="text-center {{ $bgClass }}" colspan="4">{{ $month }}</th>
+                            <th class="{{ $bgClass }}" colspan="4">{{ $month }}</th>
                         @endforeach
-                        <th class="text-center  bg-total" colspan="5">Total</th>
+                        <th class="bg-total" colspan="5">Total</th>
                     </tr>
                     <tr>
                         @foreach ($months as $index => $month)
                             @php
-                                // Menentukan kelas berdasarkan bulan untuk header sub
                                 $bgClass = match ($index) {
-                                    0 => 'bg-jan', // Januari
-                                    1 => 'bg-feb', // Februari
-                                    2 => 'bg-mar', // Maret
-                                    3 => 'bg-apr', // April
-                                    4 => 'bg-may', // Mei
-                                    5 => 'bg-jun', // Juni
-                                    6 => 'bg-jul', // Juli
-                                    7 => 'bg-aug', // Agustus
-                                    8 => 'bg-sep', // September
-                                    9 => 'bg-oct', // Oktober
-                                    10 => 'bg-nov', // November
-                                    11 => 'bg-dec', // Desember
-                                    default => '', // Default jika tidak ada
+                                    0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
+                                    3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 
+                                    6 => 'bg-jul', 7 => 'bg-aug', 8 => 'bg-sep', 
+                                    9 => 'bg-oct', 10 => 'bg-nov', 11 => 'bg-dec',
+                                    default => '',
                                 };
                             @endphp
-                            <th class="text-center {{ $bgClass }}">Jumlah Inv</th>
-                            <th class="text-center {{ $bgClass }}">Beli</th>
-                            <th class="text-center {{ $bgClass }}">Jual</th>
-                            <th class="text-center {{ $bgClass }}">Profit</th>
+                            <th class="{{ $bgClass }}">Jumlah Inv</th>
+                            <th class="{{ $bgClass }}">Beli</th>
+                            <th class="{{ $bgClass }}">Jual</th>
+                            <th class="{{ $bgClass }}">Profit</th>
                         @endforeach
-                        <th class="text-center  bg-total">Jumlah Inv</th>
-                        <th class="text-center  bg-total">Beli</th>
-                        <th class="text-center  bg-total">Jual</th>
-                        <th class="text-center  bg-total">Profit</th>
-                        <th class="text-center  bg-total">%</th>
+                        <th class="bg-total">Jumlah Inv</th>
+                        <th class="bg-total">Beli</th>
+                        <th class="bg-total">Jual</th>
+                        <th class="bg-total">Profit</th>
+                        <th class="bg-total">%</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($invoiceData as $year => $dataPerYear)
                         <tr>
-                            <td class="text-center bg-thn">{{ $year }}</td>
+                            <td class="bg-thn">{{ $year }}</td>
                             @foreach ($months as $index => $month)
                                 @php
-                                    // Mencari data untuk bulan tertentu
                                     $data = collect($dataPerYear)->firstWhere('month', $month);
-                                    // Menentukan kelas berdasarkan bulan untuk data
                                     $bgClass = match ($index) {
-                                        0 => 'bg-jan', // Januari
-                                        1 => 'bg-feb', // Februari
-                                        2 => 'bg-mar', // Maret
-                                        3 => 'bg-apr', // April
-                                        4 => 'bg-may', // Mei
-                                        5 => 'bg-jun', // Juni
-                                        6 => 'bg-jul', // Juli
-                                        7 => 'bg-aug', // Agustus
-                                        8 => 'bg-sep', // September
-                                        9 => 'bg-oct', // Oktober
-                                        10 => 'bg-nov', // November
-                                        11 => 'bg-dec', // Desember
-                                        default => '', // Default jika tidak ada
+                                        0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
+                                        3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 
+                                        6 => 'bg-jul', 7 => 'bg-aug', 8 => 'bg-sep', 
+                                        9 => 'bg-oct', 10 => 'bg-nov', 11 => 'bg-dec',
+                                        default => '',
                                     };
                                 @endphp
-                                <td class="text-center {{ $bgClass }}">{{ $data['invoice_count'] ?? 0 }}</td>
-                                <td class="text-center {{ $bgClass }}">
+                                <td class="{{ $bgClass }}">{{ $data['invoice_count'] ?? 0 }}</td>
+                                <td class="{{ $bgClass }}">
                                     {{ number_format($data['total_harga_beli'] ?? 0, 0, ',', ',') }}</td>
-                                <td class="text-center {{ $bgClass }}">
+                                <td class="{{ $bgClass }}">
                                     {{ number_format($data['total_harga_jual'] ?? 0, 0, ',', ',') }}</td>
-                                <td class="text-center {{ $bgClass }}">
+                                <td class="{{ $bgClass }}">
                                     {{ number_format($data['total_profit'] ?? 0, 0, ',', ',') }}</td>
                             @endforeach
-
-                            <!-- Total per tahun -->
-                            <td class="text-center  bg-total">{{ $summaryData[$year]['total_invoice_count'] ?? 0 }}
-                            </td>
-                            <td class="text-center  bg-total">
+                            <td class="bg-total">{{ $summaryData[$year]['total_invoice_count'] ?? 0 }}</td>
+                            <td class="bg-total">
                                 {{ number_format($summaryData[$year]['total_harga_beli'] ?? 0, 0, ',', ',') }}</td>
-                            <td class="text-center  bg-total">
+                            <td class="bg-total">
                                 {{ number_format($summaryData[$year]['total_harga_jual'] ?? 0, 0, ',', ',') }}</td>
-                            <td class="text-center bg-total">
+                            <td class="bg-total">
                                 {{ number_format($summaryData[$year]['total_profit'] ?? 0, 0, ',', ',') }}</td>
-                            <td class="text-center bg-total">
+                            <td class="bg-total">
                                 {{ number_format(round($summaryData[$year]['total_profit_percentage'] ?? 0, 1), 1, ',', '.') }}%
                             </td>
-
                         </tr>
                     @endforeach
                 </tbody>
