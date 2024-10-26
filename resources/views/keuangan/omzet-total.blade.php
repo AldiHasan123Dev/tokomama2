@@ -117,6 +117,7 @@
                                     {{ number_format($data['total_harga_jual'] ?? 0, 0, ',', ',') }}</td>
                                 <td class="{{ $bgClass }}">
                                     {{ number_format($data['total_profit'] ?? 0, 0, ',', ',') }}</td>
+                                    
                             @endforeach
                             <td class="bg-total">{{ $summaryData[$year]['total_invoice_count'] ?? 0 }}</td>
                             <td class="bg-total">

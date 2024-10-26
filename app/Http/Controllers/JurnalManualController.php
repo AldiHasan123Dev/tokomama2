@@ -44,6 +44,7 @@ class JurnalManualController extends Controller
         $noBBMO = Jurnal::where('tipe', 'BBMO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBMO = $noBBMO ? $noBBMO->no + 1 : 1;
         $noBBKO = Jurnal::where('tipe', 'BBKO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        
         $no_BBKO = $noBBKO ? $noBBKO->no + 1 : 1;
 
         $invoices = Invoice::all();
