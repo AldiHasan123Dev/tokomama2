@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="{{ asset('/assets/img/logo_sb.svg') }}">
     <!-- Layout config Js -->
     <!-- Icons CSS -->
-    @vite('resources/css/app.css')
+    {{-- @vite('resources/css/app.css') --}}
 
     <!-- ui jqgrid -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/css/ui.jqgrid.min.css">

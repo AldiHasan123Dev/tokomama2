@@ -83,12 +83,12 @@
                                     default => '',
                                 };
                             @endphp
-                            <th class="{{ $bgClass }}">Jumlah Inv</th>
+                            <th class="{{ $bgClass }}">Q.Inv</th>
                             <th class="{{ $bgClass }}">Beli</th>
                             <th class="{{ $bgClass }}">Jual</th>
                             <th class="{{ $bgClass }}">Profit</th>
                         @endforeach
-                        <th class="bg-total">Jumlah Inv</th>
+                        <th class="bg-total">Q.Inv</th>
                         <th class="bg-total">Beli</th>
                         <th class="bg-total">Jual</th>
                         <th class="bg-total">Profit</th>
