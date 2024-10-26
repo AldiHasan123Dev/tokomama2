@@ -2,44 +2,36 @@
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Preview Invoice</x-slot:tittle>
         <div class="header" style="margin-top:10px">
-            {{-- <button class="btn bg-red-500 font-semibold justify-align-center text-white w-300 mt-3" type="button"
-                onclick="window.history.back();">
-                Kembali
-            </button>
-            <button class="btn bg-green-500 font-semibold justify-align-center text-white w-300 mt-3" type="submit">
-                Submit Invoice
-            </button> --}}
-
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
                     <tr>
                         <th>
-                            <img src="{{ asset('logo_sb.svg') }}" class="logo" style="width: 20%; height: 20%;">
+                            <img src="{{ asset('logo_sb.svg') }}" class="logo" style="width: 20%; height: 20%; margin:10px">
                         </th>
                         <td style="font-weight: bold; font-size: 1.2rem; text-align:center;">CV. SARANA BAHAGIA</td>
-                        <td></td>
+                        
                     </tr>
                     <tr>
-                        <td style="font-size: 0.8rem;">Jl. Kalianak 55 Blok G, Surabaya</td>
-                        <td style="font-weight: bold; font-size: 1.2rem; text-align: center;"><u>INVOICE</u></td>
+                        <td style="font-size: 1rem; margin:2px">Jl. Kalianak 55 Blok G, Surabaya</td>
+                        <td style="font-weight: bold; font-size: 1.2rem; text-align: center;"><u>PREVIEW INVOICE</u></td>
                     </tr>
                     <tr>
-                        <td style="font-size: 0.8rem;">Telp: 031-7495507</td>
-                        <td style="text-align: center; font-size: 0.8rem">NO : {{ $inv ?? '-' }}</td>
+                        <td style="font-size: 1rem;">Telp: 031-7495507</td>
+                        <td style="text-align: center; font-size: 1rem">NO : {{ $inv ?? '-' }}</td>
                     </tr>
                 </thead>
             </table>
-            <table class="table">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <tbody>
                     <tr>
-                        <td class="header-cell" style="text-align:left">Customer :
+                        <td class="header-cell" style="font-size: 1rem; text-align:left">Customer :
                             {{ $transaksi->suratJalan->customer->nama ?? '-' }}</td>
-                        <td class="header-cell" style="text-align: center; font-weight: bold; font-size: 1.2rem;">KAPAL
+                        <td class="header-cell" style="text-align: center; font-size: 1rem;">KAPAL
                             : {{ $transaksi->suratJalan->nama_kapal ?? '-' }}</td>
 
                     </tr>
                     <tr>
-                        <td class="header-cell" style="text-align:left;">PO :
+                        <td class="header-cell" style="text-align:left;font-size: 1rem;">PO :
                             {{ $transaksi->suratJalan->no_po ?? '-' }}</td>
                     </tr>
                 </tbody>
@@ -120,15 +112,16 @@
                     $end_date = min($start_date + $dates_per_page, $total_dates);
                 @endphp
 
-                <table class="table table-striped mt-3">
+<table style="width: 100%;  border: solid; border-collapse: collapse; margin-top: 20px;" border="1">
                     <thead>
                         <tr>
-                            <th style="text-align: left;">No.</th>
-                            <th style="text-align: left;">Nama Barang</th>
-                            <th style="text-align: left;">No-Cont</th>
-                            <th style="text-align: left;">Quantity</th>
-                            <th style="text-align: right;">Harga Satuan(Rp)</th>
-                            <th style="text-align: right;">Total</th>
+                            <th style="text-align: center; border:solid; padding: 8px;">No.</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">Tgl Barang Masuk</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">Nama Barang</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">No-Cont</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">Quantity</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">Harga Satuan(Rp)</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,8 +139,9 @@
                                         $total_all += $total;
                                     @endphp
                                     <tr>
-                                        <td style="text-align: center;">{{ $index++ }}</td>
-                                        <td style="text-align: left;">
+                                        <td style="border:solid; text-align: center; padding:2px;">{{ $index++ }}</td>
+                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ $items['tgl_sj'][$idx] }}</td>
+                                        <td style=" border:solid; text-align: center;">
                                             {{ $items['nama_barang'][$idx] }}
                                             ({{ ($items['jumlah_jual'][$idx]) }} {{ $items['satuan_jual'][$idx] }})
                                             @if (str_contains($items['satuan_jual'][$idx], $items['nama_satuan'][$idx]))
@@ -168,10 +162,10 @@
                                             @endif
                                         </td>
                                         
-                                        <td style="text-align: left;">{{ $items['no_cont'][$idx] }}</td>
-                                        <td style="text-align: left;"> {{ number_format($items['jumlah'][$idx], 0, ',', '.') }} {{ $items['satuan_jual'][$idx] }}</td>
-                                        <td style="text-align: right;">{{ number_format($items['harga_jual'][$idx], 0, ',', '.') }}</td>
-                                        <td style="text-align: right;">{{ number_format($items['harga_jual'][$idx] * $items['jumlah'][$idx], 0, ',', '.') }}
+                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ $items['no_cont'][$idx] }}</td>
+                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ number_format($items['jumlah'][$idx], 0, ',', '.') }} {{ $items['satuan_jual'][$idx] }}</td>
+                                        <td style=" border:solid; text-align: right; padding: 8px;">{{ number_format($items['harga_jual'][$idx], 0, ',', '.') }}</td>
+                                        <td style=" border:solid; text-align: right; padding: 8px;">{{ number_format($items['harga_jual'][$idx] * $items['jumlah'][$idx], 0, ',', '.') }}</td>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -179,11 +173,7 @@
                         @endforeach
             @endfor
             <tr>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td>
+            <td colspan="6" style=" border:solid; text-align: right; padding: 10px;">
                 DPP
                 <br>
                 @php
@@ -212,10 +202,10 @@
                 @endif
                 
             </td>
-            <td style="text-align: right;" >
+            <td style=" border:solid; text-align: right; padding: 8px;">
 {{-- Menampilkan total tanpa PPN --}}
 {{ number_format($total, 0, ',', '.') }}
-<br style="text-align: right;">
+<br style=" border:solid; text-align: right;">
 
 @php
     // Inisialisasi variabel untuk menentukan status PPN
@@ -245,14 +235,10 @@
             </td>
         </tr>
         <tr>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td>
+            <td colspan="6" style=" border:solid; text-align: right; padding: 8px;">
                 <b>TOTAL</b>
             </td>
-            <td style="text-align: right;">
+            <td style=" border:solid; text-align: right; padding: 8px;">
                 @php
                 // Inisialisasi variabel untuk menentukan status PPN
                 $has_ppn = false; // Status PPN, default tidak ada PPN
@@ -279,29 +265,16 @@
             
             </td>
         </tr>
-        <tr>
-            <td class="text-center"></td>
-                <td class="text-center"></td>
-                <td class="text-center"></td>
-                <td class="text-center"></td>
-                <td class="text-right">TANGGAL</td>
         </tr>
-        <tr>
-            <td class="text-center"></td>
-                <td class="text-center"></td>
-                <td class="text-center"></td>
-                <td class="text-center"></td>
-                <td class="text-right m-5">{{ $tgl_inv1 }}</td>
-        </tr>
-            
-            </tbody>
-            </table>
+    </tbody>
+</table>
+<h1 style="text-align: right; margin-right:50px; padding: 8px; font-size: 1rem"> Surabaya, {{ $tgl_inv1 }}</h1>
             <form action="{{ route('invoice-transaksi.store') }}" method="post" id="form">  
                 @csrf
                 @foreach ($data as $id_transaksi => $items)
                     @if (isset($items['invoice']))
                         @foreach ($items['invoice'] as $idx => $invoice)
-                            <input type="hidden" name="tgl_invoice" value="{{ $tgl_inv1 }}">
+                            <input type="hidden" name="tgl_invoice" value="{{ $tgl_inv2 }}">
                             <input type="hidden" name="tipe" value="{{ $tipe }}">
                             <input type="hidden" name="invoice" value="{{ $inv }}">
                             <input type="hidden" name="nsfp" value="{{  $modified  }}">

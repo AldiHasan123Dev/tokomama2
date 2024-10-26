@@ -42,7 +42,7 @@
                     <tfoot>
                         <tr>
                             <td colspan="5" style="text-align: center;">
-                                <button onclick="addRow({{ $item->id }}, {{ $item->harga_jual }}, {{$item->jumlah_jual}},'{{ $item->barang->nama }}')" type="button" style="background-color: #fcd34d; color: white; padding: 8px 16px; width: 100%; border: none; border-radius: 4px;">Tambah Kolom</button>
+                                <button onclick="addRow({{ $item->id }}, {{ $item->harga_jual }}, {{$item->jumlah_jual}},'{{ $item->barang->nama }}')" type="button"  class="btn bg-orange-500 font-semibold justify-align-center text-white w-full mt-3">Tambah Kolom</button>
                             </td>
                         </tr>
                     </tfoot>
@@ -50,7 +50,7 @@
             </div>
             @endforeach
 
-            <button class="btn" style="background-color: #f59e0b; color: white; padding: 10px 20px; border: none; border-radius: 4px; width: 100%; margin-top: 20px;" type="submit">Preview Invoice</button>
+            <button  class="btn bg-green-500 font-semibold justify-align-center text-white w-full mt-3" type="submit">Preview Invoice</button>
         </form>
     </x-keuangan.card-keuangan>
 

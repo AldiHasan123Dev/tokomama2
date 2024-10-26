@@ -48,7 +48,11 @@ class InvoiceController extends Controller
 
     public function preview(Request $request)
     {
-        $tgl_inv1 = $request->tgl_invoice;
+
+        $tgl_inv2 = $request->tgl_invoice; // Asumsikan ini adalah string tanggal atau objek DateTime
+$date = date_create($tgl_inv2);
+$tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
+       
         $tgl_inv = date('m', strtotime($tgl_inv1));
         $tipe = $tgl_inv . '-' . $request->tipe;
     
@@ -108,6 +112,7 @@ class InvoiceController extends Controller
 
                     if ($suratJalan){
                         $data[$id_transaksi]['no_cont'][$idx] = $suratJalan->no_cont;
+                        $data[$id_transaksi]['tgl_sj'][$idx] = $suratJalan->tgl_sj;
                     }
     
                     if ($satuan) {
@@ -172,7 +177,7 @@ class InvoiceController extends Controller
         $transaksi = Transaction::where('id', $id_transaksi)->first();
       
         // Pass data to view
-        return view('invoice.pre-invoice', compact('invoice_count', 'tipe', 'data', 'inv', 'barang', 'satuan', 'tgl_inv1', 'transaksi', 'modified'));
+        return view('invoice.pre-invoice', compact('invoice_count', 'tipe', 'data', 'inv', 'barang', 'satuan', 'tgl_inv2', 'tgl_inv1', 'transaksi', 'modified'));
     }
     
     

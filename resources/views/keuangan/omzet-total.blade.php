@@ -37,7 +37,7 @@
             }
 
             /* Kelas untuk warna latar belakang setiap bulan */
-            .bg-thn { background-color: #e3f2fd; }
+            .bg-thn { background-color: #ca8c8c; }
             .bg-jan { background-color: #fce4ec; }
             .bg-feb { background-color: #f1f8e9; }
             .bg-mar { background-color: #e1f5fe; }
@@ -126,7 +126,7 @@
                             <td class="bg-total">
                                 {{ number_format($summaryData[$year]['total_profit'] ?? 0, 0, ',', ',') }}</td>
                             <td class="bg-total">
-                                {{ number_format(round($summaryData[$year]['total_profit_percentage'] ?? 0, 1), 1, ',', '.') }}%
+                                {{ number_format(round($summaryData[$year]['total_profit_percentage'] ?? 0, 1), 2, ',', '.') }}%
                             </td>
                         </tr>
                     @endforeach
