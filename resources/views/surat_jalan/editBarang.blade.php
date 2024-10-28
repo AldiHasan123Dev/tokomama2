@@ -1,5 +1,84 @@
 <x-Layout.layout>
+    <style>
+        .modal {
+            top: 0;
+            left: 0;
+            width: 40%;
+            z-index: 1000;
+        }
+        .kembali-button {
+    display: inline-block; 
+    padding: 12px 10px; 
+    background-color: #ad0f0f; 
+    color: white; 
+    text-decoration: none; 
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
 
+.kembali-button:hover {
+    background-color: #761408; 
+}
+        .modal-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-family: Arial, sans-serif;
+        }
+
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Form labels and containers */
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .input-field,
+        .select-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        /* Submit button */
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* Label for extra info */
+        .label-info {
+            font-size: 12px;
+            color: red;
+        }
+    </style>
     <div id="dialog"></div>
     <dialog id="my_modal_3" class="modal">
         <div class="modal-box">
@@ -10,36 +89,36 @@
             <form action="{{ route('surat-jalan.tambahBarang') }}" method="post">
                 @csrf
                 <input type="hidden" id="modal_data" name="id_surat_jalan" value="" readonly>
-                <label for="id_barang" class="label">Barang</label>
-                <select class="js-example-basic-single w-full" name="id_barang" id="id_barang">
+                <label for="id_barang" class="form-label">Barang</label>
+                <select class="select-field" name="id_barang" id="id_barang">
                     @foreach ($barangs as $bar)
                         <option value="{{ $bar->id }}">{{ $bar->nama }} || {{ $bar->satuan->nama_satuan }} || {{ $bar->value }}  - {{ $bar->kode_objek }}</option>
                     @endforeach
                 </select>
-                <label for="id_supplier" class="label">Supplier</label>
-                <select class="js-example-basic-single w-full" name="id_supplier" id="id_supplier">
+                <label for="id_supplier" class="form-label">Supplier</label>
+                <select class="select-field" name="id_supplier" id="id_supplier">
                     @foreach ($suppliers as $sup)
                         <option value="{{ $sup->id }}">{{ $sup->nama }}</option>
                     @endforeach
                 </select>
-                <label for="jumlah_jual" class="label">Jumlah Jual & Jumlah Beli</label>
-                <input type="number" name="jumlah_jual" id="jumlah_jual" class="input input-sm w-full">
-                <label for="satuan_jual" class="label">Satuan Jual & Satuan Beli</label>
-                <select class="js-example-basic-single w-full" name="satuan_jual" id="satuan_jual">
+                <label for="jumlah_jual" class="form-label">Jumlah Jual & Jumlah Beli</label>
+                <input type="number" name="jumlah_jual" id="jumlah_jual" class="input-field input-sm w-full">
+                <label for="satuan_jual" class="form-label">Satuan Jual & Satuan Beli</label>
+                <select class="select-field" name="satuan_jual" id="satuan_jual">
                     @foreach ($satuans as $satu)
                         <option value="{{ $satu->nama_satuan }}">{{ $satu->nama_satuan }}</option>
                     @endforeach
                 </select>
-                <label for="keterangan" class="label">Keterangan</label>
-                <input type="text" name="keterangan" id="keterangan" class="input input-sm w-full">
-                <button type="submit" class="btn btn-sm bg-green-400 text-white font-semibold w-full">Tambah Barang</button>
+                <label for="keterangan" class="form-label">Keterangan</label>
+                <input type="text" name="keterangan" id="keterangan" class="input-field input-sm w-full">
+                <button type="submit" class="submit-button">Tambah Barang</button>
             </form>
         </div>
     </dialog>
 
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Edit By Barang</x-slot:tittle>
-        <a href="{{ route('surat-jalan.index') }}" class="my-3 px-3 py-3 bg-blue-500 text-white w-fit rounded-lg">Kembali ke List Surat Jalan</a>
+        <a href="{{ route('surat-jalan.index') }}" class="kembali-button">Kembali ke List Surat Jalan</a>
         <div class="overflow-x-auto">
             <table class="table" id="editBarang">
                 <!-- head -->
@@ -64,7 +143,7 @@
                             <td>
                                 @if ($trans->sisa > 0)
                                     <button onclick="openModal({{ $trans->suratJalan->id }})"><i class="fa-solid fa-plus text-green-500 mr-5"></i></button>
-                                    <button onclick="getData({{ $trans->id }}, {{ $trans->jumlah_jual }})" class="text-yellow-300"><i class="fa-solid fa-pencil"></i></button>
+                                    <button onclick="getData({{ $trans->id }}, {{ $trans->jumlah_jual }}, '{{ $trans->satuan_jual }}', '{{  $trans->suratJalan->nomor_surat }}')" class="text-yellow-300"><i class="fa-solid fa-pencil"></i></button>
                                     <form action="{{ route('surat-jalan.hapusBarang') }}" method="post">
                                         @csrf
                                         @method('delete')
@@ -98,24 +177,31 @@
                 order: [[1, 'desc']]
             });
 
-            function getData(id, kuantitas) {
-                $('#dialog').html(`<dialog id="my_modal_5" class="modal">
-                <div class="modal-box w-11/12 max-w-2xl pl-10">
+            function getData(id, kuantitas, satuan, surat_jalan) {
+    $('#dialog').html(`
+        <dialog id="my_modal_5" class="modal">
+            <div class="modal-box">
                 <form method="dialog">
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
-                    <h3 class="text-lg font-bold">Edit by Barang</h3>
-                    <form action="{{route('surat-jalan.editBarang')}}" method="post">
+                <h3 class="text-lg font-bold">Edit Barang No Surat ${surat_jalan}</h3>
+                <form action="{{ route('surat-jalan.editBarang') }}" method="post">
                     @csrf
                     <input type="hidden" name="id" value="${id}" class="border-none" />
-                    <label class="input border flex items-center gap-2 mt-3">
-                        Jumlah Jual & Jumlah Beli :
-                        <input type="text" name="jumlah_jual" value="${kuantitas}" class="border-none" />
-                    </label>
-                    <button type="submit" class="btn bg-green-400 text-white font-semibold w-72 mt-2">Edit</button>
-                    </form>
-                </div>
-                </dialog>`);
+                    <label class="form-label">Jumlah Jual & Jumlah Beli :</label>
+                    <input type="text" name="jumlah_jual" class="input-field" value="${kuantitas}" />
+                    <label class="form-label">Satuan</label>
+                    <select class="select-field" name="satuan" id="satuan">
+                        @foreach ($satuans as $s)
+                            <option value="{{ $s->nama_satuan }}" ${satuan === '{{ $s->nama_satuan }}' ? 'selected' : ''}>{{ $s->nama_satuan }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="submit-button">Edit</button>
+                </form>
+            </div>
+        </dialog>
+    `);
+
                 my_modal_5.showModal();
             }
 
@@ -144,7 +230,7 @@
             }
 
             function deleteData(id) {
-                if (confirm('Are you sure you want to delete this data?')) {
+                if (confirm('Apa kamu yakin akan menghapus data ini?')) {
                     $.ajax({
                         method: 'POST',
                         url: "{{ route('surat-jalan.hapusBarang') }}",

@@ -53,10 +53,10 @@ class InvoiceController extends Controller
 $date = date_create($tgl_inv2);
 $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
        
-        $tgl_inv = date('m', strtotime($tgl_inv1));
+        $tgl_inv = date('m', strtotime($tgl_inv2));
         $tipe = $tgl_inv . '-' . $request->tipe;
     
-        $monthNumber = (int) substr($tgl_inv1, 5, 2);
+        $monthNumber = (int) substr($tgl_inv2, 5, 2);
     
         $data = array();
         $idtsk = array();

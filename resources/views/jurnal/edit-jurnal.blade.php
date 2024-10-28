@@ -2,12 +2,75 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .modal {
-            z-index: 1000; /* Set a lower z-index than dropdown */
+            top: 0;
+            left: 0;
+            width: 50%;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-family: Arial, sans-serif;
+        }
+
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Form labels and containers */
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .input-field,
+        .select-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        /* Submit button */
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* Label for extra info */
+        .label-info {
+            font-size: 12px;
+            color: red;
         }
     </style>
     <input type="hidden" id="nj" value="{{ $data[0]->nomor }}">
     <input type="hidden" id="tgl" value="{{ $tgl }}">
-    
+
     <div id="dialog"></div>
 
     <x-jurnal.card-jurnal>
@@ -28,65 +91,71 @@
         <div class="overflow-x-auto">
             <form action="{{ route('jurnal.edit.tglupdate') }}" method="post">
                 @csrf
-                <input name="tgl_input" type="date" class="mb-8 rounded-md" id="tgl_input">
-                <input readonly name="nomor_jurnal_input" type="text" class="mb-8 rounded-md bg-gray-100" id="nomor_jurnal">
-                <button type="submit" class="btn bg-green-500 font-semibold text-white">Simpan Tanggal</button>
+                <input name="tgl_input" type="date" style="width: 100%" class="mb-8 rounded-md" id="tgl_input">
+                <input readonly name="nomor_jurnal_input" type="text" style="width: 100%" class="mb-8 rounded-md bg-gray-100"
+                    id="nomor_jurnal">
+                <button type="submit" style="margin-bottom: 20px;" class="btn bg-green-500 font-semibold text-white">Simpan Tanggal</button>
             </form>
 
-            <table id="table-editj"  class="cell-border hover display nowrap" >
-              <thead>
-                <tr>
-                  <th>Aksi</th>
-                  <th>ID</th>
-                  <th>Nomor Jurnal</th>
-                  <th>Akun</th>
-                  <th>Nama Akun</th>
-                  <th>Debit</th>
-                  <th>Kredit</th>
-                  <th>Keterangan</th>
-                  <th>Invoice</th>
-                  <th>Invoice External</th>
-                  <th>Nopol</th>
-                  <th>Tipe</th>
-                  <th>Keterangan Buku Besar Pembantu</th>
-                  
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($data as $item)
-                  <tr>
-                    <td><button class="text-yellow-400" onclick="editJurnal( '{{$item->id}}', '{{$item->nomor}}', '{{$item->tgl}}', '{{$item->debit}}', '{{$item->kredit}}', '{{$item->keterangan}}', '{{$item->invoice}}', '{{$item->invoice_external}}', '{{$item->nopol}}', '{{$item->tipe}}', '{{$item->coa_id}}', '{{$item->nama_akun}}', '{{$item->no_akun}}', '{{$item->keterangan_buku_besar_pembantu}}')"><i class="fa-solid fa-pencil"></i></button> |
-                    <button id="delete-faktur-all" onclick="deleteItemJurnal('{{$item->id}}')" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button></td>
-                    <td>{{ $item->id }}</td>
-                    <td>{{ $item->nomor ?? '-' }}</td>
-                    <td>{{ $item->no_akun ?? '-' }}</td>
-                    <td>{{ $item->nama_akun ?? '-' }}</td>
-                    <td class="text-end">{{ number_format($item->debit, 2, ',', '.') }}</td>
-                    <td class="text-end">{{ number_format($item->kredit, 2, ',', '.') }}</td>
-                    <td>{{ $item->keterangan ?? '-' }}</td>
-                    <td>{{ $item->invoice == 0 ? '' : ($item->invoice ?? '-') }}</td>
-                    <td>{{ $item->invoice_external == 0 ? '' : ($item->invoice_external ?? '-') }}</td>
-                    <td>{{ $item->nopol ?? '-' }}</td>
-                    <td>{{ $item->tipe ?? '-' }}</td>
-                    <td>{{ $item->keterangan_buku_besar_pembantu ?? '-'}}</td>
-                    
-                </tr>
-                @endforeach
-              </tbody>
+            <table id="table-editj" class="cell-border hover display nowrap">
+                <thead>
+                    <tr>
+                        <th>Aksi</th>
+                        <th>ID</th>
+                        <th>Nomor Jurnal</th>
+                        <th>Akun</th>
+                        <th>Nama Akun</th>
+                        <th>Debit</th>
+                        <th>Kredit</th>
+                        <th>Keterangan</th>
+                        <th>Invoice</th>
+                        <th>Invoice External</th>
+                        <th>Nopol</th>
+                        <th>Tipe</th>
+                        <th>Keterangan Buku Besar Pembantu</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($data as $item)
+                        <tr>
+                            <td><button class="text-yellow-400"
+                                    onclick="editJurnal( '{{ $item->id }}', '{{ $item->nomor }}', '{{ $item->tgl }}', '{{ $item->debit }}', '{{ $item->kredit }}', '{{ $item->keterangan }}', '{{ $item->invoice }}', '{{ $item->invoice_external }}', '{{ $item->nopol }}', '{{ $item->tipe }}', '{{ $item->coa_id }}', '{{ $item->nama_akun }}', '{{ $item->no_akun }}', '{{ $item->keterangan_buku_besar_pembantu }}')"><i
+                                        class="fa-solid fa-pencil"></i></button> |
+                                <button id="delete-faktur-all" onclick="deleteItemJurnal('{{ $item->id }}')"
+                                    class="text-red-600 font-semibold mb-3 self-end"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </td>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->nomor ?? '-' }}</td>
+                            <td>{{ $item->no_akun ?? '-' }}</td>
+                            <td>{{ $item->nama_akun ?? '-' }}</td>
+                            <td class="text-end">{{ number_format($item->debit, 2, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($item->kredit, 2, ',', '.') }}</td>
+                            <td>{{ $item->keterangan ?? '-' }}</td>
+                            <td>{{ $item->invoice == 0 ? '' : $item->invoice ?? '-' }}</td>
+                            <td>{{ $item->invoice_external == 0 ? '' : $item->invoice_external ?? '-' }}</td>
+                            <td>{{ $item->nopol ?? '-' }}</td>
+                            <td>{{ $item->tipe ?? '-' }}</td>
+                            <td>{{ $item->keterangan_buku_besar_pembantu ?? '-' }}</td>
+
+                        </tr>
+                    @endforeach
+                </tbody>
             </table>
-          </div>
-          @php
+        </div>
+        @php
             $total_kredit = $data->sum('kredit');
             $total_debet = $data->sum('debit');
-          @endphp
-          <p class="font-bold text-2xl">Total Debet: {{number_format($total_debet, 2, ',', '.') }} </p>
-          <p class="font-bold text-2xl">Total Kredit:  {{number_format($total_kredit, 2, ',', '.') }}</span> </p>
+        @endphp
+        <p class="font-bold text-2xl">Total Debet: {{ number_format($total_debet, 2, ',', '.') }} </p>
+        <p class="font-bold text-2xl">Total Kredit: {{ number_format($total_kredit, 2, ',', '.') }}</span> </p>
     </x-jurnal.card-jurnal>
 
     <x-slot:script>
         <script src="https://cdn.datatables.net/2.1.0/js/dataTables.tailwindcss.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        
+
         <script>
             let nomorJurnal = $("#nj").val();
             let tgl = $("#tgl").val();
@@ -96,105 +165,80 @@
 
             let table = $(`#table-editj`).DataTable({});
 
-            function editJurnal(id, nomor, tgl, debit, kredit, keterangan, invoice, invoice_external, nopol, tipe, coa_id, nama_akun, no_akun, keterangan_buku_besar_pembantu) {
+            function editJurnal(id, nomor, tgl, debit, kredit, keterangan, invoice, invoice_external, nopol, tipe, coa_id,
+                nama_akun, no_akun, keterangan_buku_besar_pembantu) {
                 invoice = (invoice === '0') ? '' : invoice;
                 invoice_external = (invoice_external === '0') ? '' : invoice_external;
                 $("#dialog").html(`
-                    <dialog id="my_modal_3" class="modal">
-                        <div class="modal-box w-11/12 max-w-2xl pl-10 py-9">
-                            <form method="dialog">
-                            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                            </form>
-                            <h3 class="text-lg font-bold mb-3">Edit Jurnal</h3>
-                            <form action="{{route('jurnal.edit.update')}}" method="post">
-                                @csrf
-                                <label class="input input-bordered flex items-center gap-2 mt-3">
-                                    ID
-                                    <input name="id" type="text" class="border-none rounded-sm w-full" class="grow" readonly value="${id}" />
-                                </label>
-                                    <input name="tipe" type="hidden" value="${tipe}" />
-                                <label class="input input-bordered flex items-center gap-2 mt-3">
-                                    Nomor Jurnal
-                                    <input name="nomor" type="text" class="border-none rounded-sm w-full" class="grow" readonly value="${nomor}" />
-                                </label>
-                         
-                                <input name="tgl" type="hidden" class="border-none rounded-sm w-full" class="grow" value="${tgl}" />
-                               
-                                <label class="form-control w-full mb-3">
-                                    <div class="label">
-                                        <span class="label-text">Nopol</span>
-                                    </div>
-                                    <select class="select select-bordered w-full"  name="nopol" id="nopol">
-                                        <option value="${nopol}" selected>${nopol}</option>
-                                        @foreach ($nopol as $n)
-                                        <option class="z-10" value="{{ $n->nopol}}">{{$n->nopol}}</option>
-                                        @endforeach
-                                    </select>
-                                </label>
-                                <label class="form-control w-full mb-3">
-                                    <div class="label">
-                                        <span class="label-text">Invoice</span>
-                                    </div>
-                                    <select class="select select-bordered w-full"  name="invoice" id="invoices">
-                                        <option value="${invoice}" selected>${invoice}</option>
-                                     @foreach ($invProc as $i)
-                                    <option class="z-10" value="{{ $i }}">{{$i }}</option>
-                                    @endforeach
-                                    </select>
-                                </label>
-                                <label class="form-control w-full mb-3">
-                                    <div class="label">
-                                        <span class="label-text">Coa</span>
-                                    </div>
-                                    <select class="select select-bordered w-full"  name="coa_id" id="coa_id">
-                                        <option value="${coa_id}" selected>${no_akun} ${nama_akun}</option>
-                                        @foreach ($coa as $c)
-                                        <option class="z-10" value="{{ $c->id }}">{{$c->no_akun}} {{ $c->nama_akun }}</option>
-                                        @endforeach
-                                    </select>
-                                </label>
-                                <label class="input input-bordered flex items-center gap-2 mt-3">
-                                    Debit
-                                    <input name="debit" type="text" class="border-none rounded-sm w-full" class="grow" value="${debit}" />
-                                </label>
-                                <label class="input input-bordered flex items-center gap-2 mt-3">
-                                    Kredit
-                                    <input name="kredit" type="text" class="border-none rounded-sm w-full" class="grow" value="${kredit}" />
-                                </label>
-                                <label class="form-control w-full mt-3">
-                                     <div class="label">
-                                        <span class="label-text">Keterangan</span>
-                                    </div>
-                                    <input name="keterangan" type="text" class="input-border rounded-md w-full" class="grow" value="${keterangan}" />
-                                    <div class="label">
-                                        <span class="label-text-alt"><span class="text-red-500">*ex:</span> [1]customer [2]supplier [3]barang</span>
-                                    </div>
-                                </label>
-                                <label class="form-control w-full mb-3">
-                                    <div class="label">
-                                        <span class="label-text">Invoice External</span>
-                                    </div>
-                                    <select class="select select-bordered w-full"  name="invoice_external" id="invext">
-                                        <option value="${invoice_external}" selected>${invoice_external}</option>
-                                        @foreach ($invExtProc as $in)
-                                        <option class="z-10" value="{{ $in }}">{{$in}}</option>
-                                        @endforeach
-                                    </select>
-                                </label>
-                                 <label class="form-control w-full mt-3">
-                                     <div class="label">
-                                        <span class="label-text">Keterangan Buku Pembantu</span>
-                                    </div>
-                                    <input name="keterangan_buku_besar_pembantu" type="text" class="input-border rounded-md w-full" class="grow" value="${keterangan_buku_besar_pembantu}" />
-                                    <div class="label">
-                                    </div>
-                                </label>
-                                <button type="submit" class="btn w-full bg-green-500 text-white mt-3">Edit</button>
-                            </form>
-                        </div>
-                    </dialog>
+                   <dialog id="my_modal_3" class="modal">
+    <div class="modal-box">
+        <button class="close-button" onclick="document.getElementById('my_modal_3').close()">✕</button>
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">Edit Jurnal</h3>
+        <form action="{{ route('jurnal.edit.update') }}" method="post">
+            @csrf
+            <label class="form-label">ID</label>
+            <input name="id" type="text" class="input-field" readonly value="${id}" />
+
+            <input name="tipe" type="hidden" value="${tipe}" />
+
+            <label class="form-label">Nomor Jurnal</label>
+            <input name="nomor" type="text" class="input-field" readonly value="${nomor}" />
+
+            <input name="tgl" type="hidden" value="${tgl}" />
+
+            <label class="form-label">Nopol</label>
+            <select class="select-field" name="nopol" id="nopol">
+                <option value="${nopol}" selected>${nopol}</option>
+                @foreach ($nopol as $n)
+                <option value="{{ $n->nopol }}">{{ $n->nopol }}</option>
+                @endforeach
+            </select>
+              <label class="form-label">Invoice External</label>
+            <select class="select-field" name="invoice_external" id="invext">
+                <option value="${invoice_external}" selected>${invoice_external}</option>
+                @foreach ($invExtProc as $in)
+                <option value="{{ $in }}">{{ $in }}</option>
+                @endforeach
+            </select>
+            <label class="form-label">Invoice</label>
+            <select class="select-field" name="invoice" id="invoices">
+                <option value="${invoice}" selected>${invoice}</option>
+                @foreach ($invProc as $i)
+                <option value="{{ $i }}">{{ $i }}</option>
+                @endforeach
+            </select>
+
+            <label class="form-label">Coa</label>
+            <select class="select-field" name="coa_id" id="coa_id">
+                <option value="${coa_id}" selected>${no_akun} ${nama_akun}</option>
+                @foreach ($coa as $c)
+                <option value="{{ $c->id }}">{{ $c->no_akun }} {{ $c->nama_akun }}</option>
+                @endforeach
+            </select>
+
+            <label class="form-label">Debit</label>
+            <input name="debit" type="text" class="input-field" value="${debit}" />
+
+            <label class="form-label">Kredit</label>
+            <input name="kredit" type="text" class="input-field" value="${kredit}" />
+
+            <label class="form-label">Keterangan</label>
+            <input name="keterangan" type="text" class="input-field" value="${keterangan}" />
+            <span class="label-info">*ex: [1]customer [2]supplier [3]barang</span>
+
+
+            <label class="form-label">Keterangan Buku Pembantu</label>
+            <input name="keterangan_buku_besar_pembantu" type="text" class="input-field" value="${keterangan_buku_besar_pembantu}" />
+
+            <button type="submit" class="submit-button">Edit</button>
+        </form>
+    </div>
+</dialog>
                 `);
                 my_modal_3.showModal();
+                $('#invext').select2({
+                    dropdownParent: $(`#my_modal_3`),
+                });
                 $('#coa_id').select2({
                     dropdownParent: $(`#my_modal_3`),
                 });
@@ -204,9 +248,6 @@
                 $('#invoices').select2({
                     dropdownParent: $(`#my_modal_3`),
                 });
-                $('#invext').select2({
-                    dropdownParent: $(`#my_modal_3`),
-                });
             }
 
             function deleteItemJurnal(id) {
@@ -214,8 +255,12 @@
                     $.ajax({
                         method: 'post',
                         url: "{{ route('jurnal.item.delete') }}",
-                        data: {id: id},
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        data: {
+                            id: id
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         success: function(response) {
                             alert("Data Master Barang berhasil dihapus!");
                             location.reload();
@@ -228,8 +273,6 @@
                     });
                 }
             }
-
-            
         </script>
     </x-slot:script>
 </x-Layout.layout>

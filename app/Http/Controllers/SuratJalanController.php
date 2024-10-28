@@ -508,6 +508,8 @@ class SuratJalanController extends Controller
             'jumlah_jual' => $request->jumlah_jual,
             'jumlah_beli' => $request->jumlah_jual,
             'sisa' => $request->jumlah_jual,
+            'satuan_beli' => $request->satuan,
+            'satuan_jual' => $request->satuan,
         ]);
         return redirect()->back()->with('success', 'Data jumlah jual & jumlah beli berhasil diubah.');
     }
