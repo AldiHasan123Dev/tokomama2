@@ -26,7 +26,8 @@ class SuratJalanController extends Controller
      */
     public function index()
     {
-        return view('surat_jalan.index');
+        $nopol = Nopol::where('status', 'aktif')->get();
+        return view('surat_jalan.index', compact('nopol'));
     }
 
     /**
@@ -255,7 +256,7 @@ class SuratJalanController extends Controller
                         [
                             'nomor' => $nomor_surat,
                             'tgl' => date('Y-m-d'),
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . $item->jumlah_jual . ' ' . $item->satuan_jual . ' Harsat ' . $item->harga_beli . ') untuk ' . $item->suratJalan->customer->nama,
+                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_jual, 0, ',', '.') . ' ' .  $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 0, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
                             'debit' => $item->harga_beli * $item->jumlah_jual,
                             'kredit' => 0,
                             'invoice' => 0,
@@ -277,7 +278,7 @@ class SuratJalanController extends Controller
                         [
                             'nomor' => $nomor_surat,
                             'tgl' => date('Y-m-d'),
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . $item->jumlah_jual . ' ' . $item->satuan_jual . ' Harsat ' . $item->harga_beli . ') untuk ' . $item->suratJalan->customer->nama,
+                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_jual, 0, ',', '.') . ' ' . $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 0, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
                             'debit' => 0,
                             'kredit' => $item->harga_beli * $item->jumlah_jual,
                             'invoice' => 0,
