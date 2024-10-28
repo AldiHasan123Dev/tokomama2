@@ -127,7 +127,7 @@
                             <td class="bg-total">
                                 {{ number_format($summaryData[$year]['total_profit'] ?? 0, 0, ',', ',') }}</td>
                             <td class="bg-total">
-                                {{ number_format(round($summaryData[$year]['total_profit_percentage'] ?? 0, 1), 2, ',', '.') }}%
+                                {{ number_format($summaryData[$year]['total_profit_percentage'] ?? 0, 2) }}%
                             </td>
                         </tr>
                     @endforeach

@@ -332,7 +332,7 @@ class KeuanganController extends Controller
             // Hitung persentase total profit
             if ($summaryData[$year]['total_harga_beli'] > 0) {
                 $summaryData[$year]['total_profit_percentage'] = 
-                    round(($summaryData[$year]['total_profit'] / $summaryData[$year]['total_harga_jual']) * 100, 2);
+                    ($summaryData[$year]['total_profit'] / $summaryData[$year]['total_harga_jual']) * 100;
             }
         }
     
