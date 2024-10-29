@@ -61,7 +61,10 @@ class JurnalManualController extends Controller
             $processedInvoices[] = $processedInvoiceNumber;
         }
 
-        $transaksi = Transaction::whereNotNull('invoice_external')->get();
+        $transaksi = Transaction::whereNotNull('invoice_external')
+        ->leftJoin('invoice', 'transaksi.id', '=', 'invoice.id_transaksi')
+        ->select('transaksi.*', 'invoice.*')
+        ->get();    
         $procTransactions = [];
         $transactionCounts = [];
         foreach ($transaksi as $transaction) {
@@ -70,8 +73,8 @@ class JurnalManualController extends Controller
                 $transactionCounts[$invoiceNumber] = 0;
             }
             $transactionCounts[$invoiceNumber]++;
-
-            $procTransactionNumber = $invoiceNumber . '_' . $transactionCounts[$invoiceNumber];
+            $invoiceValue = $transaction->invoice ? $transaction->invoice : '-';
+            $procTransactionNumber = $invoiceNumber . '_' . $transactionCounts[$invoiceNumber] . ' | ' . $invoiceValue;
             $procTransactions[] = $procTransactionNumber;
         }
         $uniqueNomors = DB::table('jurnal')
@@ -464,13 +467,19 @@ class JurnalManualController extends Controller
         ]);
     }
 
-    public function getInvoiceWhereNoInvExt()
+    public function getInvoiceWhereNoInvExt(Request $request)
     {
-        // dd(request('invoice_ext'));
-        $invoiceExt = Transaction::where('invoice_external', request('invoice_ext'))
+        // Validasi input
+        $request->validate([
+            'invoice_ext' => 'required|string',
+        ]);
+
+        // Ambil data transaksi berdasarkan invoice_external
+        $invoiceExt = Transaction::where('invoice_external', $request->invoice_ext)
             ->with(['suratJalan.customer', 'barang', 'suppliers'])
             ->get();
 
+        // Siapkan array untuk menyimpan data
         $dataCust = [];
         $dataSup = [];
         $dataBar = [];
@@ -480,11 +489,13 @@ class JurnalManualController extends Controller
         $dataHarsJul = [];
         $dataKet = [];
 
+        // Periksa apakah ada data yang ditemukan
         if ($invoiceExt->isNotEmpty()) {
             foreach ($invoiceExt as $item) {
-                $dataCust[] = $item->suratJalan->customer->nama;
-                $dataSup[] = $item->suppliers->nama;
-                $dataBar[] = $item->barang->nama;
+                // Ambil data yang diperlukan dari relasi
+                $dataCust[] = $item->suratJalan->customer->nama ?? ''; // Menggunakan null coalescing operator untuk menghindari error
+                $dataSup[] = $item->suppliers->nama ?? '';
+                $dataBar[] = $item->barang->nama ?? '';
                 $dataQty[] = $item->jumlah_jual;
                 $dataSat[] = $item->satuan_jual;
                 $dataHarsBel[] = $item->harga_beli;
@@ -495,6 +506,7 @@ class JurnalManualController extends Controller
             return response()->json(['error' => 'No invoices found'], 404);
         }
 
+        // Kembalikan data dalam format JSON
         return response()->json([
             'customer' => $dataCust,
             'supplier' => $dataSup,
@@ -506,6 +518,7 @@ class JurnalManualController extends Controller
             'keterangan' => $dataKet
         ]);
     }
+    
 
     public function terapanTemplateJurnal()
     {

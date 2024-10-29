@@ -55,9 +55,8 @@
             /* Radius sudut */
             height: 2.5rem;
             /* Tinggi */
-            padding: 0.5rem;
             /* Padding dalam */
-            font-size: 1rem;
+            font-size: .9rem;
             /* Ukuran font */
         }
 
@@ -73,7 +72,6 @@
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 100%;
             /* Tinggi penuh */
-            right: 0.5rem;
             /* Jarak kanan */
         }
 
@@ -93,27 +91,14 @@
 
         /* Gaya untuk menengahkan teks dalam Select2 */
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            display: flex;
-            /* Menggunakan flexbox */
-            align-items: center;
-            /* Menengahkan secara vertikal */
-            justify-content: center;
+
             /* Menengahkan secara horizontal */
             height: 100%;
             /* Tinggi penuh */
         }
 
         /* Gaya untuk opsi dropdown */
-        .select2-container--default .select2-results__option {
-            display: flex;
-            /* Menggunakan flexbox */
-            align-items: center;
-            /* Menengahkan secara vertikal */
-            justify-content: center;
-            /* Menengahkan secara horizontal */
-            padding: 0.5rem 1rem;
-            /* Tambahkan padding untuk opsi */
-        }
+
 
         /* Gaya hover untuk opsi dropdown */
         .select2-container--default .select2-results__option--highlighted[aria-selected] {
@@ -191,7 +176,7 @@
                             <button id="reset" class="btn bg-orange-500 text-white" type="button">Reset</button>
                         </div>
                         <div class="self-center w-fit">
-                            <button id="ipt_jurhut" class="btn bg-yellow-500 text-white" type="button">
+                            <button id="ipt_jurhut" class="btn bg-yellow-500 text-white mt-5" type="button">
                                 <strong>Jurnal Hutang Supplier</strong>
                             </button>
                         </div>
@@ -260,8 +245,8 @@
                                 <th>Akun Kredit</th>
                                 <th>Keterangan</th>
                                 <th>Nominal</th>
-                                <th>Invoice External</th>
-                                <th>Keterangan Buku Besar Pembantu </th>
+                                <th>Invoice Supplier</th>
+                                <th>Kaitan Buku Besar Pembantu </th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -613,6 +598,10 @@
                 const procdata = $(this).val();
                 let datainv = procdata.split('_')[0];
                 let no = procdata.split('_')[1] - 1;
+                console.log('procdata:', procdata);
+        console.log('datainv:', datainv);
+        console.log('no:', no);
+                
                 $.ajax({
                     method: 'post',
                     url: "{{ route('jurnal.sj.whereInv') }}",
@@ -643,39 +632,51 @@
         }
 
         function bindInvoiceExternalChange(rowId) {
-            $(`#invoice_external-${rowId}`).on('change', function() {
-                const procdata = $(this).val();
-                const datainvext = procdata.split('_')[0];
-                const no = procdata.split('_')[1] - 1;
-                $.ajax({
-                    method: 'post',
-                    url: "{{ route('jurnal.sj.whereInvExt') }}",
-                    data: {
-                        invoice_ext: datainvext,
-                    },
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        console.log(response);
-                        $(`#param1-${rowId}`).val(response.customer[no]);
-                        $(`#param2-${rowId}`).val(response.supplier[no]);
-                        $(`#param3-${rowId}`).val(response.barang[no]);
-                        $(`#param4-${rowId}`).val(response.quantity[no]);
-                        $(`#param5-${rowId}`).val(response.satuan[no]);
-                        $(`#param6-${rowId}`).val(response.harsat_beli[no]);
-                        $(`#param7-${rowId}`).val(response.harsat_jual[no]);
-                        $(`#param8-${rowId}`).val(response.keterangan[no]);
-                    },
-                    error: function(xhr, status, error) {
-                        console.log('Error:', error);
-                        console.log('Status:', status);
-                        console.dir(xhr);
-                    }
+    $(`#invoice_external-${rowId}`).on('change', function() {
+        const procdata = $(this).val().split(' | ')[0].trim();
+        let parts = procdata.split('_').map(part => part.trim());
 
-                })
-            });
-        }
+        let datainvext = parts[0];
+        let no = parseInt(parts[1]) - 1; // Konversi ke integer dan sesuaikan index
+
+        console.log('procdata:', procdata); // Menampilkan data sebelum '|'
+        console.log('parts:', parts); // Menampilkan hasil pemisahan dengan '_'
+        console.log('data:', datainvext); // Menampilkan data sebelum '|'
+        console.log('no:', no);
+
+        // Lakukan AJAX untuk mendapatkan data
+        $.ajax({
+            method: 'post',
+            url: "{{ route('jurnal.sj.whereInvExt') }}",
+            data: {
+                invoice_ext: datainvext,
+            },
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                        console.log(response)
+                       
+                    $(`#param1-${rowId}`).val(response.customer[no]);
+                    $(`#param2-${rowId}`).val(response.supplier[no]);
+                    $(`#param3-${rowId}`).val(response.barang[no]);
+                    $(`#param4-${rowId}`).val(response.quantity[no]);
+                    $(`#param5-${rowId}`).val(response.satuan[no]);
+                    $(`#param6-${rowId}`).val(response.harsat_beli[no]);
+                    $(`#param7-${rowId}`).val(response.harsat_jual[no]);
+                    $(`#param8-${rowId}`).val(response.keterangan[no]);
+                
+            },
+            error: function(xhr, status, error) {
+                console.log('Error:', error); // Menangani error
+                console.log('Status:', status);
+                console.dir(xhr);
+            }
+        });
+    });
+}
+
+
 
         function calcDebitCredit(id) {
             totaltd = 0;
