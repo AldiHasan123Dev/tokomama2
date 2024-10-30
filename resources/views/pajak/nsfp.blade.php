@@ -1,5 +1,82 @@
 <x-Layout.layout>
+  <style>
+    .modal {
+        top: 0;
+        left: 0;
+        width: 40%;
+        z-index: 1000;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 800px;
+        position: relative;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        font-family: Arial, sans-serif;
+    }
+    .kembali-button {
+display: inline-block; 
+padding: 12px 10px; 
+background-color: #ad0f0f; 
+color: white; 
+text-decoration: none; 
+border-radius: 8px;
+transition: background-color 0.3s;
+}
 
+.kembali-button:hover {
+background-color: #761408; 
+}
+
+
+    .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 20px;
+        background: none;
+        border: none;
+        color: #333;
+        cursor: pointer;
+    }
+
+    /* Form labels and containers */
+    .form-label {
+        display: block;
+        font-weight: bold;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+
+    .input-field,
+    .select-field {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+
+    /* Submit button */
+    .submit-button {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    /* Label for extra info */
+    .label-info {
+        font-size: 12px;
+        color: red;
+    }
+</style>
     <div id="dialog"></div>
 
     <x-pajak.card>
@@ -153,15 +230,11 @@
                 <form action="{{route('nsfp.edit')}}" method="post">
                   @csrf
                   <input type="hidden" name="id" value="${id}" class="border-none" />
-                  <label class="input border flex items-center gap-2 mt-3">
-                    Nomor :
-                    <input type="text" name="nomor" value="${nomor}" class="border-none" />
-                  </label>
-                  <label class="input border flex items-center gap-2 mt-4">
-                    Keterangan :
-                    <input type="text" name="keterangan" value="${keterangan}" class="border-none" />
-                  </label>
-                  <button type="submit" class="btn bg-green-400 text-white font-semibold w-72 mt-4">Edit</button>
+                  <label class="form-label"> Nomor</label>
+                    <input type="text" name="nomor" value="${nomor}" class="input-field" />
+                  <label class="form-label">Keterangan</label>
+                    <input type="text" name="keterangan" value="${keterangan}" class="input-field" />
+                  <button type="submit" class="submit-button">Edit</button>
                 </form>
               </div>
             </dialog>`);

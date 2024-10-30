@@ -12,7 +12,7 @@
     background-color: #ad0f0f; 
     color: white; 
     text-decoration: none; 
-    border-radius: 8px;
+    border-radius: 4px;
     transition: background-color 0.3s;
 }
 
@@ -118,7 +118,7 @@
 
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Edit By Barang</x-slot:tittle>
-        <a href="{{ route('surat-jalan.index') }}" class="kembali-button">Kembali ke List Surat Jalan</a>
+        <a href="{{ route('surat-jalan.index') }}" class="kembali-button mt-5">Kembali ke List Surat Jalan</a>
         <div class="overflow-x-auto">
             <table class="table" id="editBarang">
                 <!-- head -->

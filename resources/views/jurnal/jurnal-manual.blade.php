@@ -1,6 +1,90 @@
 <x-Layout.layout>
     <div id="jurhut"></div>
     <style>
+        .modal {
+            top: 0;
+            left: 0;
+            width: 40%;
+            z-index: 1000;  
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-family: Arial, sans-serif;
+        }
+        .kembali-button {
+    display: inline-block; 
+    padding: 12px 10px; 
+    background-color: #ad0f0f; 
+    color: white; 
+    text-decoration: none; 
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.kembali-button:hover {
+    background-color: #761408; 
+}
+      
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Form labels and containers */
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .select-field {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        /* Submit button */
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* Label for extra info */
+        .label-info {
+            font-size: 12px;
+            color: red;
+        }
         /* Mengatur tabel dengan border minimal */
         #maintable {
             border: 1px solid black;
@@ -155,9 +239,9 @@
                             </td>
                         </tr>
                     </tbody>
-                    <div class="grid grid-cols-2 justify-items-start mb-10">
+                    <div class="grid grid-cols-2 justify-items-start mt-5">
                         <div class="w-full">
-                            <label class="form-control w-full max-w-xs mb-5">
+                            <label class="form-control w-full max-w-xs mb-10">
                                 <div class="label">
                                     <span class="label-text">Template Jurnal</span>
                                 </div>
@@ -172,17 +256,17 @@
                         
 
                         <div class="self-center w-fit">
-                            <button id="terapkan" class="btn bg-green-500 text-white" type="button">Terapkan</button>
-                            <button id="reset" class="btn bg-orange-500 text-white" type="button">Reset</button>
+                            <button id="terapkan" class="btn bg-green-500 text-white mt-5" type="button">Terapkan</button>
+                            <button id="reset" class="btn bg-orange-500 text-white mt-5" type="button">Reset</button>
                         </div>
-                        <div class="self-center w-fit">
-                            <button id="ipt_jurhut" class="btn bg-yellow-500 text-white mt-5" type="button">
+                        <div class="self-center w-fit mt-3">
+                            <button id="ipt_jurhut" class="btn bg-yellow-500 text-white mt-2" type="button">
                                 <strong>Jurnal Hutang Supplier</strong>
                             </button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 justify-items-start mb-2">
+                    <div class="grid grid-cols-3 justify-items-start mt-5">
                         <div class="w-full">
                             <label class="form-control w-full max-w-xs mb-1">
                                 <div class="label">
@@ -308,8 +392,8 @@
                                     <input type="hidden" name="invoice_external[0]" value="">
                                     <select class="select select-bordered w-36" name="invoice_external[0]"
                                         id="invoice_external-1i">
+                                        <option value="0" selected></option>
                                         @foreach ($procTransactions as $item)
-                                            <option value="0" selected></option>
                                             <option value="{{ $item }}">{{ $item }}</option>
                                         @endforeach
                                     </select>
@@ -333,7 +417,7 @@
                     <h3 class="font-bold mb-5">TOTAL CREDIT : <span id="tc"></span></h3>
 
                     <button type="button" id="simpan"
-                        class="btn bg-green-500 text-white w-5/12 ms-10 mb-5">Simpan Jurnal</button>
+                        class="btn bg-green-500 text-white w-5/12 ms-10 mb-5 mr-10">Simpan Jurnal</button>
             </form>
         </div>
     </x-keuangan.card-keuangan>
@@ -932,42 +1016,33 @@
                     <form method="dialog">
                         <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="close-modal">✕</button>
                     </form>
-                    <h3 class="text-lg font-bold">Input Jurnal Hutang</h3>
+                    <h3 class="text-lg font-bold mt-2">Input Jurnal Hutang</h3>
                     <form id="jurhutForm" action="{{ route('jurnal.hutang') }}" method="post" onsubmit="return validateForm()">
                         @csrf
-                        <label class="input border flex items-center gap-2 mt-3">
-                            No Surat:
-                            <select  autofocus class="border-none w-full" name="id_surat_jalan" id="m-sj">
+                        <label class="form-label"> No Surat</label>
+                            <select autofocus class="select-field w-65" name="id_surat_jalan" id="m-sj">
                                 <option value="" disabled selected>Pilih No Surat</option>
                             </select>
                             @error('id_surat_jalan')
                                 <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                             @enderror
-                        </label>
-
-                        <!-- Input untuk nama supplier yang akan terisi otomatis -->
-                        <label class="input border flex items-center gap-2 mt-3">
-                            Nama Supplier:
-                            <input type="text" name="id_supplier" id="nama-supplier" class="border-none w-full" placeholder="Pilih No Surat Jalan dulu" readonly>
+                        <label class="form-label">Nama Supplier:</label>
+                            <input type="text" name="id_supplier" id="nama-supplier" class="input-field" placeholder="Pilih No Surat Jalan dulu" readonly>
                             @error('id_supplier')
                                 <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                             @enderror
-                        </label>
-
                         <!-- Hidden inputs untuk id_surat_jalan dan id_supplier -->
                         <input type="hidden" name="id_surat_jalan" id="input-id-surat-jalan">
                         <input type="hidden" name="id_supplier" id="input-id-supplier">
                         <input type="hidden" name="id" id="input-id">
 
-                        <label class="input border flex items-center gap-2 mt-3">
-                            Invoice Supplier:
-                            <input type="text" id="invoice_external" name="invoice_external" required class="border-none" />
+                        <label class="form-label">Invoice Supplier</label>
+                            <input type="text" id="invoice_external" name="invoice_external" required class="input-field" />
                             @error('invoice_external')
                                 <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                             @enderror
-                        </label>
                         <div class="flex justify-center mt-4">
-                            <button type="submit" class="btn bg-green-400 text-white font-semibold w-72">Simpan</button>
+                            <button type="submit" class="submit-button mb-5">Simpan</button>
                         </div>
                     </form>
                 </div>

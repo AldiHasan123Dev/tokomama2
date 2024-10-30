@@ -132,6 +132,7 @@ class JurnalController extends Controller
             $invExtProc[] = $procTransactionNumber;
         }
 
+
         session(['jurnal_edit_url' => url()->full()]);
         return view('jurnal.edit-jurnal', compact('data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
     }
@@ -159,7 +160,7 @@ class JurnalController extends Controller
      */
     public function update(Request $request, Jurnal $jurnal)
     {
-        // dd($request->all());
+        //  dd($request->all());
 
         if ($request->invoice != null) {
             if (str_contains($request->invoice, '_')) {
@@ -223,7 +224,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
-                $data->invoice_external = $request->invoice_external;
+                $data->invoice_external = $request->invoice_external ?? 0;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
                 $data->coa_id = $request->coa_id;
@@ -298,7 +299,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
-                $data->invoice_external = $request->invoice_external;
+                $data->invoice_external = $request->invoice_external ?? 0;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
                 $data->coa_id = $request->coa_id;
@@ -372,7 +373,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
-                $data->invoice_external = $request->invoice_external;
+                $data->invoice_external = $request->invoice_external ?? 0;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
                 $data->coa_id = $request->coa_id;
@@ -443,7 +444,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
-                $data->invoice_external = $request->invoice_external;
+                $data->invoice_external = $request->invoice_external ?? 0;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
                 $data->coa_id = $request->coa_id;
@@ -516,7 +517,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
-                $data->invoice_external = $request->invoice_external;
+                $data->invoice_external = $request->invoice_external ?? 0;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
                 $data->coa_id = $request->coa_id;
@@ -588,7 +589,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
-                $data->invoice_external = $request->invoice_external;
+                $data->invoice_external = $request->invoice_external ?? 0;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
                 $data->coa_id = $request->coa_id;

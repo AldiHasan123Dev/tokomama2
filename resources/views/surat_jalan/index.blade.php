@@ -10,11 +10,11 @@
 
         .edit-button {
             display: inline-block;
-            padding: 12px 10px;
+            padding: 10px 10px;
             background-color: #eb7c06;
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 4px;
             transition: background-color 0.3s;
         }
 
@@ -76,7 +76,7 @@
 
     <x-keuangan.card-keuangan>
         <x-slot:tittle>List Surat Jalan</x-slot:tittle>
-        <a href="{{ route('surat-jalan.editBarang') }}" class="edit-button">Edit by Barang</a>
+        <a href="{{ route('surat-jalan.editBarang') }}" class="edit-button mt-5">Edit by Barang</a>
         <div class="overflow-x-auto">
             <table class="table" id="table-getfaktur">
                 <!-- head -->

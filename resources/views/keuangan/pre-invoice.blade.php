@@ -25,7 +25,7 @@
             </form>
         </x-slot:button>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto mt-5">
             <div class="table-responsive">
                 <!-- Checkbox "Select All" di luar tabel -->
                 <div class="mb-2">
@@ -95,13 +95,23 @@
                             search: true,
                             name: 'harga_jual',
                             index: 'harga_jual',
-                            label: 'Harga Jual'
+                            label: 'Harga Jual',
+                            formatter: 'number',
+                            formatoptions: {
+                                decimalPlaces: 2, 
+                                thousandsSeparator: ',', 
+                            }
                         },
                         {
                             search: true,
                             name: 'subtotal',
                             index: 'subtotal',
-                            label: 'Subtotal'
+                            label: 'Subtotal',
+                            formatter: 'number',
+                            formatoptions: {
+                                decimalPlaces: 2, 
+                                thousandsSeparator: ',', 
+                            }
                         },
                         {
                             search: true,

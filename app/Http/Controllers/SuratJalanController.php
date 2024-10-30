@@ -430,8 +430,6 @@ class SuratJalanController extends Controller
     {
         // Ambil parameter pencarian dari request
         $searchTerm = $request->get('searchString', ''); // Untuk pencarian global
-        $currentPage = $request->page; // Halaman saat ini, default ke halaman 1
-         $perPage = $request->rows;// Jumlah baris per halaman, default 10
     
         // Ambil data dengan relasi yang diperlukan dan group by
         $data = Transaction::with(['suratJalan', 'suppliers', 'barang'])
@@ -451,28 +449,31 @@ class SuratJalanController extends Controller
         }
     
         // Hitung total record sebelum pagination (setelah pencarian diterapkan)
-        $totalRecords = $data->get()->count();
+        $data1 = $data->get();
+        
+        $totalRecords = $data1->count();
+        $currentPage = $request->page; 
+        $perPage = $request->rows; 
+        $index = ($currentPage - 1) * $perPage;
+        $paginatedData = $data1->slice($index)->values();
     
         // Ambil data untuk halaman saat ini dengan pagination
-        $paginatedData = $data->orderBy('invoice_external')
-            ->paginate($perPage, ['*'], 'page', $currentPage);
+        
             
             // Membuat array hasil untuk response JSON
-            $result = $paginatedData->getCollection()->map(function ($row, $index) use ($paginatedData) {
+            $result = $paginatedData->map(function ($row) use (&$index) {
             $total = $row->harga_beli * $row->jumlah_beli;
             $ppn = 0;
             if($row->barang->status_ppn === 'ya'){
                 $value_ppn = $row->barang->value_ppn / 100;
-                // $ppn1 = $total * $value_ppn;
-                // $ppn = $ppn1 + $total;
                  $ppn = $total * $value_ppn;
-
+                 $index++;
             }
             return [
-                'DT_RowIndex' => $paginatedData->currentPage() * $paginatedData->perPage() - $paginatedData->perPage() + $index + 1,
+                'DT_RowIndex' => $index,
                 'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
                 'harga_beli' => isset($row->harga_beli) ? number_format($row->harga_beli, 2, ',', '.') : '-',
-                'jumlah_beli' => $row->jumlah_beli ?? '-',
+                'jumlah_beli' => isset($row->jumlah_beli) ? number_format($row->jumlah_beli, 2, ',', '.') : '-',
                 'total' =>  isset($total) ? number_format($total, 2, ',', '.') : '-',
                 'ppn' =>  isset($ppn) ? number_format($ppn, 2, ',', '.') : '-',
                 'supplier' => $row->suppliers->nama ?? '-',
