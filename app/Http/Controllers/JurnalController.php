@@ -102,6 +102,13 @@ class JurnalController extends Controller
         $data = Jurnal::where('nomor', $nomor)->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
         $coa = Coa::where('status', 'aktif')->get();
         $nopol = Nopol::where('status', 'aktif')->get();
+        $jurnals = Jurnal::select('keterangan_buku_besar_pembantu')
+        ->whereNotNull('keterangan_buku_besar_pembantu')
+        ->distinct()
+        ->get();
+
+
+        // dd($jurnals);
 
         $invoices = Invoice::all();
         $invProc = [];
@@ -134,7 +141,7 @@ class JurnalController extends Controller
 
 
         session(['jurnal_edit_url' => url()->full()]);
-        return view('jurnal.edit-jurnal', compact('data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
+        return view('jurnal.edit-jurnal', compact('jurnals','data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
     }
 
     public function merger()

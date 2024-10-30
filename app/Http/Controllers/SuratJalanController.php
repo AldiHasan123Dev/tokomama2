@@ -496,7 +496,7 @@ class SuratJalanController extends Controller
 
     public function editBarang()
     {
-        $transactions = Transaction::orderBy('id_surat_jalan', 'desc')->get();
+        $transactions = Transaction::with(['suppliers'])->orderBy('id_surat_jalan', 'desc')->get();
         $satuans = Satuan::all();
         $barangs = Barang::where('status', 'AKTIF')->get();
         $suppliers = Supplier::all();
@@ -512,8 +512,10 @@ class SuratJalanController extends Controller
             'sisa' => $request->jumlah_jual,
             'satuan_beli' => $request->satuan,
             'satuan_jual' => $request->satuan,
+            'id_supplier' => $request->supplier,
+            'keterangan' => $request->keterangan,
         ]);
-        return redirect()->back()->with('success', 'Data jumlah jual & jumlah beli berhasil diubah.');
+        return redirect()->back()->with('success', 'Data berhasil diupdate!!');
     }
 
     public function hapusBarang(Request $request)

@@ -5,6 +5,7 @@
             left: 0;
             width: 40%;
             z-index: 1000;
+            overflow: visible;
         }
         .kembali-button {
     display: inline-block; 
@@ -14,7 +15,7 @@
     text-decoration: none; 
     border-radius: 4px;
     transition: background-color 0.3s;
-}
+} 
 
 .kembali-button:hover {
     background-color: #761408; 
@@ -135,6 +136,7 @@
                         <th>Satuan Beli</th>
                         <th>Margin</th>
                         <th>Keterangan</th>
+                        <th>Supplier</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -143,7 +145,7 @@
                             <td>
                                 @if ($trans->sisa > 0)
                                     <button onclick="openModal({{ $trans->suratJalan->id }})"><i class="fa-solid fa-plus text-green-500 mr-5"></i></button>
-                                    <button onclick="getData({{ $trans->id }}, {{ $trans->jumlah_jual }}, '{{ $trans->satuan_jual }}', '{{  $trans->suratJalan->nomor_surat }}')" class="text-yellow-300"><i class="fa-solid fa-pencil"></i></button>
+                                    <button onclick="getData({{ $trans->id }}, {{ $trans->id_supplier }}, {{ $trans->jumlah_jual }}, '{{ $trans->satuan_jual }}', '{{  $trans->suratJalan->nomor_surat }}',' {{ $trans->suppliers->nama }}', '{{ $trans->keterangan }}')" class="text-yellow-300"><i class="fa-solid fa-pencil"></i></button>
                                     <form action="{{ route('surat-jalan.hapusBarang') }}" method="post">
                                         @csrf
                                         @method('delete')
@@ -162,6 +164,7 @@
                             <td>{{ $trans->satuan_beli }}</td>
                             <td>{{ number_format($trans->margin) }}</td>
                             <td>{{ $trans->keterangan ? $trans->keterangan : '-' }}</td>
+                            <td>{{ $trans->suppliers ? $trans->suppliers->nama : '-' }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -177,7 +180,8 @@
                 order: [[1, 'desc']]
             });
 
-            function getData(id, kuantitas, satuan, surat_jalan) {
+            function getData(id, id_supplier, kuantitas, satuan, surat_jalan,supplier,keterangan) {
+                
     $('#dialog').html(`
         <dialog id="my_modal_5" class="modal">
             <div class="modal-box">
@@ -188,19 +192,39 @@
                 <form action="{{ route('surat-jalan.editBarang') }}" method="post">
                     @csrf
                     <input type="hidden" name="id" value="${id}" class="border-none" />
+                    <input type="hidden" name="id_supplier" value="${id_supplier}" class="border-none" />
                     <label class="form-label">Jumlah Jual & Jumlah Beli :</label>
-                    <input type="text" name="jumlah_jual" class="input-field" value="${kuantitas}" />
+                    <input type="number" name="jumlah_jual" class="input-field" value="${kuantitas}" />
+                    <label class="form-label">Supplier</label>
+                    <select class="select-field" name="supplier" id="supplier">
+                        <option value="${id_supplier}" selected>${supplier}</option>
+                        @foreach ($suppliers as $su)
+                                <option value="{{ $su->id }}">{{ $su->nama }} </option>
+                                @endforeach
+                    </select>
                     <label class="form-label">Satuan</label>
                     <select class="select-field" name="satuan" id="satuan">
                         @foreach ($satuans as $s)
                             <option value="{{ $s->nama_satuan }}" ${satuan === '{{ $s->nama_satuan }}' ? 'selected' : ''}>{{ $s->nama_satuan }}</option>
                         @endforeach
                     </select>
+                    <label class="form-label">Keterangan:</label>
+                    <input type="text" name="keterangan" class="input-field" value="${keterangan}" />
                     <button type="submit" class="submit-button">Edit</button>
                 </form>
             </div>
         </dialog>
     `);
+    $('#supplier').select2({
+                    dropdownParent: $(`#my_modal_5`),
+                     dropdownAutoWidth: true,
+        width: '100%'
+                });
+                $('#satuan').select2({
+                    dropdownParent: $(`#my_modal_5`),
+                     dropdownAutoWidth: true,
+        width: '100%'
+                });
 
                 my_modal_5.showModal();
             }
@@ -222,6 +246,7 @@
                 $('#satuan_jual').select2({
                     dropdownParent: $(`#my_modal_3`),
                 });
+                
             }
 
             function closeModal() {

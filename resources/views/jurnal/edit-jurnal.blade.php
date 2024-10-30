@@ -2,18 +2,76 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .modal {
+            position: fixed;
             top: 0;
             left: 0;
             width: 50%;
-            z-index: 1000;
+            height: 100%;
+            z-index: 1500;
+            overflow-y: auto;
         }
+
+
+
+        /* Mengatur gaya untuk input text */
+        .form-control {
+            width: 100%;
+            /* Memastikan input memenuhi lebar wadah */
+            padding: 10px;
+            /* Memberikan padding dalam input */
+            border: 1px solid #ccc;
+            /* Warna border abu-abu */
+            border-radius: 5px;
+            /* Membulatkan sudut input */
+            font-size: 14px;
+            /* Ukuran font yang digunakan dalam input */
+            transition: border-color 0.3s;
+            /* Animasi transisi untuk warna border */
+        }
+
+        /* Mengubah gaya input saat mendapatkan fokus */
+        .form-control:focus {
+            border-color: #007bff;
+            /* Mengubah warna border saat fokus */
+            outline: none;
+            /* Menghilangkan outline default */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            /* Memberikan efek bayangan */
+        }
+
+        /* Mengatur gaya untuk datalist */
+        datalist {
+            margin-top: 5px;
+            /* Memberikan jarak di atas datalist */
+        }
+
+        /* Mengatur gaya untuk option dalam datalist (tidak bisa distyling di browser, tetapi bisa dicontohkan) */
+        datalist option {
+            padding: 5px;
+            /* Padding untuk opsi */
+            cursor: pointer;
+            /* Mengubah kursor saat hover */
+        }
+
+        .select2-container {
+            z-index: 10000 !important;
+            /* Atur sesuai dengan z-index modal Anda */
+        }
+
+        .modal .select2-dropdown {
+            position: absolute !important;
+            top: 100% !important;
+            /* Pastikan dropdown muncul di bawah */
+            left: 0 !important;
+            z-index: 1000 !important;
+        }
+
 
         .modal-box {
             background-color: white;
             padding: 20px;
+            height: auto;
             border-radius: 8px;
-            max-width: 800px;
-            position: relative;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             font-family: Arial, sans-serif;
         }
@@ -67,6 +125,10 @@
             font-size: 12px;
             color: red;
         }
+
+        .select2-container--open .select2-dropdown--below {
+            display: block !important;
+        }
     </style>
     <input type="hidden" id="nj" value="{{ $data[0]->nomor }}">
     <input type="hidden" id="tgl" value="{{ $tgl }}">
@@ -92,9 +154,10 @@
             <form action="{{ route('jurnal.edit.tglupdate') }}" method="post">
                 @csrf
                 <input name="tgl_input" type="date" style="width: 100%" class="mb-8 rounded-md" id="tgl_input">
-                <input readonly name="nomor_jurnal_input" type="text" style="width: 100%" class="mb-8 rounded-md bg-gray-100"
-                    id="nomor_jurnal">
-                <button type="submit" style="margin-bottom: 20px;" class="btn bg-green-500 font-semibold text-white">Simpan Tanggal</button>
+                <input readonly name="nomor_jurnal_input" type="text" style="width: 100%"
+                    class="mb-8 rounded-md bg-gray-100" id="nomor_jurnal">
+                <button type="submit" style="margin-bottom: 20px;"
+                    class="btn bg-green-500 font-semibold text-white">Simpan Tanggal</button>
             </form>
 
             <table id="table-editj" class="cell-border hover display nowrap">
@@ -170,29 +233,21 @@
                 invoice = (invoice === '0') ? '' : invoice;
                 invoice_external = (invoice_external === '0') ? '' : invoice_external;
                 $("#dialog").html(`
-                   <dialog id="my_modal_3" class="modal">
+                   <dialog id="my_modal_3" class="modal ">
     <div class="modal-box">
         <button class="close-button" onclick="document.getElementById('my_modal_3').close()">✕</button>
-        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">Edit Jurnal</h3>
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">Edit Nomor Jurnal ${nomor} ID: (${id})</h3>
         <form action="{{ route('jurnal.edit.update') }}" method="post">
             @csrf
-            <label class="form-label">ID</label>
-            <input name="id" type="text" class="input-field" readonly value="${id}" />
 
-            <input name="tipe" type="hidden" value="${tipe}" />
-
-            <label class="form-label">Nomor Jurnal</label>
-            <input name="nomor" type="text" class="input-field" readonly value="${nomor}" />
-
-            <input name="tgl" type="hidden" value="${tgl}" />
-
-            <label class="form-label">Nopol</label>
-            <select class="select-field" name="nopol" id="nopol">
-                <option value="${nopol}" selected>${nopol}</option>
-                @foreach ($nopol as $n)
-                <option value="{{ $n->nopol }}">{{ $n->nopol }}</option>
+             <label class="form-label">Coa</label>
+            <select class="select-field" name="coa_id" id="coa_id">
+                <option value="${coa_id}" selected>${no_akun} ${nama_akun}</option>
+                @foreach ($coa as $c)
+                <option value="{{ $c->id }}">{{ $c->no_akun }} {{ $c->nama_akun }}</option>
                 @endforeach
             </select>
+
               <label class="form-label">Invoice External</label>
             <select class="select-field" name="invoice_external" id="invext">
                 <option value="${invoice_external}" selected>${invoice_external}</option>
@@ -201,18 +256,28 @@
                 @endforeach
             </select>
             <label class="form-label">Invoice</label>
-            <select class="select-field" name="invoice" id="invoices">
+            <select class="select-field form-select " name="invoice" id="invoices">
                 <option value="${invoice}" selected>${invoice}</option>
                 @foreach ($invProc as $i)
                 <option value="{{ $i }}">{{ $i }}</option>
                 @endforeach
             </select>
 
-            <label class="form-label">Coa</label>
-            <select class="select-field" name="coa_id" id="coa_id">
-                <option value="${coa_id}" selected>${no_akun} ${nama_akun}</option>
-                @foreach ($coa as $c)
-                <option value="{{ $c->id }}">{{ $c->no_akun }} {{ $c->nama_akun }}</option>
+              <label class="form-label h-auto">Nopol</label>
+            <select class="form-select select-field" name="nopol" id="nopol>
+                <option value="${nopol}" selected>${nopol}</option>
+                <option value=""></option>
+                @foreach ($nopol as $n)
+                <option value="{{ $n->nopol }}">{{ $n->nopol }} </option>
+                @endforeach
+            </select>
+
+             <label class="form-label h-auto">Keterangan Buku Pembantu</label>
+            <select class="form-select select-field" name="keterangan_buku_besar_pembantu" id="keterangan_buku_besar_pembantu">
+                <option value="${keterangan_buku_besar_pembantu}" selected>${keterangan_buku_besar_pembantu}</option>
+                <option value=""></option>
+                @foreach ($jurnals as $j)
+                <option value="{{ $j->keterangan_buku_besar_pembantu }}">{{ $j->keterangan_buku_besar_pembantu }} </option>
                 @endforeach
             </select>
 
@@ -226,29 +291,67 @@
             <input name="keterangan" type="text" class="input-field" value="${keterangan}" />
             <span class="label-info">*ex: [1]customer [2]supplier [3]barang</span>
 
-
-            <label class="form-label">Keterangan Buku Pembantu</label>
-            <input name="keterangan_buku_besar_pembantu" type="text" class="input-field" value="${keterangan_buku_besar_pembantu}" />
+               <input name="id" type="hidden" value="${id}" />
+               <input name="nomor" type="hidden" value="${nomor}" />
+               
+               <input name="tgl" type="hidden" value="${tgl}" />
+               <input name="tipe" type="hidden" value="${tipe}" />
 
             <button type="submit" class="submit-button">Edit</button>
         </form>
     </div>
 </dialog>
                 `);
+
+
                 my_modal_3.showModal();
                 $('#invext').select2({
-                    dropdownParent: $(`#my_modal_3`),
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
                 });
                 $('#coa_id').select2({
-                    dropdownParent: $(`#my_modal_3`),
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
+                });
+                
+                $('#invoices').select2({
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
+                });
+                $('#keterangan_buku_besar_pembantu').select2({
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
                 });
                 $('#nopol').select2({
-                    dropdownParent: $(`#my_modal_3`),
-                });
-                $('#invoices').select2({
-                    dropdownParent: $(`#my_modal_3`),
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
                 });
             }
+
+            $.fn.select2.amd.define('select2/dropdown/position', [], function() {
+                function PositionDropdown() {}
+                PositionDropdown.prototype.bind = function(container, $container) {
+                    container.on('results:all', function() {
+                        let $dropdown = $container.data('select2').dropdown.$dropdown;
+                        let offset = $container.offset();
+                        $dropdown.css({
+                            top: offset.top + $container.outerHeight(),
+                            left: offset.left
+                        });
+                    });
+                };
+                return PositionDropdown;
+            });
 
             function deleteItemJurnal(id) {
                 if (confirm('Apakah anda ingin menghapus data ini?')) {
