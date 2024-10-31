@@ -59,7 +59,7 @@
                         <th>TOTAL</th>
                         <th>TGL. PEMBAYARAN</th>
                         <th>NO. VOUCHER</th> -->
-                        <th rowspan="2">MARGIN</th>
+                        <th rowspan="2">MARGIN EXCLUDE</th>
                         <th colspan="4" class="text-center border" style="border-left: 1px solid black; border-right: 1px solid black;">INCLUDE PPN</th>
                         <!-- <th>HARGA BELI (PPN)</th>
                         <th>MARGIN (PPN)</th> -->
@@ -96,7 +96,7 @@
                         <!-- <th>MARGIN</th> -->
                         <th style="border-left: 1px solid black;">PENJUALAN</th>
                         <th>PEMBELIAN</th>
-                        <th style="border-right: 1px solid black;">SELISIH PPN</th>
+                        <th style="border-right: 1px solid black;">PORSI PPN</th>
                         <th style="border-right: 1px solid black;">MARGIN</th>
                         <th>SATUAN</th>
                         <th>BELI</th>
@@ -183,8 +183,8 @@
                     { data: 'margin', name: 'Margin', render: $.fn.dataTable.render.number('.') },
                     { data: 'harga_jual_ppn', name: 'Harga Beli (PPN)', render: $.fn.dataTable.render.number('.') },
                     { data: 'harga_beli_ppn', name: 'Harga Jual (PPN)', render: $.fn.dataTable.render.number('.') },
-                    { data: 'margin_ppn', name: 'Margin (PPN)', render: $.fn.dataTable.render.number('.') },
                     { data: 'margin_cek', name: 'Margin CEK', render: $.fn.dataTable.render.number('.') },
+                    { data: 'margin_ppn', name: 'Margin (PPN)', render: $.fn.dataTable.render.number('.') },
                     { data: 'satuan_standar', name: 'Satuan Standar'},
                     { data: 'beli', name: 'Harsat Beli / value', render: $.fn.dataTable.render.number('.') },
                     { data: 'jual', name: 'Harsat Jual / value', render: $.fn.dataTable.render.number('.') },

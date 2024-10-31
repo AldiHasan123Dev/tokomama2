@@ -37,6 +37,33 @@ class OmzetResurce extends JsonResource
                 $nomor_vocher_penjualan = $checkInv->nomor;
             }
         }
+        
+        $ppnStatus = $this->transaksi->barang->status_ppn; 
+        $ppnValue = $this->transaksi->barang->value_ppn;
+        $ppnRate = 0.11; 
+
+        // Inisialisasi default
+        $subtotal = $this->subtotal; // Tetap menggunakan subtotal yang ada
+        $ppnAmount = 0; // Default PPN amount adalah 0
+        $total = $subtotal; // Default total adalah subtotal
+        $ppnDisplay = '0%'; // Default PPN display
+        $HJB = $this->transaksi->harga_beli * $this->transaksi->jumlah_beli;
+        $HJJ = $this->transaksi->harga_jual * $this->transaksi->jumlah_beli;
+        $marginExc = ($this->transaksi->harga_jual * $this->transaksi->jumlah_beli) - ($this->transaksi->harga_beli * $this->transaksi->jumlah_beli);
+        $ppnBeli = $HJB ;
+        $ppnJual = $HJJ;
+        $ppnMargin = $HJJ - $HJB;
+        $ppnCekMargin = 0;
+        // Logika perhitungan PPN
+        if ($ppnValue == 11) {
+            // Hanya pertimbangkan nilai PPN jika value PPN adalah 11
+            if ($ppnStatus === 'ya') {
+                $ppnJual = ($this->transaksi->harga_jual + ($this->transaksi->harga_jual * 0.11)) *  $this->transaksi->jumlah_beli;
+                $ppnBeli = ($this->transaksi->harga_beli + ($this->transaksi->harga_beli * 0.11)) *  $this->transaksi->jumlah_beli;
+                $ppnMargin = $ppnJual - $ppnBeli;
+                $ppnCekMargin = $marginExc  * 0.11;
+            }
+        }
 
 
 
@@ -74,11 +101,11 @@ class OmzetResurce extends JsonResource
             'no_vocherpbl' =>  $nomor_vocher_pembelian, 
             'tgl_penjualan' => $tgl_pembayaran_penjualan,
             'no_vocherpenj' => $nomor_vocher_penjualan,
-            'harga_jual_ppn' => ($this->transaksi->harga_jual + ($this->transaksi->harga_jual * 0.11)) *  $this->transaksi->jumlah_beli ?? '-',
-            'harga_beli_ppn' => ($this->transaksi->harga_beli + ($this->transaksi->harga_beli * 0.11)) *  $this->transaksi->jumlah_beli ?? '-',
-            'margin_ppn' => (($this->transaksi->harga_jual * 0.11) * $this->transaksi->jumlah_beli) - (($this->transaksi->harga_beli * 0.11) * $this->transaksi->jumlah_beli) ?? '-',
+            'harga_jual_ppn' => $ppnJual,
+            'harga_beli_ppn' => $ppnBeli != 0 ? $ppnBeli : '-',
+            'margin_ppn' => $ppnMargin,
             'margin' => ($this->transaksi->harga_jual * $this->transaksi->jumlah_beli) - ($this->transaksi->harga_beli * $this->transaksi->jumlah_beli) ?? '-',
-            'margin_cek' => (($this->transaksi->harga_jual + ($this->transaksi->harga_jual * 0.11)) *  $this->transaksi->jumlah_beli) - (($this->transaksi->harga_beli + ($this->transaksi->harga_beli * 0.11)) *  $this->transaksi->jumlah_beli) - ((($this->transaksi->harga_jual * 0.11) * $this->transaksi->jumlah_beli) - (($this->transaksi->harga_beli * 0.11) * $this->transaksi->jumlah_beli)) ?? '-',
+            'margin_cek' => $ppnCekMargin,
             'satuan_standar' => $this->transaksi->Barang->Satuan->nama_satuan ?? '-',
             'beli' => ($this->transaksi->satuan_beli == $this->transaksi->Barang->Satuan->nama_satuan) ? $this->transaksi->harga_beli : $this->transaksi->harga_beli / $this->transaksi->Barang->value ?? '-',
             'jual' => ($this->transaksi->satuan_beli == $this->transaksi->Barang->Satuan->nama_satuan) ? $this->transaksi->harga_jual : $this->transaksi->harga_jual / $this->transaksi->Barang->value ?? '-'

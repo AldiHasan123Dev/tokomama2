@@ -1,81 +1,82 @@
 <x-Layout.layout>
     <style>
-    .modal {
-        top: 0;
-        left: 0;
-        width: 40%;
-        z-index: 1000;
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 800px;
-        position: relative;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        font-family: Arial, sans-serif;
-    }
-    .kembali-button {
-display: inline-block; 
-padding: 12px 10px; 
-background-color: #ad0f0f; 
-color: white; 
-text-decoration: none; 
-border-radius: 4px;
-transition: background-color 0.3s;
-}
+        .modal {
+            top: 0;
+            left: 0;
+            width: 40%;
+            z-index: 1000;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-family: Arial, sans-serif;
+        }
 
-.kembali-button:hover {
-background-color: #761408; 
-}
+        .kembali-button {
+            display: inline-block;
+            padding: 12px 10px;
+            background-color: #ad0f0f;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .kembali-button:hover {
+            background-color: #761408;
+        }
 
 
-    .close-button {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 20px;
-        background: none;
-        border: none;
-        color: #333;
-        cursor: pointer;
-    }
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+        }
 
-    /* Form labels and containers */
-    .form-label {
-        display: block;
-        font-weight: bold;
-        margin-top: 15px;
-        margin-bottom: 5px;
-    }
+        /* Form labels and containers */
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
 
-    .input-field,
-    .select-field {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        margin-top: 5px;
-        font-size: 14px;
-    }
+        .input-field,
+        .select-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
 
-    /* Submit button */
-    .submit-button {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        background-color: #e0a50f;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 20px;
-    }
+        /* Submit button */
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #e0a50f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
 
-    /* Label for extra info */
-    .label-info {
-        font-size: 12px;
-        color: red;
-    }
+        /* Label for extra info */
+        .label-info {
+            font-size: 12px;
+            color: red;
+        }
     </style>
     <dialog id="my_modal_5" class="modal">
         <div class="modal-box w-11/12 max-w-2xl pl-10">
@@ -87,15 +88,15 @@ background-color: #761408;
                 <div class="form-label">
                     <span class="form-label">Harga Jual</span>
                 </div>
-                <input type="text" class="input-field" id="harga_jual"
-                    oninput="formatRibuan(this)" onclick="this.select()" />
+                <input type="text" class="input-field" id="harga_jual" oninput="formatRibuan(this)"
+                    onclick="this.select()" />
             </label>
             <label class="form-control w-full max-w">
                 <div class="form-label">
                     <span class="form-label">Harga Beli</span>
                 </div>
-                <input type="text" class="input-field" id="harga_beli"
-                    oninput="formatRibuan(this)" onclick="this.select()" />
+                <input type="text" class="input-field" id="harga_beli" oninput="formatRibuan(this)"
+                    onclick="this.select()" />
             </label>
             <label class="form-control w-full max-w">
                 <div class="form-label">
@@ -103,8 +104,7 @@ background-color: #761408;
                 </div>
                 <input type="text" class="input-field" readonly id="profit" />
             </label>
-            <button type="button" class="submit-button"
-                onclick="updateTransaksi()">Update</button>
+            <button type="button" class="submit-button" onclick="updateTransaksi()">Update</button>
         </div>
     </dialog>
 
@@ -137,14 +137,14 @@ background-color: #761408;
             }
 
             function getCleanNumber(value) {
-    // Ganti koma dengan kosong dan titik terakhir dengan koma
-    const cleanValue = value.replace(/,/g, '').replace(/\.(?=.*\.)/g, ''); // Hapus koma
-    const decimalIndex = value.lastIndexOf('.');
-    if (decimalIndex !== -1) {
-        return parseFloat(cleanValue); // Menggunakan parseFloat untuk angka desimal
-    }
-    return parseInt(cleanValue) || 0; // Ubah ke integer, default 0 jika NaN
-}
+                // Ganti koma dengan kosong dan titik terakhir dengan koma
+                const cleanValue = value.replace(/,/g, '').replace(/\.(?=.*\.)/g, ''); // Hapus koma
+                const decimalIndex = value.lastIndexOf('.');
+                if (decimalIndex !== -1) {
+                    return parseFloat(cleanValue); // Menggunakan parseFloat untuk angka desimal
+                }
+                return parseInt(cleanValue) || 0; // Ubah ke integer, default 0 jika NaN
+            }
 
 
             let id = null;
@@ -152,143 +152,149 @@ background-color: #761408;
             let table1;
             // Table Tarif
             $(document).ready(function() {
-            table1 = $("#table-tarif").jqGrid({
-                url: "{{ route('transaksi.data') }}",
-                datatype: "json",
-                mtype: "POST",
-                postData: {
-                    _token: "{{ csrf_token() }}",
-                    tarif: 1
-                },
-                colModel: [{
-                    search: true,
-                        label: 'Aksi',
-                        name: 'aksi',
-                        width: 150,
-                        sortable: false,
-                        align: 'center',
-                        formatter: 'unformat'
+                table1 = $("#table-tarif").jqGrid({
+                    url: "{{ route('transaksi.data') }}",
+                    datatype: "json",
+                    mtype: "POST",
+                    postData: {
+                        _token: "{{ csrf_token() }}",
+                        tarif: 1
                     },
-                    {
-                        search: true,
-                        label: 'No. Surat',
-                        name: 'nomor_surat',
-                        width: 150
+                    colModel: [{
+                            search: true,
+                            label: 'Aksi',
+                            name: 'aksi',
+                            width: 150,
+                            sortable: false,
+                            align: 'center',
+                            formatter: 'unformat'
+                        },
+                        {
+                            search: true,
+                            label: 'No. Surat',
+                            name: 'nomor_surat',
+                            width: 150
+                        },
+                        {
+                            search: true,
+                            label: 'Barang',
+                            name: 'barang',
+                            width: 150
+                        },
+                        {
+                            search: true,
+                            label: 'Jumlah Jual',
+                            name: 'jumlah_jual',
+                            width: 150,
+                            align: 'right'
+                        },
+                        {
+                            search: true,
+                            label: 'Satuan Jual',
+                            name: 'satuan_jual',
+                            width: 150,
+                            align: 'center'
+                        },
+                        {
+                            search: true,
+                            label: 'Jumlah Beli',
+                            name: 'jumlah_beli',
+                            width: 150,
+                              align: 'right'
+                        },
+                        {
+                            search: true,
+                            label: 'Satuan Beli',
+                            name: 'satuan_beli',
+                            width: 150,
+                            align: 'center'
+                        },
+                        {
+                            search: true,
+                            label: 'Harga Jual',
+                            name: 'harga_jual',
+                            width: 150,
+                            align: 'right'
+                        },
+                        {
+                            search: true,
+                            label: 'Harga Beli',
+                            name: 'harga_beli',
+                            width: 150,
+                            align: 'right'
+                        },
+                        {
+                            search: true,
+                            label: 'Profit',
+                            name: 'profit',
+                            width: 150,
+                            align: 'right'
+                        },
+                        {
+                            search: true,
+                            label: 'Nama Kapal',
+                            name: 'nama_kapal',
+                            width: 150
+                        },
+                        {
+                            search: true,
+                            label: 'No. Cont',
+                            name: 'no_cont',
+                            width: 150
+                        },
+                        {
+                            search: true,
+                            label: 'No. Seal',
+                            name: 'no_seal',
+                            width: 150,
+                            align: 'center'
+                        },
+                        {
+                            search: true,
+                            label: 'No. Pol',
+                            name: 'no_pol',
+                            width: 150,
+                             align: 'center'
+                        },
+                        {
+                            search: true,
+                            label: 'ID',
+                            name: 'id',
+                            width: 40,
+                            hidden: true
+                        }
+                    ],
+                    pager: "#pager-tarif",
+                    rowNum: 10, // Jumlah baris per halaman
+                    rowList: [10, 50, 100], // Opsi untuk memilih jumlah baris per halaman
+                    viewrecords: true, // Tampilkan total record di footer
+                    autowidth: true, // Menyesuaikan lebar otomatis
+                    height: 'auto',
+                    loadonce: true,
+                    serverPaging: true,
+                    jsonReader: {
+                        repeatitems: false,
+                        root: "data",
+                        page: "current_page",
+                        total: "last_page",
+                        records: "total"
                     },
-                    {
-                        search: true,
-                        label: 'Barang',
-                        name: 'barang',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'Jumlah Jual',
-                        name: 'jumlah_jual',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'Satuan Jual',
-                        name: 'satuan_jual',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'Jumlah Beli',
-                        name: 'jumlah_beli',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'Satuan Beli',
-                        name: 'satuan_beli',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'Harga Jual',
-                        name: 'harga_jual',
-                        width: 150,
-                        align: 'right'
-                    },
-                    {
-                        search: true,
-                        label: 'Harga Beli',
-                        name: 'harga_beli',
-                        width: 150,
-                        align: 'right'
-                    },
-                    {
-                        search: true,
-                        label: 'Profit',
-                        name: 'profit',
-                        width: 150,
-                        align: 'right'
-                    },
-                    {
-                        search: true,
-                        label: 'Nama Kapal',
-                        name: 'nama_kapal',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'No. Cont',
-                        name: 'no_cont',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'No. Seal',
-                        name: 'no_seal',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'No. Pol',
-                        name: 'no_pol',
-                        width: 150
-                    },
-                    {
-                        search: true,
-                        label: 'ID',
-                        name: 'id',
-                        width: 40,
-                        hidden: true
+                    loadComplete: function(data) {
+                        console.log("Data loaded for tarif:", data);
+                        $("#table-tarif").jqGrid('filterToolbar');
                     }
-                ],
-                pager: "#pager-tarif",
-                rowNum: 10, // Jumlah baris per halaman
-                rowList: [10, 50, 100], // Opsi untuk memilih jumlah baris per halaman
-                viewrecords: true, // Tampilkan total record di footer
-                autowidth: true, // Menyesuaikan lebar otomatis
-                height: 'auto',
-                loadonce: true,
-                serverPaging: true,
-                jsonReader: {
-                    repeatitems: false,
-                    root: "data",
-                    page: "current_page",
-                    total: "last_page",
-                    records: "total"
-                },
-                loadComplete: function(data) {
-                    console.log("Data loaded for tarif:", data);
-                    $("#table-tarif").jqGrid('filterToolbar');
-                }
-            }).navGrid('#pager-tarif', {
-                edit: false,
-                add: false,
-                del: false,
-                search: false,
-                refresh: true,
-    }, {}, {}, {}, {
-        closeAfterSearch: true,
-        closeAfterReset: true,
-        searchOnEnter: true,
+                }).navGrid('#pager-tarif', {
+                    edit: false,
+                    add: false,
+                    del: false,
+                    search: false,
+                    refresh: true,
+                }, {}, {}, {}, {
+                    closeAfterSearch: true,
+                    closeAfterReset: true,
+                    searchOnEnter: true,
+                });
             });
-        });
 
             // Table Non-Tarif
             let table2 = $("#table-non-tarif").jqGrid({
@@ -403,10 +409,10 @@ background-color: #761408;
                 del: false,
                 search: false,
                 refresh: true,
-    }, {}, {}, {}, {
-        closeAfterSearch: true,
-        closeAfterReset: true,
-        searchOnEnter: true,
+            }, {}, {}, {}, {
+                closeAfterSearch: true,
+                closeAfterReset: true,
+                searchOnEnter: true,
             });
 
 
@@ -416,10 +422,11 @@ background-color: #761408;
                 $('#harga_jual').val(jual);
                 $('#harga_beli').val(beli);
                 $('#profit').val(margin);
-                nama_barang = nama_barang.replace(/\+/g, ' ').replace(/%40/g, '@').trim(); // Menghapus '+' dan mengganti '%40' dengan '@'
+                nama_barang = nama_barang.replace(/\+/g, ' ').replace(/%40/g, '@')
+            .trim(); // Menghapus '+' dan mengganti '%40' dengan '@'
 
-// Mengatur innerHTML
-document.getElementById('barang').innerHTML = `${nama_barang} (Harga PER - ${satuan_jual})`;
+                // Mengatur innerHTML
+                document.getElementById('barang').innerHTML = `${nama_barang} (Harga PER - ${satuan_jual})`;
                 my_modal_5.showModal();
             }
 
@@ -428,19 +435,24 @@ document.getElementById('barang').innerHTML = `${nama_barang} (Harga PER - ${sat
                 const beli = getCleanNumber($('#harga_beli').val()) * jumlah;
                 const margin = jual - beli;
                 console.log("Harga Jual:", jual);
-    console.log("Harga Beli:", beli);
-    console.log("Profit (Margin):", margin);
+                console.log("Harga Beli:", beli);
+                console.log("Profit (Margin):", margin);
                 $('#profit').val(margin);
                 formatRibuan(document.getElementById('profit'));
             }
 
             $('#harga_jual, #harga_beli').on('input', calculateProfit);
-                        function refreshTable() {
+
+            function refreshTable() {
                 if (typeof table1 !== 'undefined') {
-                    table1.setGridParam({datatype: 'json'}).trigger("reloadGrid");
+                    table1.setGridParam({
+                        datatype: 'json'
+                    }).trigger("reloadGrid");
                 }
                 if (typeof table2 !== 'undefined') {
-                    table2.setGridParam({datatype: 'json'}).trigger("reloadGrid");
+                    table2.setGridParam({
+                        datatype: 'json'
+                    }).trigger("reloadGrid");
                 }
             }
 
