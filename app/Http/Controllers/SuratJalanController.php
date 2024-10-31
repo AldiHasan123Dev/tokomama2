@@ -457,7 +457,7 @@ class SuratJalanController extends Controller
     $currentPage = $request->page; 
     $perPage = $request->rows; 
     $index = ($currentPage - 1) * $perPage;
-    $paginatedData = collect($data1->slice($index, $perPage))->values();
+    $paginatedData = $data1->slice($index)->values();
 
     // Membuat array hasil untuk response JSON
     $result = $paginatedData->map(function ($row) use (&$index) {
