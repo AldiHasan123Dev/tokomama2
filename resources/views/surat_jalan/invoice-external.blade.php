@@ -72,7 +72,7 @@
                 label: 'Jumlah Beli',
                 name: 'jumlah_beli',
                 width: 40,
-                align: 'center'
+                align: 'right'
             },
             {
                 search: true,

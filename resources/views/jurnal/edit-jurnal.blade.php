@@ -266,7 +266,6 @@
               <label class="form-label h-auto">Nopol</label>
             <select class="form-select select-field" name="nopol" id="nopol>
                 <option value="${nopol}" selected>${nopol}</option>
-                <option value=""></option>
                 @foreach ($nopol as $n)
                 <option value="{{ $n->nopol }}">{{ $n->nopol }} </option>
                 @endforeach

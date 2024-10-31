@@ -424,75 +424,78 @@ class SuratJalanController extends Controller
             ->rawColumns(['aksi'])
             ->toJson();
     }
-
-
     public function dataTableSupplier(Request $request)
-    {
-        // Ambil parameter pencarian dari request
-        $searchTerm = $request->get('searchString', ''); // Untuk pencarian global
-    
-        // Ambil data dengan relasi yang diperlukan dan group by
-        $data = Transaction::with(['suratJalan', 'suppliers', 'barang'])
-            ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')->orderBy('created_at', 'desc');
-    
-        // Tambahkan filter pencarian jika ada
-        if (!empty($searchTerm)) {
-            $data->where(function ($query) use ($searchTerm) {
-                $query->whereHas('suratJalan', function ($q) use ($searchTerm) {
-                    $q->where('nomor_surat', 'like', "%{$searchTerm}%");
-                })
-                ->orWhereHas('suppliers', function ($q) use ($searchTerm) {
-                    $q->where('nama', 'like', "%{$searchTerm}%");
-                })
-                ->orWhere('invoice_external', 'like', "%{$searchTerm}%");
-            });
-        }
-    
-        // Hitung total record sebelum pagination (setelah pencarian diterapkan)
-        $data1 = $data->get();
-        
-        $totalRecords = $data1->count();
-        $currentPage = $request->page; 
-        $perPage = $request->rows; 
-        $index = ($currentPage - 1) * $perPage;
-        $paginatedData = $data1->slice($index)->values();
-    
-        // Ambil data untuk halaman saat ini dengan pagination
-        
-            
-            // Membuat array hasil untuk response JSON
-            $result = $paginatedData->map(function ($row) use (&$index) {
-            $total = $row->harga_beli * $row->jumlah_beli;
-            $ppn = 0;
-            if($row->barang->status_ppn === 'ya'){
-                $value_ppn = $row->barang->value_ppn / 100;
-                 $ppn = $total * $value_ppn;
-                 $index++;
-            }
-            return [
-                'DT_RowIndex' => $index,
-                'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
-                'harga_beli' => isset($row->harga_beli) ? number_format($row->harga_beli, 2, ',', '.') : '-',
-                'jumlah_beli' => isset($row->jumlah_beli) ? number_format($row->jumlah_beli, 2, ',', '.') : '-',
-                'total' =>  isset($total) ? number_format($total, 2, ',', '.') : '-',
-                'ppn' =>  isset($ppn) ? number_format($ppn, 2, ',', '.') : '-',
-                'supplier' => $row->suppliers->nama ?? '-',
-                'invoice_external' => $row->invoice_external,
-                'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->harga_beli . ', ' . $row->jumlah_beli . ', \'' . $row->barang->status_ppn . '\', ' . $row->barang->value_ppn . ')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
+{
+    // Ambil parameter pencarian dari request
+    $searchTerm = $request->get('searchString', ''); // Untuk pencarian global
 
-            ];
+    // Ambil data dengan relasi yang diperlukan dan group by
+    $data = Transaction::with(['suratJalan', 'suppliers', 'barang'])
+        ->select('id_surat_jalan', 'id_supplier', 'invoice_external', 'id_barang',
+                 DB::raw('SUM(harga_beli) as total_harga_beli'),
+                 DB::raw('SUM(jumlah_beli) as total_jumlah_beli'))
+        ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')
+        ->orderBy('created_at', 'desc');
+
+    // Tambahkan filter pencarian jika ada
+    if (!empty($searchTerm)) {
+        $data->where(function ($query) use ($searchTerm) {
+            $query->whereHas('suratJalan', function ($q) use ($searchTerm) {
+                $q->where('nomor_surat', 'like', "%{$searchTerm}%");
+            })
+            ->orWhereHas('suppliers', function ($q) use ($searchTerm) {
+                $q->where('nama', 'like', "%{$searchTerm}%");
+            })
+            ->orWhere('invoice_external', 'like', "%{$searchTerm}%");
         });
-    
-        // Kembalikan response JSON dengan format yang sesuai untuk jqGrid
-        return response()->json([
-            'current_page' => $request->page, // Halaman saat ini
-            'last_page' => ceil($totalRecords / $request->rows), // Total halaman
-            'total' => $totalRecords, // Total record setelah filter
-            'data' => $result, // Data untuk halaman ini
-        ]);
     }
-    
 
+    // Hitung total record sebelum pagination (setelah pencarian diterapkan)
+    $data1 = $data->get();
+    
+    $totalRecords = $data1->count();
+    $currentPage = $request->page; 
+    $perPage = $request->rows; 
+    $index = ($currentPage - 1) * $perPage;
+    $paginatedData = collect($data1->slice($index, $perPage))->values();
+
+    // Membuat array hasil untuk response JSON
+    $result = $paginatedData->map(function ($row) use (&$index) {
+        $index++;
+        $ppn = 0;
+        $subtotal = $row->total_harga_beli * $row->total_jumlah_beli;
+        // Hitung PPN jika barang memiliki status 'ya' pada kolom status_ppn
+        $barang = Barang::where('id', $row->id_barang)->first();
+        
+        if ($barang && $barang->status_ppn === 'ya') {
+            $value_ppn = $barang->value_ppn / 100;
+            $ppn = intval($subtotal * $value_ppn);
+        }
+
+        return [
+            'DT_RowIndex' => $index,
+            'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
+            'harga_beli' => $row->total_harga_beli ? number_format($row->total_harga_beli, 0, ',', '.') : '-',
+            'jumlah_beli' => $row->total_jumlah_beli ? number_format($row->total_jumlah_beli, 0, ',', '.') : '-',
+            'total' => number_format($subtotal, 0, ',', '.'),
+            'ppn' => number_format($ppn, 0, ',', '.'),
+            'supplier' => $row->suppliers->nama ?? '-',
+            'invoice_external' => $row->invoice_external,
+            'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->total_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
+        ];
+    });
+
+    // Kembalikan response JSON dengan format yang sesuai untuk jqGrid
+    return response()->json([
+        'current_page' => $currentPage, // Halaman saat ini
+        'last_page' => ceil($totalRecords / $perPage), // Total halaman
+        'total' => $totalRecords, // Total record setelah filter
+        'data' => $result, // Data untuk halaman ini
+    ]);
+}
+
+    
+    
 
     public function editBarang()
     {
