@@ -139,8 +139,8 @@
         // Hitung total
         const total = parseFloat(harga_beli) * parseFloat(jumlah_beli);
         const totalFormatted = total.toLocaleString('id-ID', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
 
         // Inisialisasi PPN
@@ -152,8 +152,8 @@
         }
 
         const ppnFormatted = ppn.toLocaleString('id-ID', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
 
         // Menyusun HTML dialog

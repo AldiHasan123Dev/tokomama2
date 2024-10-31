@@ -96,13 +96,13 @@
                             <tr>
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $customer->nama }}</td>
-                                <td>{{ number_format($customer->debit, 2, ',', '.') }}</td>
-                                <td>{{ number_format($customer->kredit, 2, ',', '.') }}</td>
+                                <td>{{ number_format($customer->debit, 0, ',', '.') }}</td>
+                                <td>{{ number_format($customer->kredit, 0, ',', '.') }}</td>
                                 <td>
                                     @if ($tipe == 'K')
-                                        {{ number_format($customer->kredit - $customer->debit, 2, ',', '.') }}
+                                        {{ number_format($customer->kredit - $customer->debit, 0, ',', '.') }}
                                     @else
-                                        {{ number_format($customer->debit - $customer->kredit, 2, ',', '.') }}
+                                        {{ number_format($customer->debit - $customer->kredit, 0, ',', '.') }}
                                     @endif
                                 </td>
                                 <td>
@@ -123,16 +123,16 @@
                         <tr>
                             <th colspan="2" class="text-center">Total</th>
                             <th>
-                                {{ number_format($customers->sum('debit'), 2, ',', '.') }}
+                                {{ number_format($customers->sum('debit'), 0, ',', '.') }}
                             </th>
                             <th>
-                                {{ number_format($customers->sum('kredit'), 2, ',', '.') }}
+                                {{ number_format($customers->sum('kredit'), 0, ',', '.') }}
                             </th>
                             <th>
                                 @if ($tipe == 'K')
-                                    {{ number_format($customers->sum('kredit') - $customers->sum('debit'), 2, ',', '.') }}
+                                    {{ number_format($customers->sum('kredit') - $customers->sum('debit'), 0, ',', '.') }}
                                 @else
-                                    {{ number_format($customers->sum('debit') - $customers->sum('kredit'), 2, ',', '.') }}
+                                    {{ number_format($customers->sum('debit') - $customers->sum('kredit'), 0, ',', '.') }}
                                 @endif
                             </th>
                             <th></th>
@@ -165,13 +165,13 @@
                             <tr>
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $supplier->nama }}</td>
-                                <td>{{ number_format($supplier->debit, 2, ',', '.') }}</td>
-                                <td>{{ number_format($supplier->kredit, 2, ',', '.') }}</td>
+                                <td>{{ number_format($supplier->debit, 0, ',', '.') }}</td>
+                                <td>{{ number_format($supplier->kredit, 0, ',', '.') }}</td>
                                 <td>
                                     @if ($tipe == 'K')
-                                        {{ number_format($supplier->kredit - $supplier->debit, 2, ',', '.') }}
+                                        {{ number_format($supplier->kredit - $supplier->debit, 0, ',', '.') }}
                                     @else
-                                        {{ number_format($supplier->debit - $supplier->kredit, 2, ',', '.') }}
+                                        {{ number_format($supplier->debit - $supplier->kredit, 0, ',', '.') }}
                                     @endif
                                 </td>
                                 <td>
@@ -198,9 +198,9 @@
                             </th>
                             <th>
                                 @if ($tipe == 'K')
-                                    {{ number_format($suppliers->sum('kredit') - $suppliers->sum('debit'), 2, ',', '.') }}
+                                    {{ number_format($suppliers->sum('kredit') - $suppliers->sum('debit'), 0, ',', '.') }}
                                 @else
-                                    {{ number_format($suppliers->sum('debit') - $suppliers->sum('kredit'), 2, ',', '.') }}
+                                    {{ number_format($suppliers->sum('debit') - $suppliers->sum('kredit'), 0, ',', '.') }}
                                 @endif
                             </th>
                             <th></th>
@@ -246,9 +246,9 @@
                                 <td>{{ number_format($ncs['kredit'], 2, ',', '.') }}</td>
                                 <td>
                                     @if ($tipe == 'K')
-                                        {{ number_format($ncs['kredit'] - $ncs['debit'], 2, ',', '.') }}
+                                        {{ number_format($ncs['kredit'] - $ncs['debit'], 0, ',', '.') }}
                                     @else
-                                        {{ number_format($ncs['debit'] - $ncs['kredit'], 2, ',', '.') }}
+                                        {{ number_format($ncs['debit'] - $ncs['kredit'], 0, ',', '.') }}
                                     @endif
                                 </td>
                                 <td>
@@ -291,8 +291,8 @@
                     <tfoot>
                         <tr>
                             <th colspan="4" class="text-center">Total</th>
-                            <th>{{ number_format($ncsDebitTotal, 2, ',', '.') }}</th>
-                            <th>{{ number_format($ncsKreditTotal, 2, ',', '.') }}</th>
+                            <th>{{ number_format($ncsDebitTotal, 0, ',', '.') }}</th>
+                            <th>{{ number_format($ncsKreditTotal, 0, ',', '.') }}</th>
                             <th>
                                 @php
                                     $totalSaldo =
@@ -300,7 +300,7 @@
                                             ? $ncsKreditTotal - $ncsDebitTotal
                                             : $ncsDebitTotal - $ncsKreditTotal;
                                 @endphp
-                                {{ number_format($totalSaldo, 2, ',', '.') }}
+                                {{ number_format($totalSaldo, 0, ',', '.') }}
                             </th>
                             <th colspan="3"></th>
                         </tr>
@@ -425,7 +425,7 @@
         });
 
 
-        function number_format(number, decimals = 2, dec_point = ',', thousands_sep = '.') {
+        function number_format(number, decimals = 0, dec_point = ',', thousands_sep = '.') {
             number = parseFloat(number).toFixed(decimals);
 
             let nstr = number.split('.');

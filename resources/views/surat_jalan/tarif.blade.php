@@ -137,8 +137,15 @@ background-color: #761408;
             }
 
             function getCleanNumber(value) {
-                return parseInt(value.replace(/,/g, '')) || 0; // Ubah ke integer, default 0 jika NaN
-            }
+    // Ganti koma dengan kosong dan titik terakhir dengan koma
+    const cleanValue = value.replace(/,/g, '').replace(/\.(?=.*\.)/g, ''); // Hapus koma
+    const decimalIndex = value.lastIndexOf('.');
+    if (decimalIndex !== -1) {
+        return parseFloat(cleanValue); // Menggunakan parseFloat untuk angka desimal
+    }
+    return parseInt(cleanValue) || 0; // Ubah ke integer, default 0 jika NaN
+}
+
 
             let id = null;
             let jumlah = 0;
@@ -420,6 +427,9 @@ document.getElementById('barang').innerHTML = `${nama_barang} (Harga PER - ${sat
                 const jual = getCleanNumber($('#harga_jual').val()) * jumlah;
                 const beli = getCleanNumber($('#harga_beli').val()) * jumlah;
                 const margin = jual - beli;
+                console.log("Harga Jual:", jual);
+    console.log("Harga Beli:", beli);
+    console.log("Profit (Margin):", margin);
                 $('#profit').val(margin);
                 formatRibuan(document.getElementById('profit'));
             }
