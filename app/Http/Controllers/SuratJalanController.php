@@ -246,7 +246,7 @@ class SuratJalanController extends Controller
             $total = 0;
             foreach ($data as $item) {
                     $value_ppn = $item->barang->value_ppn / 100;
-                    $total += ($item->harga_beli * $item->jumlah_jual) * $value_ppn;
+                    $total += intval($item->harga_beli * $item->jumlah_jual * $value_ppn);
                     Jurnal::updateOrCreate(
                         [
                             'id_transaksi' => $item->id,
