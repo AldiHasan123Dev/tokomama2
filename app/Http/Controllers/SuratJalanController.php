@@ -248,6 +248,7 @@ class SuratJalanController extends Controller
                     $value_ppn = $item->barang->value_ppn / 100;
                     $total += round($item->harga_beli * $item->jumlah_jual * $value_ppn);
                     
+                    
                     Jurnal::updateOrCreate(
                         [
                             'id_transaksi' => $item->id,
@@ -258,7 +259,7 @@ class SuratJalanController extends Controller
                             'nomor' => $nomor_surat,
                             'tgl' => date('Y-m-d'),
                             'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_jual, 0, ',', '.') . ' ' .  $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 0, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
-                            'debit' => $item->harga_beli * $item->jumlah_jual,
+                            'debit' => round($item->harga_beli * $item->jumlah_jual),
                             'kredit' => 0,
                             'invoice' => 0,
                             'invoice_external' => $request->invoice_external,
@@ -281,7 +282,7 @@ class SuratJalanController extends Controller
                             'tgl' => date('Y-m-d'),
                             'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_jual, 0, ',', '.') . ' ' . $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 0, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
                             'debit' => 0,
-                            'kredit' => $item->harga_beli * $item->jumlah_jual,
+                            'kredit' => round($item->harga_beli * $item->jumlah_jual),
                             'invoice' => 0,
                             'invoice_external' => $request->invoice_external,
                             'nopol' => $item->suratJalan->no_pol,
@@ -476,10 +477,10 @@ class SuratJalanController extends Controller
         return [
             'DT_RowIndex' => $index,
             'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
-            'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 0, ',', '.') : '-',
-            'jumlah_beli' => $row->total_jumlah_beli ? number_format($row->total_jumlah_beli, 0, ',', '.') : '-',
-            'total' => number_format($subtotal, 0, ',', '.'),
-            'ppn' => number_format($ppn, 0, ',', '.'),
+            'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 2, ',', '.') : '-',
+            'jumlah_beli' => $row->total_jumlah_beli ? number_format($row->total_jumlah_beli, 2, ',', '.') : '-',
+            'total' => number_format($subtotal, 2, ',', '.'),
+            'ppn' => number_format($ppn, 2, ',', '.'),
             'supplier' => $row->suppliers->nama ?? '-',
             'invoice_external' => $row->invoice_external,
             'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'

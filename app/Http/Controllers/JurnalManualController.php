@@ -590,7 +590,7 @@ class JurnalManualController extends Controller
         ->get();
         $nopol =$core[0]->suratJalan->no_pol;
         $subtotal = $core->sum(function ($item) {
-            return $item->harga_beli * $item->jumlah_jual;
+            return round($item->harga_beli * $item->jumlah_jual);
         });
         // $invoice_count = 1;
         // $nsfp = NSFP::where('available', '1')->orderBy('nomor')->take($invoice_count)->get();
@@ -618,7 +618,7 @@ class JurnalManualController extends Controller
                 $item->satuan_jual . ' Harsat ' . 
                 number_format($item->harga_beli, 2, ',', '.') . ') ' . 
                 ' untuk ' . $item->suratJalan->customer->nama,
-                    'debit' => $item->harga_beli * $item->jumlah_jual, // Debit diisi 0
+                    'debit' => round($item->harga_beli * $item->jumlah_jual), // Debit diisi 0
                     'kredit' => 0, // Menggunakan total debit sebagai kredit
                     'invoice' => '',
                     'invoice_external' => $invoice_e,
@@ -651,7 +651,7 @@ class JurnalManualController extends Controller
                 'tgl' => $time,
                 'keterangan' => 'Hutang ' . $item->suppliers->nama,
                 'debit' => 0, // Menyimpan subtotal sebagai debit
-                'kredit' => $subtotal + $subtotalPPN, // Kredit diisi 0
+                'kredit' => round($subtotal + $subtotalPPN), // Kredit diisi 0
                 'invoice' => '',
                 'invoice_external' => $invoice_e,
                 'id_transaksi' => $request->id,
@@ -671,7 +671,7 @@ class JurnalManualController extends Controller
                 $item->satuan_jual . ' Harsat ' . 
                 number_format($item->harga_beli, 2, ',', '.') . ') ' . 
                 ' untuk ' . $item->suratJalan->customer->nama,
-                'debit' => $item->harga_beli * $item->jumlah_jual, // Debit diisi 0
+                'debit' => round($item->harga_beli * $item->jumlah_jual), // Debit diisi 0
                 'kredit' => 0, // Menggunakan total debit sebagai kredit
                 'invoice' => '',
                 'invoice_external' => $invoice_e,
