@@ -193,8 +193,8 @@
                             <td>{{ $item->nomor ?? '-' }}</td>
                             <td>{{ $item->no_akun ?? '-' }}</td>
                             <td>{{ $item->nama_akun ?? '-' }}</td>
-                            <td class="text-end">{{ number_format($item->debit, 2, ',', '.') }}</td>
-                            <td class="text-end">{{ number_format($item->kredit, 2, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($item->debit, 0, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($item->kredit, 0, ',', '.') }}</td>
                             <td>{{ $item->keterangan ?? '-' }}</td>
                             <td>{{ $item->invoice == 0 ? '' : $item->invoice ?? '-' }}</td>
                             <td>{{ $item->invoice_external == 0 ? '' : $item->invoice_external ?? '-' }}</td>
@@ -211,8 +211,8 @@
             $total_kredit = $data->sum('kredit');
             $total_debet = $data->sum('debit');
         @endphp
-        <p class="font-bold text-2xl">Total Debet: {{ number_format($total_debet, 2, ',', '.') }} </p>
-        <p class="font-bold text-2xl">Total Kredit: {{ number_format($total_kredit, 2, ',', '.') }}</span> </p>
+        <p class="font-bold text-2xl">Total Debet: {{ number_format($total_debet, 0, ',', '.') }} </p>
+        <p class="font-bold text-2xl">Total Kredit: {{ number_format($total_kredit, 0, ',', '.') }}</span> </p>
     </x-jurnal.card-jurnal>
 
     <x-slot:script>
