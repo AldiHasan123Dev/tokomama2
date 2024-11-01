@@ -169,7 +169,7 @@
                         <th>Keterangan</th>
                         <th>Invoice External</th>
                         <th>Nopol</th>
-                        <th>keterangan buku besar pembantu</th>
+                        <th>Kaitan BB Pembantu</th>
                         <th class="hidden">no</th>
                     </tr>
                 </thead>
