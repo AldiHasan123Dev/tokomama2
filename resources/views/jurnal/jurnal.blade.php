@@ -182,8 +182,8 @@
                             <td>{{ $d->no_akun }}</td>
                             <td>{{ $d->nama_akun }}</td>
                             <td> {{ $d->invoice == 0 ? '' : ($d->invoice ?? '-') }}</td>
-                            <td class="text-end">{{ number_format($d->debit, 0, ',', '.') }}</td>
-                            <td class="text-end">{{ number_format($d->kredit, 0, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($d->debit, 2, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($d->kredit, 2, ',', '.') }}</td>
                             <td>{{ $d->keterangan }}</td>
                             <td>
                                 {{ $d->invoice_external == 0 ? '' : ($d->invoice_external ?? '-') }}
@@ -208,8 +208,8 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ number_format($MonJNL->sum('debit'), 0, ',', '.') }}</td>
-                    <td>{{ number_format($MonJNL->sum('kredit'), 0, ',', '.') }}</td>
+                    <td>{{ number_format($MonJNL->sum('debit'), 2, ',', '.') }}</td>
+                    <td>{{ number_format($MonJNL->sum('kredit'), 2, ',', '.') }}</td>
                     <td>{{ $LastJNL->max('no') }}</td>
                 </tr>
             </tbody>

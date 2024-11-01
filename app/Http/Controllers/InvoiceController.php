@@ -322,7 +322,7 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                     if ($result[0]->transaksi->barang->status_ppn == 'ya'){
                         $value_ppn = $result[0]->transaksi->barang->value_ppn/100;
 
-                        $temp_debit = intval(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn);
+                        $temp_debit = round(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn, 4);
                         Jurnal::create([
                             'coa_id' => 8,
                             'nomor' => $newNoJNL,
@@ -418,7 +418,7 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                 $nopol = $result[0]->transaksi->suratJalan->no_pol; // Asumsikan nopol sama untuk semua item
                 if ($result[0]->transaksi->barang->status_ppn == 'ya'){
                     $value_ppn = $result[0]->transaksi->barang->value_ppn/100;
-                    $temp_debit = intval(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn);
+                    $temp_debit = round(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn);
                     Jurnal::create([
                         'coa_id' => 8,
                         'nomor' => $tipe1,
