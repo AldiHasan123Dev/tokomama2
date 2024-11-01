@@ -432,7 +432,7 @@ class SuratJalanController extends Controller
     // Ambil data dengan relasi yang diperlukan dan group by
     $data = Transaction::with(['suratJalan', 'suppliers', 'barang'])
         ->select('id_surat_jalan', 'id_supplier', 'invoice_external', 'id_barang',
-                 DB::raw('SUM(harga_beli) as total_harga_beli'),
+                 DB::raw('AVG(harga_beli) as avg_harga_beli'),
                  DB::raw('SUM(jumlah_beli) as total_jumlah_beli'))
         ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')
         ->orderBy('created_at', 'desc');
@@ -463,7 +463,7 @@ class SuratJalanController extends Controller
     $result = $paginatedData->map(function ($row) use (&$index) {
         $index++;
         $ppn = 0;
-        $subtotal = $row->total_harga_beli * $row->total_jumlah_beli;
+        $subtotal = $row->avg_harga_beli * $row->total_jumlah_beli;
         // Hitung PPN jika barang memiliki status 'ya' pada kolom status_ppn
         $barang = Barang::where('id', $row->id_barang)->first();
         
@@ -475,13 +475,13 @@ class SuratJalanController extends Controller
         return [
             'DT_RowIndex' => $index,
             'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
-            'harga_beli' => $row->total_harga_beli ? number_format($row->total_harga_beli, 0, ',', '.') : '-',
+            'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 0, ',', '.') : '-',
             'jumlah_beli' => $row->total_jumlah_beli ? number_format($row->total_jumlah_beli, 0, ',', '.') : '-',
             'total' => number_format($subtotal, 0, ',', '.'),
             'ppn' => number_format($ppn, 0, ',', '.'),
             'supplier' => $row->suppliers->nama ?? '-',
             'invoice_external' => $row->invoice_external,
-            'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->total_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
+            'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
         ];
     });
 

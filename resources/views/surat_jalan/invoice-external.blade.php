@@ -61,7 +61,7 @@
             },
             {
                 search: true,
-                label: 'Harga Beli',
+                label: 'Harga Beli (AVG)',
                 name: 'harga_beli',
                 width: 70,
                 align: 'right',
