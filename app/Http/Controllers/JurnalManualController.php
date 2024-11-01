@@ -607,7 +607,7 @@ class JurnalManualController extends Controller
                     $value_ppn = $item->barang->value_ppn / 100;
                     return round($item->harga_beli * $item->jumlah_jual * $value_ppn);
                 });
-               dd($subtotalPPN, $subtotal + $subtotalPPN);
+               
             foreach ($core as $item) {
                 Jurnal::create([
                     'coa_id' => 63,
