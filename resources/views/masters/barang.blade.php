@@ -1,8 +1,87 @@
 <x-Layout.layout>
+    <style>
+        .modal {
+            top: 0;
+            left: 0;
+            width: 40%;
+            z-index: 1000;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-family: Arial, sans-serif;
+        }
 
+        .kembali-button {
+            display: inline-block;
+            padding: 12px 10px;
+            background-color: #ad0f0f;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .kembali-button:hover {
+            background-color: #761408;
+        }
+
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Form labels and containers */
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .input-field,
+        .select-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        /* Submit button */
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #e0a50f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* Label for extra info */
+        .label-info {
+            font-size: 12px;
+            color: red;
+        }
+    </style>
   <div id="dialog"></div>
 
   <x-master.card-master>
+    
       <x-slot:tittle>Data Barang</x-slot:tittle>
       <div class="overflow-x-auto">
           <table id="table-barang" class="display compact" style="width:100%">
@@ -44,9 +123,9 @@
                   class="input input-bordered w-full max-w-xs rounded-md" required />
           </label>
           <input type="hidden" id="nama_singkat" name="nama_singkat" />
-          <label class="input border flex items-center gap-2 mt-3">
+          <label class="input border-none flex items-center gap-2 mt-3">
               Nama Satuan :
-              <select name="id_satuan" class="select select-sm select-bordered w-full max-w-xs">
+              <select name="id_satuan" class="select-field">
                   <option disabled selected>Satuan</option>
                   @foreach ($satuan as $satu)
                       <option value="{{ $satu->id }}"> {{ $satu->nama_satuan }}</option>
@@ -68,19 +147,19 @@
                   class="input input-bordered w-full max-w-xs rounded-md" readonly disabled required />
           </label>
 
-          <label class="input border flex items-center gap-2 mt-1">
+          <label class="input border-none flex items-center gap-2 mt-1">
               Status PPN :
-              <select id="status_ppn" name="status_ppn" class="select select-sm select-bordered w-full max-w-xs"
+              <select id="status_ppn" name="status_ppn" class="select-field"
                   onchange="updatePPNValue()">
-                  <option disabled selected>status</option>
+                  <option disabled selected>Status PPN</option>
                   <option value="ya">YA</option>
                   <option value="tidak">TIDAK</option>
               </select>
           </label>
-          <label class="input border flex items-center gap-2 mt-1">
+          <label class="input border-none flex items-center gap-2 mt-1">
               Status Barang :
-              <select name="status" class="select select-sm select-bordered w-full max-w-xs">
-                  <option disabled selected>status</option>
+              <select name="status" class="select-field">
+                  <option disabled selected>Status Barang</option>
                   <option value="AKTIF">AKTIF</option>
                   <option value="NON-AKTIF">NON-AKTIF</option>
               </select>
@@ -171,53 +250,41 @@
           <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
           </form>
-          <h3 class="text-lg font-bold">Edit Data</h3>
+          <h3 class="text-lg font-bold">Edit Data Barang</h3>
           <form action="{{ route('master.barang.edit') }}" method="post">
             @csrf
             <input type="hidden" name="id" value="${id}" class="border-none" />
-            <label class="input border flex items-center gap-2 mt-3">
-              Kode Objek :
-              <input type="text" name="kode_objek" value="${kode_objek}" class="border-none" />
+            <label class="form-label">Kode Objek :</label>
+              <input type="text" name="kode_objek" value="${kode_objek}" class="input-field" />
             </label>
-            <label class="input border flex items-center gap-2 mt-4">
-              Nama :
-              <input type="text" name="nama" value="${nama}" class="border-none" />
-            </label>
+            <label class="form-label">Nama :</label>
+              <input type="text" name="nama" value="${nama}" class="input-field" />
+           
             <input type="hidden" name="nama_singkat" value="${nama}" />
-            <label class="input border flex items-center gap-2 mt-4">
-              Value :
-              <input type="text" name="value" value="${value}" class="border-none text-slate-400" />
-            </label>
-            <label class="input border flex items-center gap-2 mt-4">
-              Status PPN :
-              <select name="status_ppn" class="select select-sm select-bordered w-full max-w-xs">
+            <label class="form-label">Value : </label>
+              <input type="text" name="value" value="${value}" class="input-field" />
+            <label class="form-label">Status PPN :</label>
+              <select name="status_ppn" class="select-field">
                 <option selected>${status_ppn}</option>
                 <option value="ya">YA</option>
                 <option value="tidak">TIDAK</option>
               </select>
-            </label>
-            <label class="input border flex items-center gap-2 mt-1">
-            Status Barang :
-            <select name="status" class="select select-sm select-bordered w-full max-w-xs">
+            <label class="form-label">Status Barang : </label>
+            <select name="status" class="select-field">
               <option selected>${status}</option>
               <option value="AKTIF">AKTIF</option>
               <option value="NON-AKTIF">NON-AKTIF</option>
             </select>
-          </label>
-            <label class="input border flex items-center gap-2 mt-4">
-              Nama Satuan :
-              <select name="id_satuan" class="select select-sm select-bordered w-full max-w-xs">
+            <label class="form-label">Nama Satuan :</label>
+              <select name="id_satuan" class="select-field">
                 <option readonly value="${id_satuan}" selected>${nama_satuan}</option>
                 @foreach ($satuan as $satu)
                 <option value="{{ $satu->id }}"> {{ $satu->nama_satuan }}</option>
                 @endforeach
               </select>
-            </label>
-            <label class="input border flex items-center gap-2 mt-4">
-              Nilai (%)PPN:
-              <input type="number" name="value_ppn" value="${value_ppn}" class="border-none text-slate-400" />
-            </label>
-            <button type="submit" class="btn bg-green-400 text-white font-semibold w-72 mt-4">Edit</button>
+            <label class="form-label">Nilai (%)PPN:</label>
+              <input type="number" name="value_ppn" value="${value_ppn}" class="input-field" />
+            <button type="submit" class="submit-button">Edit</button>
           </form>
           </div>
         </dialog>`);

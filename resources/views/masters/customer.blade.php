@@ -1,7 +1,85 @@
 <x-Layout.layout>
 
   <div id="satu"></div>
+  <style>
+    .modal {
+        top: 0;
+        left: 0;
+        width: 40%;
+        z-index: 1000;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 800px;
+        position: relative;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        font-family: Arial, sans-serif;
+    }
 
+    .kembali-button {
+        display: inline-block;
+        padding: 12px 10px;
+        background-color: #ad0f0f;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+
+    .kembali-button:hover {
+        background-color: #761408;
+    }
+
+
+    .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 20px;
+        background: none;
+        border: none;
+        color: #333;
+        cursor: pointer;
+    }
+
+    /* Form labels and containers */
+    .form-label {
+        display: block;
+        font-weight: bold;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+
+    .input-field,
+    .select-field {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+
+    /* Submit button */
+    .submit-button {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background-color: #e0a50f;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    /* Label for extra info */
+    .label-info {
+        font-size: 12px;
+        color: red;
+    }
+</style>
   <x-master.card-master>
     <x-slot:tittle>Table Customer</x-slot:tittle>
     <div class="overflow-x-auto">
@@ -129,43 +207,27 @@
               <form method="dialog">
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
               </form>
-                <h3 class="text-lg font-bold">Edit Data</h3>
+                <h3 class="text-lg font-bold">Edit Data Customer</h3>
                 <form action="{{route('master.customer.edit')}}" method="post">
                   @csrf
                   <input type="hidden" name="id" value="${id}" class="border-none" />
-                  <label class="input border flex items-center gap-2 mt-3">
-                    Name :
-                    <input type="text" name="nama" value="${nama}" class="border-none" />
-                  </label>
-                  <label class="input border flex items-center gap-2 mt-3">
-                    NPWP :
-                    <input type="text" name="npwp" value="${npwp}" class="border-none" />
-                  </label>
-                  <label class="input border flex items-center gap-2 mt-3">
-                    Nama NPWP :
-                    <input type="text" name="nama_npwp" value="${nama_npwp}" class="border-none" />
-                  </label>
-                  <label class="input border flex items-center gap-2 mt-3">
-                    Email :
-                    <input type="text" name="email" value="${email}" class="border-none" />
-                  </label>
-                  <label class="input border flex items-center gap-2 mt-3">
-                    No.Telp :
-                    <input type="text" name="no_telp" value="${no_telp}" class="border-none" />
-                  </label>
-                  <label class="input border flex items-center gap-2 mt-3">
-                    Alamat :
-                    <input type="text" name="alamat" value="${alamat}" class="border-none" />
-                  </label>
-                  <label class="input border flex items-center gap-2 mt-3">
-                    Kota :
-                    <input type="text" name="kota" value="${kota}" class="border-none" />
-                  </label>
-                  <label class="input border flex items-center gap-2 mt-3">
-                    Alamat NPWP :
-                    <input type="text" name="alamat_npwp" value="${alamat_npwp}" class="border-none" />
-                  </label>
-                  <button type="submit" class="btn bg-green-400 text-white font-semibold w-72 mt-2">Edit</button>
+                  <label class="form-label">Nama :</label>
+                    <input type="text" name="nama" value="${nama}" class="input-field" />
+                  <label class="form-label">NPWP :</label>
+                    <input type="text" name="npwp" value="${npwp}" class="input-field" />
+                  <label class="form-label">Nama NPWP :</label>
+                    <input type="text" name="nama_npwp" value="${nama_npwp}" class="input-field" />
+                  <label class="form-label">Email :</label>
+                    <input type="text" name="email" value="${email}" class="input-field" />
+                  <label class="form-label">No.Telp :</label>
+                    <input type="text" name="no_telp" value="${no_telp}" class="input-field" />
+                  <label class="form-label">Alamat :</label>
+                    <input type="text" name="alamat" value="${alamat}" class="input-field" />
+                  <label class="form-label">Kota : </label>
+                    <input type="text" name="kota" value="${kota}" class="input-field" />
+                  <label class="form-label">Alamat NPWP :</label>
+                    <input type="text" name="alamat_npwp" value="${alamat_npwp}" class="input-field" />
+                  <button type="submit" class="submit-button">Edit</button>
                 </form>
               </div>
             </dialog>`);

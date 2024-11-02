@@ -585,6 +585,7 @@ class JurnalManualController extends Controller
         $nojnl =  $jnl ? $jnl->no + 1 : 1;
         $nomor = $month . '-' . $nojnl . '/' . 'SB' . '/' . $year;
         $transaksi = Transaction::where('id_surat_jalan', $no_SJ)->get();
+        
         $core =  Transaction::where('id_surat_jalan', $request->id_surat_jalan)
         ->where('id_supplier', $request->id_supplier)
         ->get();
@@ -600,6 +601,7 @@ class JurnalManualController extends Controller
         ->where('id_supplier', $request->id_supplier)
         ->update(['invoice_external' => $request->invoice_external]);
 
+       
         if ($core[0]->barang->status_ppn == 'ya') {
                 $value_ppn = $core[0]->barang->value_ppn / 100;
 

@@ -61,16 +61,19 @@
         <div class="page-content">
             <div class="my-5">
                 @if(session('error'))
-                <div role="alert" class="alert alert-error mb-5">
-                    <i class="fa-regular fa-circle-xmark"></i>
-                    <span class="font-medium">{{ session('error') }}</span>
+                <div class="alert alert-error mb-5" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; position: relative;">
+                    <i class="fa-regular fa-circle-xmark" style="margin-right: 10px;"></i>
+                    <strong>{{ session('error') }}</strong>
+                    <button style="position: absolute; top: 5px; right: 10px; background: none; border: none; color: #721c24; font-size: 20px; cursor: pointer;" onclick="this.parentElement.style.display='none';">&times;</button>
                 </div>
-                @elseif(session('success'))
-                <div role="alert" class="alert alert-success mb-5">
-                    <i class="fa-regular fa-circle-check text-xl"></i>
-                    <span class="font-medium">{{ session('success') }}</span>
+            @elseif(session('success'))
+                <div class="alert alert-success mb-5" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; position: relative;">
+                    <i class="fa-regular fa-circle-check" style="margin-right: 10px;"></i>
+                    <strong>{{ session('success') }}</strong>
+                    <button style="position: absolute; top: 5px; right: 10px; background: none; border: none; color: #155724; font-size: 20px; cursor: pointer;" onclick="this.parentElement.style.display='none';">&times;</button>
                 </div>
-                @endif
+            @endif
+            
             </div>
             {{ $slot }}
         </div>

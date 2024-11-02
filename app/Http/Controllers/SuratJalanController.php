@@ -199,6 +199,11 @@ class SuratJalanController extends Controller
                   ->where('tipe', 'BBK')
                   ->whereNotNull('nomor') // Tambahkan validasi nomor tidak kosong
                   ->update(['invoice_external' => $request->invoice_external]);
+
+                  Jurnal::where('invoice_external', $inext)
+                  ->where('tipe', 'JNL')
+                  ->whereNotNull('nomor') // Tambahkan validasi nomor tidak kosong
+                  ->update(['invoice_external' => $request->invoice_external]);
         }
     }
 
@@ -238,7 +243,11 @@ class SuratJalanController extends Controller
     if ($existingJournals->isNotEmpty()) {
         // Jika jurnal sudah ada, cukup update nomor jurnalnya
         foreach ($existingJournals as $journal) {
-            $journal->update(['nomor' => $nomor_surat]);
+            $journal->update([
+                'nomor' => $nomor_surat,
+                'invoice_external' => $invoice_external // Pastikan $invoice_external berisi nilai yang diinginkan
+            ]);
+            
         }
     } else {
         // Buat atau update entri jurnal baru hanya jika belum ada jurnal yang sesuai

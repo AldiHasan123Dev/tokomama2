@@ -568,8 +568,13 @@
                                 <td class="border border-gray-300 px-4 py-2">${mergedData[invoice].tgl[1] ? mergedData[invoice].tgl[1] : '-'}</td>
                                 <td class="border border-gray-300 px-4 py-2">${mergedData[invoice].nomor[1] ? mergedData[invoice].nomor[1] : '-'}</td>
                                 <td class="border border-gray-300 px-4 py-2">${invoice}</td>
-                                <td class="border border-gray-300 px-4 py-2">${number_format(mergedData[invoice].debit)}</td>
-                                <td class="border border-gray-300 px-4 py-2">${number_format(mergedData[invoice].kredit)}</td>
+                                <td class="border border-gray-300 px-4 py-2 ${mergedData[invoice].debit !== mergedData[invoice].kredit ? 'bg-red-500 text-white' : ''}">
+    ${number_format(mergedData[invoice].debit)}
+</td>
+<td class="border border-gray-300 px-4 py-2 ${mergedData[invoice].debit !== mergedData[invoice].kredit ? 'bg-red-500 text-white' : ''}">
+    ${number_format(mergedData[invoice].kredit)}
+</td>
+
                                 <td class="border border-gray-300 px-4 py-2 text-start">${mergedData[invoice].keterangan.join(', <br> ')}</td>
                             </tr>`;
                         }

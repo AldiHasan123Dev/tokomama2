@@ -3,7 +3,7 @@
         <x-slot:tittle>Menu Jurnal</x-slot:tittle>
         <div class="overflow-x-auto">
             <a href="{{ route('jurnal-manual.index') }}">
-                <button class="btn bg-green-500 text-white font-bold hover:bg-green-700">Input Jurnal</button>
+                <button class="btn bg-green-500 text-white font-bold hover:bg-green-700 mt-5">Input Jurnal</button>
             </a>
 
             <a href="{{ route('jurnal.jurnal-merger') }}">
@@ -167,7 +167,7 @@
                         <th>Debit</th>
                         <th>Kredit</th>
                         <th>Keterangan</th>
-                        <th>Invoice External</th>
+                        <th>Invoice Supplier</th>
                         <th>Nopol</th>
                         <th>Kaitan BB Pembantu</th>
                         <th class="hidden">no</th>
