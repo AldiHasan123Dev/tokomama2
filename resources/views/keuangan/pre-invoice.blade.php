@@ -64,32 +64,38 @@
                             name: 'DT_RowIndex',
                             index: 'DT_RowIndex',
                             label: 'No.',
-                            width: 40,
+                            width: 20,
                             align: 'center'
                         },
                         {
                             search: true,
                             name: 'nomor_surat',
                             index: 'nomor_surat',
-                            label: 'Nomor Surat'
+                            width: 130,
+                            label: 'Nomor Surat',
+                            align: 'center'
                         },
                         {
                             search: true,
                             name: 'customer',
                             index: 'customer',
-                            label: 'Customer'
+                            label: 'Customer',
+                            width: 130
                         },
                         {
                             search: true,
                             name: 'nama_barang',
                             index: 'nama_barang',
+                            width: 200,
                             label: 'Nama Barang'
                         },
                         {
                             search: true,
                             name: 'sisa',
                             index: 'sisa',
-                            label: 'Sisa'
+                            label: 'Sisa',
+                            width: 50,
+                            align: 'right'
                         },
                         {
                             search: true,
@@ -97,10 +103,12 @@
                             index: 'harga_jual',
                             label: 'Harga Jual',
                             formatter: 'number',
+                            width: 100,
                             formatoptions: {
                                 decimalPlaces: 2, 
                                 thousandsSeparator: ',', 
-                            }
+                            },
+                            align: 'right'
                         },
                         {
                             search: true,
@@ -111,31 +119,36 @@
                             formatoptions: {
                                 decimalPlaces: 2, 
                                 thousandsSeparator: ',', 
-                            }
+                            },
+                            align: 'right'
                         },
                         {
                             search: true,
                             name: 'nama_kapal',
                             index: 'nama_kapal',
-                            label: 'Nama Kapal'
+                            label: 'Nama Kapal',
+                            align: 'center'
                         },
                         {
                             search: true,
                             name: 'no_cont',
                             index: 'no_cont',
-                            label: 'No. Count'
+                            label: 'No. Count',
+                            align: 'center'
                         },
                         {
                             search: true,
                             name: 'no_seal',
                             index: 'no_seal',
-                            label: 'No. Seal'
+                            label: 'No. Seal',
+                            align: 'center'
                         },
                         {
                             search: true,
                             name: 'no_pol',
                             index: 'no_pol',
-                            label: 'No. Pol'
+                            label: 'No. Pol',
+                            align: 'center'
                         },
                         {
                             name: 'id',

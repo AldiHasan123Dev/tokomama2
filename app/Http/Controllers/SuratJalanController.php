@@ -398,7 +398,7 @@ class SuratJalanController extends Controller
 
     public function dataTable()
     {
-        $data = SuratJalan::query()->orderBy('nomor_surat', 'desc');
+        $data = SuratJalan::query()->orderBy('tgl', 'desc');
         
         // $data = SuratJalan::query()->join('ekspedisi', 'ekspedisi.id', '=', 'surat_jalan.id_ekspedisi')->join('transaction', 'transaction.id_surat_jalan', '=', 'surat_jalan.id')->select('surat_jalan.*', 'ekspedisi.nama', 'transaction.id_surat_jalan', 'transaction.harga_jual', 'transaction.jumlah_jual', 'transaction.harga_beli', 'transaction.jumlah_beli');
 

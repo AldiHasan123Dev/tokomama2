@@ -17,7 +17,7 @@ class InvoiceController extends Controller
     public function dataTable()
     {
         // $data = SuratJalan::query()->whereNull('invoice');
-        $query = Transaction::query()->where('sisa','>','0')->where('harga_jual','>','0')->where('harga_beli','>','0')->get();
+        $query = Transaction::query()->where('sisa','>','0')->where('harga_jual','>','0')->where('harga_beli','>','0')->orderBy('created_at', 'desc')->get();
         $data = TransactionResource::collection($query);
         $res =  $data->toArray(request());
 
