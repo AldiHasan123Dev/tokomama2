@@ -267,7 +267,7 @@ class SuratJalanController extends Controller
                         [
                             'nomor' => $nomor_surat,
                             'tgl' => date('Y-m-d'),
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_jual, 0, ',', '.') . ' ' .  $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 0, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
+                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_jual, 0, ',', '.') . ' ' .  $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
                             'debit' => round($item->harga_beli * $item->jumlah_jual),
                             'kredit' => 0,
                             'invoice' => 0,
@@ -289,7 +289,7 @@ class SuratJalanController extends Controller
                         [
                             'nomor' => $nomor_surat,
                             'tgl' => date('Y-m-d'),
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_jual, 0, ',', '.') . ' ' . $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 0, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
+                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_jual, 0, ',', '.') . ' ' . $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
                             'debit' => 0,
                             'kredit' => round($item->harga_beli * $item->jumlah_jual),
                             'invoice' => 0,
@@ -487,7 +487,7 @@ class SuratJalanController extends Controller
             'DT_RowIndex' => $index,
             'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
             'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 2, ',', '.') : '-',
-            'jumlah_beli' => $row->total_jumlah_beli ? number_format($row->total_jumlah_beli, 2, ',', '.') : '-',
+            'jumlah_beli' => $row->total_jumlah_beli ? number_format($row->total_jumlah_beli, 0, ',', '.') : '-',
             'total' => number_format($subtotal, 2, ',', '.'),
             'ppn' => number_format($ppn, 2, ',', '.'),
             'supplier' => $row->suppliers->nama ?? '-',

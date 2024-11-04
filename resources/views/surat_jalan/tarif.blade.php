@@ -200,7 +200,7 @@
                             label: 'Jumlah Beli',
                             name: 'jumlah_beli',
                             width: 150,
-                              align: 'right'
+                            align: 'right'
                         },
                         {
                             search: true,
@@ -214,14 +214,43 @@
                             label: 'Harga Jual',
                             name: 'harga_jual',
                             width: 150,
-                            align: 'right'
+                            align: 'right',
+                            formatter: function(cellValue) {
+                                if (!isNaN(cellValue)) {
+                                    let parts = cellValue.toString().split('.');
+                                    let formattedInteger = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",");
+                                    if (parts.length > 1) {
+                                        if (parseInt(parts[1]) !== 0) {
+                                            return `${formattedInteger}.<span style="color: red;">${parts[1]}</span>`;
+                                        }
+                                    }
+                                    return formattedInteger + (parts[1] ? '.' + parts[1] : '');
+                                }
+                                return cellValue;
+                            }
                         },
                         {
                             search: true,
                             label: 'Harga Beli',
                             name: 'harga_beli',
                             width: 150,
-                            align: 'right'
+                            align: 'right',
+                            formatter: function(cellValue) {
+                                if (!isNaN(cellValue)) {
+                                    let parts = cellValue.toString().split('.');
+                                    let formattedInteger = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",");
+                                    if (parts.length > 1) {
+                                        if (parseInt(parts[1]) !== 0) {
+                                            return `${formattedInteger}.<span style="color: red;">${parts[1]}</span>`;
+                                        }
+                                    }
+                                    return formattedInteger + (parts[1] ? '.' + parts[1] : '');
+                                }
+                                return cellValue;
+                            }
+
                         },
                         {
                             search: true,
@@ -254,7 +283,7 @@
                             label: 'No. Pol',
                             name: 'no_pol',
                             width: 150,
-                             align: 'center'
+                            align: 'center'
                         },
                         {
                             search: true,
@@ -423,7 +452,7 @@
                 $('#harga_beli').val(beli);
                 $('#profit').val(margin);
                 nama_barang = nama_barang.replace(/\+/g, ' ').replace(/%40/g, '@')
-            .trim(); // Menghapus '+' dan mengganti '%40' dengan '@'
+                    .trim(); // Menghapus '+' dan mengganti '%40' dengan '@'
 
                 // Mengatur innerHTML
                 document.getElementById('barang').innerHTML = `${nama_barang} (Harga PER - ${satuan_jual})`;

@@ -501,9 +501,9 @@
 
                     rows += `<tr>
                         <td colspan="2" class="border border-gray-300 px-4 py-2 font-bold">Total</td>
-                        <td class="border border-gray-300 px-4 py-2 font-bold">${number_format(totalDebit)}</td>
-                        <td class="border border-gray-300 px-4 py-2 font-bold">${number_format(totalKredit)}</td>
-                        <td class="border border-gray-300 px-4 py-2 font-bold">SALDO: ${number_format(saldo)}</td>
+                        <td class="border border-gray-300 text-right font-bold">${number_format(totalDebit)}</td>
+                        <td class="border border-gray-300 px-4 text-right font-bold">${number_format(totalKredit)}</td>
+                        <td class="border border-gray-300 text-right font-bold">SALDO: ${number_format(saldo)}</td>
                     </tr>`;
 
                     $('#modalBody1').append(rows);
@@ -568,10 +568,10 @@
                                 <td class="border border-gray-300 px-4 py-2">${mergedData[invoice].tgl[1] ? mergedData[invoice].tgl[1] : '-'}</td>
                                 <td class="border border-gray-300 px-4 py-2">${mergedData[invoice].nomor[1] ? mergedData[invoice].nomor[1] : '-'}</td>
                                 <td class="border border-gray-300 px-4 py-2">${invoice}</td>
-                                <td class="border border-gray-300 px-4 py-2 ${mergedData[invoice].debit !== mergedData[invoice].kredit ? 'bg-red-500 text-white' : ''}">
+                                <td class="border border-gray-300 text-right ${mergedData[invoice].debit !== mergedData[invoice].kredit ? 'bg-red-500 text-white' : ''}">
     ${number_format(mergedData[invoice].debit)}
 </td>
-<td class="border border-gray-300 px-4 py-2 ${mergedData[invoice].debit !== mergedData[invoice].kredit ? 'bg-red-500 text-white' : ''}">
+<td class="border border-gray-300 text-right ${mergedData[invoice].debit !== mergedData[invoice].kredit ? 'bg-red-500 text-white' : ''}">
     ${number_format(mergedData[invoice].kredit)}
 </td>
 
@@ -580,10 +580,10 @@
                         }
 
                         rows += `<tr>
-                            <td colspan="2" class="border border-gray-300 px-4 py-2 font-bold">Total</td>
-                            <td class="border border-gray-300 px-4 py-2 font-bold">${number_format(totalDebit)}</td>
-                            <td class="border border-gray-300 px-4 py-2 font-bold">${number_format(totalKredit)}</td>
-                            <td class="border border-gray-300 px-4 py-2 font-bold">SALDO: ${number_format(saldo)}</td>
+                            <td colspan="5" class="border border-gray-300 px-4 py-2 font-bold">Total</td>
+                            <td class="border border-gray-300 text-right font-bold">${number_format(totalDebit)}</td>
+                            <td class="border border-gray-300 text-right font-bold">${number_format(totalKredit)}</td>
+                            <td class="border border-gray-300 px-4 py-2 text-start font-bold">SALDO: ${number_format(saldo)}</td>
                         </tr>`;
 
                         $('#modalBody').append(rows);

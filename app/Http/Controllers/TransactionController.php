@@ -124,9 +124,9 @@ class TransactionController extends Controller
                     'barang' => $row->barang->nama,
                     'profit' => $row->margin ? number_format($row->margin) : '-',
                     'jumlah_jual' => $row->jumlah_jual ? number_format($row->jumlah_jual) : '-',
-                    'harga_jual' => $row->harga_jual ? number_format($row->harga_jual) : '-',
+                    'harga_jual' => $row->harga_jual ? $row->harga_jual : '-',
                     'satuan_jual' => $row->satuan_jual,
-                    'harga_beli' => $row->harga_beli ? number_format($row->harga_beli) : '-',
+                    'harga_beli' => $row->harga_beli ? $row->harga_beli : '-',
                     'jumlah_beli' => $row->jumlah_beli ? number_format($row->jumlah_beli) : '-',
                     'satuan_beli' => $row->satuan_beli,
                     'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
@@ -138,6 +138,7 @@ class TransactionController extends Controller
             }),
         ]);
     }
+    
     
 
     private function getActionButton($row)
