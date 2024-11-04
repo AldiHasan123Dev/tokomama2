@@ -102,25 +102,38 @@
                             name: 'harga_jual',
                             index: 'harga_jual',
                             label: 'Harga Jual',
-                            formatter: 'number',
                             width: 100,
                             formatoptions: {
-                                decimalPlaces: 2, 
+                                decimalPlaces: 4, 
                                 thousandsSeparator: ',', 
                             },
-                            align: 'right'
+                            align: 'right',
+                            formatter: function(cellValue) {
+                                if (!isNaN(cellValue)) {
+                                    let parts = cellValue.toString().split('.');
+                                    let formattedInteger = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",");
+                                    if (parts.length > 1) {
+                                        if (parseInt(parts[1]) !== 0) {
+                                            return `${formattedInteger}.<span style="color: red;">${parts[1]}</span>`;
+                                        }
+                                    }
+                                    return formattedInteger + (parts[1] ? '.' + parts[1] : '');
+                                }
+                                return cellValue;
+                            }
                         },
                         {
                             search: true,
                             name: 'subtotal',
                             index: 'subtotal',
                             label: 'Subtotal',
-                            formatter: 'number',
                             formatoptions: {
-                                decimalPlaces: 2, 
+                                decimalPlaces: 4, 
                                 thousandsSeparator: ',', 
                             },
-                            align: 'right'
+                            align: 'right',
+                            formatter: 'number'
                         },
                         {
                             search: true,
