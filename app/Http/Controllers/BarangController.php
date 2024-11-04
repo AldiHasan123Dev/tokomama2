@@ -72,7 +72,7 @@ class BarangController extends Controller
         // dd($request->all());
         $data->kode_objek = $request->kode_objek;
         $data->nama = $request->nama;
-        $data->nama_singkat = $request->nama_singkat;
+        $data->nama_singkat = $request->nama;
         $data->value = $request->value;
         $data->status = $request->status;
         $data->id_satuan = $request->id_satuan;
