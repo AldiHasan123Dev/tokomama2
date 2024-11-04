@@ -114,7 +114,7 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>List Belum Input Harga</x-slot:tittle>
+        <x-slot:tittle>List Belum Input Harga (Yang ada PPN, Isikan sampai 4 angka dibelakang koma)</x-slot:tittle>
         <div class="overflow-x-auto">
             <table id="table-non-tarif" class="table"></table>
             <div id="pager-non-tarif"></div>
@@ -122,7 +122,7 @@
     </x-keuangan.card-keuangan>
 
     <x-keuangan.card-keuangan class="mt-3">
-        <x-slot:tittle>List Sudah Input Harga</x-slot:tittle>
+        <x-slot:tittle>List Sudah Input Harga <span style="color: red;">(Warna merah adalah angka di belakang koma)</span></x-slot:tittle>
         <div class="overflow-x-auto">
             <table class="table" id="table-tarif"></table>
             <div id="pager-tarif"></div>

@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
 //    Route::resource('jurnal', JurnalController::class);
     Route::get('/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
+    Route::get('/data-jurnal', [JurnalController::class, 'dataJurnal'])->name('jurnal.data');
     Route::get('/jurnal-edit', [JurnalController::class, 'edit'])->name('jurnal.edit');
     Route::get('/jurnal-merger', [JurnalController::class, 'merger'])->name('jurnal.jurnal-merger');
     Route::post('/jurnal-merger', [JurnalController::class, 'merger_store'])->name('jurnal.jurnal-merger');

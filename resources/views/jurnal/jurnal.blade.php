@@ -1,4 +1,10 @@
 <x-Layout.layout>
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
+        integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
+    </head>
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Menu Jurnal</x-slot:tittle>
         <div class="overflow-x-auto">
@@ -154,47 +160,8 @@
                 </div>
             </div>
 
-            <table id="coa_table" class="cell-border hover display nowrap compact">
-                <!-- head -->
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Tipe</th>
-                        <th>Nomor</th>
-                        <th>No. Akun</th>
-                        <th>Nama Akun</th>
-                        <th>Invoice</th>
-                        <th>Debit</th>
-                        <th>Kredit</th>
-                        <th>Keterangan</th>
-                        <th>Invoice Supplier</th>
-                        <th>Nopol</th>
-                        <th>Kaitan BB Pembantu</th>
-                        <th class="hidden">no</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($data as $d)
-                        <tr>
-                            <td>{{ $d->tgl }}</td>
-                            <td>{{ $d->tipe }}</td>
-                            <td>{{ $d->nomor }}</td>
-                            <td>{{ $d->no_akun }}</td>
-                            <td>{{ $d->nama_akun }}</td>
-                            <td> {{ $d->invoice == 0 ? '' : ($d->invoice ?? '-') }}</td>
-                            <td class="text-end">{{ number_format($d->debit, 2, ',', '.') }}</td>
-                            <td class="text-end">{{ number_format($d->kredit, 2, ',', '.') }}</td>
-                            <td>{{ $d->keterangan }}</td>
-                            <td>
-                                {{ $d->invoice_external == 0 ? '' : ($d->invoice_external ?? '-') }}
-                            </td>                            
-                            <td>{{ $d->nopol }}</td>
-                            <td>{{ $d->keterangan_buku_besar_pembantu }}</td>
-                            <td class="hidden">{{ $d->no }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <table id="coa_table" class="cell-border hover display nowrap compact"></table>
+            <div id="coaPager"></div>
         </div>
     </x-keuangan.card-keuangan>
 
@@ -246,33 +213,104 @@
             </div>
         </center>
     </x-keuangan.card-keuangan>
-
+    <script type="text/ecmascript" src="{{ asset('assets/js/grid.locale-en.js') }}"></script>
+    <script type="text/ecmascript" src="{{ asset('assets/js/jquery.jqGrid.min.js') }}"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/select/2.0.3/js/dataTables.select.js"></script>
     <script src="https://cdn.datatables.net/2.1.0/js/dataTables.tailwindcss.js"></script>
     <script>
         $(document).ready(function() {
-            var table = $('#coa_table').DataTable({
-                order: [
-                    [0]
-                ],
-                pageLength: 100,
-                select: true,
+            var table = $("#coa_table").jqGrid({
+    url: "{{ route('jurnal.data') }}", // Specify the URL to fetch data
+    datatype: "json",
+    mtype: "GET",
+    colNames: [
+        'No',
+        'Tanggal', 
+        'Tipe', 
+        'Nomor', 
+        'No. Akun', 
+        'Nama Akun', 
+        'Invoice', 
+        'Debit', 
+        'Kredit', 
+        'Keterangan', 
+        'Invoice Supplier', 
+        'Nopol', 
+        'Kaitan BB Pembantu', 
+        'no'
+    ],
+    colModel: [
+        { search: true, name: 'DT_RowIndex', index: 'DT_RowIndex', width: 30, align: 'center' },
+        { search: true, name: 'tgl', index: 'tgl', width: 90, align: 'center' },
+        { search: true, name: 'tipe', index: 'tipe', width: 50, align: 'center' },
+        { search: true, name: 'nomor', index: 'nomor', width: 100, align: 'center' },
+        { search: true, name: 'no_akun', index: 'no_akun', width: 70 },
+        { search: true, name: 'nama_akun', index: 'nama_akun', width: 160 },
+        { search: true, name: 'invoice', index: 'invoice', width: 120 },
+        { search: true, name: 'debit', index: 'debit', width: 120, formatter: 'currency', formatoptions: { prefix: '', thousandsSeparator: '.', decimalPlaces: 2 }, align: 'right' },
+        { search: true, name: 'kredit', index: 'kredit', width: 120, formatter: 'currency', align: 'right', formatoptions: { prefix: '', thousandsSeparator: '.', decimalPlaces: 2 } },
+        { search: true, name: 'keterangan', index: 'keterangan', width: 200 },
+        { search: true, name: 'invoice_external', index: 'invoice_external', align: 'center', width: 100 },
+        { search: true, name: 'nopol', index: 'nopol', width: 100, align: 'center' },
+        { search: true, name: 'keterangan_buku_besar_pembantu', index: 'keterangan_buku_besar_pembantu', align: 'center', width: 100 },
+        { search: true, name: 'no', index: 'no', hidden: true } // Hidden column
+    ],
+    pager: "#coaPager",
+    rowNum: 20, // Jumlah baris per halaman
+    rowList: [10, 20, 50], // Opsi jumlah baris yang bisa dipilih
+    viewrecords: true, // Menampilkan informasi record
+    autowidth: true, // Menyesuaikan lebar otomatis
+    height: 'auto', // Tinggi tabel otomatis
+    loadonce: true,
+    serverPaging: true,
+    jsonReader: {
+        repeatitems: false,
+        root: "data",
+        page: "current_page",
+        total: "last_page",
+        records: "total"
+    },
+    loadComplete: function(data) {
+        console.log("Load complete: ", data); // Menampilkan data yang diterima saat grid selesai dimuat
+        $("#coa_table").jqGrid('filterToolbar');
+    },
+    ajaxGridOptions: {
+        beforeSend: function() {
+            console.log("Fetching data from server..."); // Log saat data sedang diambil
+        },
+        error: function(xhr, status, error) {
+            console.log("Error fetching data: ", error); // Log jika ada error saat pengambilan data
+        }
+    },
+    onSelectRow: function(id) {
+        const rowData = $("#coa_table").jqGrid('getRowData', id);
+        console.log("Selected row data: ", rowData); // Menampilkan data baris yang dipilih
+        $('#nomor').val($.trim(rowData.nomor));
+        $('.btn').removeClass('hidden');
+        $('#print').attr('href', "{{ route('invoice.print', ['id' => ':id']) }}".replace(':id', rowData.id));
+    }
+}).navGrid('#coaPager', { // Opsi untuk navigasi pada pager
+    edit: false,
+    add: false,
+    del: false,
+    search: false, // Disable search dari navGrid
+    refresh: true,
+}, {}, {}, {}, {
+    closeAfterSearch: true,
+    closeAfterReset: true,
+    searchOnEnter: true,
+});
 
-            });
+// Fungsi untuk menyegarkan tabel
+function refreshTable() {
+    $("#coa_table").trigger("reloadGrid", [{ page: 1 }]);
+}
+
+
+
 
             var MonJNL = $('#monitoring_JNL').DataTable({})
-
-            $('#coa_table tbody').on('click', 'tr', function() {
-                const row = table.row(this).data();
-                console.log(row);
-                // $('#tipe').val(row[1]);
-                // $('#no').val(row[12]);
-                $('#nomor').val($.trim(row[2]).trim(/%2F/g, ''));
-                $('.btn').removeClass('hidden');
-                $('#print').attr('href', "{{ route('invoice.print', ['id' => ':id']) }}".replace(':id', row
-                    .id));
-            });
 
             $(`#thn`).on(`change`, function() {
                 $(`#y1`).val($(this).val())
