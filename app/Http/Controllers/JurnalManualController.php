@@ -382,7 +382,7 @@ class JurnalManualController extends Controller
             }
         }
 
-        return redirect()->route('jurnal.index')->with('success', 'Data jurnal berhasil disimpan.');
+        return redirect()->back()->with('success', 'Data jurnal berhasil disimpan.');
 
     }
 
