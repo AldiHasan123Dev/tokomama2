@@ -81,7 +81,7 @@ class JurnalController extends Controller
 {
     // Membangun query untuk mengambil data dari tabel jurnal dan coa
     $query = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
-        ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->orderBy('tgl', 'desc');
+        ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->orderBy('tgl', 'desc')->orderBy('created_at', 'desc')->orderBy('no', 'desc')->orderBy('id', 'asc');
 
     // Filter berdasarkan bulan dan tahun jika diberikan
     if ($request->has('month') && $request->has('year')) {
@@ -91,7 +91,7 @@ class JurnalController extends Controller
 
     // Filter berdasarkan tipe jika diberikan
     if ($request->has('tipe')) {
-        $query->where('tipe', $request->input('tipe'));
+        $query->orderBy('tipe', $request->input('tipe'));
     }
 
     // Ambil semua data yang sesuai dengan query

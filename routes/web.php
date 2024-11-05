@@ -21,6 +21,7 @@ use App\Http\Controllers\NopolController;
 use App\Http\Controllers\PajakController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SuratJalanController;
@@ -203,6 +204,12 @@ Route::prefix('master')->controller(SupplierController::class)->middleware('auth
     Route::post('supplier-add', 'store')->name('master.supplier.add');
     Route::post('supplier-edit', 'update')->name('master.supplier.edit');
     Route::post('supplier-delete', 'destroy')->name('master.supplier.delete');
+});
+
+
+Route::prefix('laporan')->controller(LaporanController::class)->middleware('auth')->group(function () {
+    Route::get('hutang-vendor', 'dataLHV')->name('laporan.LHV');
+    Route::get('piutang-customer', 'dataLPC')->name('laporan.LPC');
 });
 
 // Route::prefix('jurnal')->controller(CoaController::class)->middleware('auth')->group(function () {
