@@ -364,7 +364,7 @@
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
-                            alert("Data Master Barang berhasil dihapus!");
+                            alert("Data Jurnal berhasil dihapus!");
                             location.reload();
                         },
                         error: function(xhr, status, error) {

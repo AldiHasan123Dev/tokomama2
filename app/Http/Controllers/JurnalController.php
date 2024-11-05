@@ -669,11 +669,21 @@ class JurnalController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Jurnal $jurnal)
-    {
-        $data = Jurnal::destroy(request('id'));
-        $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
-        return redirect($redirectUrl)->with('success', 'Data Jurnal berhasil dihapus!');
+{
+    // Menghapus jurnal berdasarkan ID yang dikirim
+    $data = Jurnal::destroy(request('id'));
+    
+    // Mendapatkan URL redirect dari session
+    $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    
+    // Memeriksa apakah redirectUrl ada, jika tidak maka mengarahkan ke jurnal.index
+    if (!$redirectUrl) {
+        return redirect()->route('jurnal.index')->with('success', 'Data Jurnal berhasil dihapus!');
     }
+
+    return redirect($redirectUrl)->with('success', 'Data Jurnal berhasil dihapus!');
+}
+
 
     public function dataTable()
     {
