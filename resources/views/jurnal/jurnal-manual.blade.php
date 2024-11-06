@@ -342,7 +342,7 @@
                                 <td>
                                     <input type="hidden" name="invoice[0]" value="">
                                     <select class="select select-bordered w-36" name="invoice[0]" id="invoice-1i">
-                                        <option value="0" selected></option>
+                                        <option value="" selected></option>
                                         @foreach ($processedInvoices as $item)
                                             <option value="{{ $item }}">{{ $item }}</option>
                                         @endforeach
@@ -361,7 +361,7 @@
                                     <input type="hidden" name="akun_debet[0]" value="0">
                                     <select class="select select-bordered w-36 calc_debit-1 1debit-0 debit-1"
                                         name="akun_debet[0]" id="akun_debet-1i">
-                                        <option value="0"></option>
+                                        <option value=""></option>
                                         @foreach ($coa as $item)
                                             <option value="{{ $item->id }}">{{ $item->no_akun }} -
                                                 {{ $item->nama_akun }}</option>
@@ -372,7 +372,7 @@
                                     <input type="hidden" name="akun_kredit[0]" value="0">
                                     <select class="select select-bordered w-36 calc_kredit-1 1credit-0 credit-1"
                                         name="akun_kredit[0]" id="akun_kredit-1i">
-                                        <option value="0"></option>
+                                        <option value=""></option>
                                         @foreach ($coa as $item)
                                             <option value="{{ $item->id }}">{{ $item->no_akun }} -
                                                 {{ $item->nama_akun }}</option>
@@ -392,7 +392,7 @@
                                     <input type="hidden" name="invoice_external[0]" value="">
                                     <select class="select select-bordered w-36" name="invoice_external[0]"
                                         id="invoice_external-1i">
-                                        <option value="0" selected></option>
+                                        <option value="" selected></option>
                                         @foreach ($procTransactions as $item)
                                             <option value="{{ $item }}">{{ $item }}</option>
                                         @endforeach
@@ -544,9 +544,9 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="hidden" name="akun_debet[${no - 1}]" value="0">
+                                    <input type="hidden" name="akun_debet[${no - 1}]" value="">
                                     <select class="select select-bordered w-36 calc_debit-${no - 1} debit-${num}" onchange="total()" name="akun_debet[${no - 1}]" id="akun_debet-${no}i">
-                                        <option id="option_debet-${no - 1}" value="0"></option>
+                                        <option id="option_debet-${no - 1}" value=""></option>
                                         @foreach ($coa as $item)
                                         <option value="{{ $item->id }}">{{ $item->no_akun }} - {{ $item->nama_akun }}</option>
                                         @endforeach
@@ -555,7 +555,7 @@
                                 <td>
                                     <input type="hidden" name="akun_kredit[${no - 1}]" value="">
                                     <select class="select select-bordered w-36 calc_kredit-${no} credit-${num}" onchange="total()" name="akun_kredit[${no - 1}]" id="akun_kredit-${no}i">
-                                        <option id="option_kredit-${no - 1}" value="0"></option>
+                                        <option id="option_kredit-${no - 1}" value=""></option>
                                         @foreach ($coa as $item)
                                         <option value="{{ $item->id }}">{{ $item->no_akun }} - {{ $item->nama_akun }}</option>
                                         @endforeach
@@ -580,7 +580,7 @@
                                 <td>
                                     <input type="hidden" name="keterangan_buku_besar_pembantu[${no - 1}]" value="">
                                     <select name="keterangan_buku_besar_pembantu[${no - 1}]" id="keterangan_buku_besar_pembantu-${no}" class="select select-bordered w-full max-w-xs">
-                                        <option value=""></option>
+                                        <option value="0"></option>
                                         @foreach ($uniqueNomors as $nomor)
                                             <option value="{{ $nomor }}">{{ $nomor }}</option>
                                         @endforeach
@@ -882,7 +882,7 @@
                 <input type="hidden" name="akun_debet[${newRowId - 1}]" value="">
                 <select class="select select-bordered w-36 max-w-xs calc_debit-${newRowId - 1} debit-${num}" onchange="total()" name="akun_debet[${newRowId - 1}]" id="akun_debet-${newRowId}i">
                     @foreach ($coa as $item)
-                    <option value="0" selected></option>
+                    <option value="" selected></option>
                     <option value="{{ $item->id }}">{{ $item->no_akun }} - {{ $item->nama_akun }}</option>
                     @endforeach
                 </select>
@@ -891,7 +891,7 @@
                 <input type="hidden" name="akun_kredit[${newRowId - 1}]" value="">
                 <select class="select select-bordered w-36 max-w-xs calc_kredit-${newRowId} credit-${num}" onchange="total()" name="akun_kredit[${newRowId - 1}]" id="akun_kredit-${newRowId}i">
                     @foreach ($coa as $item)
-                    <option value="0" selected></option>
+                    <option value="" selected></option>
                     <option value="{{ $item->id }}">{{ $item->no_akun }} - {{ $item->nama_akun }}</option>
                     @endforeach
                 </select>

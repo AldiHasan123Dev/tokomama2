@@ -1,15 +1,18 @@
 <x-Layout.layout>
     <style>
         .table-responsive td {
-            white-space: nowrap; /* Mencegah teks terpotong dan menjaga agar tetap dalam satu baris */
+            white-space: nowrap;
+            /* Mencegah teks terpotong dan menjaga agar tetap dalam satu baris */
         }
-    
+
         .d-flex.flex-row {
-            gap: 10px; /* Menambah jarak antar elemen dalam baris */
+            gap: 10px;
+            /* Menambah jarak antar elemen dalam baris */
         }
-    
+
         /* Atur lebar minimum kolom agar cukup besar untuk data */
-        th, td {
+        th,
+        td {
             min-width: 150px;
         }
     </style>
@@ -217,95 +220,103 @@
                     <i class="fa-solid fa-file-excel mr-2"></i>
                     Export Excel
                 </a>
-                <div class="table-responsive">
-                <table id="table-ncs" class="w-full">
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>Tanggal </th>
-                            <th>Nomor </th>
-                            <th>Keterangan</th>
-                            <th>Debit</th>
-                            <th>Kredit</th>
-                            <th>Saldo</th>
-                            <th>Tanggal </th>
-                            <th>Nomor </th>
-                            <th>Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        @foreach ($ncsDetails as $key => $ncs)
-                            @php $nomorUtama = $key + 1; @endphp <!-- Variabel untuk nomor utama -->
+                <div class="table-responsive" style="overflow-x: auto; border: 1px solid black;">
+                    <table id="table-ncs"style="border: 1px solid black;">
+                        <thead>
                             <tr>
-                                <td>{{ $nomorUtama }}</td>
-                                <td>{{ $ncs['tgl'] }}</td>
-                                <td>{{ $ncs['nomor'] }}</td>
-                                <td >{{ $ncs['keterangan'] }}</td>
-                                <td>{{ number_format($ncs['debit'], 2, ',', '.') }}</td>
-                                <td>{{ number_format($ncs['kredit'], 2, ',', '.') }}</td>
-                                <td>
-                                    @if ($tipe == 'K')
-                                        {{ number_format($ncs['kredit'] - $ncs['debit'], 0, ',', '.') }}
-                                    @else
-                                        {{ number_format($ncs['debit'] - $ncs['kredit'], 0, ',', '.') }}
-                                    @endif
-                                </td>
-                                <td>
-                                    @if (isset($ncs['details']) && count($ncs['details']) > 0)
-                                        <div style="display: flex; gap: 50px;">
-                                            @foreach ($ncs['details'] as $detail)
-                                                <span>{{ $detail['tgl'] }}</span>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <span>-</span>
-                                    @endif
-                                </td>  
-                                <td>
-                                    @if (isset($ncs['details']) && count($ncs['details']) > 0)
-                                        <div style="display: flex; gap: 50px;">
-                                            @foreach ($ncs['details'] as $detail)
-                                                <span>{{ $detail['nomor'] }}</span>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <span>-</span>
-                                    @endif
-                                </td>  
-                                <td>
-                                    @if (isset($ncs['details']) && count($ncs['details']) > 0)
-                                        <div style="display: flex; gap: 50px;">
-                                            @foreach ($ncs['details'] as $detail)
-                                                <span>{{ $detail['keterangan'] }}</span>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <span>-</span>
-                                    @endif
-                                </td>                                
+                                <th style="border: 1px solid black; width: 30px;" class="text-center">No.</th>
+                                <th style="border: 1px solid black;" class="text-center">Tanggal </th>
+                                <th style="border: 1px solid black;" class="text-center">Nomor </th>
+                                <th style="border: 1px solid black;" class="text-center">Keterangan</th>
+                                <th style="border: 1px solid black;" class="text-center">Debit</th>
+                                <th style="border: 1px solid black;" class="text-center">Kredit</th>
+                                <th style="border: 1px solid black;" class="text-center">Saldo</th>
+                                <th style="border: 1px solid black;" class="text-center">Tanggal </th>
+                                <th style="border: 1px solid black;" class="text-center">Nomor </th>
+                                <th style="border: 1px solid black;" class="text-center">Keterangan</th>
                             </tr>
-                            @endforeach
-                    </tbody>
+                        </thead>
+                        <tbody>
 
-                    <tfoot>
-                        <tr>
-                            <th colspan="4" class="text-center">Total</th>
-                            <th>{{ number_format($ncsDebitTotal, 0, ',', '.') }}</th>
-                            <th>{{ number_format($ncsKreditTotal, 0, ',', '.') }}</th>
-                            <th>
-                                @php
-                                    $totalSaldo =
-                                        $tipe == 'K'
-                                            ? $ncsKreditTotal - $ncsDebitTotal
-                                            : $ncsDebitTotal - $ncsKreditTotal;
-                                @endphp
-                                {{ number_format($totalSaldo, 0, ',', '.') }}
-                            </th>
-                            <th colspan="3"></th>
-                        </tr>
-                    </tfoot>
-                </table>
+                            @foreach ($ncsDetails as $key => $ncs)
+                                @php $nomorUtama = $key + 1; @endphp <!-- Variabel untuk nomor utama -->
+                                <tr>
+                                    <td style="border: 1px solid black;" class="text-center">{{ $nomorUtama }}</td>
+                                    <td style="border: 1px solid black;" class="text-center">{{ $ncs['tgl'] }}</td>
+                                    <td style="border: 1px solid black;" class="text-center">{{ $ncs['nomor'] }}</td>
+                                    <td style="border: 1px solid black;">{{ $ncs['keterangan'] }}</td>
+                                    <td style="border: 1px solid black; 
+    @if ($ncs['debit'] != $ncs['kredit']) background-color: red; color:white; @endif
+"
+                                        class="text-right">
+                                        {{ number_format($ncs['debit'], 2, ',', '.') }}
+                                    </td>
+                                    <td style="border: 1px solid black; 
+    @if ($ncs['debit'] != $ncs['kredit']) background-color: red; color:white; @endif
+"
+                                        class="text-right">
+                                        {{ number_format($ncs['kredit'], 2, ',', '.') }}
+                                    </td>
+
+                                    <td style="border: 1px solid black;" class="text-right">
+                                        @if ($tipe == 'K')
+                                            {{ number_format($ncs['kredit'] - $ncs['debit'], 2, ',', '.') }}
+                                        @else
+                                            {{ number_format($ncs['debit'] - $ncs['kredit'], 2, ',', '.') }}
+                                        @endif
+                                    </td>
+
+                                    <td style="border: 1px solid black;" class="text-center">
+                                        @if (isset($ncs['details']) && count($ncs['details']) > 0)
+                                            @foreach ($ncs['details'] as $detail)
+                                                <span>{{ $detail['tgl'] }}</span><br>
+                                            @endforeach
+                                        @else
+                                            <span>-</span>
+                                        @endif
+                                    </td>
+                                    <td style="border: 1px solid black;" class="text-center">
+                                        @if (isset($ncs['details']) && count($ncs['details']) > 0)
+                                            @foreach ($ncs['details'] as $detail)
+                                                <span>{{ $detail['nomor'] }}</span><br>
+                                            @endforeach
+                                        @else
+                                            <span>-</span>
+                                        @endif
+                                    </td>
+                                    <td style="border: 1px solid black;">
+                                        @if (isset($ncs['details']) && count($ncs['details']) > 0)
+                                            @foreach ($ncs['details'] as $detail)
+                                                <span>{{ $detail['keterangan'] }}</span><br>
+                                            @endforeach
+                                        @else
+                                            <span>-</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" style="border: 1px solid black;" class="text-center">Total</th>
+                                <th style="border: 1px solid black;" class="text-right">
+                                    {{ number_format($ncsDebitTotal, 2, ',', '.') }}</th>
+                                <th style="border: 1px solid black;" class="text-right">
+                                    {{ number_format($ncsKreditTotal, 2, ',', '.') }}</th>
+                                <th style="border: 1px solid black;">
+                                    @php
+                                        $totalSaldo =
+                                            $tipe == 'K'
+                                                ? $ncsKreditTotal - $ncsDebitTotal
+                                                : $ncsDebitTotal - $ncsKreditTotal;
+                                    @endphp
+                                    {{ number_format($totalSaldo, 0, ',', '.') }}
+                                </th>
+                                <th style="border: 1px solid black;" colspan="3"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 
@@ -546,7 +557,7 @@
 
                             if (!mergedData[invoice]) {
                                 mergedData[invoice] = {
-                                    nomor:[],
+                                    nomor: [],
                                     tgl: [],
                                     debit: 0,
                                     kredit: 0,
