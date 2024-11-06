@@ -31,16 +31,21 @@ class LaporanController extends Controller
     ->orderByRaw('MONTH(i.tgl_invoice) ASC')
     ->get();
 
-
 // Ubah hasil `invoice_list` menjadi array
 $invoices->map(function ($invoice) {
-    $invoice->invoice_list = explode(',', $invoice->invoice_list);
+    $invoice->invoice_externals = explode(',', $invoice->invoice_externals);
     return $invoice;
 });
 
 // Gabungkan semua invoice_list menjadi satu array
-$invoicelist = $invoices->flatMap->invoice_list->unique()->toArray(); // Menggunakan flatMap dan unique untuk mendapatkan list yang unik
-
+$invoicelist = $invoices->flatMap->invoice_externals
+    ->filter(function ($invoiceExternal) {
+        return !empty($invoiceExternal); // Menghapus nilai kosong
+    })
+    ->unique()
+    ->toArray();
+// Menggunakan flatMap dan unique untuk mendapatkan list yang unik
+// dd($invoicelist);
 $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
     ->selectRaw('DATE_FORMAT(j.tgl, "%M") as month, 
                  YEAR(j.tgl) as year, 
@@ -49,15 +54,12 @@ $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
     ->from('jurnal as j')
     ->join('coa as c', 'j.coa_id', '=', 'c.id')
     ->where('c.id', 5) // Menambahkan filter untuk coa_id = 5
-    ->whereIn('j.invoice', $invoicelist) // Ganti filter dengan invoice
+    ->whereIn('j.invoice_external', $invoicelist) // Ganti filter dengan invoice
     ->groupBy('month', 'year')
     ->orderByRaw('MONTH(j.tgl)')
     ->get();
 
 
-
-
-    
     $invoiceData = [];
     foreach ($invoices as $invoice){
         foreach ($invoices as $invoice) {
@@ -71,9 +73,10 @@ $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
             'month' => $invoice->month,
             'invoice_count' => $invoice->invoice_count,
             'total_hutang' => $invoice->total_hutang /1000,
-            'total_lunas' => 0,
+            'total_lunas' => $invoice->total_lunas,
         ];
     }
+ dd($invoiceData);
 
     $summaryData = [];
     foreach ($invoiceData as $year => $dataPerYear) {

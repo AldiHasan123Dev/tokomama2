@@ -991,6 +991,7 @@
             var totaltd = $('#total_debit').val();
             var totaltc = $('#total_credit').val();
             var tipe = $('#tipe').val();
+            var nominal = $('#nominal').val();
 
             if (totaltd != totaltc) {
                 alert("Total Debit dan Kredit tidak sama");
@@ -999,7 +1000,11 @@
             if (!tipe) {
                 alert("Tipe Jurnal diisi terlebih dahulu")
                 return
-            } else {
+            }  if (!nominal) {
+                alert("Nominal Jurnal diisi terlebih dahulu")
+                return
+            }
+            else {
                 if (confirm('Apakah anda yakin menyimpan data ?')) {
                     $('#form-jurnal').submit();
                 }
