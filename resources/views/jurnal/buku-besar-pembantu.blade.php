@@ -304,14 +304,14 @@
                                     {{ number_format($ncsDebitTotal, 2, ',', '.') }}</th>
                                 <th style="border: 1px solid black;" class="text-right">
                                     {{ number_format($ncsKreditTotal, 2, ',', '.') }}</th>
-                                <th style="border: 1px solid black;">
+                                <th style="border: 1px solid black;" class="text-right">
                                     @php
                                         $totalSaldo =
                                             $tipe == 'K'
                                                 ? $ncsKreditTotal - $ncsDebitTotal
                                                 : $ncsDebitTotal - $ncsKreditTotal;
                                     @endphp
-                                    {{ number_format($totalSaldo, 0, ',', '.') }}
+                                    {{ number_format($totalSaldo, 2, ',', '.') }}
                                 </th>
                                 <th style="border: 1px solid black;" colspan="3"></th>
                             </tr>

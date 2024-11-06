@@ -38,7 +38,8 @@ $invoices->map(function ($invoice) {
 });
 
 // Gabungkan semua invoice_list menjadi satu array
-$invoicelist = $invoices->flatMap->invoice_list->unique()->toArray(); // Menggunakan flatMap dan unique untuk mendapatkan list yang unik
+$invoicelist = $invoices->flatMap->invoice_list->unique()->toArray(); 
+dd($invoicelist);// Menggunakan flatMap dan unique untuk mendapatkan list yang unik
 
 $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
     ->selectRaw('DATE_FORMAT(j.tgl, "%M") as month, 
