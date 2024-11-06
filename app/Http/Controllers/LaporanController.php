@@ -14,22 +14,23 @@ class LaporanController extends Controller
         $invoices = Invoice::selectRaw('
         DATE_FORMAT(i.tgl_invoice, "%M") as month, 
         YEAR(i.tgl_invoice) as year, 
-        COUNT(DISTINCT i.invoice) as invoice_count, 
-        GROUP_CONCAT(DISTINCT i.invoice) as invoice_list, -- Menambahkan daftar invoice
+        COUNT(DISTINCT i.invoice) as invoice_count,  
         SUM(
             CASE 
                 WHEN b.status_ppn = "ya" THEN t.harga_beli * t.jumlah_beli * 1.11
                 ELSE t.harga_beli * t.jumlah_beli
             END
-        ) as total_hutang')
+        ) as total_hutang,
+        GROUP_CONCAT(DISTINCT t.invoice_external) as invoice_externals') // Menggunakan GROUP_CONCAT
     ->from('invoice as i')
     ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
     ->join('barang as b', 't.id_barang', '=', 'b.id')
     ->where('i.tgl_invoice', '>', '2024-08-01')
-    ->groupBy('year', 'month')
+    ->groupBy('year', 'month') // Mengelompokkan berdasarkan tahun dan bulan
     ->orderBy('year', 'asc')
     ->orderByRaw('MONTH(i.tgl_invoice) ASC')
     ->get();
+
 
 // Ubah hasil `invoice_list` menjadi array
 $invoices->map(function ($invoice) {
@@ -38,8 +39,7 @@ $invoices->map(function ($invoice) {
 });
 
 // Gabungkan semua invoice_list menjadi satu array
-$invoicelist = $invoices->flatMap->invoice_list->unique()->toArray(); 
-dd($invoicelist);// Menggunakan flatMap dan unique untuk mendapatkan list yang unik
+$invoicelist = $invoices->flatMap->invoice_list->unique()->toArray(); // Menggunakan flatMap dan unique untuk mendapatkan list yang unik
 
 $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
     ->selectRaw('DATE_FORMAT(j.tgl, "%M") as month, 
@@ -98,25 +98,43 @@ $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
 
 public function dataLPC(){;
 // Mengambil daftar invoice dari query $invoices
-$invoices = Invoice::selectRaw('
-    DATE_FORMAT(i.tgl_invoice, "%M") as month, 
-    YEAR(i.tgl_invoice) as year, 
-    COUNT(DISTINCT i.invoice) as invoice_count, 
-    SUM(
-        CASE 
-            WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11  -- Menghitung PPN untuk harga jual
-            ELSE t.harga_jual * t.jumlah_jual
-        END
-    ) as total_piutang,
-    i.invoice') // Menambahkan kolom invoice
-->from('invoice as i')
-->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
-->join('barang as b', 't.id_barang', '=', 'b.id')
-->where('i.tgl_invoice', '>', '2024-08-01') // Bergabung dengan tabel barang untuk mendapatkan status_ppn
-->groupBy('year', 'month') // Grup berdasarkan tahun, bulan, dan invoice
-->orderBy('year', 'asc') // Urutkan berdasarkan tahun secara ascending
-->orderByRaw('MONTH(i.tgl_invoice) ASC') // Urutkan berdasarkan bulan secara ascending
-->get();
+    $invoices = Invoice::selectRaw('
+        DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+        YEAR(i.tgl_invoice) as year, 
+        COUNT(DISTINCT i.invoice) as invoice_count,
+        GROUP_CONCAT(DISTINCT i.invoice) as invoice_list, 
+        SUM(
+            CASE 
+                WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11  -- Menghitung PPN untuk harga jual
+                ELSE t.harga_jual * t.jumlah_jual
+            END
+        ) as total_piutang,
+        i.invoice') // Menambahkan kolom invoice
+    ->from('invoice as i')
+    ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+    ->join('barang as b', 't.id_barang', '=', 'b.id')
+    ->where('i.tgl_invoice', '>', '2024-08-01') // Bergabung dengan tabel barang untuk mendapatkan status_ppn
+    ->groupBy('year', 'month') // Grup berdasarkan tahun, bulan, dan invoice
+    ->orderBy('year', 'asc') // Urutkan berdasarkan tahun secara ascending
+    ->orderByRaw('MONTH(i.tgl_invoice) ASC') // Urutkan berdasarkan bulan secara ascending
+    ->get();
+    $invoices->map(function ($invoice) {
+        $invoice->invoice_list = explode(',', $invoice->invoice_list);
+        return $invoice;
+    });
+
+    $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
+    ->selectRaw('DATE_FORMAT(j.tgl, "%M") as month, 
+                 YEAR(j.tgl) as year, 
+                 SUM(j.kredit) as total_lunas,
+                 c.nama_akun')
+    ->from('jurnal as j')
+    ->join('coa as c', 'j.coa_id', '=', 'c.id')
+    ->where('c.id', 5) // Menambahkan filter untuk coa_id = 5
+    ->whereIn('j.invoice', $invoicelist) // Ganti filter dengan invoice
+    ->groupBy('month', 'year')
+    ->orderByRaw('MONTH(j.tgl)')
+    ->get();
 
 $invoiceData = [];
 foreach ($invoices as $invoice){
