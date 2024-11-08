@@ -224,7 +224,7 @@ class JurnalManualController extends Controller
                                         'keterangan_buku_besar_pembantu' => !empty($request->keterangan_buku_besar_pembantu[$i]) ? $request->keterangan_buku_besar_pembantu[$i] : $newNoJurnal,
                                         'debit' => $request->nominal[$i],
                                         'kredit' => 0,
-                                        'invoice' => $request->invoice ? explode('_', $request->invoice[$i])[0] : 0,
+                                        'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                         'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
                                         'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
                                         'nopol' => $request->nopol[$i] ?? null,
@@ -251,7 +251,7 @@ class JurnalManualController extends Controller
                                         'keterangan_buku_besar_pembantu' => !empty($request->keterangan_buku_besar_pembantu[$i]) ? $request->keterangan_buku_besar_pembantu[$i] : $newNoJurnal,
                                         'debit' => 0,
                                         'kredit' => $request->nominal[$i],
-                                        'invoice' => $request->invoice ? explode('_', $request->invoice[$i])[0] : null,
+                                        'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                         'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
                                         'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
                                         'nopol' => $request->nopol[$i] ?? null,
@@ -282,7 +282,7 @@ class JurnalManualController extends Controller
                                         'keterangan_buku_besar_pembantu' => !empty($request->keterangan_buku_besar_pembantu[$i]) ? $request->keterangan_buku_besar_pembantu[$i] : $nomor,
                                         'debit' => $request->nominal[$i],
                                         'kredit' => 0,
-                                        'invoice' => $request->invoice ? explode('_', $request->invoice[$i])[0] : null,
+                                        'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                         'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
                                         'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
                                         'nopol' => $request->nopol[$i] ?? null,
@@ -308,7 +308,7 @@ class JurnalManualController extends Controller
                                         'keterangan_buku_besar_pembantu' => !empty($request->keterangan_buku_besar_pembantu[$i]) ? $request->keterangan_buku_besar_pembantu[$i] : $nomor,
                                         'debit' => 0,
                                         'kredit' => $request->nominal[$i],
-                                        'invoice' => $request->invoice ? explode('_', $request->invoice[$i])[0] : null,
+                                        'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                         'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
                                         'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
                                         'nopol' => $request->nopol[$i] ?? null,
@@ -340,7 +340,7 @@ class JurnalManualController extends Controller
                                     'keterangan_buku_besar_pembantu' => !empty($request->keterangan_buku_besar_pembantu[$i]) ? $request->keterangan_buku_besar_pembantu[$i] : $nomor,
                                     'debit' => $request->nominal[$i],
                                     'kredit' => 0,
-                                    'invoice' => $request->invoice ? explode('_', $request->invoice[$i])[0] : null,
+                                    'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                     'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
                                     'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
                                     'nopol' => $request->nopol[$i] ?? null,
@@ -366,7 +366,7 @@ class JurnalManualController extends Controller
                                     'keterangan_buku_besar_pembantu' => !empty($request->keterangan_buku_besar_pembantu[$i]) ? $request->keterangan_buku_besar_pembantu[$i] : $nomor,
                                     'debit' => 0,
                                     'kredit' => $request->nominal[$i],
-                                    'invoice' => $request->invoice ? explode('_', $request->invoice[$i])[0] : null,
+                                    'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                     'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
                                     'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
                                     'nopol' => $request->nopol[$i] ?? null,
@@ -622,7 +622,7 @@ class JurnalManualController extends Controller
                 ' untuk ' . $item->suratJalan->customer->nama,
                     'debit' => round($item->harga_beli * $item->jumlah_jual), // Debit diisi 0
                     'kredit' => 0, // Menggunakan total debit sebagai kredit
-                    'invoice' => '',
+                    'invoice' => null,
                     'invoice_external' => $invoice_e,
                     'id_transaksi' => $request->id,
                     'nopol' => $nopol,
@@ -638,7 +638,7 @@ class JurnalManualController extends Controller
                 'keterangan' => 'PPN Masukkan ' . $core[0]->suppliers->nama . '(FP : ---)' ,
                 'debit' => $subtotalPPN, // Menyimpan subtotal sebagai debit
                 'kredit' =>  0,// Kredit diisi 0
-                'invoice' => '',
+                'invoice' => null,
                 'invoice_external' => $invoice_e,
                 'id_transaksi' => $request->id,
                 'nopol' => $nopol,
@@ -654,7 +654,7 @@ class JurnalManualController extends Controller
                 'keterangan' => 'Hutang ' . $item->suppliers->nama,
                 'debit' => 0, // Menyimpan subtotal sebagai debit
                 'kredit' => round($subtotal + $subtotalPPN), // Kredit diisi 0
-                'invoice' => '',
+                'invoice' => null,
                 'invoice_external' => $invoice_e,
                 'id_transaksi' => $request->id,
                 'nopol' => $nopol,
@@ -675,7 +675,7 @@ class JurnalManualController extends Controller
                 ' untuk ' . $item->suratJalan->customer->nama,
                 'debit' => round($item->harga_beli * $item->jumlah_jual), // Debit diisi 0
                 'kredit' => 0, // Menggunakan total debit sebagai kredit
-                'invoice' => '',
+                'invoice' => null,
                 'invoice_external' => $invoice_e,
                 'id_transaksi' => $request->id,
                 'nopol' => $nopol,
@@ -692,7 +692,7 @@ class JurnalManualController extends Controller
                     'keterangan' => 'Hutang ' . $item->suppliers->nama,
                     'debit' => 0, // Menyimpan subtotal sebagai debit
                     'kredit' => $subtotal, // Kredit diisi 0
-                    'invoice' => '',
+                    'invoice' => null,
                     'invoice_external' => $invoice_e,
                     'id_transaksi' => $request->id,
                     'nopol' => $nopol,

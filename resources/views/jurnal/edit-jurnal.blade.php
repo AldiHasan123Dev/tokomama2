@@ -251,6 +251,7 @@
               <label class="form-label">Invoice External</label>
             <select class="select-field" name="invoice_external" id="invext">
                 <option value="${invoice_external}" selected>${invoice_external}</option>
+                 <option value=""></option>
                 @foreach ($invExtProc as $in)
                 <option value="{{ $in }}">{{ $in }}</option>
                 @endforeach

@@ -203,12 +203,12 @@
                         <tr>
                             <td class="text-center border border-black">{{ $i + 1 }}</td>
                             <td class="text-center border border-black">{{ date('d M Y', strtotime($item->transaksi->suratJalan->tgl_sj)) }}</td>
-                            <td class="text-center border border-black">
+                            <td class="border border-black">
                                 {{ $item->transaksi->barang->nama }} <br>
-                                @if ($item->transaksi->barang->satuan->nama_satuan != $item->transaksi->satuan_jual)
-                                    (Total {{ number_format($item->jumlah * $item->transaksi->barang->value) }} {{ 
-                                    $item->transaksi->barang->satuan->nama_satuan }} @if($item->transaksi->keterangan == null) 
-                                    {{ $item->transaksi->keterangan }} @endif)
+                                @if($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan )
+                                (Total {{ number_format($item->jumlah * $item->transaksi->barang->value) }} {{ $item->transaksi->barang->satuan->nama_satuan }} {{ ($item->transaksi->keterangan != '' || !is_null($item->transaksi->keterangan)) ? '= '.$item->transaksi->keterangan:'' }})
+                                 @else
+                                {{ ($item->transaksi->keterangan != '' || !is_null($item->transaksi->keterangan)) ? '= '.$item->transaksi->keterangan:'' }}
                                 @endif
                             </td>
                             <td class="text-center border border-black">
