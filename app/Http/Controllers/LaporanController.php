@@ -61,6 +61,7 @@ $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
 
 
     $invoiceData = [];
+    
     foreach ($invoices as $invoice){
         foreach ($invoices as $invoice) {
     

@@ -988,28 +988,39 @@
             bindInvoiceExternalChange(newRowId);
         });
         $('#simpan').click(function(e) {
-            var totaltd = $('#total_debit').val();
-            var totaltc = $('#total_credit').val();
-            var tipe = $('#tipe').val();
-            var nominal = $('#nominal').val();
+    e.preventDefault(); // Mencegah form langsung submit
 
-            if (totaltd != totaltc) {
-                alert("Total Debit dan Kredit tidak sama");
-                return
-            }
-            if (!tipe) {
-                alert("Tipe Jurnal diisi terlebih dahulu")
-                return
-            }  if (!nominal) {
-                alert("Nominal Jurnal diisi terlebih dahulu")
-                return
-            }
-            else {
-                if (confirm('Apakah anda yakin menyimpan data ?')) {
-                    $('#form-jurnal').submit();
-                }
-            }
-        });
+    var totaltd = $('#total_debit').val();
+    var totaltc = $('#total_credit').val();
+    var tipe = $('#tipe').val();
+    var isNominalFilled = true; // Flag untuk mengecek semua input nominal
+
+    // Loop melalui setiap input nominal untuk memastikan tidak ada yang kosong
+    $('input[id^="nominal-"]').each(function() {
+        if (!$(this).val()) {
+            isNominalFilled = false;
+            return false; // Hentikan loop jika ada yang kosong
+        }
+    });
+
+    if (totaltd != totaltc) {
+        alert("Total Debit dan Kredit tidak sama");
+        return;
+    }
+    if (!tipe) {
+        alert("Tipe Jurnal harus diisi terlebih dahulu");
+        return;
+    }
+    if (!isNominalFilled) {
+        alert("Semua Nominal Jurnal harus diisi terlebih dahulu");
+        return;
+    }
+
+    if (confirm('Apakah anda yakin menyimpan data?')) {
+        $('#form-jurnal').submit();
+    }
+});
+
     </script>
     <script>
         $(document).ready(function() {

@@ -114,7 +114,7 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>List Belum Input Harga  <span style="color: red;">(Yang ada PPN, isikan sampai 4 angka dibelakang koma)</span></x-slot:tittle>
+        <x-slot:tittle>List Belum Input Harga  <span style="color: red;">(Khusus HARGA BELI yang ada PPN, isikan sampai 4 angka dibelakang koma)</span></x-slot:tittle>
         <div class="overflow-x-auto">
             <table id="table-non-tarif" class="table"></table>
             <div id="pager-non-tarif"></div>
