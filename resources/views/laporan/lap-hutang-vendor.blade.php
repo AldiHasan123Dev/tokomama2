@@ -101,8 +101,7 @@
                             <td class="bg-thn">{{ $year }}</td>
                             @foreach ($months as $index => $month)
                                 @php
-                                    $data = collect($dataPerYear);
-                                    dd($data);
+                                    $data = collect($dataPerYear)->firstWhere('month', $month);
                                     $bgClass = match ($index) {
                                         0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
                                         3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 

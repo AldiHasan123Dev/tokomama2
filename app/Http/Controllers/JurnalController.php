@@ -239,7 +239,7 @@ class JurnalController extends Controller
                 $ket = $invoices[$index - 1]->transaksi->keterangan;
                 
                 // dd($customer, $satuan, $quantity, $hargabeli, $hargajual, $ket, $supplier, $barang);
-                $keterangan = $request->keterangan;
+                $keteranganNow = $request->keterangan;
 
                 if (str_contains($request->keterangan, '[1]')) {
                     $keterangan = str_replace('[1]', $customer, $keterangan);

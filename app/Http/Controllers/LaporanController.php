@@ -135,7 +135,7 @@ foreach ($mergedResults as $year => $dataPerYear) {
     }
 }
 
-// dd($summaryData);
+dd($summaryData);
 
     $months = [
         'January', 'February', 'March', 'April', 'May', 
