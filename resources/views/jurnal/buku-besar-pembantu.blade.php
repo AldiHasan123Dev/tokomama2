@@ -101,7 +101,7 @@
                         @foreach ($customers as $key => $customer)
                             <tr>
                                 <td>{{ $index++ }}</td>
-                                <td>{{ $customer->nama }}</td>
+                                <td >{{ $customer->nama }}</td>
                                 <td class="text-right">{{ number_format($customer->debit, 0, ',', '.') }}</td>
                                 <td class="text-right">{{ number_format($customer->kredit, 0, ',', '.') }}</td>
                                 <td class="text-right">
@@ -172,8 +172,8 @@
                     @endphp
                         @foreach ($suppliers as $key => $supplier)
                             <tr>
-                                <td class="text-right">{{ $index++ }}</td>
-                                <td class="text-right">{{ $supplier->nama }}</td>
+                                <td class="text-center">{{ $index++ }}</td>
+                                <td>{{ $supplier->nama }}</td>
                                 <td class="text-right">{{ number_format($supplier->debit, 0, ',', '.') }}</td>
                                 <td class="text-right">{{ number_format($supplier->kredit, 0, ',', '.') }}</td>
                                 <td class="text-right">
@@ -205,7 +205,7 @@
                             <th class="text-right">
                                 {{ number_format($suppliers->sum('kredit'), 2, ',', '.') }}
                             </th>
-                            <th>
+                            <th class="text-right">
                                 @if ($tipe == 'K')
                                     {{ number_format($suppliers->sum('kredit') - $suppliers->sum('debit'), 0, ',', '.') }}
                                 @else
