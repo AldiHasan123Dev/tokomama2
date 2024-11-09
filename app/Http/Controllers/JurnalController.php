@@ -356,6 +356,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
+                $data->invoice = !empty($request->invoice) ? explode('_', $request->invoice)[0] : null;
                 $data->invoice_external = !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
@@ -430,6 +431,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
+                $data->invoice = !empty($request->invoice) ? explode('_', $request->invoice)[0] : null;
                 $data->invoice_external = !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
@@ -501,6 +503,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
+                $data->invoice = !empty($request->invoice) ? explode('_', $request->invoice)[0] : null;
                 $data->invoice_external = !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
@@ -574,6 +577,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
+                $data->invoice = !empty($request->invoice) ? explode('_', $request->invoice)[0] : null;
                 $data->invoice_external = !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
@@ -646,6 +650,7 @@ class JurnalController extends Controller
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
+                $data->invoice = !empty($request->invoice) ? explode('_', $request->invoice)[0] : null;
                 $data->invoice_external = !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null;
                 $data->nopol = $request->nopol;
                 $data->tipe = $tipe;
@@ -662,7 +667,7 @@ class JurnalController extends Controller
         } else {
             return redirect()->back()->with('error', 'Invoice dan Invoice External kosong');
         }
-        dd(explode('_', $request->invoice_external) ?? null);
+        
         return redirect()->route('jurnal.edit');
     }
 
