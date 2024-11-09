@@ -95,13 +95,16 @@
                         </tr>
                     </thead>
                     <tbody>
+                    @php
+                        $index = 1; // Inisialisasi nomor urut
+                    @endphp
                         @foreach ($customers as $key => $customer)
                             <tr>
-                                <td>{{ $key + 1 }}</td>
+                                <td>{{ $index++ }}</td>
                                 <td>{{ $customer->nama }}</td>
-                                <td>{{ number_format($customer->debit, 0, ',', '.') }}</td>
-                                <td>{{ number_format($customer->kredit, 0, ',', '.') }}</td>
-                                <td>
+                                <td class="text-right">{{ number_format($customer->debit, 0, ',', '.') }}</td>
+                                <td class="text-right">{{ number_format($customer->kredit, 0, ',', '.') }}</td>
+                                <td class="text-right">
                                     @if ($tipe == 'K')
                                         {{ number_format($customer->kredit - $customer->debit, 0, ',', '.') }}
                                     @else
@@ -124,14 +127,14 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="2" class="text-center">Total</th>
-                            <th>
+                            <th colspan="2" class="text-right">Total</th>
+                            <th class="text-right">
                                 {{ number_format($customers->sum('debit'), 0, ',', '.') }}
                             </th>
-                            <th>
+                            <th class="text-right">
                                 {{ number_format($customers->sum('kredit'), 0, ',', '.') }}
                             </th>
-                            <th>
+                            <th class="text-right">
                                 @if ($tipe == 'K')
                                     {{ number_format($customers->sum('kredit') - $customers->sum('debit'), 0, ',', '.') }}
                                 @else
@@ -164,13 +167,16 @@
                         </tr>
                     </thead>
                     <tbody>
+                    @php
+                        $index = 1; // Inisialisasi nomor urut
+                    @endphp
                         @foreach ($suppliers as $key => $supplier)
                             <tr>
-                                <td>{{ $key + 1 }}</td>
-                                <td>{{ $supplier->nama }}</td>
-                                <td>{{ number_format($supplier->debit, 0, ',', '.') }}</td>
-                                <td>{{ number_format($supplier->kredit, 0, ',', '.') }}</td>
-                                <td>
+                                <td class="text-right">{{ $index++ }}</td>
+                                <td class="text-right">{{ $supplier->nama }}</td>
+                                <td class="text-right">{{ number_format($supplier->debit, 0, ',', '.') }}</td>
+                                <td class="text-right">{{ number_format($supplier->kredit, 0, ',', '.') }}</td>
+                                <td class="text-right">
                                     @if ($tipe == 'K')
                                         {{ number_format($supplier->kredit - $supplier->debit, 0, ',', '.') }}
                                     @else
@@ -192,11 +198,11 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="2" class="text-center">Total</th>
-                            <th>
+                            <th colspan="2" class="text-right">Total</th>
+                            <th class="text-right">
                                 {{ number_format($suppliers->sum('debit'), 2, ',', '.') }}
                             </th>
-                            <th>
+                            <th class="text-right">
                                 {{ number_format($suppliers->sum('kredit'), 2, ',', '.') }}
                             </th>
                             <th>
@@ -430,8 +436,34 @@
             });
 
             // Initialize DataTable for all tables
-            $('#table-customer').DataTable();
-            $('#table-supplier').DataTable();
+             // Destroy DataTable sebelumnya, kemudian inisialisasi ulang
+    if ($.fn.dataTable.isDataTable('#table-customer')) {
+        $('#table-customer').DataTable().destroy();
+    }
+
+    $('#table-customer').DataTable({
+        ordering: false,
+        columnDefs: [
+            {
+                targets: 0, 
+                orderable: false
+            }
+        ]
+    });
+             // Destroy DataTable sebelumnya, kemudian inisialisasi ulang
+    if ($.fn.dataTable.isDataTable('#table-supplier')) {
+        $('#table-supplier').DataTable().destroy();
+    }
+
+    $('#table-supplier').DataTable({
+        ordering: false,
+        columnDefs: [
+            {
+                targets: 0, 
+                orderable: false
+            }
+        ]
+    });
             $('#table-ncs').DataTable(); // Inisialisasi DataTable untuk tabel NCS
         });
 

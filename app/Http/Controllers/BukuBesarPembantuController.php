@@ -92,63 +92,64 @@ class BukuBesarPembantuController extends Controller
 
             $customer->debit = $debitTotal;
             $customer->kredit = $kreditTotal;
+            $customers = $customers->sortByDesc(function ($customer) {
+                return [$customer->debit, $customer->kredit]; 
+            });
         }
     }
 
     // Logika untuk pemasok (suppliers)
     if ($selectedState == 'supplier') {
-        $suppliers = Supplier::all(); // Menggunakan all() untuk mendapatkan koleksi
+        $suppliers = Supplier::all(); 
         foreach ($suppliers as $supplier) {
             $debitTotal = 0;
             $kreditTotal = 0;
 
-            // Ambil semua jurnal untuk supplier berdasarkan invoice_external
             $jurnals = Jurnal::where('coa_id', $selectedCoaId)
-            ->whereBetween('tgl', [$startDate, $endDate])
-            ->whereNotNull('invoice_external') 
-            ->where(function($query) {
-                $query->whereNull('invoice')
-                      ->orWhere('invoice', '')
-                      ->orWhere('invoice', '-')
-                      ->orWhere('invoice', 0);
-            })->get();
+                ->whereBetween('tgl', [$startDate, $endDate])
+                ->whereNotNull('invoice_external') 
+                ->where(function($query) {
+                    $query->whereNull('invoice')
+                          ->orWhere('invoice', '')
+                          ->orWhere('invoice', '-')
+                          ->orWhere('invoice', 0);
+                })
+                ->orderBy('debit', 'asc') 
+                ->orderBy('kredit', 'asc') 
+                ->orderBy('tgl', 'asc') 
+                ->get();
+    
             foreach ($jurnals as $j) {
                 $transaksi = Transaction::where('invoice_external', $j->invoice_external)
                     ->where('id_supplier', $supplier->id)
                     ->first();
-
+    
                 if ($transaksi && ($j->debit > 0 || $j->kredit > 0)) {
                     $debitTotal += $j->debit;
                     $kreditTotal += $j->kredit;
                 }
             }
-
+    
+            // Menyimpan nilai debit dan kredit ke supplier
             $supplier->debit = $debitTotal;
             $supplier->kredit = $kreditTotal;
         }
+        $suppliers = $suppliers->sortByDesc(function ($supplier) {
+            return [$supplier->debit, $supplier->kredit]; 
+        });
     }
-
+    
+    
    
     if ($selectedState == 'ncs') {
        $ncsRecords = Jurnal::where('coa_id', $selectedCoaId)
         ->whereBetween('tgl', [$startDate, $endDate])
-        ->where(function($query) {
-            $query->whereNull('invoice')
-                ->orWhere('invoice', '')
-                ->orWhere('invoice', '-')
-                ->orWhere('invoice', 0);
-        })
-        ->where(function($subquery) {
-            $subquery->whereNull('invoice_external')
-                    ->orWhere('invoice_external', '')
-                    ->orWhere('invoice_external', '-')
-                    ->orWhere('invoice_external', 0)
-                    ->orWhereRaw('LENGTH(TRIM(invoice_external)) = 0'); // Hanya menangkap nilai kosong
-        })
-        ->where('invoice_external', 'NOT LIKE', '%PO%') // Mengecualikan nilai yang mengandung 'PO'
+        ->whereNull('invoice_external')
+        ->whereNull('invoice')
         ->whereNotNull('keterangan_buku_besar_pembantu')
         ->orderBy('tgl', 'asc')
         ->get(['tgl', 'nomor', 'keterangan', 'debit', 'kredit', 'keterangan_buku_besar_pembantu']);
+
     
         $ncsDetails = [];
         $ncsDebitTotal = 0;
@@ -190,12 +191,6 @@ class BukuBesarPembantuController extends Controller
         $ncsDetails = array_values($ncsDetails);
     }
     
-    
-
-
-
-   
-
     // Tentukan tipe (tipe) untuk perhitungan saldo
     $akun = Coa::where('id', $selectedCoaId)
         ->orWhere('no_akun', $selectedCoaId)

@@ -59,45 +59,90 @@ $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
     ->orderByRaw('MONTH(j.tgl)')
     ->get();
 
+    // dd($jurnals);
+// Menyusun hasil dari invoice berdasarkan tahun dan bulan
+$mergedResults = [];
+// Menggabungkan hasil dari invoices ke dalam array berdasarkan tahun
+foreach ($invoices as $invoice) {
+    $mergedResults[$invoice->year][] = [
+        'month' => $invoice->month,
+        'year' => $invoice->year,
+        'invoice_count' => $invoice->invoice_count,
+        'total_hutang' => $invoice->total_hutang,
+        'total_lunas' => 0, // Default jika tidak ada entri di jurnal
+        'belum_lunas' => $invoice->total_hutang, // Belum lunas adalah total_hutang pada invoice
+    ];
+}
 
-    $invoiceData = [];
-    
-    foreach ($invoices as $invoice){
-        foreach ($invoices as $invoice) {
-    
-            // Hitung persentase profit
-            $total_profit_percentage = 0;
-            if ($invoice->total_harga_beli > 0) {
-                $total_profit_percentage = round(($total_profit / $invoice->total_harga_beli) * 100, 2);
+// Menambahkan hasil dari jurnal ke dalam array, mencocokkan berdasarkan bulan dan tahun
+foreach ($jurnals as $jurnal) {
+    $found = false;
+    // Memeriksa setiap tahun dan bulan dalam mergedResults
+    foreach ($mergedResults as $year => &$months) {
+        foreach ($months as &$result) {
+            if ($result['month'] == $jurnal->month && $result['year'] == $jurnal->year) {
+                // Menambahkan total_lunas dari jurnal ke dalam hasil yang cocok
+                $result['total_lunas'] = $jurnal->total_lunas;
+                // Menghitung sisa pembayaran (belum_lunas)
+                $result['belum_lunas'] = $result['total_hutang'] - $result['total_lunas'];
+                $found = true;
+                break;
             }
-        $invoiceData [$invoice->year][] = [
-            'month' => $invoice->month,
-            'invoice_count' => $invoice->invoice_count,
-            'total_hutang' => $invoice->total_hutang /1000,
-            'total_lunas' => $invoice->total_lunas,
-        ];
-    }
- dd($invoiceData);
-
-    $summaryData = [];
-    foreach ($invoiceData as $year => $dataPerYear) {
-        $summaryData[$year] = [
-            'total_invoice_count' => 0,
-            'total_hutang' => 0,
-        ];
-        foreach ($dataPerYear as $data) {
-            // Menambahkan total per tahun
-            $summaryData[$year]['total_invoice_count'] += $data['invoice_count'];
-            $summaryData[$year]['total_hutang'] += $data['total_hutang'];
         }
     }
+
+    // Jika tidak ditemukan, tambahkan data jurnal sebagai entry baru
+    if (!$found) {
+        $mergedResults[$jurnal->year][] = [
+            'month' => $jurnal->month,
+            'year' => $jurnal->year,
+            'invoice_count' => 0,
+            'total_hutang' => 0,
+            'total_lunas' => $jurnal->total_lunas,
+            'belum_lunas' => 0, // Jika tidak ada invoice, tidak ada sisa pembayaran
+        ];
+    }
+}
+
+// Mengurutkan data berdasarkan tahun dan bulan (bulan numerik)
+foreach ($mergedResults as $year => &$months) {
+    // Mengurutkan bulan dalam setiap tahun berdasarkan urutan bulan numerik
+    usort($months, function ($a, $b) {
+        return date('m', strtotime($a['month'])) - date('m', strtotime($b['month']));
+    });
+}
+
+// Output hasil
+// dd($mergedResults);
+
+
+$summaryData = [];
+foreach ($mergedResults as $year => $dataPerYear) {
+    // Inisialisasi summary untuk setiap tahun
+    $summaryData[$year] = [
+        'total_invoice_count' => 0,
+        'total_hutang' => 0,
+        'total_lunas' => 0,
+        'total_belum_lunas' => 0, // Menambahkan kolom untuk belum lunas
+    ];
+
+    foreach ($dataPerYear as $data) {
+        // Menambahkan total per tahun
+        $summaryData[$year]['total_invoice_count'] += $data['invoice_count'];
+        $summaryData[$year]['total_hutang'] += $data['total_hutang'];
+        $summaryData[$year]['total_lunas'] += $data['total_lunas'];
+        $summaryData[$year]['total_belum_lunas'] += $data['total_hutang'] - $data['total_lunas']; // Menghitung belum lunas
+    }
+}
+
+// dd($summaryData);
+
     $months = [
         'January', 'February', 'March', 'April', 'May', 
         'June', 'July', 'August', 'September', 
         'October', 'November', 'December'
     ];
-        return view('laporan.lap-hutang-vendor',compact('invoiceData', 'months', 'summaryData'));
-    }
+        return view('laporan.lap-hutang-vendor',compact('mergedResults', 'data' ,'months', 'summaryData'));
 }
 
 public function dataLPC(){;

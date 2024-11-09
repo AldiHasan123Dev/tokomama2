@@ -96,12 +96,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($invoiceData as $year => $dataPerYear)
+                    @foreach ($mergedResults as $year => $dataPerYear)
                         <tr>
                             <td class="bg-thn">{{ $year }}</td>
                             @foreach ($months as $index => $month)
                                 @php
-                                    $data = collect($dataPerYear)->firstWhere('month', $month);
+                                    $data = collect($dataPerYear);
+                                    dd($data);
                                     $bgClass = match ($index) {
                                         0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
                                         3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 
