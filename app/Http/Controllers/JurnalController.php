@@ -146,14 +146,15 @@ class JurnalController extends Controller
         // dd($data[0]->nomor);
         $nomor = $_GET['nomor'];
         // dd($nomor);
-        $jurnal = Jurnal::where('nomor', $nomor)->first();
+        $jurnal = Jurnal::where('nomor', $nomor) ->orderBy('id', 'desc')->first();
         $tgl = $jurnal->tgl;
-        $data = Jurnal::where('nomor', $nomor)->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+        $data = Jurnal::where('nomor', $nomor)->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun') ->orderBy('id', 'asc')->get();
         $coa = Coa::where('status', 'aktif')->get();
         $nopol = Nopol::where('status', 'aktif')->get();
         $jurnals = Jurnal::select('keterangan_buku_besar_pembantu')
         ->whereNotNull('keterangan_buku_besar_pembantu')
         ->distinct()
+        ->orderBy('id', 'desc')
         ->get();
 
 
