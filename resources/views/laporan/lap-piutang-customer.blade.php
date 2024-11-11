@@ -1,6 +1,6 @@
 <x-Layout.layout>
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Laporan Hutang Vendor</x-slot:tittle>
+        <x-slot:tittle>Laporan Piutang Customer</x-slot:tittle>
         <style type="text/css">
             body {
                 background-color: #f9f9f9;
@@ -113,7 +113,7 @@
                                 @endphp
                                    <td class="{{ $bgClass }}">{{ $data['invoice_count'] ?? 0 }}</td>
                                    <td class="{{ $bgClass }}">
-                                       {{ number_format($data['total_hutang'] ?? 0, 0, ',', ',') }}</td>
+                                       {{ number_format($data['total_piutang'] ?? 0, 0, ',', ',') }}</td>
                                    <td class="{{ $bgClass }}">
                                        {{ number_format($data['total_lunas'] ?? 0, 0, ',', ',') }}</td>
                                    <td class="{{ $bgClass }}">
