@@ -53,6 +53,7 @@
 .bg-total { background-color: #ffab91; }
 
         </style>
+          <h1 style="font-size: 1rem; margin-top: 10px; display: inline-block; border: 2px solid red; padding: 0 5px; border-radius: 8px; color: red;">Masih proses pengecekan</h1>
 
         <div class="table-container">
             <table>
@@ -96,7 +97,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($invoiceData as $year => $dataPerYear)
+                    @foreach ($mergedResults as $year => $dataPerYear)
                         <tr>
                             <td class="bg-thn">{{ $year }}</td>
                             @foreach ($months as $index => $month)
@@ -110,13 +111,13 @@
                                         default => '',
                                     };
                                 @endphp
-                                <td class="{{ $bgClass }}">{{ $data['invoice_count'] ?? 0 }}</td>
-                                <td class="{{ $bgClass }}">
-                                    {{ number_format($data['total_piutang'] ?? 0, 0, ',', ',') }}</td>
-                                <td class="{{ $bgClass }}">
-                                    {{ number_format($data['total_lunas'] ?? 0, 0, ',', ',') }}</td>
-                                <td class="{{ $bgClass }}">
-                                   0</td>
+                                   <td class="{{ $bgClass }}">{{ $data['invoice_count'] ?? 0 }}</td>
+                                   <td class="{{ $bgClass }}">
+                                       {{ number_format($data['total_hutang'] ?? 0, 0, ',', ',') }}</td>
+                                   <td class="{{ $bgClass }}">
+                                       {{ number_format($data['total_lunas'] ?? 0, 0, ',', ',') }}</td>
+                                   <td class="{{ $bgClass }}">
+                                       {{ number_format($data['belum_lunas'] ?? 0, 0, ',', ',') }}</td>
 
                             @endforeach
                             <td class="bg-total">{{ $summaryData[$year]['total_invoice_count'] ?? 0 }}</td>
@@ -125,7 +126,7 @@
                             <td class="bg-total">
                                 {{ number_format($summaryData[$year]['total_lunas'] ?? 0, 0, ',', ',') ?? 0 }}</td>
                             <td class="bg-total">
-                                0</td>
+                                {{ number_format($summaryData[$year]['total_belum_lunas'] ?? 0, 0, ',', ',') ?? 0 }}</td>
                         </tr>
                     @endforeach
                 </tbody>

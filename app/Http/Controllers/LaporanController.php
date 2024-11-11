@@ -68,18 +68,18 @@ foreach ($invoices as $invoice) {
         'month' => $invoice->month,
         'year' => $invoice->year,
         'invoice_count' => $invoice->invoice_count,
-        'total_hutang' => $invoice->total_hutang,
+        'total_hutang' => $invoice->total_hutang / 1000,
         'total_lunas' => 0, // Default jika tidak ada entri di jurnal
-        'belum_lunas' => $invoice->total_hutang, // Belum lunas adalah total_hutang pada invoice
+        'belum_lunas' => $invoice->total_hutang / 1000, // Belum lunas adalah total_hutang pada invoice
     ];
 }
 
 // Menambahkan data jurnal ke dalam $mergedResults berdasarkan tahun dan bulan
 foreach ($jurnals as $jurnal) {
     if (isset($mergedResults[$jurnal->year][$jurnal->month])) {
-        $mergedResults[$jurnal->year][$jurnal->month]['total_lunas'] = $jurnal->total_lunas;
+        $mergedResults[$jurnal->year][$jurnal->month]['total_lunas'] = $jurnal->total_lunas  / 1000;
         $mergedResults[$jurnal->year][$jurnal->month]['belum_lunas'] =
-            $mergedResults[$invoice->year][$invoice->month]['total_hutang'] - $jurnal->total_lunas;
+            $mergedResults[$invoice->year][$invoice->month]['total_hutang'] - $jurnal->total_lunas  / 1000;
     }
 }
 
@@ -140,14 +140,22 @@ public function dataLPC(){;
     ->orderByRaw('MONTH(i.tgl_invoice) ASC') // Urutkan berdasarkan bulan secara ascending
     ->get();
     $invoices->map(function ($invoice) {
-        $invoice->invoice_list = explode(',', $invoice->invoice_list);
+        $invoice->invoice_externals = explode(',', $invoice->invoice_externals);
         return $invoice;
     });
+    
+    // Gabungkan semua invoice_list menjadi satu array
+    $invoicelist = $invoices->flatMap->invoice_externals
+        ->filter(function ($invoiceExternal) {
+            return !empty($invoiceExternal); // Menghapus nilai kosong
+        })
+        ->unique()
+        ->toArray();
 
     $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
     ->selectRaw('DATE_FORMAT(j.tgl, "%M") as month, 
                  YEAR(j.tgl) as year, 
-                 SUM(j.kredit) as total_lunas,
+                 SUM(j.debit) as total_lunas,
                  c.nama_akun')
     ->from('jurnal as j')
     ->join('coa as c', 'j.coa_id', '=', 'c.id')
@@ -173,6 +181,36 @@ foreach ($invoices as $invoice){
     ];
 }
 
+
+$mergedResults = [];
+
+// Menggabungkan hasil dari invoices ke dalam array berdasarkan tahun dan bulan
+foreach ($invoices as $invoice) {
+    // Menyimpan data invoice
+    $mergedResults[$invoice->year][$invoice->month] = [
+        'month' => $invoice->month,
+        'year' => $invoice->year,
+        'invoice_count' => $invoice->invoice_count,
+        'total_hutang' => $invoice->total_hutang / 1000,
+        'total_lunas' => 0, // Default jika tidak ada entri di jurnal
+        'belum_lunas' => $invoice->total_hutang / 1000, // Belum lunas adalah total_hutang pada invoice
+    ];
+}
+
+// Menambahkan data jurnal ke dalam $mergedResults berdasarkan tahun dan bulan
+foreach ($jurnals as $jurnal) {
+    if (isset($mergedResults[$jurnal->year][$jurnal->month])) {
+        $mergedResults[$jurnal->year][$jurnal->month]['total_lunas'] = $jurnal->total_lunas  / 1000;
+        $mergedResults[$jurnal->year][$jurnal->month]['belum_lunas'] =
+            $mergedResults[$invoice->year][$invoice->month]['total_hutang'] - $jurnal->total_lunas  / 1000;
+    }
+}
+
+// Jika Anda ingin hasilnya dalam urutan bulan, Anda bisa melakukan sorting
+foreach ($mergedResults as $year => $months) {
+    ksort($mergedResults[$year]); // Mengurutkan berdasarkan bulan tanpa menggunakan referensi
+}
+
 $summaryData = [];
 foreach ($invoiceData as $year => $dataPerYear) {
     $summaryData[$year] = [
@@ -190,7 +228,7 @@ $months = [
     'June', 'July', 'August', 'September', 
     'October', 'November', 'December'
 ];
-    return view('laporan.lap-piutang-customer',compact('invoiceData', 'months', 'summaryData'));
+    return view('laporan.lap-piutang-customer',compact('mergedResults', 'data' ,'months', 'summaryData'));
 }
 }
 }
