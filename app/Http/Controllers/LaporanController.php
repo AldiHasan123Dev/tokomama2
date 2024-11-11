@@ -5,13 +5,57 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Jurnal;
 use App\Models\Invoice;
-use App\Models\Transaksi;
+use App\Models\Transaction;
 use App\Models\Coa;
 
 class LaporanController extends Controller
 {
     public function dataLHV(){
-        $invoices = Invoice::selectRaw('
+// Query untuk mengambil data
+$jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus, namun kita akan filter dengan whereNull untuk yang belum dihapus
+    ->selectRaw('DATE_FORMAT(j.tgl, "%M") as month, 
+                 YEAR(j.tgl) as year, 
+                 SUM(j.kredit) as total_lunas,
+                 GROUP_CONCAT(j.invoice_external) as invoice_externals,
+                 GROUP_CONCAT(j.id_transaksi) as transaksi')
+    ->from('jurnal as j')
+    ->where('j.coa_id', 5)
+    ->whereNotNull('j.invoice_external')
+    ->whereNotNull('j.id_transaksi')
+    ->whereNull('j.deleted_at') // Menyertakan hanya data yang tidak dihapus
+    ->groupBy('month', 'year')
+    ->orderByRaw('MONTH(j.tgl)')
+    ->get();
+
+// Ubah hasil `invoice_externals` dan `transaksi` menjadi array
+$jurnals->map(function ($jurnal) {
+    $jurnal->invoice_externals = explode(',', $jurnal->invoice_externals);
+    $jurnal->transaksi = explode(',', $jurnal->transaksi); // Mengubah transaksi menjadi array
+    return $jurnal;
+});
+
+// Gabungkan semua `invoice_externals` menjadi satu array unik
+$ie_list = $jurnals->flatMap->invoice_externals
+    ->filter(function ($invoice) {
+        return !empty($invoice); // Menghapus nilai kosong
+    })
+    ->unique()
+    ->toArray();
+
+// Gabungkan semua `transaksi` menjadi satu array unik
+$transaksi_list = $jurnals->flatMap->transaksi
+    ->filter(function ($transaksi) {
+        return !empty($transaksi); // Menghapus nilai kosong
+    })
+    ->unique()
+    ->toArray();
+
+// Debug hasil
+
+// Menggunakan flatMap dan unique untuk mendapatkan list yang unik
+$transaksi = Transaction::whereIn('invoice_external',$ie_list)->get();
+$id_transaksi = $transaksi->pluck('id');
+$invoices = Invoice::selectRaw('
         DATE_FORMAT(i.tgl_invoice, "%M") as month, 
         YEAR(i.tgl_invoice) as year, 
         COUNT(DISTINCT i.invoice) as invoice_count,  
@@ -20,46 +64,16 @@ class LaporanController extends Controller
                 WHEN b.status_ppn = "ya" THEN t.harga_beli * t.jumlah_beli * 1.11
                 ELSE t.harga_beli * t.jumlah_beli
             END
-        ) as total_hutang,
-        GROUP_CONCAT(DISTINCT t.invoice_external) as invoice_externals') // Menggunakan GROUP_CONCAT
+        ) as total_hutang') // Menggunakan GROUP_CONCAT
     ->from('invoice as i')
     ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
     ->join('barang as b', 't.id_barang', '=', 'b.id')
     ->where('i.tgl_invoice', '>', '2024-08-01')
+    ->whereIn('i.id_transaksi', $id_transaksi)
     ->groupBy('year', 'month') // Mengelompokkan berdasarkan tahun dan bulan
     ->orderBy('year', 'asc')
     ->orderByRaw('MONTH(i.tgl_invoice) ASC')
     ->get();
-
-// Ubah hasil `invoice_list` menjadi array
-$invoices->map(function ($invoice) {
-    $invoice->invoice_externals = explode(',', $invoice->invoice_externals);
-    return $invoice;
-});
-
-// Gabungkan semua invoice_list menjadi satu array
-$invoicelist = $invoices->flatMap->invoice_externals
-    ->filter(function ($invoiceExternal) {
-        return !empty($invoiceExternal); // Menghapus nilai kosong
-    })
-    ->unique()
-    ->toArray();
-// Menggunakan flatMap dan unique untuk mendapatkan list yang unik
-// dd($invoicelist);
-$jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus, namun kita akan filter dengan whereNull untuk yang belum dihapus
-    ->selectRaw('DATE_FORMAT(j.tgl, "%M") as month, 
-                 YEAR(j.tgl) as year, 
-                 SUM(j.kredit) as total_lunas,
-                 c.nama_akun')
-    ->from('jurnal as j')
-    ->join('coa as c', 'j.coa_id', '=', 'c.id')
-    ->where('c.id', 5)
-    ->whereIn('j.invoice_external', $invoicelist) // Filter berdasarkan invoice list
-    ->whereNull('j.deleted_at') // Menyertakan hanya data yang tidak dihapus
-    ->groupBy('month', 'year')
-    ->orderByRaw('MONTH(j.tgl)')
-    ->get();
-
 
 // Menyusun hasil dari invoice berdasarkan tahun dan bulan
 $mergedResults = [];
@@ -87,8 +101,7 @@ foreach ($jurnals as $jurnal) {
     // Cek apakah tahun dan bulan jurnal ada di dalam mergedResults
     if (isset($mergedResults[$jurnal->year][$jurnal->month])) {
         // Update total_lunas (dibagi 1000)
-        $mergedResults[$jurnal->year][$jurnal->month]['total_lunas'] += $jurnal->total_lunas / 1000;
-
+        $mergedResults[$jurnal->year][$jurnal->month]['total_lunas'] = $jurnal->total_lunas / 1000;
         // Menghitung belum_lunas dengan merujuk ke data invoice (total_hutang - total_lunas)
         $mergedResults[$jurnal->year][$jurnal->month]['belum_lunas'] =
             $mergedResults[$jurnal->year][$jurnal->month]['total_hutang'] - $mergedResults[$jurnal->year][$jurnal->month]['total_lunas'];
