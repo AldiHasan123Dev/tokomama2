@@ -102,6 +102,7 @@
                             @foreach ($months as $index => $month)
                                 @php
                                     $data = collect($dataPerYear)->firstWhere('month', $month);
+                                   
                                     $bgClass = match ($index) {
                                         0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
                                         3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 
@@ -116,16 +117,16 @@
                                 <td class="{{ $bgClass }}">
                                     {{ number_format($data['total_lunas'] ?? 0, 0, ',', ',') }}</td>
                                 <td class="{{ $bgClass }}">
-                                   0</td>
+                                    {{ number_format($data['belum_lunas'] ?? 0, 0, ',', ',') }}</td>
 
                             @endforeach
                             <td class="bg-total">{{ $summaryData[$year]['total_invoice_count'] ?? 0 }}</td>
                             <td class="bg-total">
                                 {{ number_format($summaryData[$year]['total_hutang'] ?? 0, 0, ',', ',') ?? 0 }}</td>
                             <td class="bg-total">
-                                0</td>
+                                {{ number_format($summaryData[$year]['total_lunas'] ?? 0, 0, ',', ',') ?? 0 }}</td>
                             <td class="bg-total">
-                                0</td>
+                                 {{ number_format($summaryData[$year]['total_belum_lunas'] ?? 0, 0, ',', ',') ?? 0 }}</td>
                         </tr>
                     @endforeach
                 </tbody>

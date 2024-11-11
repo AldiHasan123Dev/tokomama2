@@ -59,12 +59,12 @@ $jurnals = Jurnal::withTrashed() // Menyertakan data yang dihapus
     ->orderByRaw('MONTH(j.tgl)')
     ->get();
 
-    // dd($jurnals);
-// Menyusun hasil dari invoice berdasarkan tahun dan bulan
 $mergedResults = [];
-// Menggabungkan hasil dari invoices ke dalam array berdasarkan tahun
+
+// Menggabungkan hasil dari invoices ke dalam array berdasarkan tahun dan bulan
 foreach ($invoices as $invoice) {
-    $mergedResults[$invoice->year][] = [
+    // Menyimpan data invoice
+    $mergedResults[$invoice->year][$invoice->month] = [
         'month' => $invoice->month,
         'year' => $invoice->year,
         'invoice_count' => $invoice->invoice_count,
@@ -74,47 +74,19 @@ foreach ($invoices as $invoice) {
     ];
 }
 
-// Menambahkan hasil dari jurnal ke dalam array, mencocokkan berdasarkan bulan dan tahun
+// Menambahkan data jurnal ke dalam $mergedResults berdasarkan tahun dan bulan
 foreach ($jurnals as $jurnal) {
-    $found = false;
-    // Memeriksa setiap tahun dan bulan dalam mergedResults
-    foreach ($mergedResults as $year => &$months) {
-        foreach ($months as &$result) {
-            if ($result['month'] == $jurnal->month && $result['year'] == $jurnal->year) {
-                // Menambahkan total_lunas dari jurnal ke dalam hasil yang cocok
-                $result['total_lunas'] = $jurnal->total_lunas;
-                // Menghitung sisa pembayaran (belum_lunas)
-                $result['belum_lunas'] = $result['total_hutang'] - $result['total_lunas'];
-                $found = true;
-                break;
-            }
-        }
-    }
-
-    // Jika tidak ditemukan, tambahkan data jurnal sebagai entry baru
-    if (!$found) {
-        $mergedResults[$jurnal->year][] = [
-            'month' => $jurnal->month,
-            'year' => $jurnal->year,
-            'invoice_count' => 0,
-            'total_hutang' => 0,
-            'total_lunas' => $jurnal->total_lunas,
-            'belum_lunas' => 0, // Jika tidak ada invoice, tidak ada sisa pembayaran
-        ];
+    if (isset($mergedResults[$jurnal->year][$jurnal->month])) {
+        $mergedResults[$jurnal->year][$jurnal->month]['total_lunas'] = $jurnal->total_lunas;
+        $mergedResults[$jurnal->year][$jurnal->month]['belum_lunas'] =
+            $mergedResults[$invoice->year][$invoice->month]['total_hutang'] - $jurnal->total_lunas;
     }
 }
 
-// Mengurutkan data berdasarkan tahun dan bulan (bulan numerik)
-foreach ($mergedResults as $year => &$months) {
-    // Mengurutkan bulan dalam setiap tahun berdasarkan urutan bulan numerik
-    usort($months, function ($a, $b) {
-        return date('m', strtotime($a['month'])) - date('m', strtotime($b['month']));
-    });
+// Jika Anda ingin hasilnya dalam urutan bulan, Anda bisa melakukan sorting
+foreach ($mergedResults as $year => $months) {
+    ksort($mergedResults[$year]); // Mengurutkan berdasarkan bulan tanpa menggunakan referensi
 }
-
-// Output hasil
-// dd($mergedResults);
-
 
 $summaryData = [];
 foreach ($mergedResults as $year => $dataPerYear) {
@@ -135,7 +107,7 @@ foreach ($mergedResults as $year => $dataPerYear) {
     }
 }
 
-dd($summaryData);
+// dd($summaryData, $mergedResults);
 
     $months = [
         'January', 'February', 'March', 'April', 'May', 
