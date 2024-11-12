@@ -389,7 +389,7 @@
                                         min="0" name="nominal[0]" id="nominal-1i" />
                                 </td>
                                 <td>
-                                   
+                                    <input type="hidden" name="invoice_external[0]" value="">
                                     <select class="select select-bordered w-36" name="invoice_external[0]"
                                         id="invoice_external-1i">
                                         <option value="" selected></option>

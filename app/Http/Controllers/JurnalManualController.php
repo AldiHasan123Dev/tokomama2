@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Jurnal;
 use App\Models\Nopol;
 use App\Models\Supplier;
+use App\Models\Barang;
 use App\Models\SuratJalan;
 use App\Models\TemplateJurnal;
 use App\Models\TemplateJurnalItem;
@@ -75,7 +76,7 @@ class JurnalManualController extends Controller
             $transactionCounts[$invoiceNumber]++;
             $invoiceValue = $transaction->invoice ? $transaction->invoice : '-';
             $procTransactionNumber = $invoiceNumber . '_' . $transactionCounts[$invoiceNumber] . ' | ' . $invoiceValue;
-            $procTransactions[] = $procTransactionNumber;
+            $procTransactions[] = $procTransactionNumber; 
         }
         $uniqueNomors = DB::table('jurnal')
         ->whereNotNull('nomor')
@@ -200,7 +201,6 @@ class JurnalManualController extends Controller
 
             $keteranganList[$i] = $keterangan;
         }
-
         // dd($request->nominal, $request->keterangan);
         for ($i = 0; $i < $request->counter; $i++) {
             if ($request->check[$i] == 1) {
@@ -209,13 +209,20 @@ class JurnalManualController extends Controller
                         DB::transaction(
                             function () use ($request, $i, $tipe, $keteranganList, $maxNomor, $newNoJurnal) {
                                 if ($request->akun_debet[$i] != 0) {
-                                    if($request->invoice != 0) {
+                                    $result = null;
+                                    $idTransaksi = null;
+                                    if(!empty($request->invoice[$i])) {
                                         $invc = explode('_', $request->invoice[$i])[0];
-                                        $result = Invoice::where('invoice', $invc)->get();
-                                    } else if($request->invoice_external != 0) {
+                                        $result = Invoice::where('invoice', $invc)->first();
+                                        $idTransaksi = $result ? $result->id_transaksi : null;
+                                    } else if(!empty($request->invoice_external[$i])) {
                                         $invx = explode('_', $request->invoice_external[$i])[0];
-                                        $result = Invoice::where('invoice', $invx)->get();
+                                        $barang = $request->param3;
+                                        $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
+                                        $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                        $idTransaksi = $result ? $result : null;
                                     }
+                                    $idTransaksi = $result ? $result->id_transaksi : null;
                                     Jurnal::create([
                                         'coa_id' => $request->akun_debet[$i],
                                         'nomor' => $newNoJurnal,
@@ -226,7 +233,7 @@ class JurnalManualController extends Controller
                                         'kredit' => 0,
                                         'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                         'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
-                                        'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
+                                        'id_transaksi' => $idTransaksi,
                                         'nopol' => $request->nopol[$i] ?? null,
                                         'tipe' => $tipe,
                                         'no' => $maxNomor + 1,
@@ -236,13 +243,20 @@ class JurnalManualController extends Controller
                                 }
     
                                 if ($request->akun_kredit[$i] != 0) {
-                                    if($request->invoice != 0) {
+                                    $result = null;
+                                    $idTransaksi = null;
+                                    if(!empty($request->invoice[$i])) {
                                         $invc = explode('_', $request->invoice[$i])[0];
-                                        $result = Invoice::where('invoice', $invc)->get();
-                                    } else if($request->invoice_external != 0) {
+                                        $result = Invoice::where('invoice', $invc)->first();
+                                        $idTransaksi = $result ? $result->id_transaksi : null;
+                                    } else if(!empty($request->invoice_external[$i])) {
                                         $invx = explode('_', $request->invoice_external[$i])[0];
-                                        $result = Invoice::where('invoice', $invx)->get();
+                                        $barang = $request->param3;
+                                        $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
+                                        $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                        $idTransaksi = $result ? $result : null;
                                     }
+                                    $idTransaksi = $result ? $result->id_transaksi : null;
                                     Jurnal::create([
                                         'coa_id' => $request->akun_kredit[$i],
                                         'nomor' => $newNoJurnal,
@@ -253,7 +267,7 @@ class JurnalManualController extends Controller
                                         'kredit' => $request->nominal[$i],
                                         'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                         'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
-                                        'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
+                                        'id_transaksi' => $idTransaksi,
                                         'nopol' => $request->nopol[$i] ?? null,
                                         'tipe' => $tipe,
                                         'no' => $maxNomor + 1,
@@ -267,12 +281,18 @@ class JurnalManualController extends Controller
                         DB::transaction(
                             function () use ($request, $i, $nomor, $tipe, $no, $keteranganList) {
                                 if ($request->akun_debet[$i] != 0) {
-                                    if($request->invoice != 0) {
+                                    $result = null;
+                                    $idTransaksi = null;
+                                    if(!empty($request->invoice[$i])) {
                                         $invc = explode('_', $request->invoice[$i])[0];
-                                        $result = Invoice::where('invoice', $invc)->get();
-                                    } else if($request->invoice_external != 0) {
+                                        $result = Invoice::where('invoice', $invc)->first();
+                                        $idTransaksi = $result ? $result->id_transaksi : null;
+                                    } else if(!empty($request->invoice_external[$i])) {
                                         $invx = explode('_', $request->invoice_external[$i])[0];
-                                        $result = Invoice::where('invoice', $invx)->get();
+                                        $barang = $request->param3;
+                                        $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
+                                        $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                        $idTransaksi = $result ? $result : null;
                                     }
                                     Jurnal::create([
                                         'coa_id' => $request->akun_debet[$i],
@@ -284,7 +304,7 @@ class JurnalManualController extends Controller
                                         'kredit' => 0,
                                         'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                         'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
-                                        'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
+                                        'id_transaksi' => $idTransaksi,
                                         'nopol' => $request->nopol[$i] ?? null,
                                         'tipe' => $tipe,
                                         'no' => $no,
@@ -293,12 +313,18 @@ class JurnalManualController extends Controller
                                 }
     
                                 if ($request->akun_kredit[$i] != 0) {
-                                    if($request->invoice != 0) {
+                                    $result = null;
+                                    $idTransaksi = null;
+                                    if(!empty($request->invoice[$i])) {
                                         $invc = explode('_', $request->invoice[$i])[0];
-                                        $result = Invoice::where('invoice', $invc)->get();
-                                    } else if($request->invoice_external != 0) {
+                                        $result = Invoice::where('invoice', $invc)->first();
+                                        $idTransaksi = $result ? $result->id_transaksi : null;
+                                    } else if(!empty($request->invoice_external[$i])) {
                                         $invx = explode('_', $request->invoice_external[$i])[0];
-                                        $result = Invoice::where('invoice', $invx)->get();
+                                        $barang = $request->param3;
+                                        $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
+                                        $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                        $idTransaksi = $result ? $result : null;
                                     }
                                     Jurnal::create([
                                         'coa_id' => $request->akun_kredit[$i],
@@ -310,7 +336,7 @@ class JurnalManualController extends Controller
                                         'kredit' => $request->nominal[$i],
                                         'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                         'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
-                                        'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
+                                        'id_transaksi' => $idTransaksi,
                                         'nopol' => $request->nopol[$i] ?? null,
                                         'tipe' => $tipe,
                                         'no' => $no,
@@ -324,13 +350,19 @@ class JurnalManualController extends Controller
                     // Kode untuk tipe selain 'JNL'
                     DB::transaction(
                         function () use ($request, $i, $nomor, $tipe, $no, $keteranganList) {
+                            $result = null;
+                                $idTransaksi = null;
                             if ($request->akun_debet[$i] != 0) {
-                                if($request->invoice != 0) {
+                                if(!empty($request->invoice[$i])) {
                                     $invc = explode('_', $request->invoice[$i])[0];
-                                    $result = Invoice::where('invoice', $invc)->get();
-                                } else if($request->invoice_external != 0) {
+                                    $result = Invoice::where('invoice', $invc)->first();
+                                    $idTransaksi = $result ? $result->id_transaksi : null;
+                                } else if(!empty($request->invoice_external[$i])) {
                                     $invx = explode('_', $request->invoice_external[$i])[0];
-                                    $result = Invoice::where('invoice', $invx)->get();
+                                    $barang = $request->param3;
+                                    $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
+                                    $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                    $idTransaksi = $result ? $result : null;
                                 }
                                 Jurnal::create([
                                     'coa_id' => $request->akun_debet[$i],
@@ -342,7 +374,7 @@ class JurnalManualController extends Controller
                                     'kredit' => 0,
                                     'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                     'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
-                                    'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
+                                    'id_transaksi' => $idTransaksi,
                                     'nopol' => $request->nopol[$i] ?? null,
                                     'tipe' => $tipe,
                                     'no' => $no,
@@ -351,13 +383,20 @@ class JurnalManualController extends Controller
                             }
 
                             if ($request->akun_kredit[$i] != 0) {
-                                if($request->invoice != 0) {
+                                
+                                if(!empty($request->invoice[$i])) {
                                     $invc = explode('_', $request->invoice[$i])[0];
-                                    $result = Invoice::where('invoice', $invc)->get();
-                                } else if($request->invoice_external != 0) {
+                                    $result = Invoice::where('invoice', $invc)->first();
+                                    $idTransaksi = $result ? $result->id_transaksi : null;
+
+                                } else if(!empty($request->invoice_external[$i])) {
                                     $invx = explode('_', $request->invoice_external[$i])[0];
-                                    $result = Invoice::where('invoice', $invx)->get();
+                                    $barang = $request->param3;
+                                    $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
+                                    $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                    $idTransaksi = $result ? $result : null;
                                 }
+                                
                                 Jurnal::create([
                                     'coa_id' => $request->akun_kredit[$i],
                                     'nomor' => $nomor,
@@ -368,7 +407,7 @@ class JurnalManualController extends Controller
                                     'kredit' => $request->nominal[$i],
                                     'invoice' => !empty($request->invoice[$i]) ? (explode('_', $request->invoice[$i])[0] ?: null) : null,
                                     'invoice_external' => !empty($request->invoice_external[$i]) ? (explode('_', $request->invoice_external[$i])[0] ?: null) : null,
-                                    'id_transaksi' => $result[$i]['id_transaksi'] ?? null,
+                                    'id_transaksi' => $idTransaksi,
                                     'nopol' => $request->nopol[$i] ?? null,
                                     'tipe' => $tipe,
                                     'no' => $no,
@@ -376,7 +415,7 @@ class JurnalManualController extends Controller
                                 ]);
                             }
                         }
-
+                        
                     );
                 }
             }
