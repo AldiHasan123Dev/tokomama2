@@ -53,6 +53,7 @@
 .bg-total { background-color: #ffab91; }
 
         </style>
+       <h1 style="font-size: 1rem; margin-top: 10px; display: inline-block; border: 2px solid red; padding: 0 5px; border-radius: 8px; color: red;"><span style="color: red;">(Note : Data jurnal mulai Agustus 2024, sehingga Laporan Hutang Vendor ditampilkan dari periode tersebut)</span></h1>
 
 
         <div class="table-container">

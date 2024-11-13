@@ -286,13 +286,13 @@ public function dataLapPiutang(Request $request)
     // Mengelompokkan dan menghitung subtotal untuk setiap invoice
     $data = $invoices->groupBy('invoice')->map(function($group) {
         $subtotal = $group->sum('subtotal'); // Jumlahkan subtotal untuk setiap invoice
-         // Inisialisasi PPN
+        $ppn = 0; // Inisialisasi PPN
 
         // Menghitung PPN jika ada barang dengan status_ppn == 'ya'
         foreach ($group as $invoice) {
             foreach ($invoice->transaksi->barang as $barang) {
                 if (optional($barang)->status_ppn == 'ya') {
-                    $ppn = $barang->subtotal * ($barang->value_ppn / 100);
+                    $ppn += $barang->subtotal * ($barang->value_ppn / 100);
                 }
             }
         }
@@ -342,7 +342,7 @@ public function dataLapPiutang(Request $request)
                 $subtotal = $invoices->where('invoice', $jurnal->invoice)->sum('subtotal');
                 $ppn = 0;
                 $barang= $invoice->first()->transaksi->barang ?? null;
-                if ($barang && $barang->status_ppn === 'ya') {
+                if ($barang && $barang->status_ppn == 'ya') {
                         $ppn += $barang->subtotal * ($barang->value_ppn / 100);
                     }
                 
