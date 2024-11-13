@@ -210,6 +210,8 @@ Route::prefix('master')->controller(SupplierController::class)->middleware('auth
 Route::prefix('laporan')->controller(LaporanController::class)->middleware('auth')->group(function () {
     Route::get('hutang-vendor', 'dataLHV')->name('laporan.LHV');
     Route::get('piutang-customer', 'dataLPC')->name('laporan.LPC');
+    Route::get('data-lap-piutang', 'dataLapPiutang')->name('laporan.DataPiutang');
+    Route::get('lap-piutang', 'LapPiutang')->name('laporan.Piutang');
 });
 
 // Route::prefix('jurnal')->controller(CoaController::class)->middleware('auth')->group(function () {

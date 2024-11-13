@@ -7,7 +7,7 @@ use App\Models\Jurnal;
 use App\Models\Invoice;
 use App\Models\Transaction;
 use App\Models\Coa;
-
+use Carbon\Carbon;
 class LaporanController extends Controller
 {
     public function dataLHV(){
@@ -49,7 +49,10 @@ class LaporanController extends Controller
                  kredit')
     ->from('jurnal as j')
     ->join('invoice as i', 'j.id_transaksi', '=', 'i.id_transaksi')
-    ->where('coa_id', 5)
+    ->where(function($query) {
+        $query->where('j.coa_id', 5)
+              ->orWhere('j.coa_id', 32); // Menambahkan kondisi coa_id 5 atau 32
+    })
     ->where('i.tgl_invoice', '>', '2024-08-01')
     ->whereNotNull('invoice_external')
      ->whereNull('deleted_at')
@@ -253,4 +256,75 @@ $months = [
 ];
     return view('laporan.lap-piutang-customer',compact('mergedResults', 'data' ,'months', 'summaryData'));
 }
+public function dataLapPiutang()
+{
+    // Ambil data dari tabel Jurnals
+    $jurnals = Jurnal::withTrashed()
+    ->where('tipe', 'BBM')
+    ->whereNull('deleted_at')
+    ->where('debit', '!=', 0)
+    ->select('debit', 'tgl') // Hanya memilih kolom debit dan tgl
+    ->get();
+
+
+    // Ambil data dari tabel Invoices
+    $invoices = Invoice::select('invoice', 'subtotal', 'tgl_invoice') // Memilih kolom dari tabel Invoice
+    ->with(['transaksi.suratJalan.customer' => function($query) {
+        $query->select('id', 'nama'); // Memilih kolom yang diperlukan
+    }])
+    ->whereNotNull('invoice') // Pastikan invoice tidak null
+    ->get();
+
+    $data = [];
+
+    // Menggabungkan hasil dari invoices ke dalam array berdasarkan tahun dan bulan
+    foreach ($invoices as $invoice) {
+        // Menyimpan data invoice
+        $date = Carbon::parse($invoice->tgl_invoice);
+        $tempo = $date->addDays(60);
+        $data[$invoice] = [
+            'invoice' => $invoice->invoice,
+            'customer' => $invoice->suratJalan->customer->nama,
+            'jumlah_harga' => $invoice->subtotal,
+            'ditagih_tgl' => $invoice->tgl_invoice, // Membagi total_hutang dengan 1000
+            'tempo' => $tempo, 
+            'dibayar_tgl' => 0,
+            'sebesar' => 0,
+            'kurang_bayar' => 0,
+        ];
+    }
+
+    foreach ($jurnals as $jurnal) {
+        if (isset($data[$jurnals])) {
+            $data['dibayar_tgl'] = $jurnal->tgl;
+            $data['sebesar'] = $jurnal->debit;
+            $data['belum_lunas'] =
+                $data['jumlah_harga'] - $data['sebesar'];
+        } else {
+            // Jika tidak ada, buat entri baru dengan data default
+            $data[$jurnal]= [
+            'invoice' => 0,
+            'customer' => 0,
+            'jumlah_harga' => 0,
+            'ditagih_tgl' => 0, // Membagi total_hutang dengan 1000
+            'tempo' => 0, 
+            'dibayar_tgl' => $jurnal->tgl,
+            'sebesar' => $jurnal->debit,
+            'kurang_bayar' => 0,
+            ];
+        }
+    } // Menggabungkan $jurnals dan $invoices
+
+    // Menambahkan nomor urut (1, 2, 3, ...)
+    dd($data);
+
+    return response()->json(['data' => $data]);
 }
+
+
+    public function lapPiutang()
+    {
+        return view('jurnal.lap-piutang');
+    }
+
+    }
