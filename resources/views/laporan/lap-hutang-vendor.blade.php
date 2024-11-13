@@ -53,7 +53,6 @@
 .bg-total { background-color: #ffab91; }
 
         </style>
-       <h1 style="font-size: 1rem; margin-top: 10px; display: inline-block; border: 2px solid red; padding: 0 5px; border-radius: 8px; color: red;">Masih proses pengecekan</h1>
 
 
         <div class="table-container">

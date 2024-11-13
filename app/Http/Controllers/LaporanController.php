@@ -256,70 +256,140 @@ $months = [
 ];
     return view('laporan.lap-piutang-customer',compact('mergedResults', 'data' ,'months', 'summaryData'));
 }
-public function dataLapPiutang()
+
+
+public function dataLapPiutang(Request $request)
 {
-    // Ambil data dari tabel Jurnals
+    // Ambil parameter untuk pagination dari request
+    $page = $request->input('page', 1); // Halaman saat ini, default 1
+    $rows = $request->input('rows', 20); // Jumlah baris per halaman, default 20
+
+    // Ambil data dari tabel Jurnals dengan pagination, urutkan berdasarkan 'tgl' descending
     $jurnals = Jurnal::withTrashed()
-    ->where('tipe', 'BBM')
-    ->whereNull('deleted_at')
-    ->where('debit', '!=', 0)
-    ->select('debit', 'tgl') // Hanya memilih kolom debit dan tgl
+        ->where('tipe', 'BBM')
+        ->whereNull('deleted_at')
+        ->where('debit', '!=', 0)
+        ->select('debit', 'tgl', 'invoice')
+        ->orderBy('tgl', 'desc')
+        ->get();
+
+    // Ambil data dari tabel Invoices, urutkan berdasarkan 'tgl_invoice' descending
+    $invoices = Invoice::with([
+        'transaksi.suratJalan.customer' => function($query) {
+            $query->select('id', 'nama');
+        },
+        'transaksi.barang' // Menambahkan relasi transaksi.barang
+    ])
+    ->orderBy('created_at', 'desc')
     ->get();
 
+    // Mengelompokkan dan menghitung subtotal untuk setiap invoice
+    $data = $invoices->groupBy('invoice')->map(function($group) {
+        $subtotal = $group->sum('subtotal'); // Jumlahkan subtotal untuk setiap invoice
+         // Inisialisasi PPN
 
-    // Ambil data dari tabel Invoices
-    $invoices = Invoice::select('invoice', 'subtotal', 'tgl_invoice') // Memilih kolom dari tabel Invoice
-    ->with(['transaksi.suratJalan.customer' => function($query) {
-        $query->select('id', 'nama'); // Memilih kolom yang diperlukan
-    }])
-    ->whereNotNull('invoice') // Pastikan invoice tidak null
-    ->get();
+        // Menghitung PPN jika ada barang dengan status_ppn == 'ya'
+        foreach ($group as $invoice) {
+            foreach ($invoice->transaksi->barang as $barang) {
+                if (optional($barang)->status_ppn == 'ya') {
+                    $ppn = $barang->subtotal * ($barang->value_ppn / 100);
+                }
+            }
+        }
 
-    $data = [];
+        // Total harga dengan PPN
+        $jumlah_harga = $subtotal + $ppn;
 
-    // Menggabungkan hasil dari invoices ke dalam array berdasarkan tahun dan bulan
-    foreach ($invoices as $invoice) {
-        // Menyimpan data invoice
-        $date = Carbon::parse($invoice->tgl_invoice);
-        $tempo = $date->addDays(60);
-        $data[$invoice] = [
-            'invoice' => $invoice->invoice,
-            'customer' => $invoice->suratJalan->customer->nama,
-            'jumlah_harga' => $invoice->subtotal,
-            'ditagih_tgl' => $invoice->tgl_invoice, // Membagi total_hutang dengan 1000
-            'tempo' => $tempo, 
-            'dibayar_tgl' => 0,
+
+        return [
+            'invoice' => $group->first()->invoice,
+            'customer' => $group->first()->transaksi->suratJalan->customer->nama,
+            'jumlah_harga' => $jumlah_harga,
+            'ditagih_tgl' => $group->first()->tgl_invoice,
+            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays(60),
+            'dibayar_tgl' => null,
             'sebesar' => 0,
-            'kurang_bayar' => 0,
+            'kurang_bayar' => $jumlah_harga,
         ];
+    });
+
+    // Menggabungkan data jurnal dengan data invoice
+    foreach ($jurnals as $jurnal) {
+        if ($data->has($jurnal->invoice)) {
+            $currentData = $data->get($jurnal->invoice);
+
+            // Hitung subtotal dan PPN untuk invoice yang sesuai
+            $subtotal = $invoices->where('invoice', $jurnal->invoice)->sum('subtotal');
+            $ppn = 0;
+            foreach ($invoices->where('invoice', $jurnal->invoice) as $invoice) {
+                $barang= $invoice->first()->transaksi->barang ?? null;
+                    if ($barang && $barang->status_ppn === 'ya') {
+                        $ppn = $barang->subtotal * ($barang->value_ppn / 100);
+                    }
+            }
+
+            $totalHarga = $subtotal + $ppn;
+            $total = $totalHarga - $jurnal->debit;
+
+            $currentData['dibayar_tgl'] = $jurnal->tgl;
+            $currentData['sebesar'] = $jurnal->debit;
+            $currentData['kurang_bayar'] = $totalHarga - $jurnal->debit;
+            $data->put($jurnal->invoice, $currentData);
+        } else {
+            $invoicesForJurnal = $invoices->firstWhere('invoice', $jurnal->invoice);
+
+            if ($invoicesForJurnal) {
+                $subtotal = $invoices->where('invoice', $jurnal->invoice)->sum('subtotal');
+                $ppn = 0;
+                $barang= $invoice->first()->transaksi->barang ?? null;
+                if ($barang && $barang->status_ppn === 'ya') {
+                        $ppn += $barang->subtotal * ($barang->value_ppn / 100);
+                    }
+                
+
+                $totalHarga = $subtotal + $ppn;
+                $total = $totalHarga- $jurnal->debit;
+
+                $data->put($jurnal->invoice, [
+                    'invoice' => $invoicesForJurnal->invoice,
+                    'customer' => $invoicesForJurnal->transaksi->suratJalan->customer->nama,
+                    'jumlah_harga' => $totalHarga,
+                    'ditagih_tgl' => $invoicesForJurnal->tgl_invoice,
+                    'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays(60),
+                    'dibayar_tgl' => $jurnal->tgl,
+                    'sebesar' => $jurnal->debit,
+                    'kurang_bayar' => $total,
+                ]);
+            }
+        }
     }
 
-    foreach ($jurnals as $jurnal) {
-        if (isset($data[$jurnals])) {
-            $data['dibayar_tgl'] = $jurnal->tgl;
-            $data['sebesar'] = $jurnal->debit;
-            $data['belum_lunas'] =
-                $data['jumlah_harga'] - $data['sebesar'];
-        } else {
-            // Jika tidak ada, buat entri baru dengan data default
-            $data[$jurnal]= [
-            'invoice' => 0,
-            'customer' => 0,
-            'jumlah_harga' => 0,
-            'ditagih_tgl' => 0, // Membagi total_hutang dengan 1000
-            'tempo' => 0, 
-            'dibayar_tgl' => $jurnal->tgl,
-            'sebesar' => $jurnal->debit,
-            'kurang_bayar' => 0,
-            ];
-        }
-    } // Menggabungkan $jurnals dan $invoices
+    // Menambahkan nomor urut
+    $result = [];
+    $index = 1;
+    foreach ($data as $item) {
+        $item['no'] = $index++;
+        $result[] = $item;
+    }
 
-    // Menambahkan nomor urut (1, 2, 3, ...)
-    dd($data);
+    // Pagination
+    $indexStart = ($page - 1) * $rows;
+    $paginatedData = collect($result)->slice($indexStart, $rows)->values();
 
-    return response()->json(['data' => $data]);
+    $totalRecords = count($result);
+    $totalPages = ceil($totalRecords / $rows);
+
+    // Mengembalikan data dalam format yang sesuai dengan jqGrid
+    return response()->json([
+        'data' => $paginatedData,
+        'page' => $page,
+        'total' => $totalPages,
+        'records' => $totalRecords,
+        'rows' => $paginatedData,
+    ]);
 }
+
+
 
 
     public function lapPiutang()
