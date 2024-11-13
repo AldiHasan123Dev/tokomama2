@@ -635,7 +635,6 @@ class JurnalManualController extends Controller
         // $invoice_count = 1;
         // $nsfp = NSFP::where('available', '1')->orderBy('nomor')->take($invoice_count)->get();
 
-
         Transaction::where('id_surat_jalan', $request->id_surat_jalan)
         ->where('id_supplier', $request->id_supplier)
         ->update(['invoice_external' => $request->invoice_external]);

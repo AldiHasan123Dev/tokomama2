@@ -274,6 +274,7 @@ class SuratJalanController extends Controller
                             'invoice_external' => $request->invoice_external,
                             'nopol' => $item->suratJalan->no_pol,
                             'container' => null,
+                            'id_transaksi'=>$item->id,
                             'tipe' => 'BBK',
                             'no' => $no_BBK
                         ]
@@ -296,6 +297,7 @@ class SuratJalanController extends Controller
                             'invoice_external' => $request->invoice_external,
                             'nopol' => $item->suratJalan->no_pol,
                             'container' => null,
+                            'id_transaksi'=>$item->id,
                             'tipe' => 'BBK',
                             'no' => $no_BBK
                         ]
@@ -318,6 +320,7 @@ class SuratJalanController extends Controller
                         'invoice_external' => $request->invoice_external,
                         'nopol' => $data[0]->suratJalan->no_pol,
                         'container' => null,
+                        'id_transaksi'=>$data[0]->id,
                         'tipe' => 'BBK',
                         'no' => $no_BBK
                     ]
@@ -336,6 +339,7 @@ class SuratJalanController extends Controller
                         'invoice_external' => $request->invoice_external,
                         'nopol' => $item->suratJalan->no_pol,
                         'container' => null,
+                        'id_transaksi'=>$item->id,
                         'tipe' => 'BBK',
                         'no' => $no_BBK
                     ]
