@@ -53,20 +53,30 @@
                         { search: true, label: 'Jatuh Tempo TGL', name: 'tempo', width: 50, align: "center", formatter: 'date', formatoptions: { newformat: 'Y-m-d' }, sortable: true },
                         { search: true, label: 'Dibayar TGL', name: 'dibayar_tgl', width: 50, align: "center", formatter: 'date', formatoptions: { newformat: 'Y-m-d' }, sortable: true },
                         { search: true, label: 'Dibayar', name: 'sebesar', width: 120, align: "right", formatter: 'currency', formatoptions: { thousandsSeparator: ',' }, sortable: true },
-                        { search: true, label: 'Kurang Bayar', name: 'kurang_bayar', width: 120, align: "right", formatter: 'currency', formatoptions: { thousandsSeparator: ',' }, sortable: true },
-                    ],
-                    rowattr: function (rd) {
-                        if (rd.kurang_bayar > 0) {
-        return { "style": "background-color:red;color:white;" };
+                        {
+    search: true,
+    label: 'Kurang Bayar',
+    name: 'kurang_bayar',
+    width: 120,
+    align: "right",
+    formatter: 'currency',
+    formatoptions: { thousandsSeparator: ',' },
+    sortable: true,
+    cellattr: function (rowId, val) {
+        // Pastikan nilai adalah angka dan lebih besar dari 0
+        if (parseFloat(val.replace(/[^0-9.-]+/g, "")) > 0) {
+            return 'style="background-color:red;color:white;"';
+        }
     }
-},
+}
+
+                    ],
                     pager: "#jqGridPager", // ID untuk pager
                     rowNum: 20, // Menampilkan 20 baris per halaman
                     rowList: [10, 20, 50], // Pilihan jumlah baris per halaman
                     viewrecords: true, // Menampilkan total jumlah record
                     autowidth: true,
                     loadonce: false, // Memungkinkan pagination server-side
-                    serverPaging: true,
                     height: 'auto',
                     jsonReader: {
                         repeatitems: false,

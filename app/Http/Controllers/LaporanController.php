@@ -278,6 +278,7 @@ public function dataLapPiutang(Request $request)
         ->where('tipe', 'BBM')
         ->whereNull('deleted_at')
         ->where('debit', '!=', 0)
+        ->where('tgl', '>', '2024-08-01')
         ->select('debit', 'tgl', 'invoice')
         ->orderBy('tgl', 'desc')
         ->get();
@@ -289,6 +290,7 @@ public function dataLapPiutang(Request $request)
         },
         'transaksi.barang' // Menambahkan relasi transaksi.barang
     ])
+    ->where('tgl_invoice', '>', '2024-08-01')
     ->orderBy('created_at', 'desc')
     ->get();
 
@@ -301,11 +303,11 @@ public function dataLapPiutang(Request $request)
         foreach ($group as $invoice) {
             $barang = $invoice->transaksi->barang;
             if ($barang && $barang->status_ppn == 'ya') {
-                $ppn += round($invoice->subtotal * ($barang->value_ppn / 100)); // Menghitung PPN
+                $ppn += $invoice->subtotal * ($barang->value_ppn / 100); // Menghitung PPN
             }
         }
 
-        $jumlah_harga = $subtotal + $ppn;
+        $jumlah_harga = round($subtotal + $ppn);
 
         return [
             'invoice' => $group->first()->invoice,
@@ -330,11 +332,11 @@ public function dataLapPiutang(Request $request)
             foreach ($invoices->where('invoice', $jurnal->invoice) as $invoice) {
                 $barang = $invoice->transaksi->barang;
                 if ($barang && $barang->status_ppn == 'ya') {
-                    $ppn += round($invoice->subtotal * ($barang->value_ppn / 100)); // Menghitung PPN
+                    $ppn += $invoice->subtotal * ($barang->value_ppn / 100); // Menghitung PPN
                 }
             }
 
-            $totalHarga = $subtotal + $ppn;
+            $totalHarga = round($subtotal + $ppn);
             $total = $totalHarga - $jurnal->debit;
 
             $currentData['dibayar_tgl'] = $jurnal->tgl;

@@ -9,7 +9,7 @@
         }
     </style>
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Laporan Omzet</x-slot:tittle>
+        <x-slot:tittle>Laporan Trading</x-slot:tittle>
         <form action="{{route('keuangan.omzet.exportexcel')}}" method="post" class="self-end">
             @csrf
             <input type="hidden" name="start" id="startex" >
