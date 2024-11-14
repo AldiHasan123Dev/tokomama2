@@ -211,6 +211,7 @@ Route::prefix('laporan')->controller(LaporanController::class)->middleware('auth
     Route::get('hutang-vendor', 'dataLHV')->name('laporan.LHV');
     Route::get('piutang-customer', 'dataLPC')->name('laporan.LPC');
     Route::get('data-lap-piutang', 'dataLapPiutang')->name('laporan.DataPiutang');
+    Route::get('data-total-lap-piutang', 'dataLapPiutangTotal')->name('laporan.TotalDataPiutang');
     Route::get('lap-piutang', 'LapPiutang')->name('laporan.Piutang');
 });
 
