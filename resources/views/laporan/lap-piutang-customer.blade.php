@@ -14,46 +14,98 @@
             table {
                 border-collapse: collapse;
                 width: 100%;
-                margin: 0 auto; /* Center the table */
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+                margin: 0 auto;
+                /* Center the table */
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                /* Add shadow for depth */
             }
 
-            th, td {
+            th,
+            td {
                 padding: 12px;
                 text-align: center;
-                transition: background-color 0.3s ease; /* Transition for background color */
+                transition: background-color 0.3s ease;
+                /* Transition for background color */
             }
 
             th {
                 background-color: #007bff;
                 color: rgb(4, 3, 3);
                 position: sticky;
-                top: 0; /* Make the header sticky */
-                z-index: 1; /* Ensure it stays above other elements */
+                top: 0;
+                /* Make the header sticky */
+                z-index: 1;
+                /* Ensure it stays above other elements */
             }
 
             tr:hover {
-                background-color: #a0a0a0; /* Change background on hover */
+                background-color: #a0a0a0;
+                /* Change background on hover */
             }
 
             /* Kelas untuk warna latar belakang setiap bulan */
-            .bg-thn { background-color: #8c9eca; }
-.bg-jan { background-color: #d1c4e9 }
-.bg-feb { background-color: #ffccbc; }
-.bg-mar { background-color: #ffe0b2; }
-.bg-apr { background-color: #d1c4e9; }
-.bg-may { background-color: #c8e6c9; }
-.bg-jun { background-color: #d1c4e9; }
-.bg-jul { background-color: #ffecb3; }
-.bg-aug { background-color: #c5cae9; }
-.bg-sep { background-color: #b2dfdb; }
-.bg-oct { background-color: #f3e5f5; }
-.bg-nov { background-color: #fff9c4; }
-.bg-dec { background-color: #cfd8dc; }
-.bg-total { background-color: #ffab91; }
+            .bg-thn {
+                background-color: #6b8e23;
+            }
 
+            /* Tahun */
+            .bg-jan {
+                background-color: #ffebcd;
+            }
+
+            .bg-feb {
+                background-color: #ffe4e1;
+            }
+
+            .bg-mar {
+                background-color: #e6e6fa;
+            }
+
+            .bg-apr {
+                background-color: #afeeee;
+            }
+
+            .bg-may {
+                background-color: #f0e68c;
+            }
+
+            .bg-jun {
+                background-color: #98fb98;
+            }
+
+            .bg-jul {
+                background-color: #ffe4b5;
+            }
+
+            .bg-aug {
+                background-color: #dda0dd;
+            }
+
+            .bg-sep {
+                background-color: #87ceeb;
+            }
+
+            .bg-oct {
+                background-color: #d8bfd8;
+            }
+
+            .bg-nov {
+                background-color: #ffc0cb;
+            }
+
+            .bg-dec {
+                background-color: #bc8f8f;
+            }
+
+            .bg-total {
+                background-color: #ffa07a;
+            }
+
+            /* Total */
         </style>
-          <h1 style="font-size: 1rem; margin-top: 10px; display: inline-block; border: 2px solid red; padding: 0 5px; border-radius: 8px; color: red;">Masih proses pengecekan</h1>
+        <h1
+            style="font-size: 1rem; margin-top: 10px; display: inline-block; border: 2px solid red; padding: 0 5px; border-radius: 8px; color: red;">
+            Masih proses pengecekan</h1>
 
         <div class="table-container">
             <table>
@@ -63,10 +115,18 @@
                         @foreach ($months as $index => $month)
                             @php
                                 $bgClass = match ($index) {
-                                    0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
-                                    3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 
-                                    6 => 'bg-jul', 7 => 'bg-aug', 8 => 'bg-sep', 
-                                    9 => 'bg-oct', 10 => 'bg-nov', 11 => 'bg-dec',
+                                    0 => 'bg-jan',
+                                    1 => 'bg-feb',
+                                    2 => 'bg-mar',
+                                    3 => 'bg-apr',
+                                    4 => 'bg-may',
+                                    5 => 'bg-jun',
+                                    6 => 'bg-jul',
+                                    7 => 'bg-aug',
+                                    8 => 'bg-sep',
+                                    9 => 'bg-oct',
+                                    10 => 'bg-nov',
+                                    11 => 'bg-dec',
                                     default => '',
                                 };
                             @endphp
@@ -78,10 +138,18 @@
                         @foreach ($months as $index => $month)
                             @php
                                 $bgClass = match ($index) {
-                                    0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
-                                    3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 
-                                    6 => 'bg-jul', 7 => 'bg-aug', 8 => 'bg-sep', 
-                                    9 => 'bg-oct', 10 => 'bg-nov', 11 => 'bg-dec',
+                                    0 => 'bg-jan',
+                                    1 => 'bg-feb',
+                                    2 => 'bg-mar',
+                                    3 => 'bg-apr',
+                                    4 => 'bg-may',
+                                    5 => 'bg-jun',
+                                    6 => 'bg-jul',
+                                    7 => 'bg-aug',
+                                    8 => 'bg-sep',
+                                    9 => 'bg-oct',
+                                    10 => 'bg-nov',
+                                    11 => 'bg-dec',
                                     default => '',
                                 };
                             @endphp
@@ -104,21 +172,28 @@
                                 @php
                                     $data = collect($dataPerYear)->firstWhere('month', $month);
                                     $bgClass = match ($index) {
-                                        0 => 'bg-jan', 1 => 'bg-feb', 2 => 'bg-mar', 
-                                        3 => 'bg-apr', 4 => 'bg-may', 5 => 'bg-jun', 
-                                        6 => 'bg-jul', 7 => 'bg-aug', 8 => 'bg-sep', 
-                                        9 => 'bg-oct', 10 => 'bg-nov', 11 => 'bg-dec',
+                                        0 => 'bg-jan',
+                                        1 => 'bg-feb',
+                                        2 => 'bg-mar',
+                                        3 => 'bg-apr',
+                                        4 => 'bg-may',
+                                        5 => 'bg-jun',
+                                        6 => 'bg-jul',
+                                        7 => 'bg-aug',
+                                        8 => 'bg-sep',
+                                        9 => 'bg-oct',
+                                        10 => 'bg-nov',
+                                        11 => 'bg-dec',
                                         default => '',
                                     };
                                 @endphp
-                                   <td class="{{ $bgClass }}">{{ $data['invoice_count'] ?? 0 }}</td>
-                                   <td class="{{ $bgClass }}">
-                                       {{ number_format($data['total_piutang'] ?? 0, 0, ',', ',') }}</td>
-                                   <td class="{{ $bgClass }}">
-                                       {{ number_format($data['total_lunas'] ?? 0, 0, ',', ',') }}</td>
-                                   <td class="{{ $bgClass }}">
-                                       {{ number_format($data['belum_lunas'] ?? 0, 0, ',', ',') }}</td>
-
+                                <td class="{{ $bgClass }}">{{ $data['invoice_count'] ?? 0 }}</td>
+                                <td class="{{ $bgClass }}">
+                                    {{ number_format($data['total_piutang'] ?? 0, 0, ',', ',') }}</td>
+                                <td class="{{ $bgClass }}">
+                                    {{ number_format($data['total_lunas'] ?? 0, 0, ',', ',') }}</td>
+                                <td class="{{ $bgClass }}">
+                                    {{ number_format($data['belum_lunas'] ?? 0, 0, ',', ',') }}</td>
                             @endforeach
                             <td class="bg-total">{{ $summaryData[$year]['total_invoice_count'] ?? 0 }}</td>
                             <td class="bg-total">
@@ -126,7 +201,8 @@
                             <td class="bg-total">
                                 {{ number_format($summaryData[$year]['total_lunas'] ?? 0, 0, ',', ',') ?? 0 }}</td>
                             <td class="bg-total">
-                                {{ number_format($summaryData[$year]['total_belum_lunas'] ?? 0, 0, ',', ',') ?? 0 }}</td>
+                                {{ number_format($summaryData[$year]['total_belum_lunas'] ?? 0, 0, ',', ',') ?? 0 }}
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
