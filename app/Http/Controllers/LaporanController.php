@@ -170,7 +170,8 @@ foreach ($mergedResults as $year => $dataPerYear) {
     ->from('jurnal as j')
     ->join('invoice as i', 'j.id_transaksi', '=', 'i.id_transaksi')
     ->where(function($query) {
-        $query->where('j.coa_id', 5); // Kondisi coa_id 5 atau 2
+        $query->where('j.coa_id', 5)
+              ->orWhere('j.coa_id', 2); // Kondisi coa_id 5 atau 2
     })
     ->where('i.tgl_invoice', '>', '2024-08-01')
     ->whereNotNull('j.invoice') // Mengambil hanya data yang memiliki nilai invoice
