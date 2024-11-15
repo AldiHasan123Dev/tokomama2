@@ -218,11 +218,14 @@ class JurnalManualController extends Controller
                                     } else if(!empty($request->invoice_external[$i])) {
                                         $invx = explode('_', $request->invoice_external[$i])[0];
                                         $barang = $request->param3;
+                                        $supplier = $request->param2;
+                                        $id_supplier = Supplier::where('nama', $supplier)->pluck('id')->toArray();
                                         $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
-                                        $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                        $result = Transaction::where('invoice_external', $invx)->whereIn('id_barang', $id_barang)->whereIn('id_supplier',$id_supplier)->pluck('id')->first();
                                         $idTransaksi = $result ? $result : null;
+                                        // dd($result,$idTransaksi,$invx);
                                     }
-                                    $idTransaksi = $result ? $result->id_transaksi : null;
+                                    
                                     Jurnal::create([
                                         'coa_id' => $request->akun_debet[$i],
                                         'nomor' => $newNoJurnal,
@@ -252,11 +255,14 @@ class JurnalManualController extends Controller
                                     } else if(!empty($request->invoice_external[$i])) {
                                         $invx = explode('_', $request->invoice_external[$i])[0];
                                         $barang = $request->param3;
+                                        $supplier = $request->param2;
+                                        $id_supplier = Supplier::where('nama', $supplier)->pluck('id')->toArray();
                                         $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
-                                        $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                        $result = Transaction::where('invoice_external', $invx)->whereIn('id_barang', $id_barang)->whereIn('id_supplier',$id_supplier)->pluck('id')->first();
                                         $idTransaksi = $result ? $result : null;
+                                        // dd($result,$idTransaksi,$invx);
                                     }
-                                    $idTransaksi = $result ? $result->id_transaksi : null;
+                                    
                                     Jurnal::create([
                                         'coa_id' => $request->akun_kredit[$i],
                                         'nomor' => $newNoJurnal,
@@ -290,10 +296,14 @@ class JurnalManualController extends Controller
                                     } else if(!empty($request->invoice_external[$i])) {
                                         $invx = explode('_', $request->invoice_external[$i])[0];
                                         $barang = $request->param3;
+                                        $supplier = $request->param2;
+                                        $id_supplier = Supplier::where('nama', $supplier)->pluck('id')->toArray();
                                         $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
-                                        $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                        $result = Transaction::where('invoice_external', $invx)->whereIn('id_barang', $id_barang)->whereIn('id_supplier',$id_supplier)->pluck('id')->first();
                                         $idTransaksi = $result ? $result : null;
+                                        // dd($result,$idTransaksi,$invx);
                                     }
+                                  
                                     Jurnal::create([
                                         'coa_id' => $request->akun_debet[$i],
                                         'nomor' => $nomor,
@@ -322,10 +332,14 @@ class JurnalManualController extends Controller
                                     } else if(!empty($request->invoice_external[$i])) {
                                         $invx = explode('_', $request->invoice_external[$i])[0];
                                         $barang = $request->param3;
+                                        $supplier = $request->param2;
+                                        $id_supplier = Supplier::where('nama', $supplier)->pluck('id')->toArray();
                                         $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
-                                        $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                        $result = Transaction::where('invoice_external', $invx)->whereIn('id_barang', $id_barang)->whereIn('id_supplier',$id_supplier)->pluck('id')->first();
                                         $idTransaksi = $result ? $result : null;
+                                        // dd($result,$idTransaksi,$invx);
                                     }
+                                    
                                     Jurnal::create([
                                         'coa_id' => $request->akun_kredit[$i],
                                         'nomor' => $nomor,
@@ -360,10 +374,14 @@ class JurnalManualController extends Controller
                                 } else if(!empty($request->invoice_external[$i])) {
                                     $invx = explode('_', $request->invoice_external[$i])[0];
                                     $barang = $request->param3;
-                                    $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                                    $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
-                                    $idTransaksi = $result ? $result : null;
+                                    $supplier = $request->param2;
+                                        $id_supplier = Supplier::where('nama', $supplier)->pluck('id')->toArray();
+                                        $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
+                                        $result = Transaction::where('invoice_external', $invx)->whereIn('id_barang', $id_barang)->whereIn('id_supplier',$id_supplier)->pluck('id')->first();
+                                        $idTransaksi = $result ? $result : null;
+                                     
                                 }
+                                
                                 Jurnal::create([
                                     'coa_id' => $request->akun_debet[$i],
                                     'nomor' => $nomor,
@@ -392,10 +410,13 @@ class JurnalManualController extends Controller
                                 } else if(!empty($request->invoice_external[$i])) {
                                     $invx = explode('_', $request->invoice_external[$i])[0];
                                     $barang = $request->param3;
+                                    $supplier = $request->param2;
+                                    $id_supplier = Supplier::where('nama', $supplier)->pluck('id')->toArray();
                                     $id_barang =  Barang::where('nama', $barang)->pluck('id')->toArray();
-                                    $result = Transaction::where('invoice_external', $invx)->where('id_barang', $id_barang)->pluck('id')->first();
+                                    $result = Transaction::where('invoice_external', $invx)->whereIn('id_barang', $id_barang)->whereIn('id_supplier',$id_supplier)->pluck('id')->first();
                                     $idTransaksi = $result ? $result : null;
                                 }
+                               
                                 
                                 Jurnal::create([
                                     'coa_id' => $request->akun_kredit[$i],
@@ -411,7 +432,6 @@ class JurnalManualController extends Controller
                                     'nopol' => $request->nopol[$i] ?? null,
                                     'tipe' => $tipe,
                                     'no' => $no,
-                                   
                                 ]);
                             }
                         }
