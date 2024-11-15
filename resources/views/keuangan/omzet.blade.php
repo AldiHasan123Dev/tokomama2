@@ -3,11 +3,37 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/datetime/1.5.2/css/dataTables.dateTime.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.0/css/buttons.dataTables.css">
     <style>
-        .red-row {
-            background-color: yellow !important;
-            color: black;
+        /* Mengatur ukuran font, padding, dan jarak antar kolom */
+        .text-right {
+        text-align: right;
+    }
+        #table-omzet {
+            font-size: 10px; /* Ukuran font lebih kecil */
+            width: 100%;
+            table-layout: auto;
+            border-collapse: collapse; /* Menghilangkan jarak antar border kolom */
+            border-spacing: 0; /* Mengatur jarak antar kolom menjadi 0 */
+        }
+    
+        #table-omzet td, #table-omzet th {
+            padding: 2px 3px; /* Padding minimal agar lebih rapat */
+            font-size: 10px;
+            text-align: center;
+            border: 1px solid #ddd; /* Tambahkan garis tipis antar kolom */
+        }
+    
+        /* Menyesuaikan lebar kolom secara khusus */
+        #table-omzet th:nth-child(1), #table-omzet td:nth-child(1) {
+            width: 40px;
+        }
+        #table-omzet th:nth-child(2), #table-omzet td:nth-child(2) {
+            width: 80px;
+        }
+        #table-omzet th:nth-child(3), #table-omzet td:nth-child(3) {
+            width: 10px;
         }
     </style>
+    
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Laporan Trading</x-slot:tittle>
         <form action="{{route('keuangan.omzet.exportexcel')}}" method="post" class="self-end">
@@ -33,76 +59,48 @@
             <table class="cell-border hover display nowrap" id="table-omzet">
                 <!-- head -->
                 <thead>
-
                     <tr>
-                        <th rowspan="2">NO. </th>
-                        <th rowspan="2">TGL STUFFING</th>
-                        <th rowspan="2">NO. SURAT JALAN</th>
-                        <th rowspan="2">NO. INV</th>
-                        <th rowspan="2">TGL. INV</th>
-                        <th rowspan="2">No. Faktur Pajak</th>
-                        <th rowspan="2">NAMA KAPAL</th>
-                        <th rowspan="2">Cont</th>
-                        <th rowspan="2">Seal</th>
-                        <th rowspan="2">Job</th>
-                        <th rowspan="2">Nopol</th>
-                        <th rowspan="2">JENIS BARANG</th>
-                        <th rowspan="2">QUANTITY</th>
-                        <th rowspan="2">SATUAN</th>
-                        <th colspan="7" class="text-center border" style="border-left: 1px solid black; border-right: 1px solid black;">PENJUALAN (EXCL. PPN)</th>
-                        <!-- <th>CUSTOMER</th>
-                        <th>TUJUAN (Kota Cust)</th>
-                        <th>HARGA JUAL</th>
-                        <th>TOTAL TAGIHAN</th> -->
-                        <th colspan="5" class="text-center border" style="border-left: 1px solid black; border-right: 1px solid black;">PEMBELIAN (EXCL. PPN)</th>
-                        <!-- <th>HARGA BELI</th>
-                        <th>TOTAL</th>
-                        <th>TGL. PEMBAYARAN</th>
-                        <th>NO. VOUCHER</th> -->
-                        <th rowspan="2">MARGIN EXCLUDE</th>
-                        <th colspan="4" class="text-center border" style="border-left: 1px solid black; border-right: 1px solid black;">INCLUDE PPN</th>
-                        <!-- <th>HARGA BELI (PPN)</th>
-                        <th>MARGIN (PPN)</th> -->
-                        <th colspan="3" class="text-center border" style="border-left: 1px solid black; border-right: 1px solid black;">HARSAT EXCL.PPN (SATUAN ORI)</th>
-                        <!-- <th>BELI</th>
-                        <th>JUAL</th> -->
+                        <th rowspan="2"  class="text-center border">NO. </th>
+                        <th rowspan="2"  class="text-center border">TGL STUFFING</th>
+                        <th rowspan="2"  class="text-center border">NO. SURAT JALAN</th>
+                        <th rowspan="2"  class="text-center border">NO. INV</th>
+                        <th rowspan="2"  class="text-center border">TGL. INV</th>
+                        <th rowspan="2"  class="text-center border">No. Faktur Pajak</th>
+                        <th rowspan="2"  class="text-center border">NAMA KAPAL</th>
+                        <th rowspan="2"  class="text-center border">Cont</th>
+                        <th rowspan="2"  class="text-center border">Seal</th>
+                        <th rowspan="2"  class="text-center border">Job</th>
+                        <th rowspan="2"  class="text-center border">Nopol</th>
+                        <th rowspan="2"  class="text-center border">JENIS BARANG</th>
+                        <th rowspan="2"  class="text-center border">QUANTITY</th>
+                        <th rowspan="2"  class="text-center border">SATUAN</th>
+                        <th colspan="5" class="text-center border">PENJUALAN (EXCL. PPN)</th>
+                        <th colspan="5" class="text-center border">PEMBELIAN (EXCL. PPN)</th>
+                        <th rowspan="2"  class="text-center border">MARGIN EXCLUDE</th>
+                        <th colspan="4" class="text-center border">INCLUDE PPN</th>
+                        <th colspan="3" class="text-center border">HARSAT EXCL.PPN (SATUAN ORI)</th>
                     </tr>
                     <tr>
-                        <!-- <th>NO. </th>
-                        <th>TGL STUFFING</th>
-                        <th>NO. SURAT JALAN</th>
-                        <th>NO. INV</th>
-                        <th>No. Faktur Pajak</th>
-                        <th>NAMA KAPAL</th>
-                        <th>Cont</th>
-                        <th>Seal</th>
-                        <th>Job</th>
-                        <th>Nopol</th>
-                        <th>JENIS BARANG</th>
-                        <th>QUANTITY</th>
-                        <th>SATUAN</th> -->
-                        <th style="border-left: 1px solid black;">PO CUSTOMER</th>
-                        <th>CUSTOMER</th>
-                        <th>TUJUAN (Kota Cust)</th>
-                        <th>HARSAT JUAL</th>
-                        <th>TOTAL</th>
-                        <th>TGL. PEMBAYARAN</th>
-                        <th style="border-right: 1px solid black;">NO.VOCHER</th>
-                        <th>SUPPLIER</th>
-                        <th>HARSAT BELI</th>
-                        <th>TOTAL</th>
-                        <th>TGL. PEMBAYARAN</th>
-                        <th style="border-right: 1px solid black;">NO. VOUCHER</th>
-                        <!-- <th>MARGIN</th> -->
-                        <th style="border-left: 1px solid black;">PENJUALAN</th>
-                        <th>PEMBELIAN</th>
-                        <th style="border-right: 1px solid black;">PORSI PPN</th>
-                        <th style="border-right: 1px solid black;">MARGIN</th>
-                        <th>SATUAN</th>
-                        <th>BELI</th>
-                        <th style="border-right: 1px solid black;">JUAL</th>
+                        <th  class="text-center border">PO CUSTOMER</th>
+                        <th  class="text-center border">CUSTOMER</th>
+                        <th  class="text-center border">TUJUAN (Kota Cust)</th>
+                        <th  class="text-center border">HARSAT JUAL</th>
+                        <th class="text-center border">TOTAL</th>
+                        <th  class="text-center border">SUPPLIER</th>
+                        <th  class="text-center border">HARSAT BELI</th>
+                        <th  class="text-center border">TOTAL</th>
+                        <th  class="text-center border">TGL. PEMBAYARAN</th>
+                        <th  class="text-center border">NO. VOUCHER</th>
+                        <th class="text-center border">PENJUALAN</th>
+                        <th class="text-center border">PEMBELIAN</th>
+                        <th class="text-center border">PORSI PPN</th>
+                        <th class="text-center border">MARGIN</th>
+                        <th class="text-center border">SATUAN</th>
+                        <th class="text-center border">BELI</th>
+                        <th class="text-center border">JUAL</th>
                     </tr>
                 </thead>
+                
                 <tbody>
                 </tbody>
             </table>
@@ -145,52 +143,63 @@
             maxDate = new DateTime('#max', {
                 format: 'YYYY-M-D'
             });
-          
-
             let table = $(`#table-omzet`).DataTable({
-                pageLength: 100,
-                ajax: {
-                    url: "{{route('keuangan.omzet.datatable')}}",
-                    dataSrc: "data"
-                },
-                columns: [
-                    { data: 'DT_RowIndex', name: 'number'},
-                    { data: 'tgl_stuffing', name: 'tgl_stufing' },
-                    { data: 'nomor_sj', name: 'No. Surat Jalan' },
-                    { data: 'invoice', name: 'No. Invoice' },
-                    { data: 'tgl_invoice', name: 'Tanggal Invoice' },
-                    { data: 'nomor_nsfp', name: 'nomor_nsfp' },
-                    { data: 'nama_kapal', name: 'Nama Kapal' },
-                    { data: 'cont', name: 'No. Cont' },
-                    { data: 'seal', name: 'No. Seal' },
-                    { data: 'job', name: 'No. Job' },
-                    { data: 'nopol', name: 'No. Polisi' },
-                    { data: 'nama_barang', name: 'Nama Barang' },
-                    { data: 'qty', name: 'Jumlah Beli', render: $.fn.dataTable.render.number('.') },
-                    { data: 'satuan', name: 'Satuan Beli'},
-                    { data: 'po_customer', name: 'no_po' },
-                    { data: 'customer', name: 'Customer' },
-                    { data: 'kota_cust', name: 'Kota Customer' },
-                    { data: 'harga_jual', name: 'Harsat Jual', render: $.fn.dataTable.render.number('.') },
-                    { data: 'total_tagihan', name: 'Total Tagihan', render: $.fn.dataTable.render.number('.') },
-                    { data: 'tgl_penjualan', name: 'Tgl Penjualan'},
-                    { data: 'no_vocherpenj', name: 'No Vocher Penjualan'},
-                    { data: 'supplier', name: 'Supplier' },
-                    { data: 'harga_beli', name: 'Harsat Beli', render: $.fn.dataTable.render.number('.') },
-                    { data: 'total', name: 'hb x qty', render: $.fn.dataTable.render.number('.') },
-                    { data: 'tgl_pembayaranpbl', name: 'Tanggal Bayar (jurnal)' },
-                    { data: 'no_vocherpbl', name: 'Nomor Vocher (jurnal)' },
-                    { data: 'margin', name: 'Margin', render: $.fn.dataTable.render.number('.') },
-                    { data: 'harga_jual_ppn', name: 'Harga Beli (PPN)', render: $.fn.dataTable.render.number('.') },
-                    { data: 'harga_beli_ppn', name: 'Harga Jual (PPN)', render: $.fn.dataTable.render.number('.') },
-                    { data: 'margin_cek', name: 'Margin CEK', render: $.fn.dataTable.render.number('.') },
-                    { data: 'margin_ppn', name: 'Margin (PPN)', render: $.fn.dataTable.render.number('.') },
-                    { data: 'satuan_standar', name: 'Satuan Standar'},
-                    { data: 'beli', name: 'Harsat Beli / value', render: $.fn.dataTable.render.number('.') },
-                    { data: 'jual', name: 'Harsat Jual / value', render: $.fn.dataTable.render.number('.') },
-                    { data: 'id_invoice', name: 'id', visible:false},
-                ]
-            });
+    pageLength: 20,
+    ajax: {
+        url: "{{route('keuangan.omzet.datatable')}}",
+        dataSrc: "data"
+    },
+    columns: [
+        { data: 'DT_RowIndex', name: 'number' },
+        { data: 'tgl_stuffing', name: 'tgl_stufing' },
+        { data: 'nomor_sj', name: 'No. Surat Jalan' },
+        { data: 'invoice', name: 'No. Invoice' },
+        { data: 'tgl_invoice', name: 'Tanggal Invoice' },
+        { data: 'nomor_nsfp', name: 'nomor_nsfp' },
+        { data: 'nama_kapal', name: 'Nama Kapal' },
+        { data: 'cont', name: 'No. Cont' },
+        { data: 'seal', name: 'No. Seal' },
+        { data: 'job', name: 'No. Job' },
+        { data: 'nopol', name: 'No. Polisi' },
+        { data: 'nama_barang', name: 'Nama Barang' },
+        { data: 'qty', name: 'Jumlah Beli', render: $.fn.dataTable.render.number('.') },
+        { data: 'satuan', name: 'Satuan Beli' },
+        { data: 'po_customer', name: 'no_po' },
+        { data: 'customer', name: 'Customer' },
+        { data: 'kota_cust', name: 'Kota Customer' },
+        { data: 'harga_jual', align:'right', name: 'Harsat Jual', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'total_tagihan', align:'right', name: 'Total Tagihan', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'supplier', name: 'Supplier' },
+        { data: 'harga_beli', align:'right', name: 'Harsat Beli', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'total', align:'right', name: 'hb x qty', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'tgl_pembayaranpbl', name: 'Tanggal Bayar (jurnal)' },
+        { data: 'no_vocherpbl', name: 'Nomor Vocher (jurnal)' },
+        { data: 'margin', align:'right', name: 'Margin', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'harga_jual_ppn', align:'right', name: 'Harga Beli (PPN)', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'harga_beli_ppn', align:'right', name: 'Harga Jual (PPN)', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'margin_cek', align:'right', name: 'Margin CEK', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'margin_ppn', align:'right', name: 'Margin (PPN)', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'satuan_standar', name: 'Satuan Standar' },
+        { data: 'beli', align:'right', name: 'Harsat Beli / value', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'jual', align:'right', name: 'Harsat Jual / value', render: $.fn.dataTable.render.number('.'), className: 'text-right' },
+        { data: 'id_invoice', name: 'id', visible: false }
+    ],
+    columnDefs: [
+        {
+            targets: [0, 1, 2],  // Indeks kolom yang ingin diatur lebar
+            width: '40px'  // Menetapkan lebar kolom menjadi 150px
+        },
+        {
+            targets: [3, 4, 5],  // Indeks kolom lain
+            width: '120px'
+        },
+        {
+            targets: '_all',  // Menetapkan lebar untuk kolom lainnya
+            width: '100px'
+        }
+    ]
+});
+
 
             table.on('draw', function() {
                 table.rows().every(function() {

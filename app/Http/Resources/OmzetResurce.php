@@ -21,23 +21,29 @@ class OmzetResurce extends JsonResource
         $tgl_pembayaran_penjualan = '-';
         $nomor_vocher_penjualan = '-';
 
-        if ($this->transaksi->jurnals->count() > 0) {
-            $checkInvx = $this->transaksi->jurnals()->where('invoice_external', '!=', '0')->whereIn('coa_id', [1, 5])->where('kredit', '>', 0)->first();
-            $checkInv = $this->transaksi->jurnals()->where('invoice', '!=', '0')->whereIn('coa_id', [1, 5])->where('debit', '>', 0)->first();
-            //->where('invoice_external', '!=', '0') | ->where('kredit', '>', 0) |->whereIn('coa_id', [1, 5])->
-            // dd($check);
-            if ($checkInvx) {
-                // dd($check);
-                $tgl_pembayaran_pembelian = $checkInvx->tgl;
-                $nomor_vocher_pembelian = $checkInvx->nomor;
-            }
+        // Menggunakan get() untuk mengambil banyak hasil
+        $checkInvx = $this->transaksi->jurnals()
+            ->where('invoice_external', '!=', '0')
+            ->whereIn('coa_id', [1, 5])
+            ->where('kredit', '>', 0)
+            ->get();
 
-            if($checkInv)  {
-                $tgl_pembayaran_penjualan = $checkInv->tgl;
-                $nomor_vocher_penjualan = $checkInv->nomor;
-            }
+        $checkInv = $this->transaksi->jurnals()
+            ->where('invoice', '!=', '0')
+            ->whereIn('coa_id', [1, 5])
+            ->where('debit', '>', 0)
+            ->get();
+
+        // Mengambil data dari hasil get() pertama
+        if ($checkInvx->isNotEmpty()) {
+            $tgl_pembayaran_pembelian = $checkInvx->first()->tgl ?? '-';
+            $nomor_vocher_pembelian = $checkInvx->first()->nomor ?? '-';
         }
-        
+
+        if ($checkInv->isNotEmpty()) {
+            $tgl_pembayaran_penjualan = $checkInv->first()->tgl ?? '-';
+            $nomor_vocher_penjualan = $checkInv->first()->nomor ?? '-';
+        }
         $ppnStatus = $this->transaksi->barang->status_ppn; 
         $ppnValue = $this->transaksi->barang->value_ppn;
         $ppnRate = 0.11; 
@@ -47,9 +53,9 @@ class OmzetResurce extends JsonResource
         $ppnAmount = 0; // Default PPN amount adalah 0
         $total = $subtotal; // Default total adalah subtotal
         $ppnDisplay = '0%'; // Default PPN display
-        $HJB = $this->transaksi->harga_beli * $this->transaksi->jumlah_beli;
-        $HJJ = $this->transaksi->harga_jual * $this->transaksi->jumlah_beli;
-        $marginExc = ($this->transaksi->harga_jual * $this->transaksi->jumlah_beli) - ($this->transaksi->harga_beli * $this->transaksi->jumlah_beli);
+        $HJB = round($this->transaksi->harga_beli * $this->transaksi->jumlah_beli);
+        $HJJ = round($this->transaksi->harga_jual * $this->transaksi->jumlah_beli);
+        $marginExc = round(($this->transaksi->harga_jual * $this->transaksi->jumlah_beli) - ($this->transaksi->harga_beli * $this->transaksi->jumlah_beli));
         $ppnBeli = $HJB ;
         $ppnJual = $HJJ;
         $ppnMargin = $HJJ - $HJB;
@@ -58,10 +64,10 @@ class OmzetResurce extends JsonResource
         if ($ppnValue == 11) {
             // Hanya pertimbangkan nilai PPN jika value PPN adalah 11
             if ($ppnStatus === 'ya') {
-                $ppnJual = ($this->transaksi->harga_jual + ($this->transaksi->harga_jual * 0.11)) *  $this->transaksi->jumlah_beli;
-                $ppnBeli = ($this->transaksi->harga_beli + ($this->transaksi->harga_beli * 0.11)) *  $this->transaksi->jumlah_beli;
-                $ppnMargin = $ppnJual - $ppnBeli;
-                $ppnCekMargin = $marginExc  * 0.11;
+                $ppnJual = round(($this->transaksi->harga_jual + ($this->transaksi->harga_jual * 1.11)) *  $this->transaksi->jumlah_beli);
+                $ppnBeli = round(($this->transaksi->harga_beli + ($this->transaksi->harga_beli * 1.11)) *  $this->transaksi->jumlah_beli);
+                $ppnMargin = round($ppnJual - $ppnBeli);
+                $ppnCekMargin = round($marginExc  * 1.11);
             }
         }
 

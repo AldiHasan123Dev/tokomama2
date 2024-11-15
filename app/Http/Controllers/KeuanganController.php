@@ -395,7 +395,7 @@ $invoiceData = $invoices->map(function($invoice) {
     public function dataTableOmzet()
     {
 
-        $query = Invoice::get();
+        $query = Invoice::orderBy('created_at', 'desc')->orderBy('tgl_invoice', 'desc')->get();
         $data = OmzetResurce::collection($query);
         $res = $data->toArray(request());
         // dd($res);
