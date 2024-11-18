@@ -226,7 +226,9 @@
             $("#tgl_input").val(tgl);
             $("#nomor_jurnal").val(nomorJurnal);
 
-            let table = $(`#table-editj`).DataTable({});
+            let table = $(`#table-editj`).DataTable({
+            pageLength: 25 // Menentukan jumlah baris per halaman
+        });
 
             function editJurnal(id, nomor, tgl, debit, kredit, keterangan, invoice, invoice_external, nopol, tipe, coa_id,
                 nama_akun, no_akun, keterangan_buku_besar_pembantu) {
