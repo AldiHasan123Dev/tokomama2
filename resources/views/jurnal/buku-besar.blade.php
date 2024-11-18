@@ -122,25 +122,25 @@
                     <tr>
                         <th>Saldo Awal</th>
                         @foreach ($saldo['saldo_awal'] as $item)
-                            <td>{{ number_format($item, 0, '.', ',') }}</td>
+                            <td>{{ number_format($item, 2, '.', ',') }}</td>
                         @endforeach
                     </tr>
                     <tr>
                         <th>Debit</th>
                         @foreach ($saldo['debit'] as $item)
-                            <td>{{ number_format($item, 0, '.', ',') }}</td>
+                            <td>{{ number_format($item, 2, '.', ',') }}</td>
                         @endforeach
                     </tr>
                     <tr>
                         <th>Credit</th>
                         @foreach ($saldo['kredit'] as $item)
-                            <td>{{ number_format($item, 0, '.', ',') }}</td>
+                            <td>{{ number_format($item, 2, '.', ',') }}</td>
                         @endforeach
                     </tr>
                     <tr>
                         <th>Saldo Akhir</th>
                         @foreach ($saldo['saldo_akhir'] as $item)
-                            <td>{{ number_format($item, 0, '.', ',') }}</td>
+                            <td>{{ number_format($item, 2, '.', ',') }}</td>
                         @endforeach
                     </tr>
                 </tbody>
@@ -282,9 +282,9 @@
                             <td>{{ $item->nopol }}</td>
                             <td>{{ $item->invoice }}</td>
                             <td>{{ $item->keterangan }}</td>
-                            <td style="text-align: right;">{{ number_format($item->debit, 0, ',', '.') }}</td>
-                            <td style="text-align: right;">{{ number_format($item->kredit, 0, ',', '.') }}</td>
-                            <td style="text-align: right;">{{ number_format($saldo_awal, 0, ',', '.') }}</td>
+                            <td style="text-align: right;">{{ number_format($item->debit, 2, ',', '.') }}</td>
+                            <td style="text-align: right;">{{ number_format($item->kredit, 2, ',', '.') }}</td>
+                            <td style="text-align: right;">{{ number_format($saldo_awal, 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
