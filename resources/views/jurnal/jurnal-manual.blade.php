@@ -259,11 +259,11 @@
                             <button id="terapkan" class="btn bg-green-500 text-white mt-5" type="button">Terapkan</button>
                             <button id="reset" class="btn bg-orange-500 text-white mt-5" type="button">Reset</button>
                         </div>
-                        <div class="self-center w-fit mt-3">
+                        {{-- <div class="self-center w-fit mt-3">
                             <button id="ipt_jurhut" class="btn bg-yellow-500 text-white mt-2" type="button">
                                 <strong>Jurnal Hutang Supplier</strong>
                             </button>
-                        </div>
+                        </div> --}}
                     </div>
 
                     <div class="grid grid-cols-3 justify-items-start mt-5">

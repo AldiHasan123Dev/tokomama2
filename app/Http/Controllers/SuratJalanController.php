@@ -198,12 +198,14 @@ class SuratJalanController extends Controller
             Jurnal::where('invoice_external', $inext)
                   ->where('tipe', 'BBK')
                   ->whereNotNull('nomor') // Tambahkan validasi nomor tidak kosong
-                  ->update(['invoice_external' => $request->invoice_external]);
+                  ->update(['invoice_external' => $request->invoice_external,
+                            'tgl' => $request->tgl_invx]);
 
                   Jurnal::where('invoice_external', $inext)
                   ->where('tipe', 'JNL')
                   ->whereNotNull('nomor') // Tambahkan validasi nomor tidak kosong
-                  ->update(['invoice_external' => $request->invoice_external]);
+                  ->update(['invoice_external' => $request->invoice_external,
+                            'tgl' => $request->tgl_invx]);
         }
     }
 
@@ -220,7 +222,7 @@ class SuratJalanController extends Controller
 
     private function autoInvoiceExternalJurnal($request)
 {
-    $currentYear = Carbon::now()->year;
+    $currentYear = $request->tgl_invx;
     $noBBK = Jurnal::where('tipe', 'BBK')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
     $no_BBK =  $noBBK ? $noBBK->no + 1 : 1;   
     $nomor_surat = "$no_BBK/BBK-SB/" . date('y');
@@ -237,6 +239,7 @@ class SuratJalanController extends Controller
     // Cek apakah jurnal sudah ada untuk transaksi dan invoice ini
     $existingJournals = Jurnal::where('id_transaksi', $request->id_transaksi)
         ->where('invoice_external', $request->invoice_external)
+        ->where('invoice_external', $request->tgl_invx)
         ->where('keterangan', 'like', '%Pembelian%')
         ->get();
 
@@ -245,13 +248,14 @@ class SuratJalanController extends Controller
         foreach ($existingJournals as $journal) {
             $journal->update([
                 'nomor' => $nomor_surat,
-                'invoice_external' => $invoice_external // Pastikan $invoice_external berisi nilai yang diinginkan
+                'invoice_external' => $invoice_external,
+                'tgl' => $currentYear // Pastikan $invoice_external berisi nilai yang diinginkan
             ]);
             
         }
     } else {
         // Buat atau update entri jurnal baru hanya jika belum ada jurnal yang sesuai
-        DB::transaction(function () use ($data, $request, $no_BBK, $nomor_surat) {
+        DB::transaction(function () use ($data, $currentYear, $request, $no_BBK, $nomor_surat) {
             $total = 0;
             foreach ($data as $item) {
                     $value_ppn = $item->barang->value_ppn / 100;
@@ -262,11 +266,11 @@ class SuratJalanController extends Controller
                         [
                             'id_transaksi' => $item->id,
                             'tipe' => 'BBK',
-                            'coa_id' => 63 // Harsat beli
+                            'coa_id' => 30 // Harsat beli
                         ],
                         [
                             'nomor' => $nomor_surat,
-                            'tgl' => date('Y-m-d'),
+                            'tgl' => $currentYear,
                             'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_jual, 0, ',', '.') . ' ' .  $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
                             'debit' => round($item->harga_beli * $item->jumlah_jual),
                             'kredit' => 0,
@@ -289,7 +293,7 @@ class SuratJalanController extends Controller
                         ],
                         [
                             'nomor' => $nomor_surat,
-                            'tgl' => date('Y-m-d'),
+                            'tgl' => $currentYear,
                             'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_jual, 0, ',', '.') . ' ' . $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
                             'debit' => 0,
                             'kredit' => round($item->harga_beli * $item->jumlah_jual),
@@ -312,7 +316,7 @@ class SuratJalanController extends Controller
                     ],
                     [
                         'nomor' => $nomor_surat,
-                        'tgl' => date('Y-m-d'),
+                        'tgl' => $currentYear,
                         'keterangan' => 'PPN Masukan ' . $data[0]->suppliers->nama,
                         'debit' => $total,
                         'kredit' => 0,
@@ -331,7 +335,7 @@ class SuratJalanController extends Controller
                         'tipe' => 'BBK',
                         'coa_id' => 5, // COA bank mandiri,
                         'nomor' => $nomor_surat,
-                        'tgl' => date('Y-m-d'),
+                        'tgl' => $currentYear,
                         'keterangan' => 'PPN Masukan ' . $item->suppliers->nama,
                         'debit' => 0,
                         'kredit' => $total, // PPN amount
@@ -480,7 +484,12 @@ class SuratJalanController extends Controller
         $index++;
         $ppn = 0;
         $subtotal = $row->avg_harga_beli * $row->total_jumlah_beli;
-        // Hitung PPN jika barang memiliki status 'ya' pada kolom status_ppn
+        $journal = Jurnal::where('invoice_external', $row->invoice_external)->get();
+        $tgl_jurnal_array = $journal->pluck('tgl')->toArray();
+        // Tentukan tanggal, gunakan yang pertama jika ada, atau tanggal default (hari ini) jika tidak ada
+        $tgl_jurnal = !empty($tgl_jurnal_array) && $tgl_jurnal_array[0] !== '2023-12-31'
+            ? Carbon::parse($tgl_jurnal_array[0])->format('Y-m-d')
+            : Carbon::now()->format('Y-m-d');
         $barang = Barang::where('id', $row->id_barang)->first();
         
         if ($barang && $barang->status_ppn === 'ya') {
@@ -498,7 +507,7 @@ class SuratJalanController extends Controller
             'ppn' => number_format($ppn, 2, ',', '.'),
             'supplier' => $row->suppliers->nama ?? '-',
             'invoice_external' => $row->invoice_external,
-            'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
+            'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
         ];
     });
 

@@ -11,10 +11,13 @@
             <a href="{{ route('jurnal-manual.index') }}">
                 <button class="btn bg-green-500 text-white font-bold hover:bg-green-700 mt-5">Input Jurnal</button>
             </a>
-
+            <a href="/invoice-external">
+                <button class="btn bg-yellow-500 text-white font-bold hover:bg-gray-700">Jurnal Uang Muka</button>
+            </a>
             <a href="{{ route('jurnal.jurnal-merger') }}">
                 <button class="btn bg-gray-500 text-white font-bold hover:bg-gray-700">Merge Jurnal</button>
             </a>
+
 
             <div class="flex flex-row mb-16 mt-8">
                 <label for="month" class="font-bold mt-4">Bulan:</label>

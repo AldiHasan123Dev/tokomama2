@@ -134,7 +134,8 @@
         harga_beli,
         jumlah_beli,
         status_ppn,
-        value_ppn
+        value_ppn,
+        tgl_jurnal
     ) {
         // Hitung total
         const total = parseFloat(harga_beli) * parseFloat(jumlah_beli);
@@ -145,6 +146,14 @@
 
         // Inisialisasi PPN
         let ppn = 0;
+        if (tgl_jurnal && typeof tgl_jurnal === "string") {
+            const date = new Date(tgl_jurnal); // Konversi string ke Date object
+            if (!isNaN(date)) {
+                tgl_jurnal = date.toISOString().split('T')[0]; // Format ke yyyy-MM-dd
+            }
+        }
+
+        console.log({ tgl_jurnal });
 
         // Cek jika status_barang adalah 'ya'
         if (status_ppn === 'ya') {
@@ -183,17 +192,30 @@
                         Invoice External :
                         <input type="text" id="invoice_external" name="invoice_external" value="${invoice_external}" required class="border-none" autofocus />
                     </label>
+                    <label class="input border flex items-center gap-2 mt-3">
+                        Tanggal:
+                        <input type="date" id="tgl_invx" name="tgl_invx" required value="${tgl_jurnal}" class="w-full border-none"/>
+                    </label>
                     <button type="submit" class="btn bg-green-400 text-white font-semibold w-full mt-2">Edit</button>
                 </form>
             </div>
         `);
         $('#editForm').on('submit', function (e) {
-            let invoiceExternal = $('#invoice_external').val().trim();
-            if (invoiceExternal === "") {
-                e.preventDefault(); // Mencegah pengiriman form
-                alert("Invoice external harus diisi terlebih dahulu!"); // Menampilkan alert
-            }
-        });
+    e.preventDefault(); // Prevent the form from submitting immediately
+    let invoiceExternal = $('#invoice_external').val().trim();
+
+    // Check if invoice_external is empty or not
+    if (invoiceExternal === "") {
+        alert("Invoice external harus diisi terlebih dahulu!"); // Show alert if empty
+    } else {
+        // Show confirmation dialog
+        let confirmMessage = `Apakah Anda yakin dengan invoice external ini?`;
+        if (confirm(confirmMessage)) {
+            // Submit the form if confirmed
+            this.submit();  // Manually submit the form
+        }
+    }
+});
 
         $('#my_modal_5').dialog({
             modal: true,

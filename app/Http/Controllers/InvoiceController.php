@@ -272,7 +272,7 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
             }
     
         // Panggil fungsi untuk mencatat jurnal otomatis (jika diperlukan)
-        $this->autoJurnal($request->data, $invoice, $tipe, $tgl_invoice, $nsfp);
+        $this->autoJurnal($request->data, $invoice, $tipe, $tgl_invoice, $nsfp,$id_transaksi);
     
         return to_route('keuangan.invoice')->with('success', 'Data Invoice berhasil disimpan');
     }
@@ -286,6 +286,8 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
         $breakTipe = explode("-", $tipe1);;
         $breakTipe1 = explode("/", $breakTipe[1]);
         $no = $breakTipe1[0];
+        $jurhutNow = $bulanNow . '-' . $no + 1 . '/' . $breakTipe1[1] . '/' . $breakTipe1[2];
+       
       
 
         $sort = Jurnal::whereMonth('tgl', $bulan)->where('tipe', 'JNL')->get();
@@ -302,6 +304,7 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
         $title1 = $bulan;
         $year = $break[2];
         $newNoJNL = $title1 . '-' . $maxArray + 1 . '/' . $break[1] . '/' . $year;
+        $jurhut = $title1 . '-' . $maxArray + 2 . '/' . $break[1] . '/' . $year;
         $total_all = array();
         $temp_total = array();
         $invoiceArray = explode(',', $invoice); 
@@ -309,19 +312,38 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
             'transaksi.barang.satuan',
             'transaksi.suratJalan.customer'
         ])
-        ->where('invoice', $invoice) // Menggunakan string langsung tanpa loop
+        ->where('invoice', $invoiceArray) // Menggunakan string langsung tanpa loop
         ->get();
+        $id_transaksi = $result->pluck('id_transaksi');
+        $cekCoa = Jurnal::whereIn('id_transaksi',$id_transaksi)
+        ->where('coa_id', 30)->get();
+        $invoice_external1 = Transaction::whereIn('id',$id_transaksi)->get();
+        $invoice_external = $invoice_external1->pluck('invoice_external')->first();
+        // dd($invoice_external);
+       
+        // if ($cekCoa->isNotEmpty()) {
+        //     // Jika ada nilai, dump and die
+        //     dd('INI HUTANG : ', $cekCoa);
+        // } else{
+        //     dd('INI persediaan stok : ', $cekCoa);
+        // }
             $nopol = '';
             $temp_debit = 0;
             
             if ($bulan < $bulanNow) {
-                DB::transaction(function () use ($result, $tgl, $newNoJNL, $maxArray, &$nopol, &$temp_debit, $invoice, $nsfp) {
+                DB::transaction(function () use ($invoice_external, $result, $jurhutNow, $jurhut, $tgl, $newNoJNL, $maxArray, &$nopol, &$temp_debit, $invoice, $nsfp,$cekCoa) {
                     $temp_debit = 0; 
                     $nopol = $result[0]->transaksi->suratJalan->no_pol; 
+                    $subtotal = $result->sum(function ($item) {
+                        return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                    });
 
                     if ($result[0]->transaksi->barang->status_ppn == 'ya'){
                         $value_ppn = $result[0]->transaksi->barang->value_ppn/100;
-
+                        $subtotalPPN = $result->sum(function ($item) {
+                            $value_ppn = $item->transaksi->barang->value_ppn / 100;
+                            return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual * $value_ppn);
+                        });
                         $temp_debit = round(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn, 4);
                         Jurnal::create([
                             'coa_id' => 8,
@@ -371,7 +393,120 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                                 'tipe' => 'JNL',
                                 'no' => $maxArray + 1
                             ]);
+                            if ($cekCoa->isNotEmpty()) {
+                             //Jurnal Hutang PPN 
+                             
+                             //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
+                             foreach ($result as $item) {
+                                Jurnal::create([
+                                    'coa_id' => 63,
+                                    'nomor' => $jurhut,
+                                    'tgl' => $tgl,
+                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                $item->transaksi->satuan_jual . ' Harsat ' . 
+                                number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
+                                ' untuk ' . $item->transaksi->suratJalan->customer->nama,
+                                    'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
+                                    'kredit' => 0, // Menggunakan total debit sebagai kredit
+                                    'invoice' => null,
+                                    'invoice_external' => $invoice_external,
+                                    'id_transaksi' => $item->id_transaksi,
+                                    'nopol' => $nopol,
+                                    'container' => null,
+                                    'tipe' => 'JNL',
+                                    'no' =>  $maxArray + 2
+                                ]);
+
+                                 
+                            }
+                            
+                             //coa 1.6 = Uang Muka (Kredit)
+                            Jurnal::create([
+                                'coa_id' => 30,
+                                'nomor' => $jurhut,
+                                'tgl' => $tgl,
+                                'keterangan' => 'Uang Muka untuk ' . $result[0]->transaksi->suppliers->nama,
+                                'debit' => 0, // Menyimpan subtotal sebagai debit
+                                'kredit' => $subtotal, // Kredit diisi 0
+                                'invoice' => null,
+                                'invoice_external' => $invoice_external,
+                                'id_transaksi' => $result[0]->id_transaksi,
+                                'nopol' => $nopol,
+                                'container' => null,
+                                'tipe' => 'JNL',
+                                'no' =>  $maxArray + 2
+                            ]);
+                        } else{
+                            //Jurnal Hutang PPN 
+                             //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
+                             Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
+                            ->where('id_supplier', $result[0]->transaksi->id_supplier)
+                            ->update([
+                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1]
+                            ]);
+
+                             
+                             foreach ($result as $item) {
+                                Jurnal::create([
+                                    'coa_id' => 63,
+                                    'nomor' => $jurhut,
+                                    'tgl' => $tgl,
+                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                $item->transaksi->satuan_jual . ' Harsat ' . 
+                                number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
+                                ' untuk ' . $item->transaksi->suratJalan->customer->nama,
+                                    'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
+                                    'kredit' => 0, // Menggunakan total debit sebagai kredit
+                                    'invoice' => null,
+                                    'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                                    'id_transaksi' => $item->id_transaksi,
+                                    'nopol' => $nopol,
+                                    'container' => null,
+                                    'tipe' => 'JNL',
+                                    'no' =>  $maxArray + 2
+                                ]);
+
+                                 //coa 1.1.4 = PPN Masukan (Debit)
+                            }
+                            Jurnal::create([
+                                'coa_id' => 10,
+                                'nomor' => $jurhut,
+                                'tgl' => $tgl,
+                                'keterangan' => 'PPN Masukkan ' . $result[0]->transaksi->suppliers->nama . ' (FP : ' . $nsfp .  ' )' ,
+                                'debit' => $subtotalPPN, // Menyimpan subtotal sebagai debit
+                                'kredit' =>  0,// Kredit diisi 0
+                                'invoice' => null,
+                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                                'id_transaksi' => $result[0]->id_transaksi,
+                                'nopol' => $nopol,
+                                'container' => null,
+                                'tipe' => 'JNL',
+                                'no' => $maxArray + 2
+                            ]);
+                             //coa 1.6 = Persediaan Barang / Stock (Kredit)
+                            Jurnal::create([
+                                'coa_id' => 35,
+                                'nomor' => $jurhut,
+                                'tgl' => $tgl,
+                                'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                                'debit' => 0, // Menyimpan subtotal sebagai debit
+                                'kredit' => $subtotal + $subtotalPPN, // Kredit diisi 0
+                                'invoice' => null,
+                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                                'id_transaksi' => $result[0]->id_transaksi,
+                                'nopol' => $nopol,
+                                'container' => null,
+                                'tipe' => 'JNL',
+                                'no' =>  $maxArray + 2
+                            ]);
+                        }
+                            //End PPN Bulan $bulan < $bulanNow
                     } else{
+                        $subtotal = $result->sum(function ($item) {
+                            return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                        });
                         Jurnal::create([
                             'coa_id' => 8,
                             'nomor' => $newNoJNL,
@@ -410,9 +545,104 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                                 'no' => $maxArray + 1
                             ]);
                     }
+                    if ($cekCoa->isNotEmpty()) {
+                    //Jurnal Hutang No PPN 
+                             
+                             //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
+                             foreach ($result as $item) {
+                                Jurnal::create([
+                                    'coa_id' => 63,
+                                    'nomor' => $jurhut,
+                                    'tgl' => $tgl,
+                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                $item->transaksi->satuan_jual . ' Harsat ' . 
+                                number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
+                                ' untuk ' . $item->transaksi->suratJalan->customer->nama,
+                                    'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
+                                    'kredit' => 0, // Menggunakan total debit sebagai kredit
+                                    'invoice' => null,
+                                    'invoice_external' => $invoice_external,
+                                    'id_transaksi' => $item->id_transaksi,
+                                    'nopol' => $nopol,
+                                    'container' => null,
+                                    'tipe' => 'JNL',
+                                    'no' =>  $maxArray + 2
+                                ]);
+                            }
+                             //coa 1.6 = Persediaan Barang / Stock (Kredit)
+                             Jurnal::create([
+                                'coa_id' => 30,
+                                'nomor' => $jurhut,
+                                'tgl' => $tgl,
+                                'keterangan' => 'Uang Muka Untuk ' . $result[0]->transaksi->suppliers->nama,
+                                'debit' => 0, // Menyimpan subtotal sebagai debit
+                                'kredit' => $subtotal, // Kredit diisi 0
+                                'invoice' => null,
+                                'invoice_external' => $invoice_external,
+                                'id_transaksi' => $result[0]->id_transaksi,
+                                'nopol' => $nopol,
+                                'container' => null,
+                                'tipe' => 'JNL',
+                                'no' =>  $maxArray + 2
+                            ]);
+                        } else {
+                            //Jurnal Hutang No PPN 
+                            Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
+                            ->where('id_supplier', $result[0]->transaksi->id_supplier)
+                            ->update([
+                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1]
+                            ]);
+                     //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
+                     foreach ($result as $item) {
+                        Jurnal::create([
+                            'coa_id' => 63,
+                            'nomor' => $jurhut,
+                            'tgl' => $tgl,
+                            'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                        ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                        $item->transaksi->satuan_jual . ' Harsat ' . 
+                        number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
+                        ' untuk ' . $item->transaksi->suratJalan->customer->nama,
+                            'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
+                            'kredit' => 0, // Menggunakan total debit sebagai kredit
+                            'invoice' => null,
+                            'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                            'id_transaksi' => $item->id_transaksi,
+                            'nopol' => $nopol,
+                            'container' => null,
+                            'tipe' => 'JNL',
+                            'no' =>  $maxArray + 2
+                        ]);
+                    }
+                     //coa 1.6 = Persediaan Barang / Stock (Kredit)
+                     Jurnal::create([
+                        'coa_id' => 35,
+                        'nomor' => $jurhut,
+                        'tgl' => $tgl,
+                        'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                        'debit' => 0, // Menyimpan subtotal sebagai debit
+                        'kredit' => $subtotal, // Kredit diisi 0
+                        'invoice' => null,
+                        'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                        'id_transaksi' => $result[0]->id_transaksi,
+                        'nopol' => $nopol,
+                        'container' => null,
+                        'tipe' => 'JNL',
+                        'no' =>  $maxArray + 2
+                    ]);
+                        }
+                            //End Jurnal Hutang NO PPN
                     }
                 });
             } else {
+                $subtotal = $result->sum(function ($item) {
+                    return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                });
+                $subtotalPPN = $result->sum(function ($item) {
+                    $value_ppn = $item->transaksi->barang->value_ppn / 100;
+                    return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual * $value_ppn);
+                });
                 // Menginisialisasi variabel sebelum loop
                 $temp_debit = 0; 
                 $nopol = $result[0]->transaksi->suratJalan->no_pol; // Asumsikan nopol sama untuk semua item
@@ -470,7 +700,118 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                         'tipe' => 'JNL',
                         'no' => $no
                         ]);
+                        if ($cekCoa->isNotEmpty()) {
+                             
+                             //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
+                             foreach ($result as $item) {
+                                Jurnal::create([
+                                    'coa_id' => 63,
+                                    'nomor' => $jurhutNow,
+                                    'tgl' => $tgl,
+                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                $item->transaksi->satuan_jual . ' Harsat ' . 
+                                number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
+                                ' untuk ' . $item->transaksi->suratJalan->customer->nama,
+                                    'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
+                                    'kredit' => 0, // Menggunakan total debit sebagai kredit
+                                    'invoice' => null,
+                                    'invoice_external' => $invoice_external,
+                                    'id_transaksi' => $item->id_transaksi,
+                                    'nopol' => $nopol,
+                                    'container' => null,
+                                    'tipe' => 'JNL',
+                                    'no' =>  $no + 1
+                                ]);
+
+                                 //coa 1.1.4 = PPN Masukan (Debit)
+                            }
+                            
+                             //coa 1.6 = Persediaan Barang / Stock (Kredit)
+                            Jurnal::create([
+                                'coa_id' => 30,
+                                'nomor' => $jurhutNow,
+                                'tgl' => $tgl,
+                                'keterangan' => 'Uang Muka ' . $result[0]->transaksi->suppliers->nama,
+                                'debit' => 0, // Menyimpan subtotal sebagai debit
+                                'kredit' => $subtotal, // Kredit diisi 0
+                                'invoice' => null,
+                                'invoice_external' => $invoice_external,
+                                'id_transaksi' => $result[0]->id_transaksi,
+                                'nopol' => $nopol,
+                                'container' => null,
+                                'tipe' => 'JNL',
+                                'no' =>  $no + 1
+                            ]);
+                        }else {
+                            //Jurnal Hutang PPN
+                            Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
+                            ->where('id_supplier', $result[0]->transaksi->id_supplier)
+                            ->update([
+                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1]
+                            ]);
+                         //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
+                         foreach ($result as $item) {
+                            Jurnal::create([
+                                'coa_id' => 63,
+                                'nomor' => $jurhutNow,
+                                'tgl' => $tgl,
+                                'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                            ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                            $item->transaksi->satuan_jual . ' Harsat ' . 
+                            number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
+                            ' untuk ' . $item->transaksi->suratJalan->customer->nama,
+                                'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
+                                'kredit' => 0, // Menggunakan total debit sebagai kredit
+                                'invoice' => null,
+                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                                'id_transaksi' => $item->id_transaksi,
+                                'nopol' => $nopol,
+                                'container' => null,
+                                'tipe' => 'JNL',
+                                'no' =>  $no + 1
+                            ]);
+
+                             //coa 1.1.4 = PPN Masukan (Debit)
+                        }
+                        Jurnal::create([
+                            'coa_id' => 10,
+                            'nomor' => $jurhutNow,
+                            'tgl' => $tgl,
+                            'keterangan' => 'PPN Masukkan ' . $result[0]->transaksi->suppliers->nama . ' (FP : ' . $nsfp .  ' )' ,
+                            'debit' => $subtotalPPN, // Menyimpan subtotal sebagai debit
+                            'kredit' =>  0,// Kredit diisi 0
+                            'invoice' => null,
+                            'invoice_external' =>"InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                            'id_transaksi' => $result[0]->id_transaksi,
+                            'nopol' => $nopol,
+                            'container' => null,
+                            'tipe' => 'JNL',
+                            'no' => $no + 1
+                        ]);
+                         //coa 1.6 = Persediaan Barang / Stock (Kredit)
+                        Jurnal::create([
+                            'coa_id' => 35,
+                            'nomor' => $jurhutNow,
+                            'tgl' => $tgl,
+                            'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                            'debit' => 0, // Menyimpan subtotal sebagai debit
+                            'kredit' => $subtotal + $subtotalPPN, // Kredit diisi 0
+                            'invoice' => null,
+                            'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                            'id_transaksi' => $result[0]->id_transaksi,
+                            'nopol' => $nopol,
+                            'container' => null,
+                            'tipe' => 'JNL',
+                            'no' =>  $no + 1
+                        ]);
+                        }
+
+                            //End PPN Bulan $bulan < $bulanNow
                 } else {
+                    $subtotal = $result->sum(function ($item) {
+                        return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                    });
                     Jurnal::create([
                         'coa_id' => 8,
                         'nomor' => $tipe1,
@@ -509,7 +850,93 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                             'no' => $no
                         ]);
                 }
-                // Membuat entri jurnal untuk kredit (piutang) terlebih dahulu
+                if ($cekCoa->isNotEmpty()) {
+                //Jurnal Hutang No PPN 
+                             
+                             //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
+                             foreach ($result as $item) {
+                                Jurnal::create([
+                                    'coa_id' => 63,
+                                    'nomor' => $jurhutNow,
+                                    'tgl' => $tgl,
+                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                $item->transaksi->satuan_jual . ' Harsat ' . 
+                                number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
+                                ' untuk ' . $item->transaksi->suratJalan->customer->nama,
+                                    'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
+                                    'kredit' => 0, // Menggunakan total debit sebagai kredit
+                                    'invoice' => null,
+                                    'invoice_external' => $invoice_external,
+                                    'id_transaksi' => $item->id_transaksi,
+                                    'nopol' => $nopol,
+                                    'container' => null,
+                                    'tipe' => 'JNL',
+                                    'no' =>  $no + 1
+                                ]);
+                            }
+                             //coa 1.6 = Persediaan Barang / Stock (Kredit)
+                             Jurnal::create([
+                                'coa_id' => 30,
+                                'nomor' => $jurhutNow,
+                                'tgl' => $tgl,
+                                'keterangan' => 'Uang Muka Untuk ' . $result[0]->transaksi->suppliers->nama,
+                                'debit' => 0, // Menyimpan subtotal sebagai debit
+                                'kredit' => $subtotal, // Kredit diisi 0
+                                'invoice' => null,
+                                'invoice_external' => $invoice_external,
+                                'id_transaksi' => $result[0]->id_transaksi,
+                                'nopol' => $nopol,
+                                'container' => null,
+                                'tipe' => 'JNL',
+                                'no' =>  $no + 2
+                            ]);
+                        } else {
+                            Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
+                            ->where('id_supplier', $result[0]->transaksi->id_supplier)
+                            ->update([
+                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1]
+                            ]);
+                 //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
+                 foreach ($result as $item) {
+                    Jurnal::create([
+                        'coa_id' => 63,
+                        'nomor' => $jurhutNow,
+                        'tgl' => $tgl,
+                        'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                    ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                    $item->transaksi->satuan_jual . ' Harsat ' . 
+                    number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
+                    ' untuk ' . $item->transaksi->suratJalan->customer->nama,
+                        'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
+                        'kredit' => 0, // Menggunakan total debit sebagai kredit
+                        'invoice' => null,
+                        'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                        'id_transaksi' => $item->id_transaksi,
+                        'nopol' => $nopol,
+                        'container' => null,
+                        'tipe' => 'JNL',
+                        'no' =>  $no + 1
+                    ]);
+                }
+                 //coa 1.6 = Persediaan Barang / Stock (Kredit)
+                 Jurnal::create([
+                    'coa_id' => 35,
+                    'nomor' => $jurhutNow,
+                    'tgl' => $tgl,
+                    'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                    'debit' => 0, // Menyimpan subtotal sebagai debit
+                    'kredit' => $subtotal, // Kredit diisi 0
+                    'invoice' => null,
+                    'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                    'id_transaksi' => $result[0]->id_transaksi,
+                    'nopol' => $nopol,
+                    'container' => null,
+                    'tipe' => 'JNL',
+                    'no' =>  $no + 2
+                ]);
+                        }
+                            //End Jurnal Hutang NO PPN
                 }
             }
 }
