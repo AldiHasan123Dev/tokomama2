@@ -260,8 +260,6 @@ $months = [
 public function dataLapPiutang(Request $request)
 {
     // Ambil parameter untuk pagination dari request
-    $page = $request->input('page', 1); // Halaman saat ini, default 1
-    $rows = $request->input('rows', 20); // Jumlah baris per halaman, default 20
       // Filter berdasarkan kolom pencarian
       $searchField = $request->input('searchField');
       $searchString = $request->input('searchString');
@@ -378,22 +376,40 @@ public function dataLapPiutang(Request $request)
         $item['no'] = $index++;
         $result[] = $item;
     }
-
+    
     // Pagination
-    $indexStart = ($page - 1) * $rows;
-    $paginatedData = collect($result)->slice($indexStart, $rows)->values();
-
+    $currentPage = $request->input('page', 1); // Halaman saat ini, default 1
+    $perPage = $request->input('rows', 20); // Jumlah baris per halaman, default 10
     $totalRecords = count($result);
-    $totalPages = ceil($totalRecords / $rows);
+    $totalPages = ceil($totalRecords / $perPage);
+    $indexStart = ($currentPage - 1) * $perPage;
+    $paginatedData = collect($result)->slice($indexStart)->values();
+    $data = $paginatedData->map(function($row) use (&$indexStart) {
+        $indexStart++;
+        return [
+            'invoice' => $row['invoice'], // Mengakses dengan notasi array
+            'customer' => $row['customer'],
+            'jumlah_harga' => $row['jumlah_harga'],
+            'ditagih_tgl' => $row['ditagih_tgl'],
+            'tempo' => $row['tempo'],
+            'dibayar_tgl' => $row['dibayar_tgl'],
+            'sebesar' => $row['sebesar'],
+            'kurang_bayar' =>$row['kurang_bayar'],
+            'no' => $indexStart, // Menggunakan nomor urut
+        ];
+    });
+    
+
+
     
     
 
     // Mengembalikan data dalam format yang sesuai dengan jqGrid
     return response()->json([
-        'rows' => $paginatedData,
-        'curret_page' => $page,
-        'last_page' => $totalPages,
-        'total' => $totalPages,
+        'rows' => $data,
+        'current_page' => $currentPage, // Halaman saat ini
+        'last_page' => ceil($totalRecords / $perPage), // Total halaman
+        'total' => $totalRecords, // Total record setelah filter
         'records' => $totalRecords,
     ]);
 }

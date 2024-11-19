@@ -155,7 +155,7 @@
                     rowList: [10, 20, 50], // Pilihan jumlah baris per halaman
                     viewrecords: true, // Menampilkan total jumlah record
                     autowidth: true,
-                    loadonce: false, // Memungkinkan pagination server-side
+                    loadonce: true, // Memungkinkan pagination server-side
                     height: 'auto',
                     jsonReader: {
                         repeatitems: false,
@@ -252,7 +252,7 @@
                     rowList: [10, 20, 50],
                     viewrecords: true,
                     autowidth: true,
-                    loadonce: false,
+                    loadonce: true,
                     serverPaging: true,
                     height: 'auto',
                     jsonReader: {
