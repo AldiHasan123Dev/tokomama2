@@ -32,9 +32,20 @@ class JurnalExport implements FromView
         $year = $_GET['year'] ?? date('Y');
 
         if (isset($_GET['coa'])) {
-            $data = Jurnal::whereMonth('jurnal.created_at',$month)->whereYear('jurnal.created_at',$year)->where('jurnal.coa_id',$coa_id)->orderBy('created_at','asc')->orderBy('no', 'asc')->orderBy('tipe', 'asc')->get();
+            $data = Jurnal::whereMonth('jurnal.tgl', $month)
+            ->whereYear('jurnal.tgl', $year)
+            ->where('jurnal.coa_id', $coa_id)
+            ->orderBy('tgl', 'asc')
+            ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
+            ->orderBy('created_at', 'asc')
+            ->orderBy('no', 'asc')
+            ->get();
         } else {
-            $data = Jurnal::orderBy('created_at','asc')->orderBy('no', 'asc')->orderBy('tipe', 'asc')->get();
+            $data = Jurnal::orderBy('tgl', 'asc')
+            ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
+            ->orderBy('created_at', 'asc')
+            ->orderBy('no', 'asc')
+            ->get();
         }
 
         $tipe = 'D';

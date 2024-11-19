@@ -40,15 +40,15 @@ class BukuBesarController extends Controller
             $data = Jurnal::whereMonth('jurnal.tgl', $month)
                 ->whereYear('jurnal.tgl', $year)
                 ->where('jurnal.coa_id', $coa_id)
+                ->orderBy('tgl', 'asc')
                 ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
                 ->orderBy('created_at', 'asc')
-                ->orderBy('tgl', 'asc')
                 ->orderBy('no', 'asc')
                 ->get();
         } else {
-            $data = Jurnal::orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
-            ->orderBy('created_at', 'asc')
-                ->orderBy('tgl', 'asc')
+            $data = Jurnal::orderBy('tgl', 'asc')
+                ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
+                ->orderBy('created_at', 'asc')
                 ->orderBy('no', 'asc')
                 ->get();
         }
