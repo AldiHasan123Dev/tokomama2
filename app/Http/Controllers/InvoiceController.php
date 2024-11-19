@@ -889,7 +889,7 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                                 'nopol' => $nopol,
                                 'container' => null,
                                 'tipe' => 'JNL',
-                                'no' =>  $no + 2
+                                'no' =>  $no + 1
                             ]);
                         } else {
                             Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
@@ -933,7 +933,7 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                     'nopol' => $nopol,
                     'container' => null,
                     'tipe' => 'JNL',
-                    'no' =>  $no + 2
+                    'no' =>  $no + 1
                 ]);
                         }
                             //End Jurnal Hutang NO PPN

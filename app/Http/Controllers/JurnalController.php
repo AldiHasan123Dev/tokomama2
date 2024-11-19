@@ -158,6 +158,8 @@ class JurnalController extends Controller
         ->orderBy('id', 'desc')
         ->get();
 
+        $cekVoucher = Jurnal::where('nomor', $nomor)->whereIn('coa_id', [2, 5, 6])->get();
+
 
         // dd($jurnals);
 
@@ -192,7 +194,7 @@ class JurnalController extends Controller
 
 
         session(['jurnal_edit_url' => url()->full()]);
-        return view('jurnal.edit-jurnal', compact('jurnals','data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
+        return view('jurnal.edit-jurnal', compact('cekVoucher','jurnals','data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
     }
 
     public function merger()

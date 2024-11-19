@@ -150,6 +150,7 @@
     </x-jurnal.card-jurnal>
     <x-jurnal.card-jurnal>
         <x-slot:tittle>Edit Jurnal</x-slot:tittle>
+    </form>
         <div class="overflow-x-auto">
             <form action="{{ route('jurnal.edit.tglupdate') }}" method="post">
                 @csrf
@@ -158,9 +159,10 @@
                     class="mb-8 rounded-md bg-gray-100" id="nomor_jurnal">
                 <button type="submit" style="margin-bottom: 20px;"
                     class="btn bg-green-500 font-semibold text-white">Simpan Tanggal</button>
-            </form>
-
-            <table id="table-editj" class="cell-border hover display nowrap">
+                </form>
+                {{-- <button id="tambah_g" style="margin-bottom: 20px;"
+                class="btn bg-blue-500 font-semibold text-white">Tambah Garis</button> --}}
+            <table id="table-editj" class="cell-border hover display nowrap text-sm">
                 <thead>
                     <tr>
                         <th>Aksi</th>
@@ -210,9 +212,27 @@
         @php
             $total_kredit = $data->sum('kredit');
             $total_debet = $data->sum('debit');
+            $total_voucher_d = $cekVoucher->sum('debit');
+            $total_voucher_k = $cekVoucher->sum('kredit');
+            $total_voucher = $total_voucher_d + $total_voucher_k;
         @endphp
-        <p class="font-bold text-2xl">Total Debet: {{ number_format($total_debet, 2, ',', '.') }} </p>
-        <p class="font-bold text-2xl">Total Kredit: {{ number_format($total_kredit, 2, ',', '.') }}</span> </p>
+       <table class="table-auto w-full border-collapse">
+        <tbody>
+            <tr>
+                <td class="px-4 py-2 border-b font-bold">Total Debet</td>
+                <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_debet, 2, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 border-b font-bold">Total Kredit</td>
+                <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_kredit, 2, ',', '.') }}</td>
+            </tr>
+            {{-- <tr>
+                <td class="px-4 py-2 border-b font-bold">Cek Voucher</td>
+                <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_voucher, 2, ',', '.') }}</td>
+            </tr> --}}
+        </tbody>
+    </table>
+    
     </x-jurnal.card-jurnal>
 
     <x-slot:script>
@@ -227,7 +247,8 @@
             $("#nomor_jurnal").val(nomorJurnal);
 
             let table = $(`#table-editj`).DataTable({
-            pageLength: 25 // Menentukan jumlah baris per halaman
+            pageLength: 25,
+            width: 100 // Menentukan jumlah baris per halaman
         });
 
             function editJurnal(id, nomor, tgl, debit, kredit, keterangan, invoice, invoice_external, nopol, tipe, coa_id,
@@ -380,6 +401,36 @@
                     });
                 }
             }
+            $('#tambah_g').on('click', function() {
+            no = $(`#counter`).val();
+            console.log("no_first: " + no);
+            no++;
+            $(`#counter`).val(no);
+            let newRowId = no;
+
+            let html = `<tr>
+                            <td><button class="text-yellow-400"
+                                    onclick="editJurnal1( '{{ $item->id+1 }}' )"><i
+                                        class="fa-solid fa-pencil"></i></button> |
+                                <button id="delete-faktur-all" onclick="deleteItemJurnal('{{ $item->id }}')"
+                                    class="text-red-600 font-semibold mb-3 self-end"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </td>
+                            <td>{{ $item->id+1 }}</td>
+                            <td>{{ $item->nomor ?? '-' }}</td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-end"></td>
+                            <td class="text-end"></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>`;
+            $(`#table-editj`).append(html);
+        });
         </script>
     </x-slot:script>
 </x-Layout.layout>
