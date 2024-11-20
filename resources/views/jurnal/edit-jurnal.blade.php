@@ -416,9 +416,7 @@
                 <option value="{{ $j->keterangan_buku_besar_pembantu }}">{{ $j->keterangan_buku_besar_pembantu }} </option>
                 @endforeach
             </select>
-            
-            <label class="form-label">Tanggal</label>
-            <input name="tgl" type="date" class="input-field" value="${tgl}" />
+            <input name="tgl" type="hidden" class="input-field" value="${tgl}" />
 
             <label class="form-label">Debit</label>
             <input name="debit" type="text" class="input-field" value="" />
