@@ -152,12 +152,18 @@ class JurnalController extends Controller
         $data = Jurnal::where('nomor', $nomor)->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun') ->orderBy('id', 'asc')->get();
         $coa = Coa::where('status', 'aktif')->get();
         $nopol = Nopol::where('status', 'aktif')->get();
-        $jurnals = Jurnal::select('keterangan_buku_besar_pembantu')
+        $jurnals = Jurnal::select('keterangan_buku_besar_pembantu') // Tambahkan 'id' ke dalam select
         ->whereNotNull('keterangan_buku_besar_pembantu')
         ->distinct()
         ->orderBy('id', 'desc')
         ->get();
 
+    
+        $id_jurnals = Jurnal::select('id') // Tambahkan 'id' ke dalam select
+        ->orderBy('id', 'desc')
+        ->get(); // Mengambil koleksi ID
+        $latestId = $id_jurnals->pluck('id')->first(); // Mengambil ID terbaru (karena data sudah diurutkan desc)
+    
         $cekVoucher = Jurnal::where('nomor', $nomor)->whereIn('coa_id', [2, 5, 6])->get();
 
 
@@ -194,7 +200,7 @@ class JurnalController extends Controller
 
 
         session(['jurnal_edit_url' => url()->full()]);
-        return view('jurnal.edit-jurnal', compact('cekVoucher','jurnals','data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
+        return view('jurnal.edit-jurnal', compact('latestId','cekVoucher','jurnals','data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
     }
 
     public function merger()
@@ -617,19 +623,23 @@ class JurnalController extends Controller
                 }
             } else {
                 $invoice_external = $request->invoice_external;
+                if ($invoice_external != null) {
                 $invoiceExternal = Transaction::where('invoice_external', $request->invoice_external)
                     ->with(['suratJalan.customer', 'barang', 'suppliers'])
                     ->get();
 
-                
-                    $barang = optional(optional($invoiceExternal[0])->barang)->nama;
-                    $supplier = optional(optional($invoiceExternal[0])->suppliers)->nama;
-                    $customer = optional(optional(optional($invoiceExternal[0])->suratJalan)->customer)->nama;
-                    $quantity = optional($invoiceExternal[0])->jumlah_jual;
-                    $satuan = optional($invoiceExternal[0])->satuan_jual;
-                    $hargabeli = optional($invoiceExternal[0])->harga_beli;
-                    $hargajual = optional($invoiceExternal[0])->harga_jual;                    
-                    $ket = optional($invoiceExternal[0])->keterangan;
+                    
+                        $barang = optional(optional($invoiceExternal[0])->barang)->nama;
+                        $supplier = optional(optional($invoiceExternal[0])->suppliers)->nama;
+                        $customer = optional(optional(optional($invoiceExternal[0])->suratJalan)->customer)->nama;
+                        $quantity = optional($invoiceExternal[0])->jumlah_jual;
+                        $satuan = optional($invoiceExternal[0])->satuan_jual;
+                        $hargabeli = optional($invoiceExternal[0])->harga_beli;
+                        $hargajual = optional($invoiceExternal[0])->harga_jual;                    
+                        $ket = optional($invoiceExternal[0])->keterangan;
+                        $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray() ?? null;
+                        $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first() ?? null;
+                    }                    
                     $keterangan = $request->keterangan;
 
                 if (str_contains($request->keterangan, '[1]')) {
@@ -658,8 +668,6 @@ class JurnalController extends Controller
                 }
 
                 $keteranganNow = $keterangan;
-                $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray() ?? null;
-                $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first() ?? null;
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -746,4 +754,504 @@ class JurnalController extends Controller
         $redirectUrl = route('jurnal.edit', ['nomor' => $nomor]);
         return redirect($redirectUrl)->with('success', 'Tanggal Jurnal berhasil diubah!');
     }
+
+    // public function store(Request $request, Jurnal $jurnal)
+    // {
+    //     // dd($request->all());
+    //     if ($request->invoice != null) {
+    //         if (str_contains($request->invoice, '_')) {
+    //             $inv = explode('_', $request->invoice)[0];
+    //             $index = explode('_', $request->invoice)[1];
+    //             $invoices = Invoice::with([
+    //                 'transaksi.suppliers',
+    //                 'transaksi.barang',
+    //                 'transaksi.suratJalan.customer',
+    //             ])
+    //                 ->where('invoice', $inv)
+    //                 ->get();
+    //                 $barang = $invoices[$index - 1]->transaksi->barang->nama;
+    //                 $supplier = $invoices[$index - 1]->transaksi->suppliers->nama;
+    //                 $customer = $invoices[$index - 1]->transaksi->suratJalan->customer->nama;
+    //                 $quantity = $invoices[$index - 1]->transaksi->jumlah_jual;
+    //             $satuan = $invoices[$index - 1]->transaksi->satuan_jual;
+    //             $hargabeli = $invoices[$index - 1]->transaksi->harga_beli;
+    //             $hargajual = $invoices[$index - 1]->transaksi->harga_jual;
+    //             $ket = $invoices[$index - 1]->transaksi->keterangan;
+                
+    //             // dd($customer, $satuan, $quantity, $hargabeli, $hargajual, $ket, $supplier, $barang);
+    //             $keteranganNow = $request->keterangan;
+
+    //             if (str_contains($request->keterangan, '[1]')) {
+    //                 $keterangan = str_replace('[1]', $customer, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[2]')) {
+    //                 $keterangan = str_replace('[2]', $supplier, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[3]')) {
+    //                 $keterangan = str_replace('[3]', $barang, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[4]')) {
+    //                 $keterangan = str_replace('[4]', $quantity, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[5]')) {
+    //                 $keterangan = str_replace('[5]', $satuan, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[6]')) {
+    //                 $keterangan = str_replace('[6]', $hargabeli, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[7]')) {
+    //                 $keterangan = str_replace('[7]', $hargajual, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[8]')) {
+    //                 $keterangan = str_replace('[8]', $ket, $keterangan);
+    //             }
+
+    //             $nomor = $request->nomor;
+    //             $tipe = $request->tipe;
+    //             $id_transaksi = Invoice::where('invoice', $inv)->where('harga', $hargajual)->pluck('id_transaksi')->first();
+                
+    //             $noCounter = explode('-', $nomor)[0];
+    //             $no = str_replace(' ', '', explode('/', $noCounter)[0]);
+    //             if ($tipe == 'JNL') {
+    //                 $noCounter = explode('-', $nomor)[1]; // Ambil bagian kedua setelah '-'
+    //                 $no = str_replace(' ', '', explode('/', $noCounter)[0]); // Ambil bagian pertama sebelum '/'
+    //             }
+    //             $data = Jurnal::create([
+    //                 'id' => $request->id,
+    //                 'no' => $request->no,
+    //                 'id_transaksi' => $id_transaksi,
+    //                 'nomor' => $request->nomor,
+    //                 'debit' => $request->debit,
+    //                 'kredit' => $request->kredit,
+    //                 'keterangan' => $keteranganNow,
+    //                 'keterangan_buku_besar_pembantu' => $request->keterangan_buku_besar_pembantu,
+    //                 'invoice' => !empty($request->invoice) ? explode('_', $request->invoice)[0] : null,
+    //                 'invoice_external' => !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null,
+    //                 'nopol' => $request->nopol,
+    //                 'tipe' => $tipe,
+    //                 'coa_id' => $request->coa_id,
+    //             ]);                
+
+    //             if ($data->save()) {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('success', 'Data Jurnal berhasil diubah!');
+    //             } else {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('error', 'Data Jurnal Gagal diubah!');
+    //             }
+    //         } else {
+    //             $invoice = $request->invoice;
+    //             $invoices = Invoice::where('invoice', $invoice)->with([
+    //                 'transaksi.suppliers',
+    //                 'transaksi.barang',
+    //                 'transaksi.suratJalan.customer',
+    //                 ])->get();
+
+                
+    //             $barang = $invoices[0]->transaksi->barang->nama;
+    //             $supplier = $invoices[0]->transaksi->suppliers->nama;
+    //             $customer = $invoices[0]->transaksi->suratJalan->customer->nama;
+    //             $quantity = $invoices[0]->transaksi->jumlah_jual;
+    //             $satuan = $invoices[0]->transaksi->satuan_jual;
+    //             $hargabeli = $invoices[0]->transaksi->harga_beli;
+    //             $hargajual = $invoices[0]->transaksi->harga_jual;
+    //             $ket = $invoices[0]->transaksi->keterangan;
+                
+                
+
+    //             $keterangan = $request->keterangan;
+
+    //             if (str_contains($request->keterangan, '[1]')) {
+    //                 $keterangan = str_replace('[1]', $customer, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[2]')) {
+    //                 $keterangan = str_replace('[2]', $supplier, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[3]')) {
+    //                 $keterangan = str_replace('[3]', $barang, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[4]')) {
+    //                 $keterangan = str_replace('[4]', $quantity, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[5]')) {
+    //                 $keterangan = str_replace('[5]', $satuan, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[6]')) {
+    //                 $keterangan = str_replace('[6]', $hargabeli, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[7]')) {
+    //                 $keterangan = str_replace('[7]', $hargajual, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[8]')) {
+    //                 $keterangan = str_replace('[8]', $ket, $keterangan);
+    //             }
+
+    //             $keteranganNow = $request->keterangan;
+    //             $id_transaksi = Invoice::where('invoice', $inv)->where('harga', $hargajual)->pluck('id_transaksi')->first();
+    //             $nomor = $request->nomor;
+    //             $tipe = $request->tipe;
+    //             $noCounter = explode('-', $nomor)[0];
+    //             $no = str_replace(' ', '', explode('/', $noCounter)[0]);
+    //             if ($tipe == 'JNL') {
+    //                 $noCounter = explode('-', $nomor)[1]; // Ambil bagian kedua setelah '-'
+    //                 $no = str_replace(' ', '', explode('/', $noCounter)[0]); // Ambil bagian pertama sebelum '/'
+    //             }
+    //             $data = Jurnal::create([
+    //                 'id' => $request->id,
+    //                 'no' => $request->no,
+    //                 'id_transaksi' => $id_transaksi,
+    //                 'nomor' => $request->nomor,
+    //                 'debit' => $request->debit,
+    //                 'kredit' => $request->kredit,
+    //                 'keterangan' => $keteranganNow,
+    //                 'keterangan_buku_besar_pembantu' => $request->keterangan_buku_besar_pembantu,
+    //                 'invoice' => !empty($request->invoice) ? explode('_', $request->invoice)[0] : null,
+    //                 'invoice_external' => !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null,
+    //                 'nopol' => $request->nopol,
+    //                 'tipe' => $tipe,
+    //                 'coa_id' => $request->coa_id,
+    //             ]);     
+
+    //             if ($data->save()) {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('success', 'Data Jurnal berhasil diubah!');
+    //             } else {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('error', 'Data Jurnal Gagal diubah!');
+    //             }
+    //         }
+    //     } else if ($request->invoice_external ) {
+    //         if (str_contains($request->invoice_external, '_')) {
+    //             $invext = explode('_', $request->invoice_external)[0];
+    //             $index = explode('_', $request->invoice_external)[1];
+                
+                
+    //             $invoice_external = Transaction::where('invoice_external', $invext)
+    //             ->with(['suratJalan.customer', 'barang', 'suppliers'])
+    //             ->get();
+                
+                
+    //             $barang = $invoice_external[$index - 1]->barang->nama;
+    //             $supplier = $invoice_external[$index - 1]->suppliers->nama;
+    //             $customer = $invoice_external[$index - 1]->suratJalan->customer->nama;
+    //             $quantity = $invoice_external[$index - 1]->jumlah_jual;
+    //             $satuan = $invoice_external[$index - 1]->satuan_jual;
+    //             $hargabeli = $invoice_external[$index - 1]->harga_beli;
+    //             $hargajual = $invoice_external[$index - 1]->harga_jual;
+    //             $ket = $invoice_external[$index - 1]->keterangan;
+    //             $invoice_external= $request->invoice_external ?? '';
+    //             $keterangan = $request->keterangan;
+
+    //             if (str_contains($request->keterangan, '[1]')) {
+    //                 $keterangan = str_replace('[1]', $customer, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[2]')) {
+    //                 $keterangan = str_replace('[2]', $supplier, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[3]')) {
+    //                 $keterangan = str_replace('[3]', $barang, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[4]')) {
+    //                 $keterangan = str_replace('[4]', $quantity, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[5]')) {
+    //                 $keterangan = str_replace('[5]', $satuan, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[6]')) {
+    //                 $keterangan = str_replace('[6]', $hargabeli, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[7]')) {
+    //                 $keterangan = str_replace('[7]', $hargajual, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[8]')) {
+    //                 $keterangan = str_replace('[8]', $ket, $keterangan);
+    //             }
+    //             $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
+    //             $id_transaksi =Transaction::where('invoice_external', $invext)->where('id_barang', $id_barang)->pluck('id')->first();
+    //             $keteranganNow = $keterangan;
+    //             $nomor = $request->nomor;
+    //             $tipe = $request->tipe;
+    //             $noCounter = explode('-', $nomor)[0];
+    //             $no = str_replace(' ', '', explode('/', $noCounter)[0]);
+    //             if ($tipe == 'JNL') {
+    //                 $noCounter = explode('-', $nomor)[1]; // Ambil bagian kedua setelah '-'
+    //                 $no = str_replace(' ', '', explode('/', $noCounter)[0]); // Ambil bagian pertama sebelum '/'
+    //             }
+    //             $data = Jurnal::create([
+    //                 'id' => $request->id,
+    //                 'no' => $request->no,
+    //                 'id_transaksi' => $id_transaksi,
+    //                 'nomor' => $request->nomor,
+    //                 'debit' => $request->debit,
+    //                 'kredit' => $request->kredit,
+    //                 'keterangan' => $keteranganNow,
+    //                 'keterangan_buku_besar_pembantu' => $request->keterangan_buku_besar_pembantu,
+    //                 'invoice' => !empty($request->invoice) ? explode('_', $request->invoice)[0] : null,
+    //                 'invoice_external' => !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null,
+    //                 'nopol' => $request->nopol,
+    //                 'tipe' => $tipe,
+    //                 'coa_id' => $request->coa_id,
+    //             ]);     
+
+    //             if ($data->save()) {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('success', 'Data Jurnal berhasil diubah!');
+    //             } else {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('error', 'Data Jurnal Gagal diubah!');
+    //             }
+    //         } else {
+    //             $invoice_external = $request->invoice_external;
+    //             $invoiceExternal = Transaction::where('invoice_external', $request->invoice_external)
+    //             ->with(['suratJalan.customer', 'barang', 'suppliers'])
+    //             ->get();
+                
+    //             $barang = $invoiceExternal[0]->barang->nama;
+    //             $supplier = $invoiceExternal[0]->suppliers->nama;
+    //             $customer = $invoiceExternal[0]->suratJalan->customer->nama;
+    //             $quantity = $invoiceExternal[0]->jumlah_jual;
+    //             $satuan = $invoiceExternal[0]->satuan_jual;
+    //             $hargabeli = $invoiceExternal[0]->harga_beli;
+    //             $hargajual = $invoiceExternal[0]->harga_jual;
+    //             $ket = $invoiceExternal[0]->keterangan;
+                
+    //             // dd($request->invoice_external);
+    //             $keterangan = $request->keterangan;
+
+    //             if (str_contains($request->keterangan, '[1]')) {
+    //                 $keterangan = str_replace('[1]', $customer, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[2]')) {
+    //                 $keterangan = str_replace('[2]', $supplier, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[3]')) {
+    //                 $keterangan = str_replace('[3]', $barang, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[4]')) {
+    //                 $keterangan = str_replace('[4]', $quantity, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[5]')) {
+    //                 $keterangan = str_replace('[5]', $satuan, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[6]')) {
+    //                 $keterangan = str_replace('[6]', $hargabeli, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[7]')) {
+    //                 $keterangan = str_replace('[7]', $hargajual, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[8]')) {
+    //                 $keterangan = str_replace('[8]', $ket, $keterangan);
+    //             }
+
+    //             $keteranganNow = $keterangan;
+    //             $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
+    //             $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first();
+    //             $nomor = $request->nomor;
+    //             $tipe = $request->tipe;
+    //             $noCounter = explode('-', $nomor)[0];
+    //             $no = str_replace(' ', '', explode('/', $noCounter)[0]);
+    //             if ($tipe == 'JNL') {
+    //                 if ($nomor == 'SALDO AWAL') {
+    //                     $noCounter = 'SALDO AWAL';
+    //                     $no = 0;
+    //                 } else {
+    //                     $noCounter = explode('-', $nomor)[1] ?? 'SALDO AWAL'; // Ambil bagian kedua setelah '-' jika ada
+    //                     $no = str_replace(' ', '', explode('/', $noCounter)[0] ?? 0); // Ambil bagian pertama sebelum '/' jika ada
+    //                 }
+    //             }
+    //             $data = Jurnal::create([
+    //                 'id' => $request->id,
+    //                 'no' => $request->no,
+    //                 'id_transaksi' => $id_transaksi,
+    //                 'nomor' => $request->nomor,
+    //                 'debit' => $request->debit,
+    //                 'kredit' => $request->kredit,
+    //                 'keterangan' => $keteranganNow,
+    //                 'keterangan_buku_besar_pembantu' => $request->keterangan_buku_besar_pembantu,
+    //                 'invoice' => !empty($request->invoice) ? explode('_', $request->invoice)[0] : null,
+    //                 'invoice_external' => !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null,
+    //                 'nopol' => $request->nopol,
+    //                 'tipe' => $tipe,
+    //                 'coa_id' => $request->coa_id,
+    //             ]);     
+    //             if ($data->save()) {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data->nomor, $data->tgl));
+    //                 return redirect($redirectUrl)->with('success', 'Data Jurnal berhasil diubah!');
+    //             } else {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('error', 'Data Jurnal Gagal diubah!');
+    //             }
+    //         }
+    //     } else if ($request->keterangan) {
+    //         if (str_contains($request->invoice_external, '_')) {
+    //             $invext = explode('_', $request->invoice_external)[0];
+    //             $index = explode('_', $request->invoice_external)[1];
+
+    //             $invoice_external = Transaction::where('invoice_external', $request->invoice_external)
+    //                 ->with(['suratJalan.customer', 'barang', 'suppliers'])
+    //                 ->get();
+
+    //             $barang = $invoice_external[$index - 1]->barang->nama;
+    //             $supplier = $invoice_external[$index - 1]->suppliers->nama;
+    //             $customer = $invoice_external[$index - 1]->suratJalan->customer->nama;
+    //             $quantity = $invoice_external[$index - 1]->jumlah_jual;
+    //             $satuan = $invoice_external[$index - 1]->satuan_jual;
+    //             $hargabeli = $invoice_external[$index - 1]->harga_beli;
+    //             $hargajual = $invoice_external[$index - 1]->harga_jual;
+    //             $ket = $invoice_external[$index - 1]->keterangan;
+
+    //             $keterangan = $request->keterangan;
+
+    //             if (str_contains($request->keterangan, '[1]')) {
+    //                 $keterangan = str_replace('[1]', $customer, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[2]')) {
+    //                 $keterangan = str_replace('[2]', $supplier, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[3]')) {
+    //                 $keterangan = str_replace('[3]', $barang, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[4]')) {
+    //                 $keterangan = str_replace('[4]', $quantity, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[5]')) {
+    //                 $keterangan = str_replace('[5]', $satuan, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[6]')) {
+    //                 $keterangan = str_replace('[6]', $hargabeli, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[7]')) {
+    //                 $keterangan = str_replace('[7]', $hargajual, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[8]')) {
+    //                 $keterangan = str_replace('[8]', $ket, $keterangan);
+    //             }
+
+    //             $keteranganNow = $keterangan;
+    //             $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
+    //             $id_transaksi =Transaction::where('invoice_external', $invext)->where('id_barang', $id_barang)->pluck('id')->first();
+    //             $nomor = $request->nomor;
+    //             $tipe = $request->tipe;
+    //             $noCounter = explode('-', $nomor)[0];
+    //             $no = str_replace(' ', '', explode('/', $noCounter)[0]);
+    //             if ($tipe == 'JNL') {
+    //                 if ($nomor == 'SALDO AWAL') {
+    //                     $noCounter = 'SALDO AWAL';
+    //                     $no = 0;
+    //                 } else {
+    //                     $noCounter = explode('-', $nomor)[1] ?? 'SALDO AWAL'; // Ambil bagian kedua setelah '-' jika ada
+    //                     $no = str_replace(' ', '', explode('/', $noCounter)[0] ?? 0); // Ambil bagian pertama sebelum '/' jika ada
+    //                 }
+    //             }
+    //             $data = Jurnal::create([
+    //                 'id' => $request->id,
+    //                 'id_transaksi' => $id_transaksi,
+    //                 'no' => $request->no,
+    //                 'nomor' => $request->nomor,
+    //                 'debit' => $request->debit,
+    //                 'kredit' => $request->kredit,
+    //                 'keterangan' => $keteranganNow,
+    //                 'keterangan_buku_besar_pembantu' => $request->keterangan_buku_besar_pembantu,
+    //                 'invoice' => !empty($request->invoice) ? explode('_', $request->invoice)[0] : null,
+    //                 'invoice_external' => !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null,
+    //                 'nopol' => $request->nopol,
+    //                 'tipe' => $tipe,
+    //                 'coa_id' => $request->coa_id,
+    //             ]);     
+
+    //             if ($data->save()) {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('success', 'Data Jurnal berhasil diubah!');
+    //             } else {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('error', 'Data Jurnal Gagal diubah!');
+    //             }
+    //         } else {
+    //             $invoice_external = $request->invoice_external;
+    //             $invoiceExternal = Transaction::where('invoice_external', $request->invoice_external)
+    //                 ->with(['suratJalan.customer', 'barang', 'suppliers'])
+    //                 ->get();
+
+                
+    //                 $barang = optional(optional($invoiceExternal[0])->barang)->nama;
+    //                 $supplier = optional(optional($invoiceExternal[0])->suppliers)->nama;
+    //                 $customer = optional(optional(optional($invoiceExternal[0])->suratJalan)->customer)->nama;
+    //                 $quantity = optional($invoiceExternal[0])->jumlah_jual;
+    //                 $satuan = optional($invoiceExternal[0])->satuan_jual;
+    //                 $hargabeli = optional($invoiceExternal[0])->harga_beli;
+    //                 $hargajual = optional($invoiceExternal[0])->harga_jual;                    
+    //                 $ket = optional($invoiceExternal[0])->keterangan;
+    //                 $keterangan = $request->keterangan;
+
+    //             if (str_contains($request->keterangan, '[1]')) {
+    //                 $keterangan = str_replace('[1]', $customer, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[2]')) {
+    //                 $keterangan = str_replace('[2]', $supplier, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[3]')) {
+    //                 $keterangan = str_replace('[3]', $barang, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[4]')) {
+    //                 $keterangan = str_replace('[4]', $quantity, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[5]')) {
+    //                 $keterangan = str_replace('[5]', $satuan, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[6]')) {
+    //                 $keterangan = str_replace('[6]', $hargabeli, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[7]')) {
+    //                 $keterangan = str_replace('[7]', $hargajual, $keterangan);
+    //             }
+    //             if (str_contains($request->keterangan, '[8]')) {
+    //                 $keterangan = str_replace('[8]', $ket, $keterangan);
+    //             }
+
+    //             $keteranganNow = $keterangan;
+    //             $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray() ?? null;
+    //             $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first() ?? null;
+    //             $nomor = $request->nomor;
+    //             $tipe = $request->tipe;
+    //             $noCounter = explode('-', $nomor)[0];
+    //             $no = str_replace(' ', '', explode('/', $noCounter)[0]);
+    //             if ($tipe == 'JNL') {
+    //                 if ($nomor == 'SALDO AWAL') {
+    //                     $noCounter = 'SALDO AWAL';
+    //                     $no = 0;
+    //                 } else {
+    //                     $noCounter = explode('-', $nomor)[1] ?? 'SALDO AWAL'; // Ambil bagian kedua setelah '-' jika ada
+    //                     $no = str_replace(' ', '', explode('/', $noCounter)[0] ?? 0); // Ambil bagian pertama sebelum '/' jika ada
+    //                 }
+    //             }
+    //             $data = Jurnal::create([
+    //                 'id' => $request->id,
+    //                 'id_transaksi' => $id_transaksi,
+    //                 'no' => $request->no,
+    //                 'nomor' => $request->nomor,
+    //                 'debit' => $request->debit,
+    //                 'kredit' => $request->kredit,
+    //                 'keterangan' => $keteranganNow,
+    //                 'keterangan_buku_besar_pembantu' => $request->keterangan_buku_besar_pembantu,
+    //                 'invoice' => !empty($request->invoice) ? explode('_', $request->invoice)[0] : null,
+    //                 'invoice_external' => !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null,
+    //                 'nopol' => $request->nopol,
+    //                 'tipe' => $tipe,
+    //                 'coa_id' => $request->coa_id,
+    //             ]);     
+
+    //             if ($data->save()) {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data->nomor, $data->tgl));
+    //                 return redirect($redirectUrl)->with('success', 'Data Jurnal berhasil diubah!');
+    //             } else {
+    //                 $redirectUrl = session('jurnal_edit_url', route('jurnal.edit', $data));
+    //                 return redirect($redirectUrl)->with('error', 'Data Jurnal Gagal diubah!');
+    //             }
+    //         }
+    //     } else {
+    //         return redirect()->back()->with('error', 'Invoice dan Invoice External kosong');
+    //     }
+        
+    //     return redirect()->route('jurnal.edit');
+    // }
 }

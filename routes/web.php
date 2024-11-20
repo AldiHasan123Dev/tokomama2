@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/jurnal-edit', [JurnalController::class, 'edit'])->name('jurnal.edit');
     Route::get('/jurnal-merger', [JurnalController::class, 'merger'])->name('jurnal.jurnal-merger');
     Route::post('/jurnal-merger', [JurnalController::class, 'merger_store'])->name('jurnal.jurnal-merger');
+    Route::post('/jurnal-store', [JurnalController::class, 'store'])->name('jurnal.edit.store');
     Route::post('/jurnal-update', [JurnalController::class, 'update'])->name('jurnal.edit.update');
     Route::post('/jurnal-delete', [JurnalController::class, 'destroy'])->name('jurnal.item.delete');
     Route::post('/jurnal-tgl-update', [JurnalController::class, 'tglUpdate'])->name('jurnal.edit.tglupdate');

@@ -363,6 +363,120 @@
                 });
             }
 
+            
+            function tambahJurnal(id, nomor, tipe, tgl, invoice, invoice_external, nopol, keterangan, no, keterangan_buku_besar_pembantu) {
+                invoice = (invoice === '0') ? '' : invoice;
+                invoice_external = (invoice_external === '0') ? '' : invoice_external;
+                $("#dialog").html(`
+                   <dialog id="my_modal_3" class="modal ">
+    <div class="modal-box">
+        <button class="close-button" onclick="document.getElementById('my_modal_3').close()">✕</button>
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">Edit Nomor Jurnal ${nomor} ID: (${id})</h3>
+        <form action="{{ route('jurnal.edit.store') }}" method="post">
+            @csrf
+             <label class="form-label">Coa</label>
+            <select class="select-field" name="coa_id" id="coa_id">
+                <option value="" selected></option>
+                @foreach ($coa as $c)
+                <option value="{{ $c->id }}">{{ $c->no_akun }} {{ $c->nama_akun }}</option>
+                @endforeach
+            </select>
+
+              <label class="form-label">Invoice External</label>
+            <select class="select-field" name="invoice_external" id="invext">
+                <option value="${invoice_external}" selected>${invoice_external}</option>
+                 <option value=""></option>
+                @foreach ($invExtProc as $in)
+                <option value="{{ $in }}">{{ $in }}</option>
+                @endforeach
+            </select>
+           <label class="form-label">Invoice</label>
+            <select class="select-field form-select " name="invoice" id="invoices">
+                <option value="${invoice}" selected>${invoice}</option>
+                <option value=""></option>
+                @foreach ($invProc as $i)
+                <option value="{{ $i }}">{{ $i }}</option>
+                @endforeach
+            </select>
+
+              <label class="form-label h-auto">Nopol</label>
+            <select class="form-select select-field" name="nopol" id="nopol">
+                <option value="" selected></option>
+                <option value=""></option>
+                @foreach ($nopol as $n)
+                <option value="{{ $n->nopol }}">{{ $n->nopol }} </option>
+                @endforeach
+            </select>
+
+              <label class="form-label h-auto">Keterangan Buku Pembantu</label>
+            <select class="form-select select-field" name="keterangan_buku_besar_pembantu" id="keterangan_buku_besar_pembantu">
+                <option value="${keterangan_buku_besar_pembantu}" selected>${keterangan_buku_besar_pembantu}</option>
+                <option value=""></option>
+                @foreach ($jurnals as $j)
+                <option value="{{ $j->keterangan_buku_besar_pembantu }}">{{ $j->keterangan_buku_besar_pembantu }} </option>
+                @endforeach
+            </select>
+            
+            <label class="form-label">Tanggal</label>
+            <input name="tgl" type="date" class="input-field" value="${tgl}" />
+
+            <label class="form-label">Debit</label>
+            <input name="debit" type="text" class="input-field" value="" />
+
+            <label class="form-label">Kredit</label>
+            <input name="kredit" type="text" class="input-field" value="" />
+
+           <label class="form-label">Keterangan</label>
+            <input name="keterangan" type="text" class="input-field" value="${keterangan}" />
+            <span class="label-info">*ex: [1]customer [2]supplier [3]barang</span>
+
+               <input name="id" type="hidden" value="${id}" />
+               <input name="nomor" type="hidden" value="${nomor}" />
+               <input name="no" type="hidden" value="${no}" />
+               
+               <input name="tipe" type="hidden" value="${tipe}" />
+
+            <button type="submit" class="submit-button">Edit</button>
+        </form>
+    </div>
+</dialog>
+                `);
+
+
+                my_modal_3.showModal();
+                $('#invext').select2({
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
+                });
+                $('#coa_id').select2({
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
+                });
+                
+                $('#invoices').select2({
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
+                });
+                $('#keterangan_buku_besar_pembantu').select2({
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
+                });
+                $('#nopol').select2({
+                    dropdownParent: $('#my_modal_3'),
+                    dropdownAutoWidth: true,
+                    width: '100%',
+                    appendTo: 'body'
+                });
+            }
+
             $.fn.select2.amd.define('select2/dropdown/position', [], function() {
                 function PositionDropdown() {}
                 PositionDropdown.prototype.bind = function(container, $container) {
@@ -409,25 +523,25 @@
             let newRowId = no;
 
             let html = `<tr>
-                            <td><button class="text-yellow-400"
-                                    onclick="editJurnal1( '{{ $item->id+1 }}' )"><i
-                                        class="fa-solid fa-pencil"></i></button> |
-                                <button id="delete-faktur-all" onclick="deleteItemJurnal('{{ $item->id }}')"
-                                    class="text-red-600 font-semibold mb-3 self-end"><i
-                                        class="fa-solid fa-trash"></i></button>
+                           <td class="text-center align-middle">
+                                <button class="text-green-500"
+                                        onclick="tambahJurnal('{{ $latestId + 1 }}','{{ $item->nomor }}', '{{ $item->tipe }}', '{{ $item->tgl }}', '{{ $item->invoice }}', '{{ $item->invoice_external }}', 
+                                         '{{ $item->nopol }}', '{{ $item->keterangan }}', {{ $item->no }},  '{{ $item->keterangan_buku_besar_pembantu }}')">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
                             </td>
-                            <td>{{ $item->id+1 }}</td>
-                            <td>{{ $item->nomor ?? '-' }}</td>
-                            <td></td>
-                            <td></td>
-                            <td class="text-end"></td>
-                            <td class="text-end"></td>
+                            <td>{{ $latestId + 1 }}</td>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-end">{{ number_format(0, 2, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format(0, 2, ',', '.') }}</td>
+                            <td>{{ $item->keterangan ?? '-' }}</td>
+                            <td>{{ $item->invoice == 0 ? '' : $item->invoice ?? '-' }}</td>
+                            <td>{{ $item->invoice_external == 0 ? '' : $item->invoice_external ?? '-' }}</td>
+                            <td>{{ $item->nopol ?? '-' }}</td>
+                            <td>{{ $item->tipe ?? '-' }}</td>
+                            <td class="text-end">{{ $item->keterangan_buku_besar_pembantu ?? '-' }}</td>
                         </tr>`;
             $(`#table-editj`).append(html);
         });
