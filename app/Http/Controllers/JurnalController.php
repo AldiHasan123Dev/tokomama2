@@ -506,8 +506,13 @@ class JurnalController extends Controller
                 $noCounter = explode('-', $nomor)[0];
                 $no = str_replace(' ', '', explode('/', $noCounter)[0]);
                 if ($tipe == 'JNL') {
-                    $noCounter = explode('-', $nomor)[1]; // Ambil bagian kedua setelah '-'
-                    $no = str_replace(' ', '', explode('/', $noCounter)[0]); // Ambil bagian pertama sebelum '/'
+                    if ($nomor == 'SALDO AWAL') {
+                        $noCounter = 'SALDO AWAL';
+                        $no = 0;
+                    } else {
+                        $noCounter = explode('-', $nomor)[1] ?? 'SALDO AWAL'; // Ambil bagian kedua setelah '-' jika ada
+                        $no = str_replace(' ', '', explode('/', $noCounter)[0] ?? 0); // Ambil bagian pertama sebelum '/' jika ada
+                    }
                 }
                 $data = Jurnal::find($request->id);
                 $data->id_transaksi = $id_transaksi;
@@ -582,8 +587,13 @@ class JurnalController extends Controller
                 $noCounter = explode('-', $nomor)[0];
                 $no = str_replace(' ', '', explode('/', $noCounter)[0]);
                 if ($tipe == 'JNL') {
-                    $noCounter = explode('-', $nomor)[1]; // Ambil bagian kedua setelah '-'
-                    $no = str_replace(' ', '', explode('/', $noCounter)[0]); // Ambil bagian pertama sebelum '/'
+                    if ($nomor == 'SALDO AWAL') {
+                        $noCounter = 'SALDO AWAL';
+                        $no = 0;
+                    } else {
+                        $noCounter = explode('-', $nomor)[1] ?? 'SALDO AWAL'; // Ambil bagian kedua setelah '-' jika ada
+                        $no = str_replace(' ', '', explode('/', $noCounter)[0] ?? 0); // Ambil bagian pertama sebelum '/' jika ada
+                    }
                 }
                 $data = Jurnal::find($request->id);
                 $data->id_transaksi = $id_transaksi;
@@ -608,20 +618,19 @@ class JurnalController extends Controller
             } else {
                 $invoice_external = $request->invoice_external;
                 $invoiceExternal = Transaction::where('invoice_external', $request->invoice_external)
-                ->with(['suratJalan.customer', 'barang', 'suppliers'])
-                ->get();
+                    ->with(['suratJalan.customer', 'barang', 'suppliers'])
+                    ->get();
+
                 
-                $barang = $invoiceExternal[0]->barang->nama;
-                $supplier = $invoiceExternal[0]->suppliers->nama;
-                $customer = $invoiceExternal[0]->suratJalan->customer->nama;
-                $quantity = $invoiceExternal[0]->jumlah_jual;
-                $satuan = $invoiceExternal[0]->satuan_jual;
-                $hargabeli = $invoiceExternal[0]->harga_beli;
-                $hargajual = $invoiceExternal[0]->harga_jual;
-                $ket = $invoiceExternal[0]->keterangan;
-                
-                // dd($request->invoice_external);
-                $keterangan = $request->keterangan;
+                    $barang = optional(optional($invoiceExternal[0])->barang)->nama;
+                    $supplier = optional(optional($invoiceExternal[0])->suppliers)->nama;
+                    $customer = optional(optional(optional($invoiceExternal[0])->suratJalan)->customer)->nama;
+                    $quantity = optional($invoiceExternal[0])->jumlah_jual;
+                    $satuan = optional($invoiceExternal[0])->satuan_jual;
+                    $hargabeli = optional($invoiceExternal[0])->harga_beli;
+                    $hargajual = optional($invoiceExternal[0])->harga_jual;                    
+                    $ket = optional($invoiceExternal[0])->keterangan;
+                    $keterangan = $request->keterangan;
 
                 if (str_contains($request->keterangan, '[1]')) {
                     $keterangan = str_replace('[1]', $customer, $keterangan);
@@ -650,15 +659,21 @@ class JurnalController extends Controller
 
                 $keteranganNow = $keterangan;
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first();
-                  $nomor = $request->nomor;
+                $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first() ?? null;
+                $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
                 $no = str_replace(' ', '', explode('/', $noCounter)[0]);
                 if ($tipe == 'JNL') {
-                    $noCounter = explode('-', $nomor)[1]; // Ambil bagian kedua setelah '-'
-                    $no = str_replace(' ', '', explode('/', $noCounter)[0]); // Ambil bagian pertama sebelum '/'
+                    if ($nomor == 'SALDO AWAL') {
+                        $noCounter = 'SALDO AWAL';
+                        $no = 0;
+                    } else {
+                        $noCounter = explode('-', $nomor)[1] ?? 'SALDO AWAL'; // Ambil bagian kedua setelah '-' jika ada
+                        $no = str_replace(' ', '', explode('/', $noCounter)[0] ?? 0); // Ambil bagian pertama sebelum '/' jika ada
+                    }
                 }
+                
                 $data = Jurnal::find($request->id);
                 $data->nomor = $request->nomor;
                 $data->debit = $request->debit;

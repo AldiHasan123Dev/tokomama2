@@ -417,9 +417,23 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
                                     'tipe' => 'JNL',
                                     'no' =>  $maxArray + 2
                                 ]);
-
-                                 
                             }
+
+                            Jurnal::create([
+                                'coa_id' => 10,
+                                'nomor' => $jurhut,
+                                'tgl' => $tgl,
+                                'keterangan' => 'PPN Masukkan ' . $result[0]->transaksi->suppliers->nama . ' (FP : ' . $nsfp .  ' )' ,
+                                'debit' => $subtotalPPN, // Menyimpan subtotal sebagai debit
+                                'kredit' =>  0,// Kredit diisi 0
+                                'invoice' => null,
+                                'invoice_external' => $invoice_external,
+                                'id_transaksi' => $result[0]->id_transaksi,
+                                'nopol' => $nopol,
+                                'container' => null,
+                                'tipe' => 'JNL',
+                                'no' => $maxArray + 2
+                            ]);
                             
                              //coa 1.6 = Uang Muka (Kredit)
                             Jurnal::create([
