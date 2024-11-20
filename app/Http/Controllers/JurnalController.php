@@ -658,7 +658,7 @@ class JurnalController extends Controller
                 }
 
                 $keteranganNow = $keterangan;
-                $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
+                $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray() ?? null;
                 $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first() ?? null;
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
