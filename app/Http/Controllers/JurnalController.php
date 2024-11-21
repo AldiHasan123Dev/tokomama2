@@ -22,13 +22,23 @@ class JurnalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(){
+    public function index()
+    {
+        if (isset($_GET['tipe']) && isset($_GET['month']) && isset($_GET['year'])) {
+            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->where('tipe', $_GET['tipe'])->orderBy('tgl', 'desc')->orderBy('created_at', 'desc')->orderBy('no', 'desc')->orderBy('id', 'asc')->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+        } elseif (isset($_GET['month']) && isset($_GET['year'])) {
+            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->orderBy('tgl', 'desc')->orderBy('created_at', 'desc')->orderBy('no', 'desc')->orderBy('id', 'asc')->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+        } else {
+            $data = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->orderBy('tgl', 'desc')->orderBy('created_at', 'desc')->orderBy('no', 'desc')->orderBy('id', 'asc')->get();
+        }
+
+        // bulan
         if(isset($_GET['month']) && isset($_GET['year'])) {
             $MonJNL = Jurnal::whereMonth('tgl', $_GET ['month'])
             ->whereYear('tgl', $_GET['year'])
             ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
             ->get();
-            dd($_GET['month'], $MonJNL);
+            
             $balance = Jurnal::select('nomor', 
                               DB::raw('SUM(debit) as total_debit'), 
                               DB::raw('SUM(kredit) as total_kredit'))
@@ -74,70 +84,10 @@ class JurnalController extends Controller
             }
             
         }
-        // $this->datajurnal($MonJNL, $balance, $LastJNL);
 
-        return view('jurnal.jurnal', compact('MonJNL',
+        return view('jurnal.jurnal', compact('data', 'MonJNL',
         'notBalance', 'LastJNL'));
     }
-    public function dataJurnal(Request $request)
-{
-    // Membangun query untuk mengambil data dari tabel jurnal dan coa
-    $query = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
-        ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->orderBy('tgl', 'desc')->orderBy('created_at', 'desc')->orderBy('no', 'desc')->orderBy('id', 'asc');
-
-    // Filter berdasarkan bulan dan tahun jika diberikan
-    if ($request->has('month') && $request->has('year')) {
-        $query->whereMonth('tgl', $request->input('month'))
-              ->whereYear('tgl', $request->input('year'));
-    }
-
-    // Filter berdasarkan tipe jika diberikan
-    if ($request->has('tipe')) {
-        $query->orderBy('tipe', $request->input('tipe'));
-    }
-
-    // Ambil semua data yang sesuai dengan query
-    $data = $query->get();
-    $totalRecords = $data->count(); // Total record setelah filter
-
-    // Mengatur pagination
-    $currentPage = $request->input('page', 1); // Halaman saat ini, default 1
-    $perPage = $request->input('rows', 10); // Jumlah baris per halaman, default 10
-    $index = ($currentPage - 1) * $perPage; // Hitung indeks untuk slicing data
-    // Slicing data untuk pagination
-    $paginatedData = $data->slice($index)->values(); // Ambil data sesuai dengan halaman dan jumlah yang diminta
-
-    // Mengubah data menjadi format yang sesuai untuk jqGrid
-    $result = $paginatedData->map(function ($row) use (&$index) {
-        $index++;
-        return [
-            'DT_RowIndex' => $index, // Indeks baris
-            'tgl' => $row->tgl ?? '', // Tanggal
-            'tipe' => $row->tipe ?? '', // Tipe
-            'nomor' => $row->nomor ?? '', // Nomor surat
-            'no_akun' => $row->no_akun ?? '', // Nomor akun dari coa
-            'nama_akun' => $row->nama_akun ?? '', // Nama akun dari coa
-           'invoice' => $row->invoice == 0 ? '' : $row->invoice, // Invoice eksternal
-            'debit' => $row->debit ? number_format($row->debit, 2, '.', '') : 0, // Debit
-            'kredit' => $row->kredit ? number_format($row->kredit, 2, '.', '') : 0, // Kredit
-            'keterangan' => $row->keterangan ?? '', // Keterangan
-            'invoice_external' => $row->invoice_external ?? '', // Invoice eksternal
-            'nopol' => $row->nopol ?? '', // Nomor polisi
-            'keterangan_buku_besar_pembantu' => $row->keterangan_buku_besar_pembantu ?? '', // Keterangan buku besar pembantu
-            'no' => $row->no, // ID surat jalan (kolom tersembunyi)
-        ];
-    });
-
-    // Kembalikan response JSON dengan format yang sesuai untuk jqGrid
-    return response()->json([
-        'current_page' => $currentPage, // Halaman saat ini
-        'last_page' => ceil($totalRecords / $perPage), // Total halaman
-        'total' => $totalRecords, // Total record setelah filter
-        'data' => $result, // Data untuk halaman ini
-    ]);
-}
-
-    
 
     /**
      * Show the form for editing the specified resource.
@@ -166,6 +116,9 @@ class JurnalController extends Controller
         $latestId = $id_jurnals->pluck('id')->first(); // Mengambil ID terbaru (karena data sudah diurutkan desc)
     
         $cekVoucher = Jurnal::where('nomor', $nomor)->whereIn('coa_id', [2, 5, 6])->get();
+        $cekVoucher_d = $cekVoucher->pluck('debit');
+        $cekVoucher_k = $cekVoucher->pluck('kredit');
+
 
 
         // dd($jurnals);
@@ -201,7 +154,7 @@ class JurnalController extends Controller
 
 
         session(['jurnal_edit_url' => url()->full()]);
-        return view('jurnal.edit-jurnal', compact('latestId','cekVoucher','jurnals','data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
+        return view('jurnal.edit-jurnal', compact('latestId','cekVoucher_d', 'cekVoucher_k','jurnals','data', 'tgl', 'coa', 'nopol', 'invProc', 'invExtProc'));
     }
 
     public function merger()

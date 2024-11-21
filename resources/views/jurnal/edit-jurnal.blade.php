@@ -129,6 +129,7 @@
         .select2-container--open .select2-dropdown--below {
             display: block !important;
         }
+        
     </style>
     <input type="hidden" id="nj" value="{{ $data[0]->nomor }}">
     <input type="hidden" id="tgl" value="{{ $tgl }}">
@@ -160,8 +161,8 @@
                 <button type="submit" style="margin-bottom: 20px;"
                     class="btn bg-green-500 font-semibold text-white">Simpan Tanggal</button>
                 </form>
-                {{-- <button id="tambah_g" style="margin-bottom: 20px;"
-                class="btn bg-blue-500 font-semibold text-white">Tambah Garis</button> --}}
+                <button id="tambah_g" style="margin-bottom: 20px;"
+            class="btn bg-blue-500 font-semibold text-white">Tambah Baris</button>
             <table id="table-editj" class="cell-border hover display nowrap text-sm">
                 <thead>
                     <tr>
@@ -191,11 +192,11 @@
                                     class="text-red-600 font-semibold mb-3 self-end"><i
                                         class="fa-solid fa-trash"></i></button>
                             </td>
-                            <td>{{ $item->id }}</td>
+                            <td> {{ $item->id }}</td>
                             <td>{{ $item->nomor ?? '-' }}</td>
                             <td>{{ $item->no_akun ?? '-' }}</td>
                             <td>{{ $item->nama_akun ?? '-' }}</td>
-                            <td class="text-end">{{ number_format($item->debit, 2, ',', '.') }}</td>
+                            <td class="text-end" style="font-size: 10px">{{ number_format($item->debit, 2, ',', '.') }}</td>
                             <td class="text-end">{{ number_format($item->kredit, 2, ',', '.') }}</td>
                             <td>{{ $item->keterangan ?? '-' }}</td>
                             <td>{{ $item->invoice == 0 ? '' : $item->invoice ?? '-' }}</td>
@@ -212,9 +213,11 @@
         @php
             $total_kredit = $data->sum('kredit');
             $total_debet = $data->sum('debit');
-            $total_voucher_d = $cekVoucher->sum('debit');
-            $total_voucher_k = $cekVoucher->sum('kredit');
-            $total_voucher = $total_voucher_d + $total_voucher_k;
+            $cekVoucher_d_total = $cekVoucher_d->sum();
+            $cekVoucher_k_total = $cekVoucher_k->sum();
+
+            // Menghitung total voucher dengan nilai absolut
+            $total_voucher = abs($cekVoucher_d_total - $cekVoucher_k_total);
         @endphp
        <table class="table-auto w-full border-collapse">
         <tbody>
@@ -226,10 +229,10 @@
                 <td class="px-4 py-2 border-b font-bold">Total Kredit</td>
                 <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_kredit, 2, ',', '.') }}</td>
             </tr>
-            {{-- <tr>
+            <tr>
                 <td class="px-4 py-2 border-b font-bold">Cek Voucher</td>
                 <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_voucher, 2, ',', '.') }}</td>
-            </tr> --}}
+            </tr>
         </tbody>
     </table>
     
@@ -513,36 +516,44 @@
                     });
                 }
             }
-            $('#tambah_g').on('click', function() {
-            no = $(`#counter`).val();
-            console.log("no_first: " + no);
-            no++;
-            $(`#counter`).val(no);
-            let newRowId = no;
+            let latestId = {{ $latestId + 1 }}; // Ambil nilai awal dari server Laravel
 
-            let html = `<tr>
-                           <td class="text-center align-middle">
-                                <button class="text-green-500"
-                                        onclick="tambahJurnal('{{ $latestId + 1 }}','{{ $item->nomor }}', '{{ $item->tipe }}', '{{ $item->tgl }}', '{{ $item->invoice }}', '{{ $item->invoice_external }}', 
-                                         '{{ $item->nopol }}', '{{ $item->keterangan }}', {{ $item->no }},  '{{ $item->keterangan_buku_besar_pembantu }}')">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </td>
-                            <td>{{ $latestId + 1 }}</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td class="text-end">{{ number_format(0, 2, ',', '.') }}</td>
-                            <td class="text-end">{{ number_format(0, 2, ',', '.') }}</td>
-                            <td>{{ $item->keterangan ?? '-' }}</td>
-                            <td>{{ $item->invoice == 0 ? '' : $item->invoice ?? '-' }}</td>
-                            <td>{{ $item->invoice_external == 0 ? '' : $item->invoice_external ?? '-' }}</td>
-                            <td>{{ $item->nopol ?? '-' }}</td>
-                            <td>{{ $item->tipe ?? '-' }}</td>
-                            <td class="text-end">{{ $item->keterangan_buku_besar_pembantu ?? '-' }}</td>
-                        </tr>`;
-            $(`#table-editj`).append(html);
-        });
+$('#tambah_g').on('click', function() {
+    let no = $(`#counter`).val();
+    console.log("no_first: " + no);
+    no++;
+    $(`#counter`).val(no);
+    let newRowId = no;
+
+    // Tambahkan baris baru dengan `latestId` yang bertambah
+    let html = `<tr>
+                   <td class="text-center align-middle">
+                        <button class="text-green-500"
+                                onclick="tambahJurnal('${latestId}','{{ $item->nomor }}', '{{ $item->tipe }}', '{{ $item->tgl }}', '{{ $item->invoice }}', '{{ $item->invoice_external }}', 
+                                 '{{ $item->nopol }}', '{{ $item->keterangan }}', ${latestId}, '{{ $item->keterangan_buku_besar_pembantu }}')">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </td>
+                    <td>${latestId}</td>
+                    <td>{{ $item->nomor ?? '-' }}</td>
+                    <td></td>
+                    <td></td>
+                    <td class="text-end">{{ number_format(0, 2, ',', '.') }}</td>
+                    <td class="text-end">{{ number_format(0, 2, ',', '.') }}</td>
+                    <td>{{ $item->keterangan ?? '-' }}</td>
+                    <td>{{ $item->invoice == 0 ? '' : $item->invoice ?? '-' }}</td>
+                    <td>{{ $item->invoice_external == 0 ? '' : $item->invoice_external ?? '-' }}</td>
+                    <td>{{ $item->nopol ?? '-' }}</td>
+                    <td>{{ $item->tipe ?? '-' }}</td>
+                    <td class="text-end">{{ $item->keterangan_buku_besar_pembantu ?? '-' }}</td>
+                </tr>`;
+
+    $(`#table-editj`).append(html);
+
+    // Increment `latestId` untuk baris berikutnya
+    latestId++;
+});
+
         </script>
     </x-slot:script>
 </x-Layout.layout>

@@ -1,98 +1,193 @@
 <x-Layout.layout>
-    <head>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
-        integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
-    </head>
     <x-keuangan.card-keuangan>
+        <style>
+            /* Highlight baris yang dipilih */
+            #coa_table tbody tr.highlight-row {
+                background-color: #d4edda;
+                /* Hijau muda */
+                color: #155724;
+                /* Hijau gelap untuk teks */
+            }
+
+            /* Pengaturan untuk tabel secara keseluruhan */
+            table.dataTable {
+                font-size: 10px;
+                /* Ukuran font kecil */
+                border-collapse: collapse;
+                /* Menghilangkan ruang antar border */
+                margin: 0;
+                /* Menghapus margin tabel */
+                width: 100%;
+                /* Atur lebar tabel sesuai kontainer */
+            }
+
+            #coa_table th,
+            #coa_table td {
+                width: 150px;
+                /* Set lebar untuk semua kolom */
+            }
+
+            #coa_table th:nth-child(1),
+            #coa_table td:nth-child(1) {
+                width: 50px;
+                /* Set lebar untuk kolom pertama */
+                margin: 0;
+            }
+
+            #coa_table th:nth-child(2),
+            #coa_table td:nth-child(2) {
+                width: 3px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+            #coa_table th:nth-child(3),
+            #coa_table td:nth-child(3) {
+                width: 30px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+            #coa_table th:nth-child(4),
+            #coa_table td:nth-child(4) {
+                width: 30px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+            #coa_table th:nth-child(5),
+            #coa_table td:nth-child(5) {
+                width: 50px;
+                /* Set lebar untuk kolom pertama */
+                margin: 0;
+            }
+
+            #coa_table th:nth-child(6),
+            #coa_table td:nth-child(6) {
+                width: 3px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+            #coa_table th:nth-child(7),
+            #coa_table td:nth-child(7) {
+                width: 30px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+            #coa_table th:nth-child(8),
+            #coa_table td:nth-child(8) {
+                width: 30px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+            #coa_table th:nth-child(9),
+            #coa_table td:nth-child(9) {
+                width: 50px;
+                /* Set lebar untuk kolom pertama */
+                margin: 0;
+            }
+
+            #coa_table th:nth-child(10),
+            #coa_table td:nth-child(10) {
+                width: 3px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+            #coa_table th:nth-child(11),
+            #coa_table td:nth-child(11) {
+                width: 30px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+            #coa_table th:nth-child(12),
+            #coa_table td:nth-child(12) {
+                width: 30px;
+                /* Set lebar untuk kolom kedua */
+            }
+
+
+
+            /* Pengaturan untuk kolom (th dan td) */
+            table.dataTable td,
+            table.dataTable th {
+                padding: 1px 2px;
+                /* Padding minimal */
+                border: 1px solid #ddd;
+                /* Garis tepi */
+                text-align: center;
+            }
+
+            /* Pengaturan untuk header tabel */
+            table.dataTable thead th {
+                background-color: #f4f4f4;
+                text-align: center;
+                font-weight: bold;
+                position: relative;
+            }
+
+            /* Efek hover pada baris */
+            table.dataTable tbody tr:hover {
+                background-color: #f1faff;
+                /* Efek hover */
+            }
+
+            /* Mencegah teks terpotong pada baris */
+            table.dataTable tbody tr {
+                /* Hindari teks terpotong */
+            }
+
+            /* Pengaturan untuk pagination dan search box */
+            .dataTables_wrapper .dataTables_paginate {
+                font-size: 10px;
+            }
+
+            .dataTables_wrapper .dataTables_filter input {
+                height: 24px;
+                font-size: 10px;
+            }
+
+            .dataTables_wrapper .dataTables_length select {
+                height: 24px;
+                font-size: 10px;
+            }
+
+            /* Menambahkan handle untuk resize kolom */
+            th .resize-handle {
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 5px;
+                height: 100%;
+                cursor: ew-resize;
+                /* Kursor untuk drag */
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+        </style>
+
+
         <x-slot:tittle>Menu Jurnal</x-slot:tittle>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto mb-8">
             <a href="{{ route('jurnal-manual.index') }}">
-                <button class="btn bg-green-500 text-white font-bold hover:bg-green-700 mt-5">Input Jurnal</button>
-            </a>
-            <a href="/invoice-external">
-                <button class="btn bg-yellow-500 text-white font-bold hover:bg-gray-700">Jurnal Uang Muka</button>
-            </a>
-            <a href="{{ route('jurnal.jurnal-merger') }}">
-                <button class="btn bg-gray-500 text-white font-bold hover:bg-gray-700">Merge Jurnal</button>
+                <button class="btn bg-green-500 text-white font-bold hover:bg-green-700 m-2x">Input Jurnal</button>
             </a>
 
+            <a href="{{ route('jurnal.jurnal-merger') }}">
+                <button class="btn bg-gray-500 text-white font-bold hover:bg-gray-700 mb-2px">Merge Jurnal</button>
+            </a>
 
             <div class="flex flex-row mb-16 mt-8">
-                <label for="month" class="font-bold mt-4">Bulan:</label>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m1" value="1">
-                    <input type="hidden" name="year" id="y1" value="{{ date('Y') }}">
-                    <button id="btn1"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1 @if (isset($_GET['month']) && $_GET['month'] == 1) bg-green-500 text-white @endif">Jan</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m2" value="2">
-                    <input type="hidden" name="year" id="y2" value="{{ date('Y') }}">
-                    <button id="btn2"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Feb</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m3" value="3">
-                    <input type="hidden" name="year" id="y3" value="{{ date('Y') }}">
-                    <button id="btn3"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Mar</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m4" value="4">
-                    <input type="hidden" name="year" id="y4" value="{{ date('Y') }}">
-                    <button id="btn4"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Apr</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m5" value="5">
-                    <input type="hidden" name="year" id="y5" value="{{ date('Y') }}">
-                    <button id="btn5"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Mei</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m6" value="6">
-                    <input type="hidden" name="year" id="y6" value="{{ date('Y') }}">
-                    <button id="btn6"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Jun</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m7" value="7">
-                    <input type="hidden" name="year" id="y7" value="{{ date('Y') }}">
-                    <button id="btn7"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Jul</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m8" value="8">
-                    <input type="hidden" name="year" id="y8" value="{{ date('Y') }}">
-                    <button id="btn8"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Agu</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m9" value="9">
-                    <input type="hidden" name="year" id="y9" value="{{ date('Y') }}">
-                    <button id="btn9"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Sep</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m10" value="10">
-                    <input type="hidden" name="year" id="y10" value="{{ date('Y') }}">
-                    <button id="btn10"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Okt</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m11" value="11">
-                    <input type="hidden" name="year" id="y11" value="{{ date('Y') }}">
-                    <button id="btn11"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Nov</button>
-                </form>
-                <form action="" method="GET">
-                    <input type="hidden" name="month" id="m12" value="12">
-                    <input type="hidden" name="year" id="y12" value="{{ date('Y') }}">
-                    <button id="btn12"
-                        class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">Des</button>
-                </form>
+                <label for="month" class="font-bold mt-2">Bulan:</label>
+                @for ($i = 1; $i <= 12; $i++)
+                    @php
+                        $monthName = date('M', mktime(0, 0, 0, $i, 1));
+                    @endphp
+                    <form action="" method="GET">
+                        <input type="hidden" name="month" value="{{ $i }}">
+                        <input type="hidden" name="year" value="{{ date('Y') }}">
+                        <button
+                            class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1 
+                                {{ request('month') == $i ? 'bg-green-300 text-white' : '' }}">
+                            {{ $monthName }}
+                        </button>
+                    </form>
+                @endfor
 
                 <div class="w-full ml-10 mt-3">
                     <b>Tahun : </b>
@@ -110,48 +205,24 @@
                     Filter Tanggal : <input type="date" name="tanggal" id="tanggal">
                 </div> --}}
                 <div>
-                    <div class="flex flex-row">
-                        <label for="month" class="font-bold mt-3">Tipe : </label>
-                        <form action="" method="GET">
-                            <input type="hidden" name="tipe" value="JNL">
-                            <input type="hidden" name="month" id="tm1"
-                                value="{{ isset($_GET['month']) ? $_GET['month'] : '' }}">
-                            <input type="hidden" name="year" id="y2-1" value="{{ date('Y') }}">
-                            <button
-                                class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">JNL</button>
-                        </form>
-                        <form action="" method="GET">
-                            <input type="hidden" name="tipe" value="BKK">
-                            <input type="hidden" name="month" id="tm2"
-                                value="{{ isset($_GET['month']) ? $_GET['month'] : '' }}">
-                            <input type="hidden" name="year" id="y2-2" value="{{ date('Y') }}">
-                            <button
-                                class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">BKK</button>
-                        </form>
-                        <form action="" method="GET">
-                            <input type="hidden" name="tipe" value="BKM">
-                            <input type="hidden" name="month" id="tm3"
-                                value="{{ isset($_GET['month']) ? $_GET['month'] : '' }}">
-                            <input type="hidden" name="year" id="y2-3" value="{{ date('Y') }}">
-                            <button
-                                class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">BKM</button>
-                        </form>
-                        <form action="" method="GET">
-                            <input type="hidden" name="tipe" value="BBK">
-                            <input type="hidden" name="month" id="tm4"
-                                value="{{ isset($_GET['month']) ? $_GET['month'] : '' }}">
-                            <input type="hidden" name="year" id="y2-4" value="{{ date('Y') }}">
-                            <button
-                                class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">BBK</button>
-                        </form>
-                        <form action="" method="GET">
-                            <input type="hidden" name="tipe" value="BBM">
-                            <input type="hidden" name="month" id="tm5"
-                                value="{{ isset($_GET['month']) ? $_GET['month'] : '' }}">
-                            <input type="hidden" name="year" id="y2-5" value="{{ date('Y') }}">
-                            <button
-                                class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl mx-1">BBM</button>
-                        </form>
+                    <div class="flex flex-row mr-10">
+                        <label for="month" class="font-bold mt-2">Tipe :</label>
+                        @php
+                            $types = ['JNL', 'BKK', 'BKM', 'BBK', 'BBM']; // Daftar tipe
+                        @endphp
+
+                        @foreach ($types as $type)
+                            <form action="" method="GET" class="inline-block">
+                                <input type="hidden" name="tipe" value="{{ $type }}">
+                                <input type="hidden" name="month" value="{{ request('month') }}">
+                                <input type="hidden" name="year" value="{{ date('Y') }}">
+                                <button type="submit"
+                                    class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1
+                                        {{ request('tipe') == $type ? 'bg-green-300 text-white' : '' }}">
+                                    {{ $type }}
+                                </button>
+                            </form>
+                        @endforeach
                     </div>
                 </div>
                 <div>
@@ -163,8 +234,63 @@
                 </div>
             </div>
 
-            <table id="coa_table" class="cell-border hover display nowrap compact"></table>
-            <div id="coaPager"></div>
+
+            <div class="dataTable-container">
+                <table id="coa_table" class="dataTable cell-border hover display nowrap compact">
+                    <!-- head -->
+                    <thead>
+                        <tr>
+                            <th class="text-center">Tanggal <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Tipe <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Nomor <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">No. Akun <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Nama Akun <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Invoice <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Debit <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Kredit <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Keterangan <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Invoice Supplier <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Nopol <div class="resize-handle"></div>
+                            </th>
+                            <th class="text-center">Kaitan BB Pembantu <div class="resize-handle"></div>
+                            </th>
+                            <th class="hidden">no</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($data as $d)
+                            <tr>
+                                <td>{{ $d->tgl }}</td>
+                                <td>{{ $d->tipe }}</td>
+                                <td>{{ $d->nomor }}</td>
+                                <td>{{ $d->no_akun }}</td>
+                                <td>{{ $d->nama_akun }}</td>
+                                <td> {{ $d->invoice == 0 ? '' : $d->invoice ?? '-' }}</td>
+                                <td class="text-end">{{ number_format($d->debit, 2, ',', '.') }}</td>
+                                <td class="text-end">{{ number_format($d->kredit, 2, ',', '.') }}</td>
+                                <td class="text-start">{{ $d->keterangan }}</td>
+                                <td>
+                                    {{ $d->invoice_external == 0 ? '' : $d->invoice_external ?? '-' }}
+                                </td>
+                                <td>{{ $d->nopol }}</td>
+                                <td>{{ $d->keterangan_buku_besar_pembantu }}</td>
+                                <td class="hidden">{{ $d->no }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </x-keuangan.card-keuangan>
 
@@ -178,8 +304,8 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ number_format($MonJNL->sum('debit'), 2, ',', '.') }}</td>
-                    <td>{{ number_format($MonJNL->sum('kredit'), 2, ',', '.') }}</td>
+                    <td class="text-end">{{ number_format($MonJNL->sum('debit'), 2, ',', '.') }}</td>
+                    <td class="text-end">{{ number_format($MonJNL->sum('kredit'), 2, ',', '.') }}</td>
                     <td>{{ $LastJNL->max('no') }}</td>
                 </tr>
             </tbody>
@@ -190,130 +316,70 @@
                 <table border="1" class="table">
                     <thead>
                         <tr>
-                            <th width="30%"><div align="center">#</div></th>
-                           
-                            <th width="70%"><div align="left">Nomor Jurnal</div></th>
+                            <th width="30%">
+                                <div align="center">#</div>
+                            </th>
+
+                            <th width="70%">
+                                <div align="left">Nomor Jurnal</div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (empty($notBalance))
                             <tr>
-                                <td colspan="2"><div align="center">Semua Jurnal Balance</div></td>
+                                <td colspan="2">
+                                    <div align="center">Semua Jurnal Balance</div>
+                                </td>
                             </tr>
                         @else
                             @foreach ($notBalance as $nb)
                                 <tr class="hover">
-                                    <td><div align="center">{{ $loop->iteration }}</div></td>
-                                    
-									<td><div align="left">{{ $nb }}</div></td>
+                                    <td>
+                                        <div align="center">{{ $loop->iteration }}</div>
+                                    </td>
+
+                                    <td>
+                                        <div align="left">{{ $nb }}</div>
+                                    </td>
                                 </tr>
                             @endforeach
                         @endif
 
 
                     </tbody>
-              </table>
+                </table>
             </div>
         </center>
     </x-keuangan.card-keuangan>
-    <script type="text/ecmascript" src="{{ asset('assets/js/grid.locale-en.js') }}"></script>
-    <script type="text/ecmascript" src="{{ asset('assets/js/jquery.jqGrid.min.js') }}"></script>
+
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/select/2.0.3/js/dataTables.select.js"></script>
     <script src="https://cdn.datatables.net/2.1.0/js/dataTables.tailwindcss.js"></script>
     <script>
         $(document).ready(function() {
-            var table = $("#coa_table").jqGrid({
-    url: "{{ route('jurnal.data') }}", // Specify the URL to fetch data
-    datatype: "json",
-    mtype: "GET",
-    colNames: [
-        'No',
-        'Tanggal', 
-        'Tipe', 
-        'Nomor', 
-        'No. Akun', 
-        'Nama Akun', 
-        'Invoice', 
-        'Debit', 
-        'Kredit', 
-        'Keterangan', 
-        'Invoice Supplier', 
-        'Nopol', 
-        'Kaitan BB Pembantu', 
-        'no'
-    ],
-    colModel: [
-        { search: true, name: 'DT_RowIndex', index: 'DT_RowIndex', width: 30, align: 'center' },
-        { search: true, name: 'tgl', index: 'tgl', width: 90, align: 'center' },
-        { search: true, name: 'tipe', index: 'tipe', width: 50, align: 'center' },
-        { search: true, name: 'nomor', index: 'nomor', width: 100, align: 'center' },
-        { search: true, name: 'no_akun', index: 'no_akun', width: 70 },
-        { search: true, name: 'nama_akun', index: 'nama_akun', width: 160 },
-        { search: true, name: 'invoice', index: 'invoice', width: 120 },
-        { search: true, name: 'debit', index: 'debit', width: 120, formatter: 'currency', formatoptions: { prefix: '', thousandsSeparator: '.', decimalPlaces: 2 }, align: 'right' },
-        { search: true, name: 'kredit', index: 'kredit', width: 120, formatter: 'currency', align: 'right', formatoptions: { prefix: '', thousandsSeparator: '.', decimalPlaces: 2 } },
-        { search: true, name: 'keterangan', index: 'keterangan', width: 200 },
-        { search: true, name: 'invoice_external', index: 'invoice_external', align: 'center', width: 100 },
-        { search: true, name: 'nopol', index: 'nopol', width: 100, align: 'center' },
-        { search: true, name: 'keterangan_buku_besar_pembantu', index: 'keterangan_buku_besar_pembantu', align: 'center', width: 100 },
-        { search: true, name: 'no', index: 'no', hidden: true } // Hidden column
-    ],
-    pager: "#coaPager",
-    rowNum: 20, // Jumlah baris per halaman
-    rowList: [10, 20, 50], // Opsi jumlah baris yang bisa dipilih
-    viewrecords: true, // Menampilkan informasi record
-    autowidth: true, // Menyesuaikan lebar otomatis
-    height: 'auto', // Tinggi tabel otomatis
-    loadonce: true,
-    serverPaging: true,
-    jsonReader: {
-        repeatitems: false,
-        root: "data",
-        page: "current_page",
-        total: "last_page",
-        records: "total"
-    },
-    loadComplete: function(data) {
-        console.log("Load complete: ", data); // Menampilkan data yang diterima saat grid selesai dimuat
-        $("#coa_table").jqGrid('filterToolbar');
-    },
-    ajaxGridOptions: {
-        beforeSend: function() {
-            console.log("Fetching data from server..."); // Log saat data sedang diambil
-        },
-        error: function(xhr, status, error) {
-            console.log("Error fetching data: ", error); // Log jika ada error saat pengambilan data
-        }
-    },
-    onSelectRow: function(id) {
-        const rowData = $("#coa_table").jqGrid('getRowData', id);
-        console.log("Selected row data: ", rowData); // Menampilkan data baris yang dipilih
-        $('#nomor').val($.trim(rowData.nomor));
-        $('.btn').removeClass('hidden');
-        $('#print').attr('href', "{{ route('invoice.print', ['id' => ':id']) }}".replace(':id', rowData.id));
-    }
-}).navGrid('#coaPager', { // Opsi untuk navigasi pada pager
-    edit: false,
-    add: false,
-    del: false,
-    search: false, // Disable search dari navGrid
-    refresh: true,
-}, {}, {}, {}, {
-    closeAfterSearch: true,
-    closeAfterReset: true,
-    searchOnEnter: true,
-});
-
-// Fungsi untuk menyegarkan tabel
-function refreshTable() {
-    $("#coa_table").trigger("reloadGrid", [{ page: 1 }]);
-}
-
-
-
-
+            var table = $('#coa_table').DataTable({
+                pageLength: 20, // Batas data per halaman
+                lengthMenu: [20, 50, 100, 150], // Pilihan jumlah data per halaman
+                ordering: false,
+            });
             var MonJNL = $('#monitoring_JNL').DataTable({})
+
+            $('#coa_table tbody').on('click', 'tr', function() {
+                const row = table.row(this).data();
+
+                // Hapus latar belakang hijau dari semua baris sebelumnya
+                $('#coa_table tbody tr').removeClass('highlight-row');
+
+                // Tambahkan latar belakang hijau ke baris yang diklik
+                $(this).addClass('highlight-row');
+
+                console.log(row);
+                $('#nomor').val($.trim(row[2]).replace(/%2F/g, ''));
+                $('.btn').removeClass('hidden');
+                $('#print').attr('href', "{{ route('invoice.print', ['id' => ':id']) }}".replace(':id', row
+                    .id));
+            });
 
             $(`#thn`).on(`change`, function() {
                 $(`#y1`).val($(this).val())
@@ -335,7 +401,34 @@ function refreshTable() {
                 $(`#y2-5`).val($(this).val())
             })
 
+
+
+        });
+        $(document).ready(function() {
+            $('th').on('mousedown', function(e) {
+                const th = $(this);
+                const startX = e.pageX;
+                const startWidth = th.width();
+                const minWidth = 0; // Lebar minimum kolom yang diizinkan
+
+                // Mengatur ukuran kolom saat mouse bergerak
+                $(document).on('mousemove', function(e) {
+                    const diff = e.pageX - startX;
+                    const newWidth = startWidth + diff;
+
+                    // Pastikan kolom tidak lebih kecil dari lebar minimum
+                    if (newWidth > minWidth) {
+                        th.width(newWidth);
+                    }
+                });
+
+                // Mengakhiri proses resizing saat mouse dilepas
+                $(document).on('mouseup', function() {
+                    $(document).off('mousemove mouseup');
+                });
+            });
         });
     </script>
+
 
 </x-Layout.layout>
