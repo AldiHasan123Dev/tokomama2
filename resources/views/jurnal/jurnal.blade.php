@@ -11,25 +11,25 @@
 
             /* Pengaturan untuk tabel secara keseluruhan */
             table.dataTable {
-                font-size: 10px;
+                font-size: 13px;
                 /* Ukuran font kecil */
                 border-collapse: collapse;
                 /* Menghilangkan ruang antar border */
                 margin: 0;
                 /* Menghapus margin tabel */
-                width: 100%;
+                
                 /* Atur lebar tabel sesuai kontainer */
             }
 
             #coa_table th,
             #coa_table td {
-                width: 150px;
+                width: 50px;
                 /* Set lebar untuk semua kolom */
             }
 
             #coa_table th:nth-child(1),
             #coa_table td:nth-child(1) {
-                width: 50px;
+                width: 2px;
                 /* Set lebar untuk kolom pertama */
                 margin: 0;
             }
@@ -271,12 +271,12 @@
                     <tbody>
                         @foreach ($data as $d)
                             <tr>
-                                <td>{{ $d->tgl }}</td>
-                                <td>{{ $d->tipe }}</td>
-                                <td>{{ $d->nomor }}</td>
-                                <td>{{ $d->no_akun }}</td>
-                                <td>{{ $d->nama_akun }}</td>
-                                <td> {{ $d->invoice == 0 ? '' : $d->invoice ?? '-' }}</td>
+                                <td class="text-start">{{ $d->tgl }}</td>
+                                <td class="text-start">{{ $d->tipe }}</td>
+                                <td class="text-start">{{ $d->nomor }}</td>
+                                <td class="text-start">{{ $d->no_akun }}</td>
+                                <td class="text-start">{{ $d->nama_akun }}</td>
+                                <td class="text-start"> {{ $d->invoice == 0 ? '' : $d->invoice ?? '-' }}</td>
                                 <td class="text-end">{{ number_format($d->debit, 2, ',', '.') }}</td>
                                 <td class="text-end">{{ number_format($d->kredit, 2, ',', '.') }}</td>
                                 <td class="text-start">{{ $d->keterangan }}</td>

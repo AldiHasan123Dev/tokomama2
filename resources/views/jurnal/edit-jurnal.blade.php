@@ -196,7 +196,7 @@
                             <td>{{ $item->nomor ?? '-' }}</td>
                             <td>{{ $item->no_akun ?? '-' }}</td>
                             <td>{{ $item->nama_akun ?? '-' }}</td>
-                            <td class="text-end" style="font-size: 10px">{{ number_format($item->debit, 2, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($item->debit, 2, ',', '.') }}</td>
                             <td class="text-end">{{ number_format($item->kredit, 2, ',', '.') }}</td>
                             <td>{{ $item->keterangan ?? '-' }}</td>
                             <td>{{ $item->invoice == 0 ? '' : $item->invoice ?? '-' }}</td>
