@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
 //    Route::resource('jurnal', JurnalController::class);
     Route::get('/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
     Route::get('/data-jurnal', [JurnalController::class, 'dataJurnal'])->name('jurnal.data');
+    Route::post('/jurnal-export', [JurnalController::class, 'exportJurnal'])->name('jurnal.export');
     Route::get('/jurnal-edit', [JurnalController::class, 'edit'])->name('jurnal.edit');
     Route::get('/jurnal-merger', [JurnalController::class, 'merger'])->name('jurnal.jurnal-merger');
     Route::post('/jurnal-merger', [JurnalController::class, 'merger_store'])->name('jurnal.jurnal-merger');

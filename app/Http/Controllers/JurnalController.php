@@ -15,6 +15,8 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\JurnalALLExport;
 use Yajra\DataTables\Facades\DataTables;
 
 class JurnalController extends Controller
@@ -88,6 +90,8 @@ class JurnalController extends Controller
         return view('jurnal.jurnal', compact('data', 'MonJNL',
         'notBalance', 'LastJNL'));
     }
+
+
 
     /**
      * Show the form for editing the specified resource.
@@ -1235,5 +1239,12 @@ class JurnalController extends Controller
         }
         
         return redirect()->route('jurnal.edit');
+    }
+    public function exportJurnal(Request $request){
+
+        if ($request->mulai == null || $request->sampai == null) {
+            return back()->with('error', 'Silahkan atur nilai rentang data.');
+        }
+        return Excel::download(new JurnalALLExport($request->mulai, $request->sampai), 'jurnal.xlsx');
     }
 }

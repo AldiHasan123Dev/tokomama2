@@ -1,6 +1,91 @@
 <x-Layout.layout>
+    <div id="exp-jurnal"></div>
     <x-keuangan.card-keuangan>
         <style>
+            .modal {
+            top: 0;
+            left: 0;
+            width: 40%;
+            z-index: 1000;  
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-family: Arial, sans-serif;
+        }
+        .kembali-button {
+    display: inline-block; 
+    padding: 12px 10px; 
+    background-color: #ad0f0f; 
+    color: white; 
+    text-decoration: none; 
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.kembali-button:hover {
+    background-color: #761408; 
+}
+      
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Form labels and containers */
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .select-field {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        /* Submit button */
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* Label for extra info */
+        .label-info {
+            font-size: 12px;
+            color: red;
+        }
             /* Highlight baris yang dipilih */
             #coa_table tbody tr.highlight-row {
                 background-color: #d4edda;
@@ -17,7 +102,7 @@
                 /* Menghilangkan ruang antar border */
                 margin: 0;
                 /* Menghapus margin tabel */
-                
+
                 /* Atur lebar tabel sesuai kontainer */
             }
 
@@ -102,6 +187,31 @@
                 /* Set lebar untuk kolom kedua */
             }
 
+            /* Kelas untuk tombol coklat */
+            .btn-coklat {
+                background-color: #6B4F1F;
+                /* Coklat dasar */
+                color: white;
+                /* Warna teks putih */
+                font-weight: bold;
+                /* Teks tebal */
+                padding: 10px 8px;
+                /* Padding tombol */
+                border-radius: 8px;
+                /* Sudut tombol melengkung */
+                border: 2px solid #6B4F1F;
+                /* Border coklat */
+                transition: background-color 0.3s ease, transform 0.3s ease;
+                /* Efek transisi */
+            }
+
+            /* Efek hover pada tombol */
+            .btn-coklat:hover {
+                background-color: #8B5A2B;
+                /* Coklat lebih gelap saat hover */
+                transform: scale(1.05);
+                /* Sedikit membesar saat hover */
+            }
 
 
             /* Pengaturan untuk kolom (th dan td) */
@@ -163,7 +273,8 @@
 
 
         <x-slot:tittle>Menu Jurnal</x-slot:tittle>
-        <div class="overflow-x-auto mb-8">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <div class="overflow-x-auto mt-8">
             <a href="{{ route('jurnal-manual.index') }}">
                 <button class="btn bg-green-500 text-white font-bold hover:bg-green-700 m-2x">Input Jurnal</button>
             </a>
@@ -173,6 +284,8 @@
             <a href="{{ route('jurnal.jurnal-merger') }}">
                 <button class="btn bg-gray-500 text-white font-bold hover:bg-gray-700 mb-2px">Merge Jurnal</button>
             </a>
+            
+                <button class="btn bg-red-500 text-white font-bold hover:bg-gray-700 mb-2px" id="ipt_jurnal">Export Jurnal</button>
 
             <div class="flex flex-row mb-16 mt-8">
                 <label for="month" class="font-bold mt-2">Bulan:</label>
@@ -230,8 +343,8 @@
                 <div>
                     <form action="{{ route('jurnal.edit') }}" method="get" class="ml-10">
                         <input type="hidden" name="nomor" id="nomor">
-                        <button class="btn bg-yellow-500 text-white font-bold hover:bg-yellow-700" id="edit">Edit
-                            Jurnal</button>
+                        <button class="btn-coklat" id="edit">Edit Jurnal</button>
+
                     </form>
                 </div>
             </div>
@@ -242,29 +355,29 @@
                     <!-- head -->
                     <thead>
                         <tr>
-                            <th class="text-center">Tanggal <div class="resize-handle"></div>
+                            <th class="text-center">Tanggal
                             </th>
-                            <th class="text-center">Tipe <div class="resize-handle"></div>
+                            <th class="text-center">Tipe
                             </th>
-                            <th class="text-center">Nomor <div class="resize-handle"></div>
+                            <th class="text-center">Nomor 
                             </th>
-                            <th class="text-center">No. Akun <div class="resize-handle"></div>
+                            <th class="text-center">No. Akun 
                             </th>
-                            <th class="text-center">Nama Akun <div class="resize-handle"></div>
+                            <th class="text-center">Nama Akun 
                             </th>
-                            <th class="text-center">Invoice <div class="resize-handle"></div>
+                            <th class="text-center">Invoice 
                             </th>
-                            <th class="text-center">Debit <div class="resize-handle"></div>
+                            <th class="text-center">Debit 
                             </th>
-                            <th class="text-center">Kredit <div class="resize-handle"></div>
+                            <th class="text-center">Kredit
                             </th>
-                            <th class="text-center">Keterangan <div class="resize-handle"></div>
+                            <th class="text-center">Keterangan 
                             </th>
-                            <th class="text-center">Invoice Supplier <div class="resize-handle"></div>
+                            <th class="text-center">Invoice Supplier 
                             </th>
-                            <th class="text-center">Nopol <div class="resize-handle"></div>
+                            <th class="text-center">Nopol
                             </th>
-                            <th class="text-center">Kaitan BB Pembantu <div class="resize-handle"></div>
+                            <th class="text-center">Kaitan BB Pembantu 
                             </th>
                             <th class="hidden">no</th>
                         </tr>
@@ -364,6 +477,8 @@
                 pageLength: 20, // Batas data per halaman
                 lengthMenu: [20, 50, 100, 150], // Pilihan jumlah data per halaman
                 ordering: false,
+                scrollX: true, 
+                autowidth: false,
             });
             var MonJNL = $('#monitoring_JNL').DataTable({})
 
@@ -429,6 +544,35 @@
                     $(document).off('mousemove mouseup');
                 });
             });
+        });
+            $('#ipt_jurnal').click(function() {
+                $('#exp-jurnal').html(`
+            <dialog id="my_modal_5" class="modal">
+                <div class="modal-box w-11/12 max-w-2xl pl-10">
+                    <form method="dialog">
+                        <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="close-modal">✕</button>
+                    </form>
+                    <h3 class="text-lg font-bold mt-2">Export Jurnal</h3>
+                    <form id="jurhutForm" action="{{ route('jurnal.export') }}" method="post" onsubmit="return validateForm()">
+                        @csrf
+                        <label class="form-label">Mulai Tanggal</label>
+                        <input type="date" id="mulai" name="mulai" class="rounded-md input-field"></td>
+                        <label class="form-label">Sampai Tanggal</label>
+                        <input type="date" id="sampai" name="sampai" class="rounded-md input-field"></td>
+                           <button type="submit" class="submit-button mb-5">
+    <i class="fas fa-share"></i> Export
+</button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+        `);
+
+                // Menampilkan modal
+                document.getElementById('my_modal_5').showModal();
+                $('#close-modal').click(function() {
+                    document.getElementById('my_modal_5').close(); // Menutup modal
+                });
         });
     </script>
 

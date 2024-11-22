@@ -217,7 +217,7 @@
             $cekVoucher_k_total = $cekVoucher_k->sum();
 
             // Menghitung total voucher dengan nilai absolut
-            $total_voucher = abs($cekVoucher_d_total - $cekVoucher_k_total);
+            $total_voucher = abs($cekVoucher_k_total - $cekVoucher_d_total);
         @endphp
        <table class="table-auto w-full border-collapse">
         <tbody>

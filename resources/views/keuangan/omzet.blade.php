@@ -3,40 +3,64 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/datetime/1.5.2/css/dataTables.dateTime.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.0/css/buttons.dataTables.css">
     <style>
-        /* Mengatur ukuran font, padding, dan jarak antar kolom */
-        .text-right {
-        text-align: right;
-    }
         #table-omzet {
-            font-size: 10px; /* Ukuran font lebih kecil */
+            font-size: 8px; /* Perkecil ukuran font */
             width: 100%;
-            table-layout: auto;
-            border-collapse: collapse; /* Menghilangkan jarak antar border kolom */
-            border-spacing: 0; /* Mengatur jarak antar kolom menjadi 0 */
+            border-collapse: collapse;
+            border-spacing: 0;
         }
     
-        #table-omzet td, #table-omzet th {
-            padding: 2px 3px; /* Padding minimal agar lebih rapat */
-            font-size: 10px;
+        #table-omzet td, 
+        #table-omzet th {
+            padding: 2px 2px; /* Atur padding */
             text-align: center;
-            border: 1px solid #ddd; /* Tambahkan garis tipis antar kolom */
+            border: 1px solid #ddd;
+            white-space: nowrap; /* Pastikan teks tidak memotong */
+            font-size: 12px;
         }
-    
-        /* Menyesuaikan lebar kolom secara khusus */
-        #table-omzet th:nth-child(1), #table-omzet td:nth-child(1) {
-            width: 40px;
+
+        #table-container {
+            overflow-x: auto;
+            max-width: 100%;
         }
-        #table-omzet th:nth-child(2), #table-omzet td:nth-child(2) {
-            width: 80px;
+
+        .dataTables_wrapper .dataTables_paginate,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_info {
+            font-size: 8px;
         }
-        #table-omzet th:nth-child(3), #table-omzet td:nth-child(3) {
-            width: 10px;
-        }
+
+        table.dataTable td,
+            table.dataTable th {
+                padding: 1px 2px;
+                /* Padding minimal */
+                border: 1px solid #ddd;
+                /* Garis tepi */
+                text-align: center;
+            }
+
+            table.dataTable {
+                font-size: 13px;
+                /* Ukuran font kecil */
+                border-collapse: collapse;
+                /* Menghilangkan ruang antar border */
+                margin: 0;
+                /* Menghapus margin tabel */
+
+                /* Atur lebar tabel sesuai kontainer */
+            }
+
+        .red-row {
+        background-color: #f8d7da !important; /* Warna latar belakang merah muda */
+        color: #721c24; /* Warna teks merah gelap untuk kontras */
+    }
     </style>
+    
     
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Laporan Trading</x-slot:tittle>
-        <form action="{{route('keuangan.omzet.exportexcel')}}" method="post" class="self-end">
+        <form action="{{route('keuangan.omzet.exportexcel')}}" method="post" class="self-end mt-8">
             @csrf
             <input type="hidden" name="start" id="startex" >
             <input type="hidden" name="end" id="endex" >
@@ -55,56 +79,55 @@
                   </tr>
                 </tbody>
               </table>
-              
             <table class="cell-border hover display nowrap" id="table-omzet">
                 <!-- head -->
                 <thead>
                     <tr>
-                        <th rowspan="2"  class="text-center border">NO. </th>
-                        <th rowspan="2"  class="text-center border">TGL STUFFING</th>
-                        <th rowspan="2"  class="text-center border">NO. SURAT JALAN</th>
-                        <th rowspan="2"  class="text-center border">NO. INV</th>
-                        <th rowspan="2"  class="text-center border">TGL. INV</th>
-                        <th rowspan="2"  class="text-center border">No. Faktur Pajak</th>
-                        <th rowspan="2"  class="text-center border">NAMA KAPAL</th>
-                        <th rowspan="2"  class="text-center border">Cont</th>
-                        <th rowspan="2"  class="text-center border">Seal</th>
-                        <th rowspan="2"  class="text-center border">Job</th>
-                        <th rowspan="2"  class="text-center border">Nopol</th>
-                        <th rowspan="2"  class="text-center border">JENIS BARANG</th>
-                        <th rowspan="2"  class="text-center border">QUANTITY</th>
-                        <th rowspan="2"  class="text-center border">SATUAN</th>
-                        <th colspan="5" class="text-center border">PENJUALAN (EXCL. PPN)</th>
-                        <th colspan="5" class="text-center border">PEMBELIAN (EXCL. PPN)</th>
-                        <th rowspan="2"  class="text-center border">MARGIN EXCLUDE</th>
-                        <th colspan="4" class="text-center border">INCLUDE PPN</th>
-                        <th colspan="3" class="text-center border">HARSAT EXCL.PPN (SATUAN ORI)</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">NO. </th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">TGL STUFFING</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">NO. SURAT JALAN</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">NO. INV</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">TGL. INV</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">No. Faktur Pajak</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">NAMA KAPAL</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">Cont</th>
+                        <th rowspan="2"style="font-size: 12px"  class="text-center border">Seal</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">Job</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">Nopol</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">JENIS BARANG</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">QUANTITY</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">SATUAN</th>
+                        <th colspan="5" style="font-size: 12px" class="text-center border">PENJUALAN (EXCL. PPN)</th>
+                        <th colspan="5" style="font-size: 12px" class="text-center border">PEMBELIAN (EXCL. PPN)</th>
+                        <th rowspan="2" style="font-size: 12px"  class="text-center border">MARGIN EXCLUDE</th>
+                        <th colspan="4" style="font-size: 12px" class="text-center border">INCLUDE PPN</th>
+                        <th colspan="3" style="font-size: 12px" class="text-center border">HARSAT EXCL.PPN (SATUAN ORI)</th>
                     </tr>
                     <tr>
-                        <th  class="text-center border">PO CUSTOMER</th>
-                        <th  class="text-center border">CUSTOMER</th>
-                        <th  class="text-center border">TUJUAN (Kota Cust)</th>
-                        <th  class="text-center border">HARSAT JUAL</th>
-                        <th class="text-center border">TOTAL</th>
-                        <th  class="text-center border">SUPPLIER</th>
-                        <th  class="text-center border">HARSAT BELI</th>
-                        <th  class="text-center border">TOTAL</th>
-                        <th  class="text-center border">TGL. PEMBAYARAN</th>
-                        <th  class="text-center border">NO. VOUCHER</th>
-                        <th class="text-center border">PENJUALAN</th>
-                        <th class="text-center border">PEMBELIAN</th>
-                        <th class="text-center border">PORSI PPN</th>
-                        <th class="text-center border">MARGIN</th>
-                        <th class="text-center border">SATUAN</th>
-                        <th class="text-center border">BELI</th>
-                        <th class="text-center border">JUAL</th>
+                        <th style="font-size: 12px" class="text-center border">PO CUSTOMER</th>
+                        <th style="font-size: 12px"  class="text-center border">CUSTOMER</th>
+                        <th style="font-size: 12px"  class="text-center border">TUJUAN (Kota Cust)</th>
+                        <th style="font-size: 12px"  class="text-center border">HARSAT JUAL</th>
+                        <th style="font-size: 12px" class="text-center border">TOTAL</th>
+                        <th style="font-size: 12px"  class="text-center border">SUPPLIER</th>
+                        <th style="font-size: 12px" class="text-center border">HARSAT BELI</th>
+                        <th style="font-size: 12px" class="text-center border">TOTAL</th>
+                        <th style="font-size: 12px" class="text-center border">TGL. PEMBAYARAN</th>
+                        <th style="font-size: 12px" class="text-center border">NO. VOUCHER</th>
+                        <th style="font-size: 12px" class="text-center border">PENJUALAN</th>
+                        <th style="font-size: 12px" class="text-center border">PEMBELIAN</th>
+                        <th style="font-size: 12px" class="text-center border">PORSI PPN</th>
+                        <th style="font-size: 12px" class="text-center border">MARGIN</th>
+                        <th style="font-size: 12px" class="text-center border">SATUAN</th>
+                        <th style="font-size: 12px" class="text-center border">BELI</th>
+                        <th style="font-size: 12px" class="text-center border">JUAL</th>
                     </tr>
                 </thead>
                 
                 <tbody>
                 </tbody>
             </table>
-        </div>
+              </div>
     </x-keuangan.card-keuangan>
 
     {{-- <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script> --}}
@@ -145,6 +168,8 @@
             });
             let table = $(`#table-omzet`).DataTable({
     pageLength: 20,
+    scrollX: true, 
+    autoWidth: false,
     ajax: {
         url: "{{route('keuangan.omzet.datatable')}}",
         dataSrc: "data"
@@ -186,18 +211,12 @@
     ],
     columnDefs: [
         {
-            targets: [0, 1, 2],  // Indeks kolom yang ingin diatur lebar
-            width: '40px'  // Menetapkan lebar kolom menjadi 150px
-        },
-        {
-            targets: [3, 4, 5],  // Indeks kolom lain
-            width: '120px'
-        },
-        {
-            targets: '_all',  // Menetapkan lebar untuk kolom lainnya
-            width: '100px'
+            targets: '_all',
+            className: 'text-center', // Teks tengah untuk semua kolom
+            width: '50px' // Atur lebar default
         }
-    ]
+    ],
+    fixedHeader: true,
 });
 
 

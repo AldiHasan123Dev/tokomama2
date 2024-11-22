@@ -412,3 +412,4 @@ $invoiceData = $invoices->map(function($invoice) {
         return Excel::download(new OmzetExport($request->start, $request->end), 'laporan-omzet.xlsx');
     }
 }
+

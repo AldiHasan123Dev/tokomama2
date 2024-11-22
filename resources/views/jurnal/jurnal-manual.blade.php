@@ -413,8 +413,9 @@
                         </tbody>
                     </table>
 
-                    <h3 class="font-bold">TOTAL DEBET : <span id="td"></span></h3>
-                    <h3 class="font-bold mb-5">TOTAL CREDIT : <span id="tc"></span></h3>
+                    <h3 class="font-bold">TOTAL DEBET      : <span id="td"></span></h3>
+                    <h3 class="font-bold">TOTAL CREDIT     : <span id="tc"></span></h3>
+                    <h3 class="font-bold mb-5">CEK VOUCHER : <span id="cek_voucher"></span></h3>
 
                     <button type="button" id="simpan"
                         class="btn bg-green-500 text-white w-5/12 ms-10 mb-5 mr-10">Simpan Jurnal</button>
@@ -793,25 +794,54 @@
         });
 
         function total() {
-            totaltc = 0;
-            totaltd = 0;
-            for (let i = 1; i <= num; i++) {
-                let coa_debit = $(".debit-" + i + "").val();
-                let coa_credit = $(".credit-" + i + "").val();
-                let nominal = parseFloat($(`.nominal-${i}`).val());
+    totaltc = 0;
+    totaltd = 0;
+    let totalVoucherDebit = 0; // Untuk sum debit yang memiliki COA 3, 4, atau 5
+    let totalVoucherCredit = 0; // Untuk sum kredit yang memiliki COA 3, 4, atau 5
+    let cekVoucher = 0; // Untuk menghitung selisih antara total kredit dan total debit COA 3, 4, dan 5
 
-                if (coa_debit != 0) {
-                    totaltd += nominal;
-                }
-                if (coa_credit != 0) {
-                    totaltc += nominal;
-                }
+    for (let i = 1; i <= num; i++) {
+        let coa_debit = $(".debit-" + i).val();
+        let coa_credit = $(".credit-" + i).val();
+        let nominal = parseFloat($(`.nominal-${i}`).val());
+
+        // Jika coa_debit tidak 0, tambahkan nominal ke totaltd
+        if (coa_debit != 0) {
+            totaltd += nominal;
+            // Tambahkan ke totalVoucherDebit jika COA adalah 3, 4, atau 5
+            if (coa_debit == 3 || coa_debit == 4 || coa_debit == 5) {
+                totalVoucherDebit += nominal;
             }
-            $('#total_debit').val(totaltd);
-            $('#total_credit').val(totaltc);
-            $('#td').html(totaltd.toLocaleString('en-US'));
-            $('#tc').html(totaltc.toLocaleString('en-US'));
         }
+
+        // Jika coa_credit tidak 0, tambahkan nominal ke totaltc
+        if (coa_credit != 0) {
+            totaltc += nominal;
+            // Tambahkan ke totalVoucherCredit jika COA adalah 3, 4, atau 5
+            if (coa_credit == 6 || coa_credit == 2 || coa_credit == 5) {
+                totalVoucherCredit += nominal;
+            }
+        }
+    }
+
+    // Hitung cekVoucher sebagai selisih antara total kredit dan total debit COA 3, 4, dan 5
+    cekVoucher = Math.abs(totalVoucherDebit - totalVoucherCredit);
+
+    // Menampilkan hasil total debit, total kredit, total voucher debit, dan total voucher credit
+    $('#total_debit').val(totaltd);
+    $('#total_credit').val(totaltc);
+    $('#td').html(totaltd.toLocaleString('en-US'));
+    $('#tc').html(totaltc.toLocaleString('en-US'));
+    $('#total_voucher_debit').html(totalVoucherDebit.toLocaleString('en-US')); // Tampilkan total voucher debit
+    $('#total_voucher_credit').html(totalVoucherCredit.toLocaleString('en-US')); // Tampilkan total voucher credit
+    $('#cek_voucher').html(cekVoucher.toLocaleString('en-US')); // Tampilkan cek voucher (selisih)\
+    console.log('Total Debit: ', totaltd);
+    console.log('Total Credit: ', totaltc);
+    console.log('Total Voucher Debit (COA 3,4,5): ', totalVoucherDebit);
+    console.log('Total Voucher Credit (COA 3,4,5): ', totalVoucherCredit);
+    console.log('Cek Voucher (Absolut): ', cekVoucher);
+}
+
 
         function doTotal() {
             console.log('total running')

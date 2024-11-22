@@ -93,8 +93,8 @@
             <td>{{ $item->Transaksi->Suppliers->nama }}</td>
             <td>{{ $item->Transaksi->harga_beli }}</td>
             <td>{{ $item->Transaksi->harga_beli * $item->Transaksi->jumlah_beli }}</td>
-            <td> - </td>
-            <td> Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ipsum magnam tempore quibusdam. Illum ab voluptatum laborum enim beatae, numquam officiis laboriosam recusandae quo obcaecati inventore accusantium fugiat porro, nisi at. </td>
+            <td> {{ $item->tgl }} </td>
+            <td> {{ $item->nomor }}
             <td>{{ ($item->Transaksi->harga_jual * $item->Transaksi->jumlah_beli) - ($item->Transaksi->harga_beli * $item->Transaksi->jumlah_beli) }}</td>
             <td>{{ ($item->Transaksi->harga_jual + ($item->Transaksi->harga_jual * 0.11)) *  $item->Transaksi->jumlah_beli }}</td>
             <td>{{ ($item->Transaksi->harga_beli + ($item->Transaksi->harga_beli * 0.11)) *  $item->Transaksi->jumlah_beli }}</td>
