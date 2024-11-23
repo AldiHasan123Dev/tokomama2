@@ -1,5 +1,7 @@
 <x-Layout.layout>
     <x-keuangan.card-keuangan>
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    </head>
         <x-slot:tittle>Jurnal Buku Besar</x-slot:tittle>
         <div class="overflow-x-auto">
             <form action="{{ route('buku-besar.export') }}" method="get">
@@ -12,7 +14,7 @@
                         value="@if (isset($_GET['coa'])) {{ $_GET['coa'] }} @else {{ '' }} @endif">
                 @endif
 
-                <button class="btn bg-green-500 text-white mt-3 mb-5" type="submit"><i
+                <button class="btn bg-green-500 text-white mt-3 mb-5" type="submit" id="export"><i
                         class="fa-solid fa-file-excel"></i> Export Excel</button>
             </form>
 
@@ -349,4 +351,31 @@
             }
         });
     </script>
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script>
+ document.getElementById('export').addEventListener('click', function() {
+            // Menampilkan pesan loading
+            Swal.fire({
+                title: 'Silahkan Tunggu...',
+                text: 'Proses ekspor sedang berlangsung.',
+                allowOutsideClick: false,  // Tidak bisa mengklik di luar
+                didOpen: () => {
+                    Swal.showLoading(); // Menampilkan indikator loading
+                }
+            }, 4000);
+
+            // Menggunakan setTimeout untuk mensimulasikan waktu proses
+            setTimeout(function() {
+                // Proses download file
+                window.location.href = "{{ route('buku-besar.export') }}";  // Ganti dengan route yang sesuai
+
+                // Setelah file berhasil diunduh, menampilkan pesan sukses
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Laporan buku besar sudah di export, file akan disimpan sekitar 1 menit'
+                });
+            }, 5000);  // Simulasi delay selama 1 detik sebelum memulai download (Anda bisa mengatur waktu ini)
+        });
+     </script>
 </x-Layout.layout>

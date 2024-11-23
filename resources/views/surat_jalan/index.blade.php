@@ -83,6 +83,7 @@
                 <thead>
                     <tr>
                         <th>Aksi</th>
+                        <th>Tanggal SJ</th>
                         <th>Invoice</th>
                         <th>No. Surat</th>
                         <th>Kepada</th>
@@ -117,6 +118,10 @@
                 columns: [{
                         data: 'aksi',
                         name: 'aksi'
+                    },
+                    {
+                        data: 'tgl_sj',
+                        name: 'Tanggal SJ'
                     },
                     {
                         data: 'invoice',

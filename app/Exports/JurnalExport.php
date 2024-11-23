@@ -3,92 +3,31 @@
 namespace App\Exports;
 
 use App\Models\Coa;
-use App\Models\Jurnal;
-use App\Models\Nopol;
-use App\Models\TemplateJurnal;
-use Carbon\Carbon;
-use Illuminate\Contracts\View\View;
-use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class JurnalExport implements FromView
+class JurnalExport implements WithMultipleSheets
 {
-    public function view(): View
+    public function sheets(): array
     {
-        $templates = TemplateJurnal::all();
-        $nopol = Nopol::where('status', 'aktif')->get();
-        $coa = Coa::where('status', 'aktif')->get();
-        $coa_id = 1;
-        if (isset($_GET['coa'])) {
-            $coa_id = $_GET['coa'];
-        }
-        $coa_find = Coa::find($coa_id);
+        $sheets = [];
 
-        $coa_by_id = Coa::where('id', $coa_id)->first();
+        // Ambil request COA jika ada
+        $coaId = request('coa', null);
 
-//        dd($this->saldo());
-
-        $months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-        $month = $_GET['month'] ?? date('m');
-        $year = $_GET['year'] ?? date('Y');
-
-        if (isset($_GET['coa'])) {
-            $data = Jurnal::whereMonth('jurnal.tgl', $month)
-            ->whereYear('jurnal.tgl', $year)
-            ->where('jurnal.coa_id', $coa_id)
-            ->orderBy('tgl', 'asc')
-            ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
-            ->orderBy('created_at', 'asc')
-            ->orderBy('no', 'asc')
-            ->get();
+        if ($coaId) {
+            // Jika ada request COA, ekspor hanya COA tersebut
+            $coa = Coa::find($coaId);
+            if ($coa) {
+                $sheets[] = new JurnalSheetExport($coa);
+            }
         } else {
-            $data = Jurnal::orderBy('tgl', 'asc')
-            ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
-            ->orderBy('created_at', 'asc')
-            ->orderBy('no', 'asc')
-            ->get();
-        }
-
-        $tipe = 'D';
-        if(substr($coa_find->no_akun,0,1)=='2'||substr($coa_find->no_akun,0,1)=='3'||substr($coa_find->no_akun,0,1)=='5'){
-            $tipe = 'C';
-        }
-
-        $saldo = array();
-
-        foreach ($months as $idx => $item) {
-            $bln = $idx + 1;
-            $c = new Carbon($year.'-'.sprintf('%02d',$bln).'-01');
-            $now = $c->startOfMonth()->format('Y-m-d');
-            $last = $c->endOfMonth()->format('Y-m-d');
-            $start = $c->subMonth()->startOfMonth()->format('Y-m-d');
-            // $start = '2022-12-01';
-            $des = $c->endOfMonth()->format('Y-m-d');
-            // dd($start,$des,$last);
-            if($idx==0){
-                if ($tipe=='D') {
-                    $saldo_awal = Jurnal::where('coa_id',$coa_id)->whereBetween('tgl',['2023-12-01',$des])->sum('debit') - Jurnal::where('coa_id',$coa_id)->whereBetween('tgl',['2023-12-01',$des])->sum('kredit');
-                } else {
-                    $saldo_awal = Jurnal::where('coa_id',$coa_id)->whereBetween('tgl',['2023-12-01',$last])->sum('kredit') - Jurnal::where('coa_id',$coa_id)->whereBetween('tgl',['2023-12-01',$last])->sum('debit');
-                }
-            } else {
-                $start = $now;
-                $saldo_awal =  $saldo['saldo_akhir'][$idx-1];
+            // Jika tidak ada request COA, ekspor semua COA aktif
+            $coaList = Coa::where('status', 'aktif')->get();
+            foreach ($coaList as $coa) {
+                $sheets[] = new JurnalSheetExport($coa);
             }
-            $debit = Jurnal::where('coa_id',$coa_id)->whereBetween('tgl',[$now,$last])->sum('debit');
-            $credit = Jurnal::where('coa_id',$coa_id)->whereBetween('tgl',[$now,$last])->sum('kredit');
-            $saldo['saldo_awal'][$idx] = $saldo_awal;
-            if ($tipe=='D') {
-                $saldo['saldo_akhir'][$idx] = ($debit + $saldo_awal ) - $credit;
-            } else {
-                $saldo['saldo_akhir'][$idx] = ($credit + $saldo_awal) - $debit ;
-            }
-            $saldo['debit'][$idx] = $debit;
-            $saldo['kredit'][$idx] = $credit;
         }
 
-        $m = (int)$month;
-        $saldo_awal = $saldo['saldo_awal'][$m-1];
-
-        return view('jurnal.buku-besar-export', compact('templates','nopol', 'coa', 'months', 'saldo','saldo_awal', 'coa', 'coa_id', 'year', 'coa_by_id', 'data', 'tipe', 'month'));
+        return $sheets;
     }
 }

@@ -149,6 +149,7 @@ class BukuBesarController extends Controller
 
     public function export()
     {
+        
         return Excel::download(new JurnalExport, 'buku_besar.xlsx');
     }
 }

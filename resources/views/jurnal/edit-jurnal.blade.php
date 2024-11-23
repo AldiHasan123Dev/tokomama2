@@ -251,7 +251,8 @@
 
             let table = $(`#table-editj`).DataTable({
             pageLength: 25,
-            width: 100 // Menentukan jumlah baris per halaman
+            width: 100,
+            scrollX: true,  // Menentukan jumlah baris per halaman
         });
 
             function editJurnal(id, nomor, tgl, debit, kredit, keterangan, invoice, invoice_external, nopol, tipe, coa_id,
