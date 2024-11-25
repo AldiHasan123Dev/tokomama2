@@ -161,10 +161,8 @@ class SuratJalanController extends Controller
 
         $data->tgl_sj = $request->tgl_sj;
         $data->save();
-
-        return redirect()->route('surat-jalan.index');
+        return redirect()->route('surat-jalan.index')->with('success', 'Data surat jalan berhasil di update');
     }
-
     public function updateInvoiceExternal(Request $request) 
 {
     // Ambil data transaksi berdasarkan id_surat_jalan dan id_supplier

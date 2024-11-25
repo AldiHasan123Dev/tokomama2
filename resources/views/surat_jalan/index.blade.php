@@ -180,8 +180,7 @@
                     <form action="{{ route('surat-jalan.data.edit') }}" method="post">
                     @csrf
                     <input type="hidden" name="id" value="${id}" class="border-none" />
-                    <label class="form-label">Invoice</label>
-                        <input type="text" name="invoice" value="${invoice}" class="input-field" />
+                    <input type="hidden" name="invoice" value="${invoice}" class="input-field"  />
                      <label class="form-label">Nomor Surat</label>
                         <input type="text" name="nomor_surat" value="${nomor_surat}" class="input-field" readonly />
                         <label class="form-label">Nomor Pol</label>

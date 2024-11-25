@@ -443,6 +443,29 @@
     </form>
 
     <script>
+document.getElementById("submit").addEventListener("click", function (e) {
+    let isFilled = false; // Untuk mengecek apakah ada data yang diisi
+    const rows = document.querySelectorAll("#tbody-list-barang tr");
+
+    rows.forEach((row) => {
+        const barang = row.querySelector(`[name="barang[]"]`).value.trim();
+        const jumlahBeli = row.querySelector(`[name="jumlah_beli[]"]`).value.trim();
+        const satuanBeli = row.querySelector(`[name="satuan_beli[]"]`).value.trim();
+        const supplier = row.querySelector(`[name="supplier[]"]`).value.trim();
+
+        // Cek apakah minimal salah satu kolom dalam baris terisi
+        if (barang !== "" && jumlahBeli !== "" && satuanBeli !== "" && supplier !== "") {
+            isFilled = true;
+        }
+    });
+
+    if (!isFilled) {
+        e.preventDefault(); // Menghentikan form submit
+        alert("Masih ada input yang belum teriisi, silahkan diisi terlebih dahulu");
+    }
+});
+
+
         function validateForm() {
         let valid = true;
         let fields = [
