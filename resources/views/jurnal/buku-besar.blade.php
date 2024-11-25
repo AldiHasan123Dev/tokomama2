@@ -21,8 +21,7 @@
                 <div class="font-bold">Akun : </div>
                 <div>
                     <select class="js-example-basic-single w-1/2" name="akun" id="coas">
-                        <option value="{{ $coa_by_id->id }}" selected>{{ $coa_by_id->no_akun }} -
-                            {{ $coa_by_id->nama_akun }}</option>
+                        <option value="" selected>Pilih COA</option>
                         @foreach ($coa as $c)
                             <option value="{{ $c->id }}">{{ $c->no_akun }} - {{ $c->nama_akun }}</option>
                         @endforeach
@@ -149,7 +148,7 @@
         </div>
 
         @php
-            $coa = isset($_GET['coa']) ? urlencode(trim($_GET['coa'])) : urlencode('1');
+            $coa = isset($_GET['coa']) && $_GET['coa'] != '' ? $_GET['coa'] : null;
         @endphp
         <div class="mb-6 mt-4 flex">
             <label for="month" style="font-size: 1rem; margin: 2px; margin-top: 10px">Bulan : </label>
@@ -337,6 +336,7 @@
             let month = searchParams.get("month");
             let year = searchParams.get("year");
             let coa = searchParams.get("coa");
+console.log(month, year, coa);
 
             var table = $('#table-buku-besar').DataTable({
                 pageLength: 10,
@@ -344,7 +344,7 @@
 
             function submitForm() {
                 var form = document.getElementById('myForm');
-                var coaInput = document.getElementById('c1');
+                var coaInput = document.getElementById('coa');
                 coaInput.value = encodeURIComponent(coaInput.value);
                 form.submit();
             }

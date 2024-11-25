@@ -255,7 +255,7 @@
             }
 
             function deleteData(id) {
-                if (confirm('Apa kamu yakin akan menghapus data ini?')) {
+                confirm('Apa kamu yakin akan menghapus data ini?') {
                     $.ajax({
                         method: 'POST',
                         url: "{{ route('surat-jalan.hapusBarang') }}",

@@ -76,7 +76,7 @@
         @if (!$isBiayaPendapatan)
             <tr>
                 <td colspan="10"><b>Saldo Awal</b></td>
-                <td class="text-right"><b>{{ number_format($currentSaldo, 2) }}</b></td>
+                <td class="text-right"><b>{{ $currentSaldo }}</b></td>
             </tr>
         @endif
 
@@ -99,15 +99,16 @@
                 <td>{{ $item->nopol ?? '-' }}</td>
                 <td>{{ $item->invoice ?? '-' }}</td>
                 <td>{{ $item->keterangan }}</td>
-                <td class="text-right">{{ number_format($item->debit, 2) }}</td>
-                <td class="text-right">{{ number_format($item->kredit, 2) }}</td>
+                <td class="text-right">{{ $item->debit }}</td>
+                <td class="text-right">{{ $item->kredit }}</td>
+                <td class="text-right">{{ $currentSaldo }}</td>
                 
                 {{-- Jika akun adalah "Biaya" atau "Pendapatan", jangan tampilkan saldo --}}
-                @if (!$isBiayaPendapatan)
+                {{-- @if (!$isBiayaPendapatan)
                     <td class="text-right">{{ number_format($currentSaldo, 2) }}</td>
                 @else
                     <td class="text-right">0</td>
-                @endif
+                @endif --}}
             </tr>
         @endforeach
         </tbody>

@@ -22,13 +22,13 @@ class BukuBesarController extends Controller
         $templates = TemplateJurnal::all();
         $nopol = Nopol::where('status', 'aktif')->get();
         $coa = Coa::where('status', 'aktif')->get();
-        $coa_id = 1;
+        $coa_id = null;
         if (isset($_GET['coa'])) {
             $coa_id = $_GET['coa'];
         }
         $coa_find = Coa::find($coa_id);
 
-        $coa_by_id = Coa::where('id', $coa_id)->first();
+        $coa_by_id = $coa_id;
 
 //        dd($this->saldo());
 
@@ -36,17 +36,33 @@ class BukuBesarController extends Controller
         $month = $_GET['month'] ?? date('m');
         $year = $_GET['year'] ?? date('Y');
 
-        if (isset($_GET['coa'])) {
+        if ($coa_id) {
+            // Jika coa_id ada
+            if ($coa_id == null) {
+                // Jika coa_id adalah 1, query tanpa filter coa_id
+                $data = Jurnal::whereMonth('jurnal.tgl', $month)
+                    ->whereYear('jurnal.tgl', $year)
+                    ->orderBy('tgl', 'asc')
+                    ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
+                    ->orderBy('created_at', 'asc')
+                    ->orderBy('no', 'asc')
+                    ->get();
+            } else {
+                // Jika coa_id tidak sama dengan 1, filter berdasarkan coa_id
+                $data = Jurnal::whereMonth('jurnal.tgl', $month)
+                    ->whereYear('jurnal.tgl', $year)
+                    ->where('jurnal.coa_id', $coa_id)
+                    ->orderBy('tgl', 'asc')
+                    ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
+                    ->orderBy('created_at', 'asc')
+                    ->orderBy('no', 'asc')
+                    ->get();
+            }
+        } else {
+            // Jika coa_id tidak ada (null), query tanpa filter coa_id
             $data = Jurnal::whereMonth('jurnal.tgl', $month)
                 ->whereYear('jurnal.tgl', $year)
-                ->where('jurnal.coa_id', $coa_id)
                 ->orderBy('tgl', 'asc')
-                ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
-                ->orderBy('created_at', 'asc')
-                ->orderBy('no', 'asc')
-                ->get();
-        } else {
-            $data = Jurnal::orderBy('tgl', 'asc')
                 ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
                 ->orderBy('created_at', 'asc')
                 ->orderBy('no', 'asc')
@@ -56,9 +72,18 @@ class BukuBesarController extends Controller
         
 
         $tipe = 'D';
-        if(substr($coa_find->no_akun,0,1)=='2'||substr($coa_find->no_akun,0,1)=='3'||substr($coa_find->no_akun,0,1)=='5'){
-            $tipe = 'C';
-        }
+
+// Cek jika $coa_find atau $coa_find->no_akun adalah null
+if ($coa_find && $coa_find->no_akun) {
+    if (substr($coa_find->no_akun, 0, 1) == '2' || substr($coa_find->no_akun, 0, 1) == '3' || substr($coa_find->no_akun, 0, 1) == '5') {
+        $tipe = 'C';
+    }
+} else {
+    // Jika $coa_find atau $coa_find->no_akun null, tentukan tipe default lainnya, jika perlu
+    // Misalnya, set tipe ke 'D' jika diperlukan
+    $tipe = 'D'; // atau sesuaikan dengan tipe lain jika ada kebutuhan
+}
+
 
         $saldo = array();
 
@@ -149,7 +174,10 @@ class BukuBesarController extends Controller
 
     public function export()
     {
-        
+        // Menambahkan SweetAlert session untuk notifikasi
+        session()->flash('export_success', 'Proses ekspor berhasil, file buku besar sedang diunduh.');
+    
         return Excel::download(new JurnalExport, 'buku_besar.xlsx');
     }
+    
 }
