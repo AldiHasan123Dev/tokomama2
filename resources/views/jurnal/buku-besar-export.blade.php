@@ -93,7 +93,7 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $item->tgl }}</td>
-                <td>{{ $item->nomor }}</td>
+                <td>{{ $item->nomor }}</td> 
                 <td>{{ $item->coa->no_akun ?? '-' }}</td>
                 <td>{{ $item->coa->nama_akun ?? '-' }}</td>
                 <td>{{ $item->nopol ?? '-' }}</td>
