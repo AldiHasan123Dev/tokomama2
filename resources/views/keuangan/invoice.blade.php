@@ -53,6 +53,12 @@
                     },
                     {
                         search: true,
+                        label: 'Nomor Jurnal',
+                        name: 'nomor',
+                        width: 150
+                    },
+                    {
+                        search: true,
                         label: 'Invoice',
                         name: 'invoice',
                         width: 150

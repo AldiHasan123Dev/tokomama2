@@ -84,9 +84,9 @@
         @php
             // Perbarui saldo berdasarkan tipe dan transaksi debit/kredit
             if ($tipe == 'D') {
-                $currentSaldo += $item->debit - $item->kredit;
+                $currentSaldo = $item->debit - $item->kredit;
             } else {
-                $currentSaldo += $item->kredit - $item->debit;
+                $currentSaldo = $item->kredit - $item->debit;
             }
         @endphp
     

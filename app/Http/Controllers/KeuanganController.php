@@ -147,8 +147,18 @@ class KeuanganController extends Controller
         $searchTerm = $request->get('searchString', ''); // Ganti 'searchString' sesuai parameter yang diinginkan
     
         // Ambil data dengan urutan berdasarkan 'created_at' DESC dan groupBy 'invoice'
-        $data = Invoice::with(['nsfp', 'transaksi.barang']) // Eager loading relasi yang diperlukan
-            ->orderBy('created_at', 'desc');
+        $data = Invoice::with([
+            'nsfp', // Relasi ke tabel `nsfp`
+            'transaksi.barang', // Relasi ke tabel `barang`
+            'transaksi.jurnal' => function($query) {
+                $query->whereNotNull('invoice'); // Misalnya, menambahkan kondisi where pada jurnal
+            }
+        ])
+        ->orderBy('created_at', 'desc');
+    
+    
+    
+          
     
         // Tambahkan filter pencarian
         if (!empty($searchTerm)) {
@@ -185,6 +195,7 @@ class KeuanganController extends Controller
                 'DT_RowIndex' => $index,
                 'nsfp' => $row->first()->nsfp->nomor ?? '-',
                 'invoice' => $row->first()->invoice ?? '-',
+                'nomor' => $row->first()->transaksi->jurnal->nomor ?? '-',
                 'subtotal' => number_format($row->sum('subtotal'), 0, ',', '.'),
                 'ppn' => $this->calculatePPN($row),
                 'total' => $this->calculateTotal($row),
