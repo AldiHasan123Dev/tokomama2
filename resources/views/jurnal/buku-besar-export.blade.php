@@ -70,6 +70,9 @@
             $currentSaldo = $saldo_awal;
             // Cek apakah nama akun COA mengandung kata 'Biaya' atau 'Pendapatan'
             $isBiayaPendapatan = isset($coa) && (str_contains($coa->nama_akun, 'Biaya') || str_contains($coa->nama_akun, 'Pendapatan'));
+            if ($isBiayaPendapatan) {
+                $currentSaldo = 0;
+            }
         @endphp
 
         {{-- Jika nama akun bukan "Biaya" atau "Pendapatan", tampilkan saldo awal --}}
@@ -79,16 +82,26 @@
                 <td class="text-right"><b>{{ $currentSaldo }}</b></td>
             </tr>
         @endif
-
+        
         @foreach ($data as $item)
         @php
-            // Perbarui saldo berdasarkan tipe dan transaksi debit/kredit
-            if ($tipe == 'D') {
-                $currentSaldo = $item->debit - $item->kredit;
-            } else {
-                $currentSaldo = $item->kredit - $item->debit;
-            }
-        @endphp
+                   if ($tipe == 'D') {
+        // Menambahkan debit ke saldo yang sudah ada jika debit lebih besar dari 0
+        if ($item->debit > 0) {
+            $currentSaldo += $item->debit;
+        } else {
+            // Debit kurang dari atau sama dengan 0, maka kredit ditambahkan
+            $currentSaldo -= $item->kredit;
+        }
+    } else {
+        // Jika tipe bukan 'D', saldo tetap dihitung dengan cara yang sama
+        if ($item->debit > 0) {
+            $currentSaldo -= $item->debit;
+        } else {
+            $currentSaldo += $item->kredit;
+        }
+    }
+            @endphp
     
             <tr>
                 <td>{{ $loop->iteration }}</td>

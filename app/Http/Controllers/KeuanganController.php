@@ -151,7 +151,8 @@ class KeuanganController extends Controller
             'nsfp', // Relasi ke tabel `nsfp`
             'transaksi.barang', // Relasi ke tabel `barang`
             'transaksi.jurnal' => function($query) {
-                $query->whereNotNull('invoice'); // Misalnya, menambahkan kondisi where pada jurnal
+                $query
+                ->whereNotNull('invoice');// Misalnya, menambahkan kondisi where pada jurnal
             }
         ])
         ->orderBy('created_at', 'desc');

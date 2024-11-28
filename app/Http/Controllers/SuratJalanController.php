@@ -163,6 +163,14 @@ class SuratJalanController extends Controller
         $data->save();
         return redirect()->route('surat-jalan.index')->with('success', 'Data surat jalan berhasil di update');
     }
+
+    public function checkBarangCount(Request $request)
+{
+    $count = Transaction::where('id', $request->id)->count();
+    return response()->json(['count' => $count]);
+    
+}
+
     public function updateInvoiceExternal(Request $request) 
 {
     // Ambil data transaksi berdasarkan id_surat_jalan dan id_supplier
@@ -179,6 +187,7 @@ class SuratJalanController extends Controller
             break;
         }
     }
+    
 
     // Jika ada invoice_external sebelumnya dan di request baru invoice_external kosong/null
     if ($inext != null && $request->invoice_external == null) {

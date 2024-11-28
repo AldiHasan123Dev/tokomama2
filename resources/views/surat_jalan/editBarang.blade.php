@@ -146,12 +146,13 @@
                                 @if ($trans->sisa > 0)
                                     <button onclick="openModal({{ $trans->suratJalan->id }})"><i class="fa-solid fa-plus text-green-500 mr-5"></i></button>
                                     <button onclick="getData({{ $trans->id }}, {{ $trans->id_supplier }}, {{ $trans->jumlah_jual }}, '{{ $trans->satuan_jual }}', '{{  $trans->suratJalan->nomor_surat }}',' {{ $trans->suppliers->nama }}', '{{ $trans->keterangan }}')" class="text-yellow-300"><i class="fa-solid fa-pencil"></i></button>
-                                    <form action="{{ route('surat-jalan.hapusBarang') }}" method="post">
+                                    <form onsubmit="deleteData({{ $trans->id }}); return false;">
                                         @csrf
                                         @method('delete')
-                                        <input type="hidden" name="id" value="{{ $trans->id }}">
                                         <button type="submit"><i class="fa-solid fa-trash text-red-500"></i></button>
                                     </form>
+                                    
+                                    
                                 @endif
                             </td>
                             <td>{{ $trans->suratJalan->nomor_surat }}</td>
@@ -175,97 +176,114 @@
     {{-- <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script> --}}
     <x-slot:script>
         <script>
-            let table = new DataTable('#editBarang', {
+            // Inisialisasi DataTable
+            let table = $('#editBarang').DataTable({
                 pageLength: 100,
                 order: [[1, 'desc']]
             });
-
-            function getData(id, id_supplier, kuantitas, satuan, surat_jalan,supplier,keterangan) {
-                
-    $('#dialog').html(`
-        <dialog id="my_modal_5" class="modal">
-            <div class="modal-box">
-                <form method="dialog">
-                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                </form>
-                <h3 class="text-lg font-bold">Edit Barang No Surat ${surat_jalan}</h3>
-                <form action="{{ route('surat-jalan.editBarang') }}" method="post">
-                    @csrf
-                    <input type="hidden" name="id" value="${id}" class="border-none" />
-                    <input type="hidden" name="id_supplier" value="${id_supplier}" class="border-none" />
-                    <label class="form-label">Jumlah Jual & Jumlah Beli :</label>
-                    <input type="number" name="jumlah_jual" class="input-field" value="${kuantitas}" />
-                    <label class="form-label">Supplier</label>
-                    <select class="select-field" name="supplier" id="supplier">
-                        <option value="${id_supplier}" selected>${supplier}</option>
-                        @foreach ($suppliers as $su)
-                                <option value="{{ $su->id }}">{{ $su->nama }} </option>
-                                @endforeach
-                    </select>
-                    <label class="form-label">Satuan</label>
-                    <select class="select-field" name="satuan" id="satuan">
-                        @foreach ($satuans as $s)
-                            <option value="{{ $s->nama_satuan }}" ${satuan === '{{ $s->nama_satuan }}' ? 'selected' : ''}>{{ $s->nama_satuan }}</option>
-                        @endforeach
-                    </select>
-                    <label class="form-label">Keterangan:</label>
-                    <input type="text" name="keterangan" class="input-field" value="${keterangan}" />
-                    <button type="submit" class="submit-button">Edit</button>
-                </form>
-            </div>
-        </dialog>
-    `);
-    $('#supplier').select2({
+        
+            // Fungsi untuk menampilkan modal edit barang
+            function getData(id, id_supplier, kuantitas, satuan, surat_jalan, supplier, keterangan) {
+                $('#dialog').html(`
+                    <dialog id="my_modal_5" class="modal">
+                        <div class="modal-box">
+                            <form method="dialog">
+                                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                            </form>
+                            <h3 class="text-lg font-bold">Edit Barang No Surat ${surat_jalan}</h3>
+                            <form action="{{ route('surat-jalan.editBarang') }}" method="post">
+                                @csrf
+                                <input type="hidden" name="id" value="${id}" class="border-none" />
+                                <input type="hidden" name="id_supplier" value="${id_supplier}" class="border-none" />
+                                <label class="form-label">Jumlah Jual & Jumlah Beli :</label>
+                                <input type="number" name="jumlah_jual" class="input-field" value="${kuantitas}" />
+                                <label class="form-label">Supplier</label>
+                                <select class="select-field" name="supplier" id="supplier">
+                                    <option value="${id_supplier}" selected>${supplier}</option>
+                                    @foreach ($suppliers as $su)
+                                        <option value="{{ $su->id }}">{{ $su->nama }} </option>
+                                    @endforeach
+                                </select>
+                                <label class="form-label">Satuan</label>
+                                <select class="select-field" name="satuan" id="satuan">
+                                    @foreach ($satuans as $s)
+                                        <option value="{{ $s->nama_satuan }}" ${satuan === '{{ $s->nama_satuan }}' ? 'selected' : ''}>{{ $s->nama_satuan }}</option>
+                                    @endforeach
+                                </select>
+                                <label class="form-label">Keterangan:</label>
+                                <input type="text" name="keterangan" class="input-field" value="${keterangan}" />
+                                <button type="submit" class="submit-button">Edit</button>
+                            </form>
+                        </div>
+                    </dialog>
+                `);
+        
+                // Inisialisasi select2 pada elemen select
+                $('#supplier').select2({
                     dropdownParent: $(`#my_modal_5`),
-                     dropdownAutoWidth: true,
-        width: '100%'
+                    dropdownAutoWidth: true,
+                    width: '100%'
                 });
+        
                 $('#satuan').select2({
                     dropdownParent: $(`#my_modal_5`),
-                     dropdownAutoWidth: true,
-        width: '100%'
+                    dropdownAutoWidth: true,
+                    width: '100%'
                 });
-
+        
+                // Menampilkan modal
                 my_modal_5.showModal();
             }
-
+        
+            // Fungsi untuk membuka modal lainnya
             function openModal(data) {
-                // Set the data to the hidden input field
+                // Menyimpan data ke input tersembunyi
                 document.getElementById('modal_data').value = data;
-                // Show the modal
                 document.getElementById('my_modal_3').showModal();
-
-                $('#id_barang').select2({
-                    dropdownParent: $(`#my_modal_3`),
-                });
-
-                $('#id_supplier').select2({
-                    dropdownParent: $(`#my_modal_3`),
-                });
-
-                $('#satuan_jual').select2({
-                    dropdownParent: $(`#my_modal_3`),
-                });
-                
+        
+                // Inisialisasi select2 untuk modal ini
+                $('#id_barang').select2({ dropdownParent: $(`#my_modal_3`) });
+                $('#id_supplier').select2({ dropdownParent: $(`#my_modal_3`) });
+                $('#satuan_jual').select2({ dropdownParent: $(`#my_modal_3`) });
             }
-
+        
+            // Fungsi untuk menutup modal
             function closeModal() {
-                // Close the modal
                 document.getElementById('my_modal_3').close();
             }
+         
+            
+            // Fungsi untuk menghapus data dengan konfirmasi
+            function deleteData(id, surat_jalan_id) {
+    // Pertama, lakukan pengecekan jumlah barang di surat jalan
+    $.ajax({
+        method: 'GET',
+        url: "{{ route('surat-jalan.checkBarangCount') }}", // Sesuaikan dengan route untuk mengecek jumlah barang
+        data: {
+            id: id // Kirim ID surat jalan untuk mengecek jumlah barang
+        },
+        success: function(response) {
+            // Tampilkan nilai count di console
+            console.log('Jumlah barang di surat jalan: ', response.count);
 
-            function deleteData(id) {
-                confirm('Apa kamu yakin akan menghapus data ini?') {
+            // Cek apakah barang yang akan dihapus adalah satu-satunya barang
+            if (response.count === 1) {
+                // Jika hanya ada 1 barang di surat jalan
+                confirm('Ini adalah satu-satunya barang dalam surat jalan, Apa anda yakin akan menghapusnya ?');
+            } else {
+                // Tampilkan konfirmasi untuk penghapusan jika barang lebih dari 1
+                if (confirm('Apa anda yakin akan menghapus data ini?')) {
+                    // Jika user menekan 'OK', lanjutkan dengan penghapusan data
                     $.ajax({
-                        method: 'POST',
+                        method: 'DELETE',
                         url: "{{ route('surat-jalan.hapusBarang') }}",
-                        data: { 
+                        data: {
                             id: id
                         },
                         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                         success: function(response) {
                             alert("Data Surat Jalan berhasil dihapus!");
-                            table.ajax.reload();
+                            location.reload(); // Refresh halaman setelah data dihapus
                         },
                         error: function(xhr, status, error) {
                             console.log('Error:', error);
@@ -274,8 +292,23 @@
                             console.log('Response:', xhr.responseJSON);
                         }
                     });
+                } else {
+                    // Jika user menekan 'Cancel', tidak ada aksi yang dilakukan
+                    console.log("Penghapusan dibatalkan");
                 }
             }
+        },
+        error: function(xhr, status, error) {
+            console.log('Error:', error);
+            console.log('Status:', status);
+            console.dir(xhr);
+            console.log('Response:', xhr.responseJSON);
+        }
+    });
+}
+
+
         </script>
+        
     </x-slot:script>
 </x-Layout.layout>
