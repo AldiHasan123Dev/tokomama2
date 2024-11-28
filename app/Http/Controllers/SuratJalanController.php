@@ -166,7 +166,7 @@ class SuratJalanController extends Controller
 
     public function checkBarangCount(Request $request)
 {
-    $count = Transaction::where('id', $request->id)->count();
+    $count = Transaction::where('id_surat_jalan', $request->id_surat_jalan)->count();
     return response()->json(['count' => $count]);
     
 }

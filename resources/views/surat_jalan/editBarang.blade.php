@@ -146,7 +146,7 @@
                                 @if ($trans->sisa > 0)
                                     <button onclick="openModal({{ $trans->suratJalan->id }})"><i class="fa-solid fa-plus text-green-500 mr-5"></i></button>
                                     <button onclick="getData({{ $trans->id }}, {{ $trans->id_supplier }}, {{ $trans->jumlah_jual }}, '{{ $trans->satuan_jual }}', '{{  $trans->suratJalan->nomor_surat }}',' {{ $trans->suppliers->nama }}', '{{ $trans->keterangan }}')" class="text-yellow-300"><i class="fa-solid fa-pencil"></i></button>
-                                    <form onsubmit="deleteData({{ $trans->id }}); return false;">
+                                    <form onsubmit="deleteData({{ $trans->id }}, {{ $trans->id_surat_jalan }}); return false;">
                                         @csrf
                                         @method('delete')
                                         <button type="submit"><i class="fa-solid fa-trash text-red-500"></i></button>
@@ -254,13 +254,13 @@
          
             
             // Fungsi untuk menghapus data dengan konfirmasi
-            function deleteData(id, surat_jalan_id) {
+            function deleteData(id, id_surat_jalan) {
     // Pertama, lakukan pengecekan jumlah barang di surat jalan
     $.ajax({
         method: 'GET',
         url: "{{ route('surat-jalan.checkBarangCount') }}", // Sesuaikan dengan route untuk mengecek jumlah barang
         data: {
-            id: id // Kirim ID surat jalan untuk mengecek jumlah barang
+            id_surat_jalan: id_surat_jalan // Kirim ID surat jalan untuk mengecek jumlah barang
         },
         success: function(response) {
             // Tampilkan nilai count di console
