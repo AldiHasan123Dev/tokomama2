@@ -69,7 +69,7 @@
         @php
             $currentSaldo = $saldo_awal;
             // Cek apakah nama akun COA mengandung kata 'Biaya' atau 'Pendapatan'
-            $isBiayaPendapatan = isset($coa) && (str_contains($coa->nama_akun, 'Biaya') || str_contains($coa->nama_akun, 'Pendapatan'));
+            $isBiayaPendapatan = isset($coa) && in_array(substr($coa->no_akun, 0, 1), ['5', '6']);
             if ($isBiayaPendapatan) {
                 $currentSaldo = 0;
             }

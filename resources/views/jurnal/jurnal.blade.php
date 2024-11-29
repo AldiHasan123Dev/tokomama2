@@ -106,86 +106,7 @@
                 /* Atur lebar tabel sesuai kontainer */
             }
 
-            #coa_table th,
-            #coa_table td {
-                width: 50px;
-                /* Set lebar untuk semua kolom */
-            }
-
-            #coa_table th:nth-child(1),
-            #coa_table td:nth-child(1) {
-                width: 2px;
-                /* Set lebar untuk kolom pertama */
-                margin: 0;
-            }
-
-            #coa_table th:nth-child(2),
-            #coa_table td:nth-child(2) {
-                width: 3px;
-                /* Set lebar untuk kolom kedua */
-            }
-
-            #coa_table th:nth-child(3),
-            #coa_table td:nth-child(3) {
-                width: 30px;
-                /* Set lebar untuk kolom kedua */
-            }
-
-            #coa_table th:nth-child(4),
-            #coa_table td:nth-child(4) {
-                width: 30px;
-                /* Set lebar untuk kolom kedua */
-            }
-
-            #coa_table th:nth-child(5),
-            #coa_table td:nth-child(5) {
-                width: 50px;
-                /* Set lebar untuk kolom pertama */
-                margin: 0;
-            }
-
-            #coa_table th:nth-child(6),
-            #coa_table td:nth-child(6) {
-                width: 3px;
-                /* Set lebar untuk kolom kedua */
-            }
-
-            #coa_table th:nth-child(7),
-            #coa_table td:nth-child(7) {
-                width: 30px;
-                /* Set lebar untuk kolom kedua */
-            }
-
-            #coa_table th:nth-child(8),
-            #coa_table td:nth-child(8) {
-                width: 30px;
-                /* Set lebar untuk kolom kedua */
-            }
-
-            #coa_table th:nth-child(9),
-            #coa_table td:nth-child(9) {
-                width: 50px;
-                /* Set lebar untuk kolom pertama */
-                margin: 0;
-            }
-
-            #coa_table th:nth-child(10),
-            #coa_table td:nth-child(10) {
-                width: 3px;
-                /* Set lebar untuk kolom kedua */
-            }
-
-            #coa_table th:nth-child(11),
-            #coa_table td:nth-child(11) {
-                width: 30px;
-                /* Set lebar untuk kolom kedua */
-            }
-
-            #coa_table th:nth-child(12),
-            #coa_table td:nth-child(12) {
-                width: 30px;
-                /* Set lebar untuk kolom kedua */
-            }
+            
 
             /* Kelas untuk tombol coklat */
             .btn-coklat {
@@ -263,7 +184,6 @@
                 position: absolute;
                 right: 0;
                 top: 0;
-                width: 5px;
                 height: 100%;
                 cursor: ew-resize;
                 /* Kursor untuk drag */
@@ -478,8 +398,7 @@
                 lengthMenu: [20, 50, 100, 150], // Pilihan jumlah data per halaman
                 ordering: false,
                 scrollX: true, 
-                autowidth: false,
-            });
+                });
             var MonJNL = $('#monitoring_JNL').DataTable({})
 
             $('#coa_table tbody').on('click', 'tr', function() {

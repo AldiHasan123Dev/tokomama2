@@ -340,6 +340,7 @@ console.log(month, year, coa);
 
             var table = $('#table-buku-besar').DataTable({
                 pageLength: 10,
+                scrollX: true, 
             });
 
             function submitForm() {

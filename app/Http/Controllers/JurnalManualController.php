@@ -48,7 +48,30 @@ class JurnalManualController extends Controller
         
         $no_BBKO = $noBBKO ? $noBBKO->no + 1 : 1;
 
-        $invoices = Invoice::all();
+        $invoices = DB::table('jurnal as j1')
+        ->where('j1.tipe', 'JNL') // Kondisi tipe JNL
+        ->where('j1.debit', '>', 0) // Kondisi debit lebih besar dari 0
+        ->where('j1.coa_id', 8) // Kondisi coa_id
+        ->groupBy('j1.invoice')
+        ->orderBy('j1.invoice', 'desc')
+        ->get();
+
+        //Sortir otomatis jika invoice sudah ada BBM nya, maka tidak akan tampil
+        // $invoices = DB::table('jurnal as j1')
+        // ->where('j1.tipe', 'JNL') // Kondisi tipe JNL
+        // ->where('j1.debit', '>', 0) // Kondisi debit lebih besar dari 0
+        // ->where('j1.coa_id', 8) // Kondisi coa_id
+        // ->whereNotExists(function ($query) {
+        //     $query->select(DB::raw(1))
+        //         ->from('jurnal as j2')
+        //         ->whereColumn('j1.invoice', 'j2.invoice')
+        //         ->where('j2.tipe', '!=', 'JNL') // Pastikan tidak ada tipe selain JNL
+        //         ->where('j2.nomor', '!=', 'SALDO AWAL');
+        // })
+        // ->groupBy('j1.invoice')
+        // ->orderBy('j1.invoice', 'desc')
+        // ->get();
+
         $processedInvoices = [];
         $invoiceCounts = [];
         foreach ($invoices as $invoice) {
@@ -58,14 +81,17 @@ class JurnalManualController extends Controller
             }
             $invoiceCounts[$invoiceNumber]++;
 
-            $processedInvoiceNumber = $invoiceNumber . '_' . $invoiceCounts[$invoiceNumber];
+            $processedInvoiceNumber = $invoiceNumber . '_' . "\n" . number_format($invoice->debit) . '_' . "\n" . $invoiceCounts[$invoiceNumber];
             $processedInvoices[] = $processedInvoiceNumber;
         }
 
-        $transaksi = Transaction::whereNotNull('invoice_external')
-        ->leftJoin('invoice', 'transaksi.id', '=', 'invoice.id_transaksi')
-        ->select('transaksi.*', 'invoice.*')
-        ->get();    
+        $transaksi = DB::table('jurnal as j1')
+        ->where('j1.tipe', 'JNL') // Kondisi tipe JNL
+        ->where('j1.kredit', '>', 0) // Kondisi debit lebih besar dari 0
+        ->where('j1.coa_id', 35) // Kondisi coa_id
+        ->groupBy('j1.invoice_external')
+        ->orderBy('j1.created_at', 'desc')
+        ->get();
         $procTransactions = [];
         $transactionCounts = [];
         foreach ($transaksi as $transaction) {
@@ -75,7 +101,7 @@ class JurnalManualController extends Controller
             }
             $transactionCounts[$invoiceNumber]++;
             $invoiceValue = $transaction->invoice ? $transaction->invoice : '-';
-            $procTransactionNumber = $invoiceNumber . '_' . $transactionCounts[$invoiceNumber] . ' | ' . $invoiceValue;
+            $procTransactionNumber = $invoiceNumber . '_' . "\n" . $transactionCounts[$invoiceNumber] . "\n" . number_format($transaction->kredit,2) . "\n" . ' | ' . $invoiceValue;
             $procTransactions[] = $procTransactionNumber; 
         }
         $uniqueNomors = DB::table('jurnal')

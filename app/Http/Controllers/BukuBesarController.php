@@ -108,12 +108,16 @@ if ($coa_find && $coa_find->no_akun) {
             }
             $debit = Jurnal::where('coa_id',$coa_id)->whereBetween('tgl',[$now,$last])->sum('debit');
             $credit = Jurnal::where('coa_id',$coa_id)->whereBetween('tgl',[$now,$last])->sum('kredit');
-            $saldo['saldo_awal'][$idx] = $saldo_awal;
+            $isBiayaPendapatan = isset($coa_find) && in_array(substr($coa_find->no_akun, 0, 1), ['5', '6']);
+            if ($isBiayaPendapatan) {
+                $saldo_awal = 0;
+            }
             if ($tipe=='D') {
                 $saldo['saldo_akhir'][$idx] = ($debit + $saldo_awal ) - $credit;
             } else {
                 $saldo['saldo_akhir'][$idx] = ($credit + $saldo_awal) - $debit ;
             }
+            $saldo['saldo_awal'][$idx] = $saldo_awal;
             $saldo['debit'][$idx] = $debit;
             $saldo['kredit'][$idx] = $credit;
         }

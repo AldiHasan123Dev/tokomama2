@@ -682,7 +682,7 @@
             $(`#invoice-${rowId}`).on('change', function() {
                 const procdata = $(this).val();
                 let datainv = procdata.split('_')[0];
-                let no = procdata.split('_')[1] - 1;
+                let no = procdata.split('_')[2] - 1;
                 console.log('procdata:', procdata);
         console.log('datainv:', datainv);
         console.log('no:', no);

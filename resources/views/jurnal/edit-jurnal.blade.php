@@ -368,7 +368,7 @@
             }
 
             
-            function tambahJurnal(id, nomor, tipe, tgl, invoice, invoice_external, nopol, keterangan, no, keterangan_buku_besar_pembantu) {
+            function tambahJurnal(id, nomor, tipe, tgl, invoice, invoice_external, nopol, keterangan, no, keterangan_buku_besar_pembantu, id_transaksi) {
                 invoice = (invoice === '0') ? '' : invoice;
                 invoice_external = (invoice_external === '0') ? '' : invoice_external;
                 $("#dialog").html(`
@@ -435,6 +435,7 @@
                <input name="id" type="hidden" value="${id}" />
                <input name="nomor" type="hidden" value="${nomor}" />
                <input name="no" type="hidden" value="${no}" />
+               <input name="id_transaksi" type="hidden" value="${id_transaksi}" />
                
                <input name="tipe" type="hidden" value="${tipe}" />
 
@@ -531,7 +532,7 @@ $('#tambah_g').on('click', function() {
                    <td class="text-center align-middle">
                         <button class="text-green-500"
                                 onclick="tambahJurnal('${latestId}','{{ $item->nomor }}', '{{ $item->tipe }}', '{{ $item->tgl }}', '{{ $item->invoice }}', '{{ $item->invoice_external }}', 
-                                 '{{ $item->nopol }}', '{{ $item->keterangan }}', ${latestId}, '{{ $item->keterangan_buku_besar_pembantu }}')">
+                                 '{{ $item->nopol }}', '{{ $item->keterangan }}', {{ $item->no }}, '{{ $item->keterangan_buku_besar_pembantu }}', {{ $item->id_transaksi }})">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </td>

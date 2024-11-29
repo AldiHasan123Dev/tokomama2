@@ -315,7 +315,7 @@ class JurnalController extends Controller
                 }
 
                 $keteranganNow = $request->keterangan;
-                $id_transaksi = Invoice::where('invoice', $inv)->where('harga', $hargajual)->pluck('id_transaksi')->first();
+                $id_transaksi = Invoice::where('invoice', $invoice)->where('harga', $hargajual)->pluck('id_transaksi')->first();
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -739,7 +739,6 @@ class JurnalController extends Controller
 
     public function store(Request $request, Jurnal $jurnal)
     {
-        // dd($request->all());
         if ($request->invoice != null) {
             if (str_contains($request->invoice, '_')) {
                 $inv = explode('_', $request->invoice)[0];
@@ -802,7 +801,8 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi,
+                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
+
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -870,7 +870,7 @@ class JurnalController extends Controller
                 }
 
                 $keteranganNow = $request->keterangan;
-                $id_transaksi = Invoice::where('invoice', $inv)->where('harga', $hargajual)->pluck('id_transaksi')->first();
+                $id_transaksi = Invoice::where('invoice', $invoice)->where('harga', $hargajual)->pluck('id_transaksi')->first();
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -883,7 +883,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi,
+                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -964,7 +964,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi,
+                   'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -1047,7 +1047,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi,
+                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -1132,7 +1132,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi,
+                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -1197,6 +1197,7 @@ class JurnalController extends Controller
                 $keteranganNow = $keterangan;
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray() ?? null;
                 $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first() ?? null;
+               
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -1214,7 +1215,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi,
+                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
