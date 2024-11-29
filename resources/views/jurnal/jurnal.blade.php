@@ -269,7 +269,18 @@
                 </div>
             </div>
 
-
+            <div class="bg-gray-50 mt-5 p-4 rounded shadow-sm">
+                <div class="mb-4">
+                    <label for="searchByNomor" class="font-weight-bold mr-2">Cari Berdasarkan Nomor:</label>
+                    <input type="text" id="searchByNomor" class="input-field form-control" placeholder="Masukkan nomor jurnal...">
+                </div>
+                <div class="mb-4">
+                    <label for="searchByKeterangan" class="font-weight-bold mr-2">Cari Berdasarkan Keterangan:</label>
+                    <input type="text" id="searchByKeterangan" class="input-field form-control" placeholder="Masukkan keterangan jurnal...">
+                </div>
+            </div>
+            
+                
             <div class="dataTable-container">
                 <table id="coa_table" class="dataTable cell-border hover display nowrap compact">
                     <!-- head -->
@@ -398,9 +409,15 @@
                 lengthMenu: [20, 50, 100, 150], // Pilihan jumlah data per halaman
                 ordering: false,
                 scrollX: true, 
-                });
+            });
             var MonJNL = $('#monitoring_JNL').DataTable({})
-
+            
+            $('#searchByNomor').on('keyup', function() {
+                    table.columns(2).search(this.value).draw();
+                });
+                $('#searchByKeterangan').on('keyup', function() {
+                    table.columns(8).search(this.value).draw();
+                });
             $('#coa_table tbody').on('click', 'tr', function() {
                 const row = table.row(this).data();
 
