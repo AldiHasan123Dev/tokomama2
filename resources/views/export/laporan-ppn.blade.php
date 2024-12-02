@@ -40,16 +40,17 @@
                 <td>FK</td>
                 <td>
                     @if ($item->transaksi->barang->status_ppn == 'ya')
-                        010
+                        10
                     @else
-                        080
+                        80
                     @endif
                 </td>
                 <td>0</td>
                 @php
-                    $new_nsfp_nomor = str_replace(['.', '-'], '', $item->nsfp->nomor);
-                @endphp
-                <td>{{ substr($new_nsfp_nomor, 6) }}</td>
+                $new_nsfp_nomor = str_replace(['.', '-'],'', substr( $item->nsfp->nomor,3));
+               // Menambahkan '00' di depan dan memotong 2 karakter pertama
+            @endphp
+                <td>="{{ $new_nsfp_nomor }}"</td>
                 <td>{{ date('n', strtotime($item->tgl_invoice)) }}</td>
                 <td>{{ date('Y', strtotime($item->tgl_invoice)) }}</td>
                 <td>{{ date('d/m/Y', strtotime($item->tgl_invoice)) }}</td>
@@ -64,14 +65,19 @@
                     @if ($item->transaksi->barang->status_ppn == 'ya')
                         {{ round($total * ($item->transaksi->barang->value_ppn / 100)) }}
                     @else
-                        0
+                        {{ $total }}
                     @endif
                 </td>
                 @php
                     $total = 0;
                 @endphp
                 <td>0</td>
-                <td></td>
+                <td>@if ($of->transaksi->barang->status_ppn == 'ya')
+                    
+                    @else
+                    1
+                @endif
+                </td>
                 <td>0</td>
                 <td>0</td>
                 <td>0</td>
@@ -94,7 +100,7 @@
                         @if ($of->transaksi->barang->status_ppn == 'ya')
                             {{ round(($of->transaksi->harga_jual * $of->transaksi->jumlah_jual) * ($item->transaksi->barang->value_ppn / 100)) }}
                         @else
-                            0
+                            {{ $of->transaksi->harga_jual * $of->transaksi->jumlah_jual }}
                         @endif
                     </td>
                     <td></td>

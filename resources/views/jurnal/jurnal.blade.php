@@ -271,7 +271,7 @@
 
             <div class="bg-gray-50 mt-5 p-4 rounded shadow-sm">
                 <div class="mb-4">
-                    <label for="searchByNomor" class="font-weight-bold mr-2">Cari Berdasarkan Nomor:</label>
+                    <label for="searchByNomor" class="font-weight-bold mr-2">Cari Berdasarkan Nomor Voucher:</label>
                     <input type="text" id="searchByNomor" class="input-field form-control" placeholder="Masukkan nomor jurnal...">
                 </div>
                 <div class="mb-4">
