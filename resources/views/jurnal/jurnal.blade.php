@@ -243,7 +243,7 @@
                     <div class="flex flex-row mr-10">
                         <label for="month" class="font-bold mt-2">Tipe :</label>
                         @php
-                            $types = ['JNL', 'BKK', 'BKM', 'BBK', 'BBM']; // Daftar tipe
+                            $types = ['JNL', 'BKK', 'BKM', 'BBK', 'BBM', 'BBMO', 'BBKO']; // Daftar tipe
                         @endphp
 
                         @foreach ($types as $type)
