@@ -100,8 +100,8 @@
         <table class="info-table">
             <tbody>
                 <tr>
-                    <td class="header-cell" style="text-align:left ;padding-left:40px">Customer : {{ $data->first()->transaksi->suratJalan->customer->nama ?? '-' }}</td>
-                    <td class="header-cell" style="text-align:center;">KAPAL : {{ $data->first()->transaksi->suratJalan->nama_kapal }}</td>
+                    <td class="header-cell" style="text-align:left ;padding-left:40px">Customer : {{ $data->first()->transaksi->suratJalan->customer->nama . ' - ' . $data->first()->transaksi->suratJalan->customer->kota ?? '-' }}</td>
+                    <td class="header-cell" style="text-align:left ;padding-right:40px">KAPAL : {{ $data->first()->transaksi->suratJalan->nama_kapal }}</td>
                 </tr>
                 <tr style="margin-top:30px">
                     <td class="header-cell" style="text-align:left ;padding-left:40px; margin:90px">PO : {{ $data->first()->transaksi->suratJalan->no_po ?? '-' }}</td>

@@ -25,8 +25,8 @@
                 <tbody>
                     <tr>
                         <td class="header-cell" style="font-size: 1rem; text-align:left">Customer :
-                            {{ $transaksi->suratJalan->customer->nama ?? '-' }}</td>
-                        <td class="header-cell" style="text-align: center; font-size: 1rem;">KAPAL
+                            {{ $transaksi->suratJalan->customer->nama . ' - ' . $transaksi->suratJalan->customer->kota ?? '-' }}</td>
+                        <td class="header-cell" style="text-align: left; padding-left:420px; font-size: 1rem;">KAPAL
                             : {{ $transaksi->suratJalan->nama_kapal ?? '-' }}</td>
 
                     </tr>
