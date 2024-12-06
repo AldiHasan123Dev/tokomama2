@@ -40,9 +40,9 @@
                 <td>FK</td>
                 <td>
                     @if ($item->transaksi->barang->status_ppn == 'ya')
-                        10
+                        '01
                     @else
-                        80
+                        '08
                     @endif
                 </td>
                 <td>0</td>
@@ -50,7 +50,7 @@
                 $new_nsfp_nomor = str_replace(['.', '-'],'', substr( $item->nsfp->nomor,3));
                // Menambahkan '00' di depan dan memotong 2 karakter pertama
             @endphp
-                <td>="{{ $new_nsfp_nomor }}"</td>
+                <td>'{{ $new_nsfp_nomor }}</td>
                 <td>{{ date('n', strtotime($item->tgl_invoice)) }}</td>
                 <td>{{ date('Y', strtotime($item->tgl_invoice)) }}</td>
                 <td>{{ date('d/m/Y', strtotime($item->tgl_invoice)) }}</td>
