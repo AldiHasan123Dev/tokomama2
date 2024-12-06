@@ -22,6 +22,19 @@
             <th>REFERENSI</th>
             <th>KODE_DOKUMEN_PENDUKUNG</th>
         </tr>
+        <tr>
+            <th>OF</th>
+            <th>KODE_OBJEK</th>
+            <th>NAMA</th>
+            <th>HARGA_SATUAN</th>
+            <th>JUMLAH_BARANG</th>
+            <th>HARGA_TOTAL</th>
+            <th>DISKON</th>
+            <th>DPP</th>
+            <th>PPN</th>
+            <th>TARIF_PPNBM</th>
+            <th>PPNBM</th>
+        </tr>
     </thead>
     <tbody>
         @php
@@ -65,7 +78,7 @@
                     @if ($item->transaksi->barang->status_ppn == 'ya')
                         {{ round($total * ($item->transaksi->barang->value_ppn / 100)) }}
                     @else
-                        {{ $total }}
+                        {{ $total *  (11/100) }}
                     @endif
                 </td>
                 @php
@@ -100,11 +113,13 @@
                         @if ($of->transaksi->barang->status_ppn == 'ya')
                             {{ round(($of->transaksi->harga_jual * $of->transaksi->jumlah_jual) * ($item->transaksi->barang->value_ppn / 100)) }}
                         @else
-                            {{ $of->transaksi->harga_jual * $of->transaksi->jumlah_jual }}
+                            {{  $of->transaksi->harga_jual * $of->transaksi->jumlah_jual  }}
                         @endif
                     </td>
-                    <td></td>
-                    <td></td>
+                    <td>
+                        0
+                    </td>
+                    <td>0</td>
                 </tr>
             @endforeach
         @endforeach
