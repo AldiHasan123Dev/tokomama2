@@ -113,13 +113,13 @@
                         @if ($of->transaksi->barang->status_ppn == 'ya')
                             {{ round(($of->transaksi->harga_jual * $of->transaksi->jumlah_jual) * ($item->transaksi->barang->value_ppn / 100)) }}
                         @else
-                            {{  $of->transaksi->harga_jual * $of->transaksi->jumlah_jual  }}
+                            {{  ($of->transaksi->harga_jual * $of->transaksi->jumlah_jual) * (11/100)  }}
                         @endif
                     </td>
                     <td>
                         0
                     </td>
-                    <td>0</td>
+                    <td></td>
                 </tr>
             @endforeach
         @endforeach
