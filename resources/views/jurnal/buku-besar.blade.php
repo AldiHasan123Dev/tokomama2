@@ -39,6 +39,13 @@
             </div>
 
             <style>
+                #table-buku-besar tbody tr.highlight-row {
+                background-color: #d4edda;
+                /* Hijau muda */
+                color: #155724;
+                /* Hijau gelap untuk teks */
+            }
+
                 .table-custom {
                     width: 100%;
                     border-collapse: collapse;
@@ -298,6 +305,15 @@
         $(document).ready(function() {
             $('.js-example-basic-single').select2();
 
+            $('#table-buku-besar tbody').on('click', 'tr', function() {
+                const row = table.row(this).data();
+
+                // Hapus latar belakang hijau dari semua baris sebelumnya
+                $('#table-buku-besar tbody tr').removeClass('highlight-row');
+
+                // Tambahkan latar belakang hijau ke baris yang diklik
+                $(this).addClass('highlight-row');
+            });
             //const date = new Date();
             //const month = date.getMonth() //+ 1;
             //const year = date.getFullYear();
