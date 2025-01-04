@@ -423,6 +423,22 @@
         </div>
     </x-keuangan.card-keuangan>
     <script>
+        document.getElementById('tanggal_jurnal').addEventListener('change', function () {
+        const dateInput = this.value; // Ambil nilai dari input date
+        if (dateInput) {
+            const year = new Date(dateInput).getFullYear().toString().slice(-2); // Ambil 2 digit tahun
+            const select = document.getElementById('tipe'); // Ambil elemen select
+            const options = select.querySelectorAll('option'); // Ambil semua opsi
+            
+            // Loop untuk memperbarui tahun di setiap opsi
+            options.forEach(option => {
+                if (option.value) { // Abaikan opsi kosong
+                    option.value = option.value.replace(/\/\d{2}$/, `/${year}`); // Perbarui value
+                    option.textContent = option.textContent.replace(/\/\d{2}$/, `/${year}`); // Perbarui teks
+                }
+            });
+        }
+    });
         let totaltdtc = 0;
         let totaltd = 0;
         let totaltc = 0;
