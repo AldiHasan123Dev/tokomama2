@@ -1158,15 +1158,18 @@ class JurnalController extends Controller
                     ->with(['suratJalan.customer', 'barang', 'suppliers'])
                     ->get();
 
-                
-                    $barang = optional(optional($invoiceExternal[0])->barang)->nama;
-                    $supplier = optional(optional($invoiceExternal[0])->suppliers)->nama;
-                    $customer = optional(optional(optional($invoiceExternal[0])->suratJalan)->customer)->nama;
-                    $quantity = optional($invoiceExternal[0])->jumlah_jual;
-                    $satuan = optional($invoiceExternal[0])->satuan_jual;
-                    $hargabeli = optional($invoiceExternal[0])->harga_beli;
-                    $hargajual = optional($invoiceExternal[0])->harga_jual;                    
-                    $ket = optional($invoiceExternal[0])->keterangan;
+                // Mengambil elemen pertama dengan aman
+                $invoice = $invoiceExternal->first();
+
+                $barang = optional(optional($invoice)->barang)->nama ?? null;
+                $supplier = optional(optional($invoice)->suppliers)->nama ?? null;
+                $customer = optional(optional(optional($invoice)->suratJalan)->customer)->nama ?? null;
+                $quantity = optional($invoice)->jumlah_jual ?? null;
+                $satuan = optional($invoice)->satuan_jual ?? null;
+                $hargabeli = optional($invoice)->harga_beli ?? null;
+                $hargajual = optional($invoice)->harga_jual ?? null;
+                $ket = optional($invoice)->keterangan ?? null;
+
                     $keterangan = $request->keterangan;
 
                 if (str_contains($request->keterangan, '[1]')) {
