@@ -186,7 +186,20 @@
                     @foreach ($data as $item)
                         <tr>
                             <td><button class="text-yellow-400"
-                                    onclick="editJurnal( '{{ $item->id }}', '{{ $item->nomor }}', '{{ $item->tgl }}', '{{ $item->debit }}', '{{ $item->kredit }}', '{{ $item->keterangan }}', '{{ $item->invoice }}', '{{ $item->invoice_external }}', '{{ $item->nopol }}', '{{ $item->tipe }}', '{{ $item->coa_id }}', '{{ $item->nama_akun }}', '{{ $item->no_akun }}', '{{ $item->keterangan_buku_besar_pembantu }}')"><i
+                                    onclick="editJurnal( '{{ addslashes($item->id) }}',
+            '{{ addslashes($item->nomor) }}',
+            '{{ addslashes($item->tgl) }}',
+            '{{ addslashes($item->debit) }}',
+            '{{ addslashes($item->kredit) }}',
+            '{{ addslashes($item->keterangan) }}',
+            '{{ addslashes($item->invoice) }}',
+            '{{ addslashes($item->invoice_external) }}',
+            '{{ addslashes($item->nopol) }}',
+            '{{ addslashes($item->tipe) }}',
+            '{{ addslashes($item->coa_id) }}',
+            '{{ addslashes($item->nama_akun) }}',
+            '{{ addslashes($item->no_akun) }}',
+            '{{ addslashes($item->keterangan_buku_besar_pembantu) }}')"><i
                                         class="fa-solid fa-pencil"></i></button> |
                                 <button id="delete-faktur-all" onclick="deleteItemJurnal('{{ $item->id }}')"
                                     class="text-red-600 font-semibold mb-3 self-end"><i
@@ -532,7 +545,7 @@ $('#tambah_g').on('click', function() {
                    <td class="text-center align-middle">
                         <button class="text-green-500"
                                 onclick="tambahJurnal('${latestId}','{{ $item->nomor }}', '{{ $item->tipe }}', '{{ $item->tgl }}', '{{ $item->invoice }}', '{{ $item->invoice_external }}', 
-                                 '{{ $item->nopol }}', '{{ $item->keterangan }}', {{ $item->no }}, '{{ $item->keterangan_buku_besar_pembantu }}', {{ $item->id_transaksi }})">
+                                 '{{ $item->nopol }}', '{{ ($item->keterangan) }}', {{ $item->no }}, '{{ $item->keterangan_buku_besar_pembantu }}', {{ $item->id_transaksi }})">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </td>

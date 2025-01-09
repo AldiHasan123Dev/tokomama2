@@ -3,89 +3,91 @@
     <x-keuangan.card-keuangan>
         <style>
             .modal {
-            top: 0;
-            left: 0;
-            width: 40%;
-            z-index: 1000;  
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 800px;
-            position: relative;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            font-family: Arial, sans-serif;
-        }
-        .kembali-button {
-    display: inline-block; 
-    padding: 12px 10px; 
-    background-color: #ad0f0f; 
-    color: white; 
-    text-decoration: none; 
-    border-radius: 8px;
-    transition: background-color 0.3s;
-}
+                top: 0;
+                left: 0;
+                width: 40%;
+                z-index: 1000;
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                max-width: 800px;
+                position: relative;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                font-family: Arial, sans-serif;
+            }
 
-.kembali-button:hover {
-    background-color: #761408; 
-}
-      
+            .kembali-button {
+                display: inline-block;
+                padding: 12px 10px;
+                background-color: #ad0f0f;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                transition: background-color 0.3s;
+            }
 
-        .close-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            background: none;
-            border: none;
-            color: #333;
-            cursor: pointer;
-        }
+            .kembali-button:hover {
+                background-color: #761408;
+            }
 
-        /* Form labels and containers */
-        .form-label {
-            display: block;
-            font-weight: bold;
-            margin-top: 15px;
-            margin-bottom: 5px;
-        }
 
-        .select-field {
-            width: 90%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-top: 5px;
-            font-size: 14px;
-        }
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                font-size: 20px;
+                background: none;
+                border: none;
+                color: #333;
+                cursor: pointer;
+            }
 
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-top: 5px;
-            font-size: 14px;
-        }
+            /* Form labels and containers */
+            .form-label {
+                display: block;
+                font-weight: bold;
+                margin-top: 15px;
+                margin-bottom: 5px;
+            }
 
-        /* Submit button */
-        .submit-button {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
+            .select-field {
+                width: 90%;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                margin-top: 5px;
+                font-size: 14px;
+            }
 
-        /* Label for extra info */
-        .label-info {
-            font-size: 12px;
-            color: red;
-        }
+            .input-field {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                margin-top: 5px;
+                font-size: 14px;
+            }
+
+            /* Submit button */
+            .submit-button {
+                display: block;
+                width: 100%;
+                padding: 12px;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                margin-top: 20px;
+            }
+
+            /* Label for extra info */
+            .label-info {
+                font-size: 12px;
+                color: red;
+            }
+
             /* Highlight baris yang dipilih */
             #coa_table tbody tr.highlight-row {
                 background-color: #d4edda;
@@ -106,7 +108,7 @@
                 /* Atur lebar tabel sesuai kontainer */
             }
 
-            
+
 
             /* Kelas untuk tombol coklat */
             .btn-coklat {
@@ -204,8 +206,9 @@
             <a href="{{ route('jurnal.jurnal-merger') }}">
                 <button class="btn bg-gray-500 text-white font-bold hover:bg-gray-700 mb-2px">Merge Jurnal</button>
             </a>
-            
-                <button class="btn bg-red-500 text-white font-bold hover:bg-gray-700 mb-2px" id="ipt_jurnal">Export Jurnal</button>
+
+            <button class="btn bg-red-500 text-white font-bold hover:bg-gray-700 mb-2px" id="ipt_jurnal">Export
+                Jurnal</button>
 
             <div class="flex flex-row mb-16 mt-8">
                 <label for="month" class="font-bold mt-2">Bulan:</label>
@@ -215,7 +218,7 @@
                     @endphp
                     <form action="" method="GET">
                         <input type="hidden" name="month" value="{{ $i }}">
-                        <input type="hidden" name="year" value="{{ date('Y') }}">
+                        <input type="hidden" name="year" value="{{ date('Y') }}"class="year-input">
                         <button
                             class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1 
                                 {{ request('month') == $i ? 'bg-green-300 text-white' : '' }}">
@@ -226,7 +229,7 @@
 
                 <div class="w-full ml-10 mt-3">
                     <b>Tahun : </b>
-                    <select class="js-example-basic-single w-1/2" name="akun" id="thn">
+                    <select id="thn" class="w-1/2 select2">
                         <option selected value="{{ date('Y') }}">{{ date('Y') }}</option>
                         @for ($year = date('Y'); $year >= 2024; $year--)
                             <option value="{{ $year }}">{{ $year }}</option>
@@ -250,10 +253,10 @@
                             <form action="" method="GET" class="inline-block">
                                 <input type="hidden" name="tipe" value="{{ $type }}">
                                 <input type="hidden" name="month" value="{{ request('month') }}">
-                                <input type="hidden" name="year" value="{{ date('Y') }}">
+                                <input type="hidden" name="year" value="{{ request('year') }}" class="year-input">
                                 <button type="submit"
                                     class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1
-                                        {{ request('tipe') == $type ? 'bg-green-300 text-white' : '' }}">
+            {{ request('tipe') == $type ? 'bg-green-300 text-white' : '' }}">
                                     {{ $type }}
                                 </button>
                             </form>
@@ -272,15 +275,17 @@
             <div class="bg-gray-50 mt-5 p-4 rounded shadow-sm">
                 <div class="mb-4">
                     <label for="searchByNomor" class="font-weight-bold mr-2">Cari Berdasarkan Nomor Voucher:</label>
-                    <input type="text" id="searchByNomor" class="input-field form-control" placeholder="Masukkan nomor jurnal...">
+                    <input type="text" id="searchByNomor" class="input-field form-control"
+                        placeholder="Masukkan nomor jurnal...">
                 </div>
                 <div class="mb-4">
                     <label for="searchByKeterangan" class="font-weight-bold mr-2">Cari Berdasarkan Keterangan:</label>
-                    <input type="text" id="searchByKeterangan" class="input-field form-control" placeholder="Masukkan keterangan jurnal...">
+                    <input type="text" id="searchByKeterangan" class="input-field form-control"
+                        placeholder="Masukkan keterangan jurnal...">
                 </div>
             </div>
-            
-                
+
+
             <div class="dataTable-container">
                 <table id="coa_table" class="dataTable cell-border hover display nowrap compact">
                     <!-- head -->
@@ -290,25 +295,25 @@
                             </th>
                             <th class="text-center">Tipe
                             </th>
-                            <th class="text-center">Nomor 
+                            <th class="text-center">Nomor
                             </th>
-                            <th class="text-center">No. Akun 
+                            <th class="text-center">No. Akun
                             </th>
-                            <th class="text-center">Nama Akun 
+                            <th class="text-center">Nama Akun
                             </th>
-                            <th class="text-center">Invoice 
+                            <th class="text-center">Invoice
                             </th>
-                            <th class="text-center">Debit 
+                            <th class="text-center">Debit
                             </th>
                             <th class="text-center">Kredit
                             </th>
-                            <th class="text-center">Keterangan 
+                            <th class="text-center">Keterangan
                             </th>
-                            <th class="text-center">Invoice Supplier 
+                            <th class="text-center">Invoice Supplier
                             </th>
                             <th class="text-center">Nopol
                             </th>
-                            <th class="text-center">Kaitan BB Pembantu 
+                            <th class="text-center">Kaitan BB Pembantu
                             </th>
                             <th class="hidden">no</th>
                         </tr>
@@ -404,20 +409,21 @@
     <script src="https://cdn.datatables.net/2.1.0/js/dataTables.tailwindcss.js"></script>
     <script>
         $(document).ready(function() {
+            $('.select2').select2();
             var table = $('#coa_table').DataTable({
                 pageLength: 20, // Batas data per halaman
                 lengthMenu: [20, 50, 100, 150], // Pilihan jumlah data per halaman
                 ordering: false,
-                scrollX: true, 
+                scrollX: true,
             });
             var MonJNL = $('#monitoring_JNL').DataTable({})
-            
+
             $('#searchByNomor').on('keyup', function() {
-                    table.columns(2).search(this.value).draw();
-                });
-                $('#searchByKeterangan').on('keyup', function() {
-                    table.columns(8).search(this.value).draw();
-                });
+                table.columns(2).search(this.value).draw();
+            });
+            $('#searchByKeterangan').on('keyup', function() {
+                table.columns(8).search(this.value).draw();
+            });
             $('#coa_table tbody').on('click', 'tr', function() {
                 const row = table.row(this).data();
 
@@ -434,25 +440,23 @@
                     .id));
             });
 
-            $(`#thn`).on(`change`, function() {
-                $(`#y1`).val($(this).val())
-                $(`#y2`).val($(this).val())
-                $(`#y3`).val($(this).val())
-                $(`#y4`).val($(this).val())
-                $(`#y5`).val($(this).val())
-                $(`#y6`).val($(this).val())
-                $(`#y7`).val($(this).val())
-                $(`#y8`).val($(this).val())
-                $(`#y9`).val($(this).val())
-                $(`#y10`).val($(this).val())
-                $(`#y11`).val($(this).val())
-                $(`#y12`).val($(this).val())
-                $(`#y2-1`).val($(this).val())
-                $(`#y2-2`).val($(this).val())
-                $(`#y2-3`).val($(this).val())
-                $(`#y2-4`).val($(this).val())
-                $(`#y2-5`).val($(this).val())
-            })
+            // Mengupdate nilai tahun untuk semua input dengan kelas 'year-input'
+            $('#thn').on('change', function() {
+                var selectedYear = $(this).val();
+
+                // Mengupdate nilai 'year' pada semua input hidden dengan kelas 'year-input'
+                $('.year-input').val(selectedYear);
+
+                // Update nilai untuk elemen lain yang diperlukan (misal ID: y1, y2, y3, ...)
+                for (var i = 1; i <= 12; i++) {
+                    $('#y' + i).val(selectedYear);
+                }
+
+                // Update untuk elemen yang memiliki ID seperti y2-1, y2-2, ...
+                for (var j = 1; j <= 5; j++) {
+                    $('#y2-' + j).val(selectedYear);
+                }
+            });
 
 
 
@@ -481,8 +485,8 @@
                 });
             });
         });
-            $('#ipt_jurnal').click(function() {
-                $('#exp-jurnal').html(`
+        $('#ipt_jurnal').click(function() {
+            $('#exp-jurnal').html(`
             <dialog id="my_modal_5" class="modal">
                 <div class="modal-box w-11/12 max-w-2xl pl-10">
                     <form method="dialog">
@@ -504,11 +508,11 @@
             </dialog>
         `);
 
-                // Menampilkan modal
-                document.getElementById('my_modal_5').showModal();
-                $('#close-modal').click(function() {
-                    document.getElementById('my_modal_5').close(); // Menutup modal
-                });
+            // Menampilkan modal
+            document.getElementById('my_modal_5').showModal();
+            $('#close-modal').click(function() {
+                document.getElementById('my_modal_5').close(); // Menutup modal
+            });
         });
     </script>
 
