@@ -1,27 +1,107 @@
 <x-Layout.layout>
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Preview Invoice</x-slot:tittle>
-        <div class="header" style="margin-top:10px">
-            <table style="width: 100%; border-collapse: collapse;">
+        <x-slot:tittle>Preview Invoice</x-slot:tittle          
+        <div class="header">
+            <div style=" display: flex; border: solid; justify-content: space-between; padding: 5px; margin-top: 30px;">
+                <table style="width: 50%; border-collapse: collapse;" border="1">
+                    <thead>
+                        <tr>
+                            <td style="font-weight: bold; padding: 0; text-align: center;">
+                                <img src="{{ asset('assets/img/Tokomama4 (1).PNG') }}" alt="Logo" style="height: 100px; margin-bottom: 1px; margin-left: 60px">
+                                TOKO MAMA <br>
+                                Jayapura Selatan - Papua <br>
+                            </td>
+                        </tr>
+                    </thead>                    
+                </table>                
+                <div style="margin-right: 100px; width: 48%;">
+                <table style="width: 120%; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
+                    <thead>
+                        <tr>
+                            <td style="font-weight: bold;">Bill To :</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold; margin:2px">{{ $transaksi->suratJalan->customer->nama }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">{{ $transaksi->suratJalan->customer->no_telp }}</td>
+                        </tr>
+                    </thead>
+                </table>
+                <table style="width: 120%; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
+                    <thead>
+                        <tr>
+                            <td style="font-weight: bold;">{{ $transaksi->suratJalan->customer->alamat_npwp }}</td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div style="margin-right: 50px; width: 108%; margin-top: 20px;">
+            <table style="width: 100%; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
                 <thead>
                     <tr>
-                        <th>
-                            <img src="{{ asset('logo_sb.svg') }}" class="logo" style="width: 20%; height: 20%; margin:10px">
-                        </th>
-                        <td style="font-weight: bold; font-size: 1.2rem; text-align:center;">CV. SARANA BAHAGIA</td>
-                        
-                    </tr>
-                    <tr>
-                        <td style="font-size: 1rem; margin:2px">Jl. Kalianak 55 Blok G, Surabaya</td>
-                        <td style="font-weight: bold; font-size: 1.2rem; text-align: center;"><u>PREVIEW INVOICE</u></td>
-                    </tr>
-                    <tr>
-                        <td style="font-size: 1rem;">Telp: 031-7495507</td>
-                        <td style="text-align: center; font-size: 1rem">NO : {{ $inv ?? '-' }}</td>
+                        <td style="font-weight: bold; text-align: center">SALES INVOICES</td>
                     </tr>
                 </thead>
             </table>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+<div style="display: flex; flex-direction: column; gap: 10px;">
+    <!-- Baris Pertama: NO INVOICE dan TGL INVOICE -->
+    <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+        <!-- Tabel NO INVOICE -->
+        <table style="width: 48%; border-collapse: collapse;" border="1">
+            <thead>
+                <tr>
+                    <th style="font-weight: bold; border: solid; padding: 8px; min-width: 150px; text-align: left; white-space: nowrap;">
+                        Tgl Invoice : {{ $tgl_inv2 }}
+                    </th>
+                </tr>
+            </thead>
+        </table>
+
+        <!-- Tabel TGL INVOICE -->
+        <table style="width: 48%; border-collapse: collapse;" border="1">
+            <thead>
+                <tr>
+                    <th style="font-weight: bold; border: solid; padding: 8px; min-width: 150px; text-align: center; white-space: nowrap;">
+                        No Invoice : {{ $inv }}
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <!-- Baris Kedua: KETERANGAN dan TOTAL -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 10px">
+        <!-- Tabel KETERANGAN -->
+        <table style="width: 48%; border-collapse: collapse;" border="1">
+            <thead>
+                <tr>
+                    <th style="font-weight: bold; border: solid; padding: 8px; min-width: 150px; text-align: left; white-space: nowrap;">
+                        Terms : {{ $transaksi->suratJalan->customer->top }}
+                    </th>
+                </tr>
+            </thead>
+        </table>
+
+        <!-- Tabel TOTAL -->
+        <table style="width: 48%; border-collapse: collapse;" border="1">
+            <thead>
+                <tr>
+                    <th style="font-weight: bold; border: solid; padding: 8px; min-width: 150px; text-align: center; white-space: nowrap;">
+                       Tgl SJ : {{ $transaksi->suratJalan->created_at->format('Y-m-d') }}
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+            
+            </div>
+                        
+            </div>
+            
+            </div>            
+            {{-- <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <tbody>
                     <tr>
                         <td class="header-cell" style="font-size: 1rem; text-align:left">Customer :
@@ -35,10 +115,8 @@
                             {{ $transaksi->suratJalan->no_po ?? '-' }}</td>
                     </tr>
                 </tbody>
-            </table>
-        </div>
-        <main>
-            <br>
+            </table> --}}
+        <main style="margin: 15px; margin-bottom: 30px;">
 
             @php
                 $items_per_page = 11;
@@ -112,15 +190,21 @@
                     $end_date = min($start_date + $dates_per_page, $total_dates);
                 @endphp
 
-<table style="width: 100%;  border: solid; border-collapse: collapse; margin-top: 20px;" border="1">
+<table style="width: 100%; margin-top: 25px; margin: 5px; border: solid; border-collapse: collapse; margin-top: 5px;" border="1">
+    @php   
+    $end_date = min($start_date + $dates_per_page, $total_dates);
+                @endphp
+
+<table style="width: 100%;  border: solid; border-collapse: collapse; margin-top: 5px;" border="1">
                     <thead>
                         <tr>
                             <th style="text-align: center; border:solid; padding: 8px;">No.</th>
-                            <th style="text-align: center;  border:solid; padding: 8px;">Tgl Barang Masuk</th>
+                           
                             <th style="text-align: center;  border:solid; padding: 8px;">Nama Barang</th>
-                            <th style="text-align: center;  border:solid; padding: 8px;">No-Cont</th>
-                            <th style="text-align: center;  border:solid; padding: 8px;">Quantity</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">QTY</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">Unit</th>
                             <th style="text-align: center;  border:solid; padding: 8px;">Harga Satuan(Rp)</th>
+                            <th style="text-align: center;  border:solid; padding: 8px;">PO</th>
                             <th style="text-align: center;  border:solid; padding: 8px;">Total</th>
                         </tr>
                     </thead>
@@ -140,8 +224,7 @@
                                     @endphp
                                     <tr>
                                         <td style="border:solid; text-align: center; padding:2px;">{{ $index++ }}</td>
-                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ $items['tgl_sj'][$idx] }}</td>
-                                        <td style=" border:solid; text-align: center;">
+                                        <td style=" border:solid; padding-left: 10px;">
                                             {{ $items['nama_barang'][$idx] }}
                                             ({{ ($items['jumlah_jual'][$idx]) }} {{ $items['satuan_jual'][$idx] }})
                                             @if (str_contains($items['satuan_jual'][$idx], $items['nama_satuan'][$idx]))
@@ -162,9 +245,10 @@
                                             @endif
                                         </td>
                                         
-                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ $items['no_cont'][$idx] }}</td>
-                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ number_format($items['jumlah'][$idx], 0, ',', '.') }} {{ $items['satuan_jual'][$idx] }}</td>
+                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ number_format($items['jumlah'][$idx], 0, ',', '.') }}</td>
+                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ $items['satuan_jual'][$idx] }}</td>
                                         <td style=" border:solid; text-align: right; padding: 8px;">{{ number_format($items['harga_jual'][$idx], 0, ',', '.') }}</td>
+                                        <td style=" border:solid; text-align: center; padding: 8px;">{{ $items['no_po'][$idx] }}</td>
                                         <td style=" border:solid; text-align: right; padding: 8px;">{{ number_format($items['harga_jual'][$idx] * $items['jumlah'][$idx], 0, ',', '.') }}</td>
                                         </td>
                                     </tr>
@@ -173,8 +257,73 @@
                         @endforeach
             @endfor
             <tr>
-            <td colspan="6" style=" border:solid; text-align: right; padding: 10px;">
-                DPP
+                <td colspan="5">  <p style="font-weight: bold; padding-left: 30px; font-size: 0.8rem"> 
+                    Terbilang:
+                    @php
+    $dpp = 11/12 * $total;
+@endphp
+                    @php
+    // Inisialisasi variabel untuk menentukan status PPN
+    $total_ppn = 0; // Default nilai PPN
+
+    // Loop melalui data untuk menghitung nilai PPN
+    foreach ($data as $id_transaksi => $items) {
+        if (isset($items['invoice'])) {
+            foreach ($items['invoice'] as $idx => $invoice) {
+                // Jika salah satu item memiliki status PPN 'ya', hitung nilai PPN
+                if ($items['status_ppn'][$idx] == 'ya') {
+                    $ppn_value = ($items['value_ppn'][$idx] / 100) * $dpp;
+                    $total_ppn += $ppn_value; // Keluar dari kedua loop jika status PPN ditemukan
+                }
+            }
+        }
+    }
+@endphp 
+                    @php
+                    // Inisialisasi variabel untuk menentukan status PPN
+                    $has_ppn = false; // Status PPN, default tidak ada PPN
+                
+                    // Loop melalui data untuk memeriksa status PPN
+                    foreach ($data as $id_transaksi => $items) {
+                        if (isset($items['invoice'])) {
+                            foreach ($items['invoice'] as $idx => $invoice) {
+                                // Jika salah satu item memiliki status PPN 'ya', set $has_ppn menjadi true
+                                if ($items['status_ppn'][$idx] == 'ya') {
+                                    $has_ppn = true;
+                                    break 2; // Keluar dari kedua loop jika status PPN ditemukan
+                                }
+                            }
+                        }
+                    }
+                
+                    // Hitung total PPN jika ada
+                    $total_with_ppn = $has_ppn ? ($total + $total_ppn) : $total; 
+                @endphp
+                    @if($barang->status_ppn == 'ya')
+                        {{ ucwords(strtolower(terbilang(round($total_with_ppn * ($items['value_ppn'][$idx] / 100))))) }} Rupiah
+                    @else
+                        {{ ucwords(strtolower(terbilang(round($total_with_ppn)))) }} Rupiah
+                    @endif
+                </p>
+                <table style="font-size: 0.8rem;">
+                    <tr>
+                        <th style="text-align: left; padding-left: 50px; font-style: italic;">Pembayaran ke rekening:</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-left: 50px; font-style: italic;">TOKO MAMA</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-left: 50px; font-style: italic;">Mandiri (Cab.Indrapura) : 14.000.45006.005</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-left: 50px;"></th>
+                    </tr>
+                </table></td>
+            <td colspan="1" style=" border:solid; text-align: right; padding: 10px;">
+                Subtotal
+                <br>
+                DPP 11/12
                 <br>
                 @php
                     // Inisialisasi variabel untuk menentukan status PPN
@@ -196,15 +345,20 @@
                 
                 {{-- Menampilkan status PPN --}}
                 @if($ppn_status == 'PPN 11%')
-                    PPN 11%
+                    PPN 12%
                 @else
-                    PPN 11% (DIBEBASKAN)
+                    PPN 12% (DIBEBASKAN)
                 @endif
                 
             </td>
             <td style=" border:solid; text-align: right; padding: 8px;">
 {{-- Menampilkan total tanpa PPN --}}
 {{ number_format($total, 0, ',', '.') }}
+<br style=" border:solid; text-align: right;">
+@php
+    $dpp = 11/12 * $total;
+@endphp
+{{ number_format($dpp, 0, ',', '.') }}
 <br style=" border:solid; text-align: right;">
 
 @php
@@ -217,7 +371,7 @@
             foreach ($items['invoice'] as $idx => $invoice) {
                 // Jika salah satu item memiliki status PPN 'ya', hitung nilai PPN
                 if ($items['status_ppn'][$idx] == 'ya') {
-                    $ppn_value = ($barang->value_ppn / 100) * $items['harga_jual'][$idx] * $items['jumlah'][$idx];
+                    $ppn_value = ($items['value_ppn'][$idx] / 100) * $dpp;
                     $total_ppn += $ppn_value; // Keluar dari kedua loop jika status PPN ditemukan
                 }
             }
@@ -229,7 +383,7 @@
 @if($total_ppn > 0)
     {{ number_format($total_ppn, 0, ',', '.') }}
 @else
-    -
+    0
 @endif
 
             </td>
@@ -268,7 +422,27 @@
         </tr>
     </tbody>
 </table>
-<h1 style="text-align: right; margin-right:50px; padding: 8px; font-size: 1rem"> Surabaya, {{ $tgl_inv1 }}</h1>
+<div class="footer">
+        <table style="font-size: 0.8rem; margin-left: 870px; margin-top: 20px">
+            <tr>
+                <th style="text-align: left; padding-left: 50px; font-style: italic;"></th>
+                <td style="align-items:right ;text-align: center;">Jayapura, {{ $tgl_inv1 }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: left; padding-left: 50px; font-style: italic;"></th>
+                <td style="text-align: center;">Hormat Kami</td>
+            </tr>
+            <tr>
+                <th style="text-align: left; padding-left: 50px; font-style: italic;"></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th style="text-align: left; padding-left: 50px;"></th>
+                <th style="padding-top:30px">(Dwi Satria Wardana)</th>
+            </tr>
+        </table>
+
+</div>
             <form action="{{ route('invoice-transaksi.store') }}" method="post" id="form">  
                 @csrf
                 @foreach ($data as $id_transaksi => $items)
@@ -305,6 +479,7 @@
             </form>
             
             </main>
+        </div>
     </x-keuangan.card-keuangan>
 
     <x-slot:script>

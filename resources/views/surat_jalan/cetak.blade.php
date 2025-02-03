@@ -68,7 +68,7 @@
 
         .footer-content {
             position:fixed;
-            bottom: -30px;
+            bottom: -1px;
             padding-top:14px;
             margin-left:15px;
             width:100%;
@@ -93,7 +93,7 @@
                     <th rowspan="4" style="width: 20%">
                         <img src="{{ public_path('logo_sb.svg') }}" class="logo">
                     </th>
-                    <td>CV. SARANA BAHAGIA</td>
+                    <td>TOKO MAMA</td>
                     <td></td>
                     <td>Kepada:</td>
                 </tr>
@@ -119,6 +119,10 @@
                 <tr class="m-5">
                     <th>PO</th>
                     <td style="font-weight: bold" colspan="2">No: {{ $surat_jalan->no_po }} </td>
+                </tr>
+                <tr class="mt-5">
+                    <th>No. Pol</th>
+                    <td style="font-weight: bold" colspan="2">No: {{ $surat_jalan->no_pol }} </td>
                 </tr>
             </thead>
         </table>
@@ -164,6 +168,7 @@
                 }
             }
         @endphp
+        <br>
         <table class="table border border-black">
             <thead>
                 <tr>
@@ -184,10 +189,10 @@
                             <span>{{ $i + 1 }}</span><br>
                         </td>
                         <td class="text-center" style="vertical-align: top; border-right: 1px solid black">
-                            <span>{{ number_format($item->jumlah_beli) }}</span>
+                            <span>{{ number_format($item->jumlah_jual) }}</span>
                         </td>
                         <td class="text-center" style="vertical-align: top; border-right: 1px solid black">
-                            <span>{{ $item->satuan_beli }}</span><br>
+                            <span>{{ $item->satuan_jual }}</span><br>
                         </td>
                         <td class="px-2" style="padding: 0px 5px">
                             <div class="flex justify-between mt-3">
@@ -217,37 +222,6 @@
                         @endif
                     </tr>
                 @endfor
-
-                @if ($page == $pages)
-                    <tr>
-                        <td style="vertical-align: top; border-right: 1px solid black" rowspan="5"></td>
-                        <td style="vertical-align: top; border-right: 1px solid black" rowspan="5"></td>
-                        <td style="vertical-align: top; border-right: 1px solid black" rowspan="5"></td>
-                        <td class="border border-black py-1" style="padding: 0 5px;">
-                            Nama Kapal: {{ $surat_jalan->nama_kapal }} 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black py-1" style="padding: 0 5px;">
-                            No. Cont: {{ $surat_jalan->no_cont }} 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black py-1" style="padding: 0 5px;">
-                            No. Seal: {{ $surat_jalan->no_seal }} 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black py-1" style="padding: 0 5px;">
-                            No. Pol: {{ $surat_jalan->no_pol }} 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border border-black py-1" style="padding: 0 5px;">
-                            No. Job: {{ $surat_jalan->no_job }} 
-                        </td>
-                    </tr>
-                @endif
             </tbody>
         </table>
 
@@ -258,8 +232,8 @@
         </div>
 
         @if ($page == $pages)
-            <div class="footer-content">
-                <p>Note &nbsp; : &nbsp; Barang yang diterima dalam keadaan baik dan lengkap</p>
+            <div class="footer-content" style="margin-bottom: 50px">
+                <p style="margin-left: 30px;">Note &nbsp; : &nbsp; Barang yang diterima dalam keadaan baik dan lengkap</p>
                 <table>
                     <tr>
                         <th style="width: 50%;"></th>
@@ -294,10 +268,6 @@
         @endif
     @endfor
 </div>
-
-
-
-
 </body>
 
 </html>

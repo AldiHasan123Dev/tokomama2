@@ -17,7 +17,22 @@ class InvoiceController extends Controller
     public function dataTable()
     {
         // $data = SuratJalan::query()->whereNull('invoice');
-        $query = Transaction::query()->where('sisa','>','0')->where('harga_jual','>','0')->where('harga_beli','>','0')->orderBy('created_at', 'desc')->get();
+        $query = Transaction::query()
+        ->leftJoin('invoice', 'transaksi.id', '=', 'invoice.id_transaksi') 
+        ->whereNull('invoice.id_transaksi')
+        ->whereNotNull('id_surat_jalan')
+        ->where('harga_beli', '>', 0)
+        ->orderBy('transaksi.created_at', 'desc')
+        ->select([
+            'transaksi.id', // Gunakan alias agar tidak tertimpa oleh invoice.id
+            'transaksi.*' // Pilih semua kolom dari transaksi
+        ])
+        ->get();
+    
+    $data = TransactionResource::collection($query);
+    $res = $data->toArray(request());
+    
+
         $data = TransactionResource::collection($query);
         $res =  $data->toArray(request());
 

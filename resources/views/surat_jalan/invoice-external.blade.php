@@ -49,6 +49,12 @@
             },
             {
                 search: true,
+                label: 'No BM',
+                name: 'no_bm',
+                width: 60
+            },
+            {
+                search: true,
                 label: 'Supplier',
                 name: 'supplier',
                 width: 80
@@ -69,7 +75,7 @@
             },
             {
                 search: true,
-                label: 'Jumlah Beli',
+                label: 'Jumlah Jual',
                 name: 'jumlah_beli',
                 width: 40,
                 align: 'right'
@@ -126,8 +132,6 @@
 
     // Fungsi untuk menampilkan dialog edit
     window.getData = function (
-        id_surat_jalan,
-        nomor_surat,
         id_supplier,
         nama_supplier,
         invoice_external,
@@ -170,11 +174,6 @@
             <div id="my_modal_5" title="Edit Data">
                 <form id="editForm" action="{{ route('surat-jalan-external.data.edit') }}" method="post">
                     @csrf
-                    <input type="hidden" name="id_surat_jalan" value="${id_surat_jalan}" />
-                    <label class="input border flex items-center gap-2 mt-3">
-                        Nomor Surat :
-                        <input type="text" name="nomor_surat" value="${nomor_surat}" class="border-none" readonly />
-                    </label>
                     <input type="hidden" name="id_supplier" value="${id_supplier}" />
                     <label class="input border flex items-center gap-2 mt-3">
                         Nama Supplier :

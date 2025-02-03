@@ -86,10 +86,8 @@
                         <th>Tanggal SJ</th>
                         <th>Invoice</th>
                         <th>No. Surat</th>
+                        <th>No. BM</th>
                         <th>Kepada</th>
-                        <th>Nama Kapal</th>
-                        <th>No. Count</th>
-                        <th>No. Seal</th>
                         <th>No. Pol</th>
                         <th>No. Job</th>
                         <th>Profit</th>
@@ -132,20 +130,12 @@
                         name: 'No. Surat'
                     },
                     {
+                        data: 'no_bm',
+                        name: 'No. BM'
+                    },
+                    {
                         data: 'kepada',
                         name: 'kepada'
-                    },
-                    {
-                        data: 'nama_kapal',
-                        name: 'nama_kapal'
-                    },
-                    {
-                        data: 'no_cont',
-                        name: 'no_cont'
-                    },
-                    {
-                        data: 'no_seal',
-                        name: 'no_seal'
                     },
                     {
                         data: 'no_pol',
@@ -168,7 +158,7 @@
                 ]
             });
 
-            function getData(id, invoice, nomor_surat, kepada, jumlah, satuan, nama_kapal, no_cont, no_seal, no_pol, no_job,
+            function getData(id, invoice, nomor_surat, kepada, jumlah, satuan, no_pol,
                 tgl_sj, no_po) {
 
                 $('#dialog').html(`<dialog id="my_modal_5" class="modal">
@@ -191,14 +181,6 @@
                     </select>
                          <label class="form-label">Kepada</label>
                         <input type="text" name="kepada" value="${kepada}" class="input-field" />
-                    <label class="form-label">Nama Kapal</label>
-                        <input type="text" name="nama_kapal" value="${nama_kapal}" class="input-field" />
-                    <label class="form-label">Nomor Cont</label>
-                        <input type="text" name="no_cont" value="${no_cont}" class="input-field" />
-                    <label class="form-label">Nomor Seal </label>
-                        <input type="text" name="no_seal" value="${no_seal}" class="input-field" />
-                    <label class="form-label">Nomor Seal</label>
-                        <input type="text" name="no_job" value="${no_job}" class="input-field" />
                     <label class="form-label">Nomor PO </label>
                         <input type="text" name="no_po" value="${no_po}" class="input-field" />
                     <label class="form-label">Tanggal Surat Jalan</label>

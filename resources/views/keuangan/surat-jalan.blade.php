@@ -237,7 +237,7 @@
                             alt="company_logo" class="w-32">
                     </div>
                     <div class="font-bold font-serif col-span-2">
-                        <p>CV.SARANA BAHAGIA</p>
+                        <p>TOKO MAMA</p>
                         <p>JL.Kalianak 55 BLOK G, SURABAYA</p>
                         <p>Telp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;031-123456
                         </p>

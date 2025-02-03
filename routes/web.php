@@ -14,6 +14,7 @@ use App\Http\Controllers\JurnalManualController;
 use App\Http\Controllers\NSFPController as nsfp;
 use App\Http\Controllers\KeuanganController;
 use App\Http\Controllers\LabaRugi;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\MasterController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\Neraca;
@@ -59,6 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/surat-jalan-cetak/{surat_jalan}', [SuratJalanController::class, 'cetak'])->name('surat-jalan.cetak');
     Route::get('/surat-jalan-tarif-barang', [SuratJalanController::class, 'tarif'])->name('surat-jalan.barang');
+    Route::get('/barang-masuk/harga-beli', [SuratJalanController::class, 'harga_beli'])->name('harga_beli');
     Route::get('/surat-jalan/editBarang', [SuratJalanController::class, 'editBarang'])->name('surat-jalan.editBarang');
     Route::post('/surat-jalan/editBarang', [SuratJalanController::class, 'editBarangPost'])->name('surat-jalan.editBarang');
     Route::delete('/surat-jalan/hapusBarang/', [SuratJalanController::class, 'hapusBarang'])->name('surat-jalan.hapusBarang');
@@ -69,11 +71,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/surat-jalan-external-edit', [SuratJalanController::class, 'updateInvoiceExternal'])->name('surat-jalan-external.data.edit');
     Route::post('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
     // Route::delete('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
-
+    Route::get('/bm/cetak/{id}', [StockController::class, 'cetak'])->name('cetak_nota.cetak');
+    Route::get('/barang-masuk/create', [SuratJalanController::class, 'create_bm'])->name('barang_masuk');
+    Route::get('/barang-masuk/cetak-nota', [StockController::class, 'cetak_nota'])->name('cetak_nota');
+    Route::post('/barang-masuk/store', [SuratJalanController::class, 'store_bm'])->name('barang_masuk.store');
     Route::resource('surat-jalan', SuratJalanController::class);
     Route::resource('invoice-transaksi', InvoiceController::class);
     Route::post('/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
-//    Route::resource('jurnal', JurnalController::class);
+    Route::resource('jurnal', JurnalController::class);
+    Route::get('/stock/cetak/{id}', [StockController::class, 'cetak'])->name('stock.cetak');
+    Route::post('/update-lock/{id}', [StockController::class, 'updateLock']);
     Route::get('/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
     Route::get('/data-jurnal', [JurnalController::class, 'dataJurnal'])->name('jurnal.data');
     Route::post('/jurnal-export', [JurnalController::class, 'exportJurnal'])->name('jurnal.export');
@@ -93,14 +100,15 @@ Route::middleware('auth')->group(function () {
     Route::post('jurnal-sj-whereinvext', [JurnalManualController::class, 'getInvoiceWhereNoInvExt'])->name('jurnal.sj.whereInvExt');
     Route::post('ekspedisi-data', [EkspedisiController::class, 'dataTable'])->name('ekspedisi.data');
     Route::post('transaction-data', [TransactionController::class, 'dataTable'])->name('transaksi.data');
+    Route::post('transaction-data1', [TransactionController::class, 'dataTable1'])->name('transaksi.data1');
     Route::put('transaction-update', [TransactionController::class, 'update'])->name('transaksi.update');
     // Route::get('coa', [CoaController::class,'index'])->name('jurnal.coa');
     // Route::post('coa', [CoaController::class,'statusCoa'])->name('jurnal.coa');
     Route::get('coa', [CoaController::class,'index'])->name('jurnal.coa');
-Route::post('coa', [CoaController::class,'store'])->name('jurnal.coa.store');
-Route::put('coa/{coa}', [CoaController::class,'update'])->name('jurnal.coa.update');
-Route::delete('coa/{coa}', [CoaController::class,'destroy'])->name('jurnal.coa.destroy');
-Route::get('coa/data', [CoaController::class, 'dataTable'])->name('jurnal.coa.data');
+    Route::post('coa', [CoaController::class,'store'])->name('jurnal.coa.store');
+    Route::put('coa/{coa}', [CoaController::class,'update'])->name('jurnal.coa.update');
+    Route::delete('coa/{coa}', [CoaController::class,'destroy'])->name('jurnal.coa.destroy');
+    Route::get('coa/data', [CoaController::class, 'dataTable'])->name('jurnal.coa.data');
 
     Route::post('coa', [CoaController::class,'store'])->name('jurnal.coa.store');
     Route::put('coa/{coa}', [CoaController::class,'update'])->name('jurnal.coa.update');
@@ -150,6 +158,16 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::get('data-omzet-total', 'dataOmzeTotal')->name('keuangan.data-omzet-total');
     Route::get('omzet-list', 'dataTableOmzet')->name('keuangan.omzet.datatable');
     Route::post('omzet-export', 'OmzetExportExcel')->name('keuangan.omzet.exportexcel');
+});
+
+Route::prefix('toko')->controller(StockController::class)->middleware('auth')->group(function () {
+    Route::get('/stock', 'stocks')->name('stock'); 
+    Route::post('/stock-update', 'update_stock')->name('stock.update_stock');
+    Route::get('/stock-{id}-edit', 'edit_stock')->name('stock.edit_stock');
+    Route::get('data-barang','getdataBarangOptions')->name('stock.barang-options');
+    Route::post('stock-barang_masuk', 'barang_masuk')->name('stock.barang_masuk'); 
+    Route::get('data-stock', 'dataStock')->name('stock.data');
+    Route::get('data-stock1', 'dataStock1')->name('stock.data1');
 });
 
 Route::prefix('pajak')->middleware('auth')->group(function () {

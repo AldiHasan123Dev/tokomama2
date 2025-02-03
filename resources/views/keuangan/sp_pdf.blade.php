@@ -82,7 +82,7 @@
                     <th rowspan="4" style="width: 13%; height: 15%;">
                         <img src="{{ public_path('logo_sb.svg') }}" class="logo" style="width: 60%; height: 55%;">
                     </th>
-                    <td style="font-weight: bold; font-size: 1rem;">CV. SARANA BAHAGIA</td>
+                    <td style="font-weight: bold; font-size: 1rem;">TOKO MAMA</td>
                     <td></td>
                 </tr>
                 <tr>
@@ -286,7 +286,7 @@
                         <td style="text-align: center;">Surabaya, {{ $formattedDate }}</td>
                     </tr>
                     <tr>
-                        <th style="text-align: left; padding-left: 50px; font-style: italic;">CV. Sarana Bahagia</th>
+                        <th style="text-align: left; padding-left: 50px; font-style: italic;">TOKO MAMA</th>
                         <td style="text-align: center;">Hormat Kami</td>
                     </tr>
                     <tr>

@@ -7,7 +7,7 @@
             <div class="flex h-[90vh] flex-col">
                 <div class="mx-auto mb-12">
                     <a href="index.html" class="">
-                        <img src="{{ asset('/logo_sb.svg') }}" alt="" class="inline h-7"> <span class="text-xl font-medium align-middle ltr:ml-1.5 rtl:mr-1.5 dark:text-white">Sarana Bahagia</span>
+                        <img src="{{ asset('/logo_sb.svg') }}" alt="" class="inline h-7"> <span class="text-xl font-medium align-middle ltr:ml-1.5 rtl:mr-1.5 dark:text-white">tokomama.id</span>
                     </a>
                 </div>
 

@@ -89,6 +89,9 @@
             <th>ID</th>
             <th>Nama</th>
             <th>NPWP</th>
+            <th>TOP
+
+            </th>
             <th>Email</th>
             <th>No.Telp</th>
             <th>Alamat</th>
@@ -127,6 +130,13 @@
           <span class="label-text">Nama NPWP <span class="text-red-500">*</span></span>
         </div>
         <input type="text" placeholder="Nama NPWP" name="nama_npwp"
+          class="input input-bordered w-full max-w-xs rounded-md" required />
+      </label>
+      <label class="form-control w-full max-w-xs col-start-3">
+        <div class="label">
+          <span class="label-text">TOP <span class="text-red-500">*</span></span>
+        </div>
+        <input type="text" placeholder="Nama NPWP" name="top"
           class="input input-bordered w-full max-w-xs rounded-md" required />
       </label>
       <label class="form-control w-full max-w-xs col-start-4">
@@ -188,6 +198,7 @@
                 { data: 'DT_RowIndex', name: 'number'},
                 { data: 'nama', name: 'nama' },
                 { data: 'npwp', name: 'npwp' },
+                { data: 'top', name: 'top'},
                 { data: 'email', name: 'email' },
                 { data: 'no_telp', name: 'no_telp' },
                 { data: 'alamat', name: 'alamat' },
@@ -199,7 +210,7 @@
             ]
           })
 
-          function getData(id, nama, npwp, nama_npwp, email, no_telp, alamat, alamat_npwp, kota ) 
+          function getData(id, nama, npwp, nama_npwp, email, no_telp, alamat, alamat_npwp, kota,top ) 
           {
             // alert(nama);
             $('#satu').html(`<dialog id="my_modal_5" class="modal">
@@ -217,6 +228,8 @@
                     <input type="text" name="npwp" value="${npwp}" class="input-field" />
                   <label class="form-label">Nama NPWP :</label>
                     <input type="text" name="nama_npwp" value="${nama_npwp}" class="input-field" />
+                   <label class="form-label">TOP :</label>
+                    <input type="text" name="top" value="${top}" class="input-field" />
                   <label class="form-label">Email :</label>
                     <input type="text" name="email" value="${email}" class="input-field" />
                   <label class="form-label">No.Telp :</label>

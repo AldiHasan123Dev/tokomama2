@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>SJ dan Stok Barang Belum Jadi Invoice</x-slot:tittle>
+        <x-slot:tittle>SJ ready to invoice</x-slot:tittle>
         <x-slot:button>
             <form action="{{ route('invoice-transaksi.index') }}" method="get" id="form">
                 <input type="hidden" name="id_transaksi" id="id_transaksi">
@@ -93,7 +93,7 @@
                             search: true,
                             name: 'sisa',
                             index: 'sisa',
-                            label: 'Sisa',
+                            label: 'Jml',
                             width: 50,
                             align: 'right'
                         },
@@ -135,27 +135,27 @@
                             align: 'right',
                             formatter: 'number'
                         },
-                        {
-                            search: true,
-                            name: 'nama_kapal',
-                            index: 'nama_kapal',
-                            label: 'Nama Kapal',
-                            align: 'center'
-                        },
-                        {
-                            search: true,
-                            name: 'no_cont',
-                            index: 'no_cont',
-                            label: 'No. Count',
-                            align: 'center'
-                        },
-                        {
-                            search: true,
-                            name: 'no_seal',
-                            index: 'no_seal',
-                            label: 'No. Seal',
-                            align: 'center'
-                        },
+                        // {
+                        //     search: true,
+                        //     name: 'nama_kapal',
+                        //     index: 'nama_kapal',
+                        //     label: 'Nama Kapal',
+                        //     align: 'center'
+                        // },
+                        // {
+                        //     search: true,
+                        //     name: 'no_cont',
+                        //     index: 'no_cont',
+                        //     label: 'No. Count',
+                        //     align: 'center'
+                        // },
+                        // {
+                        //     search: true,
+                        //     name: 'no_seal',
+                        //     index: 'no_seal',
+                        //     label: 'No. Seal',
+                        //     align: 'center'
+                        // },
                         {
                             search: true,
                             name: 'no_pol',

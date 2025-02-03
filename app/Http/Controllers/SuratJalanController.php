@@ -35,15 +35,40 @@ class SuratJalanController extends Controller
      */
     public function create()
     {
-        $barang = Barang::join('satuan', 'barang.id_satuan', '=', 'satuan.id')->select('barang.*', 'satuan.nama_satuan')->where('barang.status', 'AKTIF')->get();
+        $barang = Transaction::join('barang', 'transaksi.id_barang', '=', 'barang.id')
+        ->join('satuan', 'barang.id_satuan', '=', 'satuan.id')
+        ->select(
+            'barang.nama',
+            'barang.kode_objek',
+            'satuan.nama_satuan',
+            'transaksi.*'
+        )
+        ->where('barang.status', 'AKTIF')
+        ->whereNull('id_surat_jalan')
+        ->where('harga_jual',0)
+        ->where('harga_beli', '>', 0)
+        ->where('sisa', '>', 0)
+        ->whereNotNull('transaksi.stts')
+        ->get();
 
-        // dd($barang);
         $nopol = Nopol::where('status', 'aktif')->get();
         $customer = Customer::all();
         $ekspedisi = Ekspedisi::all();
         $satuan = Satuan::all();
         $supplier = Supplier::all();
         return view('surat_jalan.create', compact('barang', 'nopol', 'customer', 'ekspedisi', 'satuan', 'supplier'));
+    }
+
+    public function create_bm()
+    {
+        $barang = Barang::join('satuan', 'barang.id_satuan', '=', 'satuan.id')->select('barang.*', 'satuan.nama_satuan')->where('barang.status', 'AKTIF')->get();
+        // dd($barang);
+        $nopol = Nopol::where('status', 'aktif')->get();
+        $customer = Customer::all();
+        $ekspedisi = Ekspedisi::all();
+        $satuan = Satuan::all();
+        $supplier = Supplier::all();
+        return view('surat_jalan.create_bm', compact('barang', 'nopol', 'customer', 'ekspedisi', 'satuan', 'supplier'));
     }
 
     /**
@@ -53,73 +78,160 @@ class SuratJalanController extends Controller
     {
         $request->validate([
             'id_customer' => 'required|exists:customer,id',
-            'kepada' => 'required|exists:ekspedisi,nama', // Validasi untuk memastikan ekspedisi ada di database
+            'kepada' => 'required|exists:ekspedisi,nama',
             'no_pol' => 'required|exists:nopol,nopol',
         ], [
             'id_customer.required' => 'ID Customer tidak valid. Silakan pilih dari daftar yang tersedia.',
-            'id_customer.exists' => 'Customer tidak valid. Silakan pilih dari daftar yang tersedia 1.',
+            'id_customer.exists' => 'Customer tidak valid. Silakan pilih dari daftar yang tersedia.',
             'no_pol.required' => 'Nomor Polisi wajib diisi.',
             'no_pol.exists' => 'Nomor Polisi tidak valid. Silakan pilih dari daftar yang tersedia.',
             'kepada.required' => 'Ekspedisi yang dimasukkan tidak valid. Silakan pilih dari daftar yang ada.',
-            'kepada.exists' => 'Ekspedisi yang dimasukkan tidak valid. Silakan pilih dari daftar yang ada.' 
-            // Pesan error kustom
+            'kepada.exists' => 'Ekspedisi yang dimasukkan tidak valid. Silakan pilih dari daftar yang ada.'
         ]);
+    
+        // Validasi dan cek stok terlebih dahulu
+        for ($i = 0; $i < count($request->barang); $i++) {
+            if ($request->barang[$i] != null && $request->jumlah_jual[$i] != null) {
+                // Ambil stok barang dari database berdasarkan barang yang dipilih
+                $transactions = Transaction::whereIn('id', $request->barang)->get();
+
+                // Jika ada lebih dari satu transaksi (sisa lebih dari satu nilai)
+                if ($transactions->count() > 1) {
+                    // Hitung total stok dari semua transaksi
+                    $totalStok = $transactions->sum('sisa');
+                } else {
+                    // Jika hanya ada satu transaksi, ambil stoknya
+                    $totalStok = $transactions->first()->sisa;
+                }
+        
+                // Ambil jumlah jual untuk barang ini
+                $totalJumlahJual = array_sum(array_filter($request->jumlah_jual, function($value) {
+                    return !is_null($value) && $value !== ''; // Pastikan nilai bukan null dan bukan string kosong
+                }));
+                
+                // Cek apakah stok mencukupi
+                $cek = $totalStok - $totalJumlahJual;
+        
+                // Debug output
+        
+                // Jika stok kurang, redirect kembali dengan pesan error
+                if ($cek < 0) {
+                    return redirect()->back()->with('error', "Stok barang yang diinput tidak mencukupi! Total stok: {$totalStok}, Jumlah jual: {$totalJumlahJual}");
+                }
+            }
+        }
+        
+    
+        // Lanjutkan pengecekan untuk satuan jual
         for ($i = 0; $i < count($request->satuan_jual); $i++) {
-            $satuanJual = Satuan::where('nama_satuan', $request->satuan_jual[$i])->exists();
-            if (!$satuanJual) {
-                if ($request->satuan_jual[$i] != null) {
+            if ($request->satuan_jual[$i] != null) {
+                $satuanJual = Satuan::where('nama_satuan', $request->satuan_jual[$i])->exists();
+                if (!$satuanJual) {
+                    // Jika satuan tidak ada, buat baru
                     $satuan = new Satuan;
                     $satuan->nama_satuan = $request->satuan_jual[$i];
                     $satuan->save();
                 }
             }
         }
-
-        for ($i = 0; $i < count($request->satuan_beli); $i++) {
-            $satuanBeli = Satuan::where('nama_satuan', $request->satuan_beli[$i])->exists();
-            if (!$satuanBeli) {
-                if ($request->satuan_beli[$i] != null) {
-                    $satuan = new Satuan;
-                    $satuan->nama_satuan = $request->satuan_beli[$i];
-                    $satuan->save();
-                }
-            }
-        }
-
+    
+        // Mendapatkan customer berdasarkan id_customer
         $customer = Customer::find($request->id_customer);
         if (!$customer) {
             return back()->with('error', 'Customer Tidak Ditemukan');
         }
+    
         $data = $request->all();
+        $expedisi = Ekspedisi::where('nama',$request->kepada)->first();
+        // Mengatur nomor surat jalan
         if (SuratJalan::count() == 0) {
             $no = 87;
         } else {
             $no = SuratJalan::whereYear('created_at', date('Y'))->max('no') + 1;
         }
-
-        $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"); // daftar angka Romawi
-        $month_number = date("n", strtotime($request->tgl_sj)); // mengambil nomor bulan dari tanggal
+    
+        // Menentukan nomor surat jalan dalam format roman
+        $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII");
+        $month_number = date("n", strtotime($request->tgl_sj));
         $month_roman = $roman_numerals[$month_number];
         $data['no'] = $no;
+        $data['id_ekspedisi'] = $expedisi->id;
         $data['nomor_surat'] = sprintf('%03d', $no) . '/SJ/SB-' . $month_roman . '/' . date('Y', strtotime($request->tgl_sj));
         $sj = SuratJalan::create($data);
+    
+        // Periksa apakah Surat Jalan sudah ada
+        if (SuratJalan::find($sj->id)) {
+            // Jika ada, lanjutkan update transaksi
+            for ($i = 0; $i < count($request->barang); $i++) {
+                if ($request->barang[$i] != null && $request->jumlah_jual[$i] != null) {
+                    // Cek stok lagi sebelum update transaksi
+                    $transaction = Transaction::where('id', $request->barang[$i])->first();
+                    if ($transaction) {
+                       
+                            $sisa = $transaction->sisa - $request->jumlah_jual[$i];
+                            $bkeluar = $request->jumlah_jual[$i] + $transaction->jumlah_jual;
+                            Transaction::create([
+                                'sisa' => $sisa, // Menggunakan sisa dari transaksi yang ada
+                                'id_surat_jalan' => $sj->id, // ID surat jalan yang baru
+                                'jumlah_jual' => $request->jumlah_jual[$i], // Jumlah jual yang baru
+                                'satuan_jual' => $request->satuan_jual[$i],
+                                'satuan_beli' => $transaction->satuan_beli, // Satuan jual yang baru
+                                'keterangan' => $request->keterangan[$i], // Keterangan dari request
+                                'id_barang' => $transaction->id_barang,
+                                'id_supplier' => $transaction->id_supplier, 
+                                'id_surat_jalan' => $sj->id,
+                                'harga_beli' => $transaction->harga_beli,
+                                'keterangan'=> $transaction->keterangan,
+                                'no_bm' => $transaction->no_bm,
+                                'stts' => $transaction->stts
+                            ]);
+
+                            $transaction->update([
+                                'sisa' => $sisa,
+                                'keterangan' => $request->keterangan[$i],
+                                'jumlah_jual' => $bkeluar,
+                                'satuan_jual' => $request->satuan_jual[$i]
+                            ]);
+                        
+                    }
+                }
+            }
+        } else {
+            return back()->with('error', 'ID Surat Jalan tidak valid');
+        }
+    
+        return redirect()->route('surat-jalan.cetak', $sj);
+    }
+    
+    
+
+    public function store_bm(Request $request)
+    {
+        $data = $request->all();
+        if (Transaction::count() == 0) {
+            $no = 1;
+        } else {
+            $no = Transaction::whereYear('created_at', date('Y'))->max('no') + 1 ;
+        }
+        $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"); // daftar angka Romawi
+        $month_number = date("n", strtotime($request->tgl));
+        $month_roman = $roman_numerals[$month_number];
+        $no_bm = sprintf('%03d', $no) . '/BM/SB-' . $month_roman . '/' . date('Y', strtotime($request->tgl));
         for ($i = 0; $i < count($request->barang); $i++) {
             // dd($request->barang);
             if ($request->barang[$i] != null && $request->supplier[$i] != null) {
                 Transaction::create([
-                    'id_surat_jalan' => $sj->id,
                     'id_barang' => $request->barang[$i],
                     'jumlah_beli' => $request->jumlah_beli[$i],
-                    'jumlah_jual' => $request->jumlah_jual[$i],
-                    'sisa' => $request->jumlah_jual[$i],
+                    'sisa' => $request->jumlah_beli[$i],
                     'satuan_beli' => $request->satuan_beli[$i],
-                    'satuan_jual' => $request->satuan_jual[$i],
-                    'keterangan' => $request->keterangan[$i],
-                    'id_supplier' => $request->supplier[$i]
+                    'id_supplier' => $request->supplier[$i],
+                    'no' => $no,
+                    'no_bm' => $no_bm
                 ]);
             }
         }
-        return redirect()->route('surat-jalan.cetak', $sj);
+        return redirect()->route('stock')->with('success', 'Barang Masuk sudah tersimpan!!');
         // return redirect back()->route('surat-jalan.cetak', $sj);
     }
 
@@ -278,7 +390,7 @@ class SuratJalanController extends Controller
                         [
                             'nomor' => $nomor_surat,
                             'tgl' => $currentYear,
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_jual, 0, ',', '.') . ' ' .  $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
+                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_jual, 0, ',', '.') . ' ' .  $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suppliers->nama,
                             'debit' => round($item->harga_beli * $item->jumlah_jual),
                             'kredit' => 0,
                             'invoice' => null,
@@ -301,7 +413,7 @@ class SuratJalanController extends Controller
                         [
                             'nomor' => $nomor_surat,
                             'tgl' => $currentYear,
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_jual, 0, ',', '.') . ' ' . $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suratJalan->customer->nama,
+                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_jual, 0, ',', '.') . ' ' . $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suppliers->nama,
                             'debit' => 0,
                             'kredit' => round($item->harga_beli * $item->jumlah_jual),
                             'invoice' => null,
@@ -411,15 +523,27 @@ class SuratJalanController extends Controller
         return view('surat_jalan.tarif');
     }
 
+    public function harga_beli()
+    {
+        return view('surat_jalan.harga_beli');
+    }
+
     public function dataTable()
     {
-        $data = SuratJalan::query()->orderBy('created_at', 'desc');
-        
-        // $data = SuratJalan::query()->join('ekspedisi', 'ekspedisi.id', '=', 'surat_jalan.id_ekspedisi')->join('transaction', 'transaction.id_surat_jalan', '=', 'surat_jalan.id')->select('surat_jalan.*', 'ekspedisi.nama', 'transaction.id_surat_jalan', 'transaction.harga_jual', 'transaction.jumlah_jual', 'transaction.harga_beli', 'transaction.jumlah_beli');
-
-
+        $data = SuratJalan::query()
+        ->with('transactions') // Pastikan relasi transactions dipanggil untuk efisiensi
+        ->orderBy('created_at', 'desc');
+    
         return DataTables::of($data)
-            ->addIndexColumn()
+        ->addIndexColumn()
+        ->addColumn('no_bm', function ($row) {
+            return optional($row->transactions->first())->no_bm; // Menghindari error jika tidak ada transaksi
+        })
+    
+            ->addColumn('profit', function ($row) {
+                $total = $row->transactions->sum('margin');
+                return number_format($total);
+            })
             ->addColumn('profit', function ($row) {
                 $total = $row->transactions->sum('margin');
                 return number_format($total);
@@ -457,10 +581,12 @@ class SuratJalanController extends Controller
 
     // Ambil data dengan relasi yang diperlukan dan group by
     $data = Transaction::with(['suratJalan', 'suppliers', 'barang'])
-        ->select('id_surat_jalan', 'id_supplier', 'invoice_external', 'id_barang',
+        ->select('no_bm','id_surat_jalan', 'id_supplier', 'invoice_external', 'id_barang',
                  DB::raw('AVG(harga_beli) as avg_harga_beli'),
                  DB::raw('SUM(harga_beli) as sum_harga_beli'),
-                 DB::raw('SUM(jumlah_beli) as total_jumlah_beli'))
+                 DB::raw('SUM(jumlah_jual) as total_jumlah_beli'))
+        ->where('harga_beli', '>', 0)
+        ->whereNotNull('id_surat_jalan')
         ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')
         ->orderBy('created_at', 'desc');
 
@@ -510,11 +636,12 @@ class SuratJalanController extends Controller
             'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 2, ',', '.') : '-',
             'sum_harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 4, ',', '.') : '-',
             'jumlah_beli' => $row->total_jumlah_beli ? number_format($row->total_jumlah_beli, 0, ',', '.') : '-',
+            'no_bm' => $row->no_bm ?? '-',
             'total' => number_format($subtotal, 2, ',', '.'),
             'ppn' => number_format($ppn, 2, ',', '.'),
             'supplier' => $row->suppliers->nama ?? '-',
             'invoice_external' => $row->invoice_external,
-            'aksi' => '<button onclick="getData(' . $row->id_surat_jalan . ', \'' . addslashes($row->suratJalan->nomor_surat) . '\', ' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
+            'aksi' => '<button onclick="getData(' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
         ];
     });
 

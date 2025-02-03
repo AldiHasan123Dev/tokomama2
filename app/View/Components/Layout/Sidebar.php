@@ -26,7 +26,13 @@ class Sidebar extends Component
     {
         $role_id = Auth::user()->role_id;
         $menus = RoleMenu::where('role_id',$role_id)->pluck('menu_id')->toArray();
-        $sub_menu = SubMenu::whereIn('id',$menus)->get()->groupBy('menu_id');
+        $sub_menu = SubMenu::whereIn('sub_menu.menu_id', $menus)
+    ->join('menu', 'sub_menu.menu_id', '=', 'menu.id')
+    ->select('sub_menu.*', 'menu.order as menu_order') // Ambil semua kolom dari sub_menu dan kolom order dari menu
+    ->orderBy('menu.order') // Urutkan berdasarkan 'order' dari tabel menu
+    ->orderBy('sub_menu.order') // Urutkan berdasarkan 'order' dari tabel sub_menu
+    ->get()
+    ->groupBy('menu_id');
         return view('components.layout.sidebar', compact('sub_menu'));
     }
 }

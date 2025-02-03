@@ -58,7 +58,7 @@
                             <th rowspan="4" style="width: 20%">
                                 <img src="{{ url('logo_sb.svg') }}" class="logo mx-auto">
                             </th>
-                            <td style="font-weight: bold; font-size: 1.3rem;">CV. SARANA BAHAGIA</td>
+                            <td style="font-weight: bold; font-size: 1.3rem;">TOKO MAMA</td>
                             <td></td>
                         </tr>
                         <tr>
@@ -214,7 +214,7 @@
                                 strtotime($surat_jalan->tgl_sj)) }}@endfor</td>
                     </tr>
                     <tr>
-                        <th style="text-align: left; padding-left: 50px;">CV. Sarana Bahagia</th>
+                        <th style="text-align: left; padding-left: 50px;">TOKO MAMA</th>
                         <td style="text-align: center;">Hormat Kami</td>
                     </tr>
                     <tr>

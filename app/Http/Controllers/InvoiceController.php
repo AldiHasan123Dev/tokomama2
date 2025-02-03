@@ -48,10 +48,9 @@ class InvoiceController extends Controller
 
     public function preview(Request $request)
     {
-
         $tgl_inv2 = $request->tgl_invoice; // Asumsikan ini adalah string tanggal atau objek DateTime
-$date = date_create($tgl_inv2);
-$tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
+        $date = date_create($tgl_inv2);
+        $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
        
         $tgl_inv = date('m', strtotime($tgl_inv2));
         $tipe = $tgl_inv . '-' . $request->tipe;
@@ -84,6 +83,17 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
             $no++;
         }
 
+        foreach ($request->harga_jual as $id_transaksi => $harga_jual) {
+            foreach ($harga_jual as $idx => $item) {
+                $data[$id_transaksi]['harga_jual'][$idx] = $item;
+                $trx1 = Transaction::find($id_transaksi);
+                $margin = $trx1->harga_beli - $item;
+                $trx1->update([
+                    'harga_jual' => $item,
+                    'margin' => $margin
+                ]);
+            }
+        }
     
         foreach ($request->invoice as $id_transaksi => $invoice) {
             foreach ($invoice as $idx => $item) {
@@ -94,6 +104,7 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
         foreach ($request->jumlah as $id_transaksi => $jumlah) {
             foreach ($jumlah as $idx => $item) {
                 $data[$id_transaksi]['jumlah'][$idx] = $item;
+               
     
                 // Ambil transaksi berdasarkan id_transaksi
                 $trx = Transaction::find($id_transaksi);
@@ -112,6 +123,7 @@ $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
 
                     if ($suratJalan){
                         $data[$id_transaksi]['no_cont'][$idx] = $suratJalan->no_cont;
+                        $data[$id_transaksi]['no_po'][$idx] = $suratJalan->no_po;
                         $data[$id_transaksi]['tgl_sj'][$idx] = $suratJalan->tgl_sj;
                     }
     
