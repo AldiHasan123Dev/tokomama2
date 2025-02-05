@@ -58,6 +58,23 @@ class TransactionController extends Controller
         $transaksi->update($request->all());
         return response('success');
     }
+    public function update1(Request $request)
+{
+
+    foreach ($request->id as $key => $id) {
+        $transaksi = Transaction::find($id);
+        // Update data
+        $transaksi->jumlah_beli = $request->jumlah_beli[$key];
+        $transaksi->sisa = $request->jumlah_beli[$key];
+        $transaksi->stts = $request->stts;
+        $transaksi->save();
+    }
+
+    return response()->json(['message' => 'Barang Masuk Sudah Diterima'], 200);
+}
+
+    
+    
 
     /**
      * Remove the specified resource from storage.
@@ -219,7 +236,7 @@ if (request('non_tarif') && !request('tarif')) {
     private function getActionButton($row)
 {
     // Cek apakah transaksi ini terhubung ke Invoice
-    $invoiceExists = Invoice::where('id_transaksi', $row->id)->exists();
+    $invoiceExists = Transaction::where('id', $row->id)->whereNotNull('stts')->exists();
 
     if (!$invoiceExists) {
         // Encode nilai teks yang rawan karakter khusus
@@ -238,5 +255,26 @@ if (request('non_tarif') && !request('tarif')) {
 
     return "-";
 }
+// private function getActionButton($row)
+// {
+//     // Cek apakah transaksi ini terhubung ke Invoice
+//     $invoiceExists = Invoice::where('id_transaksi', $row->id)->exists();
 
+//     if (!$invoiceExists) {
+//         // Encode nilai teks yang rawan karakter khusus
+//         $id = $row->id;
+//         $hargaJual = $row->harga_jual;
+//         $hargaBeli = $row->harga_beli;
+//         $margin = $row->margin;
+//         $jumlahJual = $row->jumlah_jual;
+//         $namaBarang = urlencode(addslashes($row->barang->nama));  // Encode untuk nama barang
+//         $satuanJual = urlencode(addslashes($row->satuan_beli));    // Encode untuk satuan jual
+
+//         return '<button type="button" class="modal-toggle w-20 btn text-semibold text-white bg-green-700 m-1" ' .
+//                'onclick="inputTarif(' . $id . ',' . $hargaJual . ',' . $hargaBeli . ',' . $margin . ',' . $jumlahJual . ', \'' . $namaBarang . '\', \'' . $satuanJual . '\')">' .
+//                'Edit Harga</button>';
+//     }
+
+//     return "-";
+// }
 }

@@ -132,11 +132,9 @@
                     <form method="dialog">
                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                     </form>
-                    <h3 class="text-lg font-bold">Edit Jumlah Beli: <span id="barang1"></span></h3>
+                    <h3 class="text-lg font-bold">Konfirmasi Penerimaan: <span id="barang1"></span></h3>
                     <label class="form-control w-full max-w">
-                        <div class="form-label">
-                            <span class="form-label">Jumlah Beli</span>
-                        </div>
+                       
                         <!-- Menampilkan semua jumlah beli di sini -->
                         <div id="jumlah_beli_container"></div>
                     </label>
@@ -146,7 +144,7 @@
                         </div>
                         <input type="text" class="input-field" id="status" required/>
                     </label>
-                    <button type="button" class="submit-button" onclick="updateTransaksi1()">Update</button>
+                    <button type="button" class="submit-button" onclick="updateTransaksi1()">Diterima</button>
                 </div>
             </dialog>
             
@@ -205,6 +203,11 @@ $(function () {
                 formatter: function() {
                     return '<input type="checkbox" class="row-checkbox" />'; // Checkbox untuk setiap baris
                 }
+            },
+            {
+                            name: 'id',
+                            index: 'id',
+                            hidden: true
             },
             {
                 label: 'Status',
@@ -323,36 +326,48 @@ $('#form').submit(function (e) {
     e.preventDefault(); // Mencegah form untuk submit secara langsung
 
     var ids = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:first-child').text(); // Mengambil ID dari kolom pertama
+    var rowId = $(this).closest('tr').attr('id'); // Ambil row ID
+    return $("#jqGrid1").jqGrid('getCell', rowId, 'id'); // Ambil kolom 'id' yang di-hidden
 }).get();
+
 console.log("IDs:", ids);
 
+
 var barang = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(5)').text(); // Mengambil nama barang dari kolom "Barang"
+    return $(this).closest('tr').find('td:eq(6)').text(); // Mengambil nama barang dari kolom "Barang"
 }).get();
 console.log("Barang:", barang);
 
 var jumlahBeli = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(6)').text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
+    return $(this).closest('tr').find('td:eq(7)').text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
 }).get();
 console.log("Jumlah Beli:", jumlahBeli);
 
 var satuanBeli = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(8)').text(); // Mengambil satuan beli dari kolom "Satuan Beli"
+    return $(this).closest('tr').find('td:eq(9)').text(); // Mengambil satuan beli dari kolom "Satuan Beli"
 }).get();
 console.log("Satuan Beli:", satuanBeli);
 
 var noBm = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(4)').text(); // Mengambil nama barang dari kolom "No BM"
+    return $(this).closest('tr').find('td:eq(5)').text(); // Mengambil nama barang dari kolom "No BM"
 }).get();
 console.log("No BM:", noBm);
+var status = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(3)').text(); // Mengambil nama barang dari kolom "No BM"
+}).get();
+console.log("Status :", status);
 
+if (status.some(s => s !== "-")) {
+    alert("Status sudah divalidasi!");
+    return;
+} 
 if (ids.length > 0) {
     // Jika ada checkbox yang dicentang, tampilkan modal dengan data yang sesuai
     // Iterasi untuk semua item yang dipilih
     inputTarif(ids, jumlahBeli, barang, satuanBeli, noBm); // Tampilkan data untuk semua item yang dipilih
-} else {
-    alert("Pilih transaksi terlebih dahulu!");
+} 
+else {
+    alert("Pilih barang masuk terlebih dahulu!");
 }
 });
 
@@ -376,8 +391,8 @@ function inputTarif(ids_transaksi, jumlah, nama_barang, satuan_beli, no_bm) {
         $('#jumlah_beli_container').append(`
 
             <div>
-                <input type="text" id="ids_transaksi_${i}" value="${ids_transaksi[i]}" class="input-field" />
-                <label for="jumlah_beli_${i}">Jumlah Beli untuk ${nama_barang[i]}:</label>
+                <input type="hidden" id="ids_transaksi_${i}" value="${ids_transaksi[i]}" class="input-field" />
+                <label for="jumlah_beli_${i}">${nama_barang[i]} (${satuan_beli[i]}) :</label>
                 <input type="text" id="jumlah_beli_${i}" value="${jumlah[i]}" class="input-field" />
             </div>
         `);
@@ -387,27 +402,7 @@ function inputTarif(ids_transaksi, jumlah, nama_barang, satuan_beli, no_bm) {
 }
 
 
-            function updateTransaksi() {
-                if (confirm('Apakah anda yakin?')) {
-                    $.ajax({
-                        type: "PUT",
-                        url: "{{ route('transaksi.update') }}",
-                        data: {
-                            id: id,
-                            _token: "{{ csrf_token() }}",
-                            harga_beli: getCleanNumber($('#harga_beli').val()),
-                            // harga_jual: getCleanNumber($('#harga_jual').val()),
-                            // margin: getCleanNumber($('#profit').val()),
-                        },
-                        success: function(response) {
-                            refreshTable();
-                            alert("Update Berhasil!");
-                            my_modal_5.close();
-                        }
-                    });
-                }
-            }
-            function updateTransaksi1() {
+function updateTransaksi1() {
     let jumlahBeli = [];
     let id = [];
     let status = $('#status').val();
@@ -420,30 +415,46 @@ function inputTarif(ids_transaksi, jumlah, nama_barang, satuan_beli, no_bm) {
         id.push($(this).val()); // Mengambil value dari setiap input
     });
 
+    // Log data ke console untuk debugging
+    console.log("Jumlah Beli:", jumlahBeli);
+    console.log("ID Transaksi:", id);
+    console.log("Status:", status);
+
     // Validasi apakah jumlah beli dan status sudah diisi
     if (jumlahBeli.some(jumlah => !jumlah) || status === "") {
-        alert("Silakan isi jumlah beli dan status terlebih dahulu!");
+        alert("Silakan diisi status/keterangan. Contoh : Sesuai");
         return; // Hentikan eksekusi jika input kosong
     }
 
     if (confirm('Apakah Anda yakin?')) {
-        $.ajax({
-            type: "PUT",
-            url: "{{ route('transaksi.update') }}",
-            data: {
-                id: id, // Mengirimkan array ids
-                jumlah_beli: jumlahBeli, // Mengirimkan array jumlah beli
-                stts: status, // Status transaksi
-                _token: "{{ csrf_token() }}",
-            },
-            success: function(response) {
-                refreshTable();
-                alert("Update Berhasil!");
-                my_modal_1.close();
-            }
-        });
-    }
+    let dataKirim = {
+        id: id, // Array ID transaksi
+        jumlah_beli: jumlahBeli, // Array jumlah beli
+        stts: status, // Status transaksi
+        _token: "{{ csrf_token() }}"
+    };
+
+    console.log("Data yang dikirim ke server:", dataKirim); // Debugging
+
+    $.ajax({
+        type: "PUT",
+        url: "{{ route('transaksi.update1') }}",
+        data: dataKirim,
+        success: function(response) {
+            console.log("Response dari server:", response);
+            refreshTable();
+            alert("Update Berhasil!");
+            my_modal_1.close();
+        },
+        error: function(xhr, status, error) {
+            console.log("Error:", xhr.responseText);
+            alert("Update gagal! Cek console untuk detail.");
+        }
+    });
 }
+
+}
+
 
 
 

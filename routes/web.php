@@ -101,6 +101,7 @@ Route::middleware('auth')->group(function () {
     Route::post('transaction-data', [TransactionController::class, 'dataTable'])->name('transaksi.data');
     Route::post('transaction-data1', [TransactionController::class, 'dataTable1'])->name('transaksi.data1');
     Route::put('transaction-update', [TransactionController::class, 'update'])->name('transaksi.update');
+    Route::put('transaction-update1', [TransactionController::class, 'update1'])->name('transaksi.update1');
     // Route::get('coa', [CoaController::class,'index'])->name('jurnal.coa');
     // Route::post('coa', [CoaController::class,'statusCoa'])->name('jurnal.coa');
     Route::get('coa', [CoaController::class,'index'])->name('jurnal.coa');

@@ -162,7 +162,7 @@ class StockController extends Controller
         $index = $offset + 1; // Mulai nomor urut sesuai offset
         $formattedStocks = $paginatedData->map(function ($stock) use (&$index) {
             return [
-                'id' => $stock->barang_id,
+                'id' => $stock->id,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
                 'status' => $stock->stts ?? '-',
                 'invoice_external' => $stock->invoice_external,
