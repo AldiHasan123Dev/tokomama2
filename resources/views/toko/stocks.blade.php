@@ -303,7 +303,7 @@ $(function () {
         height: 'auto', // Tinggi tabel otomatis menyesuaikan
         viewrecords: true, // Menampilkan jumlah total data
         autowidth: true, // Menyesuaikan lebar tabel dengan kontainer
-        caption: "Stocks Table", // Judul tabel
+        caption: "List Barang Masuk", // Judul tabel
         loadonce: true, // Memuat semua data hanya sekali
         search: true, // Mengaktifkan toolbar pencarian
         toolbar: [true, "top"], // Menampilkan toolbar di bagian atas tabel
