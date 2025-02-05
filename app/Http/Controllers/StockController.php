@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Stock;
 use App\Models\Supplier;
+use PDF;
 use App\Models\Invoice;
 use App\Models\Barang;
 use App\Models\Transaction;
@@ -75,23 +76,27 @@ class StockController extends Controller
         // Return respons JSON
         return response()->json($data);
     }
-
-    public function cetak($id)
+    public function cetak($no_bm)
     {
-        // Ambil data transaksi berdasarkan ID
-        $transaksi = Transaction::findOrFail($id);
-    
-        // Data untuk view
-        $data = [
-            'transaksi' => $transaksi, // Kirimkan objek transaksi
-            'barang' => $transaksi->barang, // Ambil relasi barang dari transaksi
-            'supplier' => $transaksi->suppliers // Ambil relasi supplier
-        ];
-    
-        // Render view nota ke PDF
-        $pdf = \PDF::loadView('toko.nota', $data);
-    
-        return $pdf->stream('Nota-Barang-Masuk-' . $id . '.pdf');
+        // Ambil data berdasarkan no_bm
+        $stocks = Transaction::where('no_bm', $no_bm)->get();
+        
+        if ($stocks->isEmpty()) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan');
+        }
+
+        // Hitung total harga beli dan volume beli
+        $totalHargaBeli = $stocks->sum('harga_beli');
+        $totalVolumeBeli = $stocks->sum('jumlah_beli');
+
+        // Buat PDF
+        $pdf = PDF::loadView('toko.nota', [
+            'stocks' => $stocks,
+            'totalHargaBeli' => $totalHargaBeli,
+            'totalVolumeBeli' => $totalVolumeBeli
+        ]);
+
+        return $pdf->stream("nota_$no_bm.pdf");
     }
     
 
@@ -159,6 +164,7 @@ class StockController extends Controller
             return [
                 'id' => $stock->barang_id,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
+                'status' => $stock->stts ?? '-',
                 'invoice_external' => $stock->invoice_external,
                 'no_bm' => $stock->no_bm,
                 'satuan_beli' => $stock->satuan_beli,
@@ -256,10 +262,8 @@ private function getJumlahBeli($stock)
         $jumlahBeli = $stock->jumlah_beli;
         $namaBarang = isset($stock->barang->nama) ? htmlspecialchars($stock->barang->nama, ENT_QUOTES, 'UTF-8') : '';
         $satuanBeli = isset($stock->satuan_beli) ? htmlspecialchars($stock->satuan_beli, ENT_QUOTES, 'UTF-8') : '';
-
-        return '<button type="button" class="modal-toggle w-20 btn text-semibold text-white bg-orange-700 m-1" ' .
-               'onclick="inputTarif1(' . $id . ', ' . $jumlahBeli . ', \'' . $namaBarang . '\', \'' . $satuanBeli . '\')">' .
-               'Konf Terima</button>';
+        return '<input type="checkbox" class="confirm-checkbox m-1" ' .
+       'onclick="inputTarif1(' . $id . ', ' . $jumlahBeli . ', \'' . $namaBarang . '\', \'' . $satuanBeli . '\')">';
     }
 
     return '<span class="badge bg-green-500 text-white p-2">' . htmlspecialchars($stock->stts, ENT_QUOTES, 'UTF-8') . '</span>';

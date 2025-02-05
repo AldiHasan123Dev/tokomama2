@@ -71,7 +71,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/surat-jalan-external-edit', [SuratJalanController::class, 'updateInvoiceExternal'])->name('surat-jalan-external.data.edit');
     Route::post('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
     // Route::delete('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
-    Route::get('/bm/cetak/{id}', [StockController::class, 'cetak'])->name('cetak_nota.cetak');
     Route::get('/barang-masuk/create', [SuratJalanController::class, 'create_bm'])->name('barang_masuk');
     Route::get('/barang-masuk/cetak-nota', [StockController::class, 'cetak_nota'])->name('cetak_nota');
     Route::post('/barang-masuk/store', [SuratJalanController::class, 'store_bm'])->name('barang_masuk.store');
@@ -165,6 +164,8 @@ Route::prefix('toko')->controller(StockController::class)->middleware('auth')->g
     Route::post('/stock-update', 'update_stock')->name('stock.update_stock');
     Route::get('/stock-{id}-edit', 'edit_stock')->name('stock.edit_stock');
     Route::get('data-barang','getdataBarangOptions')->name('stock.barang-options');
+    Route::get('/cetak-nota/{no_bm}', [StockController::class, 'cetak'])->where('no_bm', '.*') // Menangkap semua karakter termasuk slash
+    ->name('cetak_nota.cetak');
     Route::post('stock-barang_masuk', 'barang_masuk')->name('stock.barang_masuk'); 
     Route::get('data-stock', 'dataStock')->name('stock.data');
     Route::get('data-stock1', 'dataStock1')->name('stock.data1');

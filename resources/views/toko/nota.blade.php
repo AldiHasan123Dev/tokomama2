@@ -8,127 +8,184 @@
     <title>Nota Barang Masuk</title>
     <style>
         @page {
-            size: 21.59cm 13.97cm;
-            margin: 145px 0px 50px 0px;
+            size: A5 landscape;
+            margin: 120px 30px 80px 30px;
         }
+        
 
         body {
             font-family: Arial, sans-serif;
-            width: 100%;
             font-size: 0.9rem;
             margin: 0;
             padding: 0;
+            width: 100%;
         }
 
         .header {
             position: fixed;
-            top: -110px;
+            top: -50px;
             left: 0;
             right: 0;
             text-align: center;
-            padding: 10px;
             font-size: 1.5rem;
+            font-weight: bold;
         }
 
         .content {
-            margin: 20px;
+            margin: 3px;
             font-size: 1rem;
         }
 
         p {
             margin: 5px 0;
+            margin-bottom: 10px;
         }
 
         table {
+            width: 100%;
             border-collapse: collapse;
-            width: 90%;
-            margin: 20px auto;
-            border: 1px solid #000;
+            margin-top: 15px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #000;
-            padding: 8px;
-            text-align: center;
-            font-size: 1rem;
+            padding: 6px;
+            font-size: 0.8rem;
+        }
+
+        th {
+            background-color: #f2f2f2;
         }
 
         .footer {
             position: fixed;
-            bottom: 0;
+            bottom: -60px;
             left: 0;
             right: 0;
-            height: 80px;
             text-align: center;
             font-size: 0.9rem;
         }
 
-        .footer-content {
-            position: fixed;
-            bottom: -30px;
-            padding-top: 14px;
+        .signature-table {
             width: 100%;
             text-align: center;
+            margin-top: 30px;
+            border: none;
         }
 
-        .signature-table {
-    width: 90%;
-    margin: 0 auto;
-    text-align: center;
-    font-size: 1rem;
-    margin-top: 20px;
-    border: none;
-}
+        .signature-table td {
+            height: 50px;
+            margin: 100px;
+            border: none;
+        }
 
-.signature-table th, .signature-table td {
-    border: none;
-    text-align: center;
-    height: 60px;
-}
+        .new-page {
+            page-break-before: always;
+        }
 
+        .page-number {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+        }
 
+        .total-volume {
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h2>Nota Barang Masuk</h2>
-    </div>
-
+    <div class="header">NOTA PENGIRIMAN BARANG</div>
     <div class="content">
-        <p><strong>Tanggal:</strong> {{ $transaksi->created_at->format('d-m-Y') }}</p>
-        <p><strong>Supplier:</strong> {{ $supplier->nama }}</p>
-    </div>
+        @php
+        $items_per_page = 5;
+        $total_items = $stocks->count();
+        $pages = ceil($total_items / $items_per_page);
+        $remaining_items = $total_items % $items_per_page;
+        if ($remaining_items > 7) {
+            $pages++;
+        }
+        @endphp
+<p><strong>No. BM:</strong> {{ $stocks->first()->no_bm }}</p>
+<p><strong>Tanggal Kirim:</strong> {{ $stocks->first()->created_at->format('d-m-Y') }}</p>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nama Barang</th>
-                <th>Jumlah</th>
-                <th>Satuan</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ $transaksi->barang->nama }}</td>
-                <td>{{ $transaksi->jumlah_beli }}</td>
-                <td>{{ $transaksi->satuan_beli }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div class="footer-content">
-        <p><strong>Note:</strong> Barang yang diterima dalam keadaan baik dan lengkap.</p>
-        <table class="signature-table">
-            <tr>
-                <th>PENERIMA</th>
-                <th>PENGIRIM</th>
-            </tr>
-            <tr>
-                <td>____________________</td>
-                <td>____________________</td>
-            </tr>
+        @for ($page = 1; $page <= $pages; $page++)
+        @php
+            $start = ($page - 1) * $items_per_page;
+            $end = min($start + $items_per_page, $total_items);
+        @endphp
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Barang</th>
+                    <th>Jumlah</th>
+                    <th>Satuan</th>
+                    <th>Supplier</th>
+                    <th>Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($stocks as $index => $stock)
+                @if ($index >= $start && $index < $end)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>                            
+                            <div class="flex justify-between mt-3">
+                                <span>{{ $stock->barang->nama_singkat }}</span>
+                                <span>({{ number_format($stock->jumlah_beli) }} {{ $stock->satuan_beli }})</span>
+                            </div>
+                            @if (str_contains($stock->satuan_beli, $stock->barang->satuan->nama_satuan))
+                            @php
+                                $t = (int)$stock->jumlah_beli;
+                            @endphp
+                        @else
+                            @php
+                                $t = (double)$stock->barang->value * (int)$stock->jumlah_beli;
+                            @endphp
+                        @endif
+                        @if($stock->satuan_beli != $stock->barang->satuan->nama_satuan )
+                            (Total {{ number_format($t) }} {{ $stock->barang->satuan->nama_satuan }} {{ ($stock->keterangan != '' || !is_null($stock->keterangan)) ? '= '.$stock->keterangan:'' }})
+                        @else
+                            {{ ($stock->keterangan != '' || !is_null($stock->keterangan)) ? '= '.$stock->keterangan:'' }}
+                        @endif</td>
+                        <td>{{ $stock->jumlah_beli }}</td>
+                        <td>{{ $stock->satuan_beli }}</td>
+                        <td>{{ $stock->suppliers->nama }}</td>
+                        <td></td>
+                    </tr>
+                @endif
+                @endforeach
+            </tbody>
         </table>
+
+        @if ($page == $pages)
+        <p><strong>Note:</strong> Barang yang diterima dalam keadaan baik dan lengkap.</p>
+        <br>
+        <div class="footer">
+            <table class="signature-table">
+                <tr>
+                    <td><strong>PENERIMA</strong></td>
+                    <td><strong>PENGIRIM</strong></td>
+                </tr>
+                <tr style="margin: 10px">
+                    <td>____________________</td>
+                    <td>____________________</td>
+                </tr>
+            </table>
+            <p class="page-number">
+                Halaman: {{ $page }} dari {{ $pages }}
+            </p>
+        </div>
+        @endif
+
+        @if ($page < $pages)
+        <div class="new-page"></div>
+        @endif
+        @endfor
     </div>
 </body>
 

@@ -137,8 +137,8 @@
                         <div class="form-label">
                             <span class="form-label">Jumlah Beli</span>
                         </div>
-                        <input type="text" class="input-field" id="jumlah_beli"
-                            onclick="this.select()" required/>
+                        <!-- Menampilkan semua jumlah beli di sini -->
+                        <div id="jumlah_beli_container"></div>
                     </label>
                     <label class="form-control w-full max-w">
                         <div class="form-label">
@@ -149,6 +149,33 @@
                     <button type="button" class="submit-button" onclick="updateTransaksi1()">Update</button>
                 </div>
             </dialog>
+            
+            <x-slot:button>
+                <form action="" method="get" id="form">
+                    <input type="hidden" name="id_transaksi" id="id_transaksi">
+                    <div class="flex gap-2">
+                        <div class="flex-gap-2">
+                            <input type="hidden" name="invoice_count" id="count" value="1"
+                            class="rounded-md form-control text-center" min="1" style="height: 28px">
+                        </div>
+                        <button type="submit" class="btn font-semibold bg-green-500 btn-sm text-white mt-4"
+                        >
+                        Konfirmasi Penerimaan
+                    </button>
+                    
+                        </div>
+                    </form>
+                </x-slot:button>
+                <div class="overflow-x-auto mt-5">
+                    <div class="table-responsive">
+                        <!-- Checkbox "Select All" di luar tabel -->
+                        <div class="mb-2">
+                            <input type="checkbox" class="m-2" id="select-all" /> Pilih Semua
+                        </div>
+                        <table class="table" id="table-getfaktur"></table>
+                        <div id="jqGridPager"></div>
+                    </div>
+                </div>
             <!-- Adjusted table ID and pager ID for jqGrid -->
             <table id="jqGrid1" class="table"></table>
             <div id="jqGridPager1"></div>
@@ -157,7 +184,7 @@
 
     <x-slot:script>
         <script>
-            $(function () {
+$(function () {
     const table1 = $("#jqGrid1").jqGrid({
         url: "{{ route('stock.data1') }}", // URL untuk data JSON dari controller
         datatype: "json",
@@ -169,12 +196,21 @@
                 align: 'center',
                 width: 20
             },
-                {
+            {
+                name: 'checkbox',
+                index: 'checkbox',
+                label: 'Pilih',
+                width: 50,
+                align: 'center',
+                formatter: function() {
+                    return '<input type="checkbox" class="row-checkbox" />'; // Checkbox untuk setiap baris
+                }
+            },
+            {
                 label: 'Status',
-                name: 'lock',
+                name: 'status',
                 width: 200,
                 sortable: false,
-                formatter: 'unformat'
             },
             {
                 search: true,
@@ -276,28 +312,81 @@
 
     // Aktifkan filter toolbar (opsional jika sudah diaktifkan di opsi)
     $("#jqGrid1").jqGrid('filterToolbar');
+    $('#select-all').change(function() {
+        var checked = $(this).is(':checked');
+        $('.row-checkbox').prop('checked', checked);
+    });
 });
 
-function inputTarif(id_transaksi, beli, nama_barang,satuan_beli) {
-                id = id_transaksi;
-                $('#harga_beli').val(beli);
-                nama_barang = nama_barang.replace(/\+/g, ' ').replace(/%40/g, '@')
-                    .trim(); // Menghapus '+' dan mengganti '%40' dengan '@'
+// Menghandle form submit untuk mengambil ID transaksi yang dipilih
+$('#form').submit(function (e) {
+    e.preventDefault(); // Mencegah form untuk submit secara langsung
 
-                // Mengatur innerHTML
-                document.getElementById('barang').innerHTML = `${nama_barang} (Harga PER - ${satuan_beli})`;
-                my_modal_5.showModal();
-            }
-            function inputTarif1(id_transaksi, jumlah, nama_barang,satuan_beli) {
-                id = id_transaksi;
-                $('#jumlah_beli').val(jumlah);
-                nama_barang = nama_barang.replace(/\+/g, ' ').replace(/%40/g, '@')
-                    .trim(); // Menghapus '+' dan mengganti '%40' dengan '@'
+    var ids = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:first-child').text(); // Mengambil ID dari kolom pertama
+}).get();
+console.log("IDs:", ids);
 
-                // Mengatur innerHTML
-                document.getElementById('barang1').innerHTML = `${nama_barang} (Harga PER - ${satuan_beli})`;
-                my_modal_1.showModal();
-            }
+var barang = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(5)').text(); // Mengambil nama barang dari kolom "Barang"
+}).get();
+console.log("Barang:", barang);
+
+var jumlahBeli = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(6)').text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
+}).get();
+console.log("Jumlah Beli:", jumlahBeli);
+
+var satuanBeli = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(8)').text(); // Mengambil satuan beli dari kolom "Satuan Beli"
+}).get();
+console.log("Satuan Beli:", satuanBeli);
+
+var noBm = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(4)').text(); // Mengambil nama barang dari kolom "No BM"
+}).get();
+console.log("No BM:", noBm);
+
+if (ids.length > 0) {
+    // Jika ada checkbox yang dicentang, tampilkan modal dengan data yang sesuai
+    // Iterasi untuk semua item yang dipilih
+    inputTarif(ids, jumlahBeli, barang, satuanBeli, noBm); // Tampilkan data untuk semua item yang dipilih
+} else {
+    alert("Pilih transaksi terlebih dahulu!");
+}
+});
+
+function inputTarif(ids_transaksi, jumlah, nama_barang, satuan_beli, no_bm) {
+    let itemsHTML = ''; // Tempat untuk menampung data yang ingin ditampilkan
+
+    // Menggunakan Set untuk mengambil nilai unik dari no_bm
+    let uniqueNoBm = [...new Set(no_bm)];
+
+    // Menampilkan informasi barang yang dipilih dalam modal (dengan no_bm yang unik)
+    for (let i = 0; i < uniqueNoBm.length; i++) {
+        let decodedNamaBarang = decodeURIComponent(uniqueNoBm[i].replace(/\+/g, ' ')); // Decode nama barang
+        itemsHTML += `<p>${decodedNamaBarang}</p>`;
+    }
+
+    $('#barang1').html(itemsHTML); // Menampilkan semua item yang dipilih
+    $('#jumlah_beli_container').html(''); // Clear previous entries
+
+    // Dinamis menambahkan jumlah beli per barang
+    for (let i = 0; i < jumlah.length; i++) {
+        $('#jumlah_beli_container').append(`
+
+            <div>
+                <input type="text" id="ids_transaksi_${i}" value="${ids_transaksi[i]}" class="input-field" />
+                <label for="jumlah_beli_${i}">Jumlah Beli untuk ${nama_barang[i]}:</label>
+                <input type="text" id="jumlah_beli_${i}" value="${jumlah[i]}" class="input-field" />
+            </div>
+        `);
+    }
+
+    my_modal_1.showModal(); // Menampilkan modal
+}
+
+
             function updateTransaksi() {
                 if (confirm('Apakah anda yakin?')) {
                     $.ajax({
@@ -319,11 +408,20 @@ function inputTarif(id_transaksi, beli, nama_barang,satuan_beli) {
                 }
             }
             function updateTransaksi1() {
-    let jumlahBeli = getCleanNumber($('#jumlah_beli').val());
+    let jumlahBeli = [];
+    let id = [];
     let status = $('#status').val();
 
+    // Ambil nilai jumlah beli dari semua input yang telah ditampilkan
+    $('input[id^="jumlah_beli_"]').each(function(index) {
+        jumlahBeli.push($(this).val()); // Mengambil value dari setiap input
+    });
+    $('input[id^="ids_transaksi_"]').each(function(index) {
+        id.push($(this).val()); // Mengambil value dari setiap input
+    });
+
     // Validasi apakah jumlah beli dan status sudah diisi
-    if (!jumlahBeli || status === "") {
+    if (jumlahBeli.some(jumlah => !jumlah) || status === "") {
         alert("Silakan isi jumlah beli dan status terlebih dahulu!");
         return; // Hentikan eksekusi jika input kosong
     }
@@ -333,11 +431,10 @@ function inputTarif(id_transaksi, beli, nama_barang,satuan_beli) {
             type: "PUT",
             url: "{{ route('transaksi.update') }}",
             data: {
-                id: id,
+                id: id, // Mengirimkan array ids
+                jumlah_beli: jumlahBeli, // Mengirimkan array jumlah beli
+                stts: status, // Status transaksi
                 _token: "{{ csrf_token() }}",
-                jumlah_beli: jumlahBeli,
-                sisa: jumlahBeli, // Sisa mengikuti jumlah beli
-                stts: status,
             },
             success: function(response) {
                 refreshTable();
@@ -347,6 +444,8 @@ function inputTarif(id_transaksi, beli, nama_barang,satuan_beli) {
         });
     }
 }
+
+
 
             function formatRibuan(input) {
                 let angka = input.value.replace(/,/g, ''); // Hapus koma

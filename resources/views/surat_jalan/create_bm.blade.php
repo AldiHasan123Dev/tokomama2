@@ -60,7 +60,7 @@
                                     <th>Satuan Beli</th>
                                     {{-- <th>Harsat Jual</th> --}}
                                     <th>Supplier</th>
-                                    {{-- <th>Profit</th> --}}
+                                    <th>Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-list-barang">
@@ -106,6 +106,9 @@
                                             <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                             @endforeach
                                         </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="keterangan[]" id="keterangan-{{ $i }}" style="10000px">
                                     </td>
                                 </tr>
                                 @endfor
@@ -202,95 +205,99 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                             </select>
                                     </td>
                                     <td>
-                                        <select name="supplier[]" id="supplier-{{ $i }}" class="select2 form-control my-0" style="width: 300px; border:none">
+                                        <select name="supplier[]" id="supplier-${q}" class="select2 form-control my-0" style="width: 300px; border:none">
                                             <option value=""></option>
                                             @foreach ($supplier as $item)
                                             <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                             @endforeach
                                         </select>
                                     </td>
+                                    <td>
+                                        <input type="text" style="11000px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}" class="form-control">
+                                    </td>
                                 </tr>`;
                 $('#tbody-list-barang').append(html);
-                $(".select2").selectize();
+                $("#barang-" + q).selectize();
+                $("#supplier-" + q).selectize();
             });
 
-        // function inputBarang() {
-        //     for(let i = 1; i <= q; i++) {
-        //         const jumlah_beli = $('#jumlah_beli-' + i).val();
-        //         const satuan_beli = $('#satuan_beli-' + i).val();
-        //         const jumlah_jual =  $('#jumlah_jual-' + i).val(jumlah_beli);
-        //         const satuan_jual = $('#satuan_jual-' + i).val(satuan_beli);
+        function inputBarang() {
+            for(let i = 1; i <= q; i++) {
+                const jumlah_beli = $('#jumlah_beli-' + i).val();
+                const satuan_beli = $('#satuan_beli-' + i).val();
+                const jumlah_jual =  $('#jumlah_jual-' + i).val(jumlah_beli);
+                const satuan_jual = $('#satuan_jual-' + i).val(satuan_beli);
                 
-        //     }
-        //     let text = '';
-        //     for (let i = 1; i <= q; i++) {
-        //         const idbarang = $('#id_barangs-' + i).val();
-        //         const barang = $('#barang-' + i).val();
-        //         const jumlah_beli = $('#jumlah_beli-' + i).val();
-        //         const satuan_beli = $('#satuan_beli-' + i).val();
-        //         // const harga_beli = $('#harga_beli-' + i).val();
-        //         const jumlah_jual =  $('#jumlah_jual-' + i).val();
-        //         const satuan_jual = $('#satuan_jual-' + i).val();
-        //         const keterangan = $('#keterangan-' + i).val();
-        //         // const harga_jual = $('#harga_jual-' + i).val();
-        //         const nama_barangs = $('#barang-' + i).find('option:selected').data('nama');
-        //         const value_barangs = $('#barang-' + i).find('option:selected').data('value');
-        //         const satuan_barangs = $('#barang-' + i).find('option:selected').data('satuan');
-        //         if (barang != '' && typeof (barang) != undefined) {
-        //             $("#satuan_beli-" + i).prop('required',true);
-        //             $("#satuan_jual-" + i).prop('required',true);
-        //             $("#supplier-" + i).prop('required',true);
+            }
+            let text = '';
+            for (let i = 1; i <= q; i++) {
+                const idbarang = $('#id_barangs-' + i).val();
+                const barang = $('#barang-' + i).val();
+                const jumlah_beli = $('#jumlah_beli-' + i).val();
+                const satuan_beli = $('#satuan_beli-' + i).val();
+                // const harga_beli = $('#harga_beli-' + i).val();
+                const jumlah_jual =  $('#jumlah_jual-' + i).val();
+                const satuan_jual = $('#satuan_jual-' + i).val();
+                const keterangan = $('#keterangan-' + i).val();
+                // const harga_jual = $('#harga_jual-' + i).val();
+                const nama_barangs = $('#barang-' + i).find('option:selected').data('nama');
+                const value_barangs = $('#barang-' + i).find('option:selected').data('value');
+                const satuan_barangs = $('#barang-' + i).find('option:selected').data('satuan');
+                if (barang != '' && typeof (barang) != undefined) {
+                    $("#satuan_beli-" + i).prop('required',true);
+                    $("#satuan_jual-" + i).prop('required',true);
+                    $("#supplier-" + i).prop('required',true);
                     
 
-        //             var id_barang = $("#barang_list option[value='" + barang + "']").data('id');
-        //             // console.log(id_barang)
-        //             var value_barang = $("#barang_list option[value='" + barang + "']").data('value');
-        //             var nama_satuan = $("#barang_list option[value='" + barang + "']").data('satuan');
-        //             $("#id_barang-" + i).val(id_barang);
-        //             if (satuan_jual.includes(nama_satuan)){
-        //                 var total_jumlah = parseInt(jumlah_jual);
-        //             } else {
-        //                 var total_jumlah = parseFloat(value_barang) * parseInt(jumlah_jual);
-        //             }
-        //             var txt_total = '';
-        //             //console.log("Satuan jual = " + satuan_jual);
-        //             //console.log("Nama Satuan = " + nama_satuan);
-        //             // if(barang.includes("@")){
-        //                 if(satuan_jual.includes(nama_satuan)) {
-        //                     txt_total += `<p>${keterangan!=''?' = '+keterangan:''}</p>`;
-        //                 } else {
-        //                     txt_total += `<p>(Total: ${total_jumlah} ${nama_satuan} ${keterangan!=''?' = '+keterangan:''})</p>`;
-        //                 }
-        //             // }
-        //             text += `
-        //                     <div class="flex justify-between mt-3">
-        //                         <span>${barang}</span>
-        //                         <span>(${jumlah_jual} ${satuan_jual})</span>
-        //                     </div>
-        //                     ${txt_total}
-        //                     `;
-        //                     $('#txt_nomor' + i).html(i);
+                    var id_barang = $("#barang_list option[value='" + barang + "']").data('id');
+                    // console.log(id_barang)
+                    var value_barang = $("#barang_list option[value='" + barang + "']").data('value');
+                    var nama_satuan = $("#barang_list option[value='" + barang + "']").data('satuan');
+                    $("#id_barang-" + i).val(id_barang);
+                    if (satuan_jual.includes(nama_satuan)){
+                        var total_jumlah = parseInt(jumlah_jual);
+                    } else {
+                        var total_jumlah = parseFloat(value_barang) * parseInt(jumlah_jual);
+                    }
+                    var txt_total = '';
+                    //console.log("Satuan jual = " + satuan_jual);
+                    //console.log("Nama Satuan = " + nama_satuan);
+                    // if(barang.includes("@")){
+                        if(satuan_jual.includes(nama_satuan)) {
+                            txt_total += `<p>${keterangan!=''?' = '+keterangan:''}</p>`;
+                        } else {
+                            txt_total += `<p>(Total: ${total_jumlah} ${nama_satuan} ${keterangan!=''?' = '+keterangan:''})</p>`;
+                        }
+                    // }
+                    text += `
+                            <div class="flex justify-between mt-3">
+                                <span>${barang}</span>
+                                <span>(${jumlah_jual} ${satuan_jual})</span>
+                            </div>
+                            ${txt_total}
+                            `;
+                            $('#txt_nomor' + i).html(i);
 
-        //                     // var test = $('#profit-' + i).val(jumlah_jual * harga_jual - jumlah_beli * harga_beli);
-        //         } else {
-        //             $("#satuan_beli-" + i).prop('required',false);
-        //             $("#satuan_jual-" + i).prop('required',false);
-        //             $("#supplier-" + i).prop('required',false);
-        //         }
+                            // var test = $('#profit-' + i).val(jumlah_jual * harga_jual - jumlah_beli * harga_beli);
+                } else {
+                    $("#satuan_beli-" + i).prop('required',false);
+                    $("#satuan_jual-" + i).prop('required',false);
+                    $("#supplier-" + i).prop('required',false);
+                }
 
-        //         $('#jumlah_beli-' + i).on('input', function () {
-        //             var inputValue = $(this).val();
-        //             $('#txt_jumlah' + i).html(inputValue);
-        //         });
+                $('#jumlah_beli-' + i).on('input', function () {
+                    var inputValue = $(this).val();
+                    $('#txt_jumlah' + i).html(inputValue);
+                });
 
-        //         $('#satuan_beli-' + i).on('input', function () {
-        //             var inputValue = $(this).val();
-        //             $('#txt_satuan' + i).html(inputValue);
-        //         });
+                $('#satuan_beli-' + i).on('input', function () {
+                    var inputValue = $(this).val();
+                    $('#txt_satuan' + i).html(inputValue);
+                });
 
-        //     }
-        //     $('#barang-list').html(text);
-        // }
+            }
+            $('#barang-list').html(text);
+        }
     </script>
 
 </x-Layout.layout>

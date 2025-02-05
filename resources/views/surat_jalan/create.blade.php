@@ -77,7 +77,7 @@
                                                 <option value=""></option>
                                                 @foreach ($barang as $item)
                                                     <option value="{{ $item->id }}">{{ $item->nama }} ||
-                                                        {{ $item->nama_satuan }} || {{ $item->sisa }} -
+                                                        {{ $item->nama_satuan }} || Stock : {{ $item->sisa }} ||
                                                         {{ $item->kode_objek }} || {{ $item->no_bm }}</option>
                                                 @endforeach
                                             </select>
@@ -483,7 +483,7 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                     <input type="hidden" name="nama_satuan[]" id="nama_satuan-${q}" />
                                     <td class="text-center">${q}</td>
                                     <td>
-                                        <select name="barang[]" id="barang-${q}" class="select2 form-control my-0" style="width: 300px; border:none">
+                                        <select name="barang[]" id="barang-${q}" class="select2 form-control my-0" style="width: 500px; border:none>
                                             <option value=""></option>
                                             @foreach ($barang as $item)
                                             <option value="{{ $item->id }}">{{ $item->nama }} || {{ $item->nama_satuan }} || {{ $item->value }}</option>
@@ -491,12 +491,13 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="number" style="width:120px" onchange="inputBarang()" name="jumlah_beli[]" id="jumlah_beli-${q}"
+                                        <input type="number" style="width:120px" onchange="inputBarang()" name="jumlah_jual[]" id="jumlah_jual-${q}"
                                             class="form-control">
                                     </td>
                                     <td>
-                                            <select name="satuan_beli[]" id="satuan_beli-${q}"
-                                                onchange="inputBarang()" class="m-1 form-select">
+                                        <select name="satuan_jual[]" id="satuan_jual-${q}"
+                                                onchange="inputBarang()" class=" m-1 form-select"
+                                                >
                                                 <option value=""></option>
                                                 @foreach ($satuan as $item)
                                                     <option value="{{ $item->nama_satuan }}">{{ $item->nama_satuan }}
@@ -505,27 +506,11 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                             </select>
                                     </td>
                                     <td>
-                                        <input type="number" style="width:120px" onchange="inputBarang()" name="jumlah_jual[]" id="jumlah_jual-${q}"
-                                            class="form-control">
-                                    </td>
-                                    <td>
-                                        <input type="text" style="width:120px" onchange="inputBarang()" name="satuan_jual[]" id="satuan_jual-${q}"
-                                            class="form-control" placeholder="(ZAK, BALL, KARTON, DLL)" list="satuan_jual_list" autocomplete="off">
-                                    </td>
-                                    <td>
-                                        <select name="supplier[]" id="supplier-{{ $i }}" class="select2 form-control my-0" style="width: 230px; border:none">
-                                            <option value=""></option>
-                                            @foreach ($supplier as $item)
-                                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="text" style="width:120px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}" class="form-control">
+                                        <input type="text" style="11000px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}" class="form-control">
                                     </td>
                                 </tr>`;
                 $('#tbody-list-barang').append(html);
-                $(".select2").selectize();
+                $("#barang-" + q).selectize();
             });
 
         // function inputBarang() {

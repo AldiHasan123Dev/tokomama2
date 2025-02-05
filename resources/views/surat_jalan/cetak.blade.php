@@ -209,13 +209,15 @@
                                 @endphp
                             @endif
                             @if($item->satuan_jual != $item->barang->satuan->nama_satuan )
+                            @php
+                            @endphp
                                 (Total {{ number_format($t) }} {{ $item->barang->satuan->nama_satuan }} {{ ($item->keterangan != '' || !is_null($item->keterangan)) ? '= '.$item->keterangan:'' }})
                             @else
                                 {{ ($item->keterangan != '' || !is_null($item->keterangan)) ? '= '.$item->keterangan:'' }}
                             @endif
                         </td>
                         @if ($i == $start)
-                            <td class="border border-black text-center" rowspan="{{ 5 + $end - $start }}">
+                            <td class="border border-black text-center" rowspan="{{ $end - $start }}">
                                 {{ $surat_jalan->customer->nama && $surat_jalan->customer->nama !== '-' ? $surat_jalan->customer->nama : '-' }} <br>
                                 {{ $surat_jalan->customer->kota && $surat_jalan->customer->kota !== '-' ? $surat_jalan->customer->kota : '' }} 
                             </td>
@@ -232,7 +234,7 @@
         </div>
 
         @if ($page == $pages)
-            <div class="footer-content" style="margin-bottom: 50px">
+            <div class="footer-content" style="margin-bottom: 70px">
                 <p style="margin-left: 30px;">Note &nbsp; : &nbsp; Barang yang diterima dalam keadaan baik dan lengkap</p>
                 <table>
                     <tr>

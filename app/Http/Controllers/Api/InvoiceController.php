@@ -22,6 +22,7 @@ class InvoiceController extends Controller
         ->whereNull('invoice.id_transaksi')
         ->whereNotNull('id_surat_jalan')
         ->where('harga_beli', '>', 0)
+        ->where('sisa', '>',0)
         ->orderBy('transaksi.created_at', 'desc')
         ->select([
             'transaksi.id', // Gunakan alias agar tidak tertimpa oleh invoice.id

@@ -171,9 +171,10 @@ class SuratJalanController extends Controller
                             $sisa = $transaction->sisa - $request->jumlah_jual[$i];
                             $bkeluar = $request->jumlah_jual[$i] + $transaction->jumlah_jual;
                             Transaction::create([
-                                'sisa' => $sisa, // Menggunakan sisa dari transaksi yang ada
+                                'sisa' => $request->jumlah_jual[$i], // Menggunakan sisa dari transaksi yang ada
                                 'id_surat_jalan' => $sj->id, // ID surat jalan yang baru
-                                'jumlah_jual' => $request->jumlah_jual[$i], // Jumlah jual yang baru
+                                'jumlah_jual' => $request->jumlah_jual[$i],
+                                'jumlah_beli' => $transaction->jumlah_beli, // Jumlah jual yang baru
                                 'satuan_jual' => $request->satuan_jual[$i],
                                 'satuan_beli' => $transaction->satuan_beli, // Satuan jual yang baru
                                 'keterangan' => $request->keterangan[$i], // Keterangan dari request
@@ -181,14 +182,12 @@ class SuratJalanController extends Controller
                                 'id_supplier' => $transaction->id_supplier, 
                                 'id_surat_jalan' => $sj->id,
                                 'harga_beli' => $transaction->harga_beli,
-                                'keterangan'=> $transaction->keterangan,
                                 'no_bm' => $transaction->no_bm,
                                 'stts' => $transaction->stts
                             ]);
 
                             $transaction->update([
                                 'sisa' => $sisa,
-                                'keterangan' => $request->keterangan[$i],
                                 'jumlah_jual' => $bkeluar,
                                 'satuan_jual' => $request->satuan_jual[$i]
                             ]);
@@ -213,6 +212,18 @@ class SuratJalanController extends Controller
         } else {
             $no = Transaction::whereYear('created_at', date('Y'))->max('no') + 1 ;
         }
+
+        for ($i = 0; $i < count($request->satuan_beli); $i++) {
+            if ($request->satuan_beli[$i] != null) {
+                $satuanJual = Satuan::where('nama_satuan', $request->satuan_beli[$i])->exists();
+                if (!$satuanJual) {
+                    // Jika satuan tidak ada, buat baru
+                    $satuan = new Satuan;
+                    $satuan->nama_satuan = $request->satuan_beli[$i];
+                    $satuan->save();
+                }
+            }
+        }
         $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"); // daftar angka Romawi
         $month_number = date("n", strtotime($request->tgl));
         $month_roman = $roman_numerals[$month_number];
@@ -223,6 +234,7 @@ class SuratJalanController extends Controller
                 Transaction::create([
                     'id_barang' => $request->barang[$i],
                     'jumlah_beli' => $request->jumlah_beli[$i],
+                    'keterangan' => $request->keterangan[$i],
                     'sisa' => $request->jumlah_beli[$i],
                     'satuan_beli' => $request->satuan_beli[$i],
                     'id_supplier' => $request->supplier[$i],
@@ -231,7 +243,7 @@ class SuratJalanController extends Controller
                 ]);
             }
         }
-        return redirect()->route('stock')->with('success', 'Barang Masuk sudah tersimpan!!');
+        return redirect()->route('harga_beli')->with('success', 'Barang Masuk sudah tersimpan!!');
         // return redirect back()->route('surat-jalan.cetak', $sj);
     }
 
