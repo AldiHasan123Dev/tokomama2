@@ -24,6 +24,7 @@ class Transaction extends Model
         'satuan_jual',
         'margin',
         'keterangan',
+        'tgl_bm',
         'no',
         'no_bm',
         'id_supplier'

@@ -71,6 +71,7 @@ class CustomerController extends Controller
         $data->kota = $request->kota;
         $data->alamat_npwp = $request->alamat_npwp;
         $data->top = $request->top;
+        $data->sales = $request->sales;
 
         if ($data->save()) {
             return redirect()->route('master.customer', $data)->with('success', 'Data Master Customer berhasil diubah!');
@@ -104,9 +105,10 @@ class CustomerController extends Controller
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
                 return '<div class="flex gap-3 mt-2">
-           <button onclick="getData(' . $row->id . ', \'' . addslashes($row->nama) . '\', \'' . addslashes($row->npwp) . '\', \'' . addslashes($row->nama_npwp) . '\', \'' . addslashes($row->email) . '\', \'' . addslashes($row->no_telp) . '\', \'' . addslashes($row->alamat) . '\', \'' . addslashes($row->alamat_npwp) . '\', \'' . addslashes($row->kota) . '\', ' . $row->top . ')" id="delete-faktur-all" class="text-yellow-300 font-semibold mb-3 self-end">
+           <button onclick="getData(' . $row->id . ', \'' . addslashes($row->nama) . '\', \'' . addslashes($row->npwp) . '\', \'' . addslashes($row->nama_npwp) . '\', \'' . addslashes($row->email) . '\', \'' . addslashes($row->no_telp) . '\', \'' . addslashes($row->alamat) . '\', \'' . addslashes($row->alamat_npwp) . '\', \'' . addslashes($row->kota) . '\', ' . $row->top . ', \'' . addslashes($row->sales) . '\')" id="delete-faktur-all" class="text-yellow-300 font-semibold mb-3 self-end">
     <i class="fa-solid fa-pencil"></i>
 </button>
+
 
             <button onclick="deleteData(' . $row->id . ')" id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end" ><i class="fa-solid fa-trash"></i></button>
             </div>';

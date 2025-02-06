@@ -87,6 +87,7 @@
         <thead>
           <tr>
             <th>#</th>
+            <th>Sopir</th>
             <th>Nopol</th>
             <th>Status</th>
             <th>Aksi</th>
@@ -104,11 +105,19 @@
       @csrf
       <label class="form-control w-full max-w-xs col-start-1">
         <div class="label">
-          <span class="label-text">nopol <span class="text-red-500">*</span></span>
+          <span class="label-text">Nopol <span class="text-red-500">*</span></span>
         </div>
         <input type="text" placeholder="Nomor Polisi" name="nopol"
           class="input input-bordered w-full max-w-xs rounded-md" required />
       </label>
+      <label class="form-control w-full max-w-xs col-start-2">
+        <div class="label">
+          <span class="label-text">Nama Sopir <span class="text-red-500">*</span></span>
+        </div>
+        <input type="text" placeholder="Nama Sopir" name="sopir"
+          class="input input-bordered w-full max-w-xs rounded-md" required />
+      </label>
+      <input type="hidden" value="aktif" name="status">
       <div class="mt-9">
         <button type="submit" class="btn text-semibold text-white bg-green-500">Simpan Data Customer</button>
       </div>
@@ -129,6 +138,7 @@
             },
             columns: [
                 { data: 'DT_RowIndex', name: 'number'},
+                { data: 'sopir', name: 'sopir' },
                 { data: 'nopol', name: 'nopol' },
                 { data: 'status', name: 'status' },
                 { data: 'aksi', name: 'aksi' },
@@ -163,7 +173,7 @@
             }
           }
 
-          function getData(id, nopol) {
+          function getData(id, nopol,sopir) {
             $('#dialog').html(`<dialog id="my_modal_7" class="modal modal-bottom sm:modal-middle">
               <div class="modal-box  w-11/12 max-w-2xl pl-10 py-9">
               <form method="dialog">
@@ -175,6 +185,8 @@
                   <input type="hidden" name="id" value="${id}" class="border-none" />
                   <label class="form-label">Kode Objek :</label>
                     <input type="text" name="nopol" value="${nopol}" class="input-field" />
+                     <label class="form-label">Nama Sopir :</label>
+                    <input type="text" name="sopir" value="${sopir}" class="input-field" />
                   <button type="submit" class="submit-button">Edit</button>
                 </form>
               </div>

@@ -135,10 +135,10 @@
             <div class="card bg-base-400 shadow-xl mb-5">
                 <div class="card-body">
                     <div class="block overflow-x-auto w-full">
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-4 mb-5">
                             <div style="width: 500px;" class="center-container">
-                                <input type="hidden" name="id_ekspedisi" id="id_ekspedisi">
-                                <label class="form-control w-full max-w-xs">
+                                <input type="hidden" name="id_ekspedisi" value="1" id="id_ekspedisi">
+                                {{-- <label class="form-control w-full max-w-xs">
                                     <div class="label">
                                         <span class="label-text">Ekspedisi <span class="text-red-500">*</span></span>
                                     </div>
@@ -152,7 +152,21 @@
                                         </option>
                                         @endforeach
                                     </datalist>
-                                </label>
+                                </label> --}}
+                                    <label class="form-control w-full max-w-xs">
+                                        <div class="label">
+                                            <span class="label-text">Tujuan/NamaCustomer <span class="text-red-500">*</span></span>
+                                        </div>
+                                        <input type="text"
+                                            class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
+                                            id="tujuan" name="tujuan" list="customer_list" required autocomplete="off"  oninput="this.value = this.value.toUpperCase();"/>
+                                        <input type="hidden" name="id_customer" id="id_customer">
+                                        <datalist id="customer_list">
+                                            @foreach ($customer as $mb)
+                                            <option data-id="{{$mb->id}}" value="{{ $mb->nama }}">{{ $mb->nama }}</option>
+                                            @endforeach
+                                        </datalist>
+                                    </label>
                             </div>
                             {{-- <div>
                                 <label class="form-control w-full max-w-xs">
@@ -196,7 +210,7 @@
                                     <input type="hidden" name="id_nopol" id="id_nopol">
                                     <datalist id="no_pol_list">
                                         @foreach ($nopol as $np)
-                                        <option data-id="{{ $np->id }}}" value="{{ $np->nopol }}">{{ $np->nopol }}</option>
+                                        <option data-id="{{ $np->id }}}" value="{{ $np->nopol }}">{{ $np->nopol }} || {{ $np->sopir }}</option>
                                         @endforeach
                                     </datalist>
                                 </label>
@@ -209,22 +223,6 @@
                                     <input type="text"
                                         class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
                                         id="no_po" name="no_po" value="-"  oninput="this.value = this.value.toUpperCase();" required />
-                                </label>
-                            </div>
-                            <div style="width: 500px;" class="center-container">
-                                <label class="form-control w-full max-w-xs">
-                                    <div class="label">
-                                        <span class="label-text">Tujuan/NamaCustomer <span class="text-red-500">*</span></span>
-                                    </div>
-                                    <input type="text"
-                                        class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                        id="tujuan" name="tujuan" list="customer_list" required autocomplete="off"  oninput="this.value = this.value.toUpperCase();"/>
-                                    <input type="hidden" name="id_customer" id="id_customer">
-                                    <datalist id="customer_list">
-                                        @foreach ($customer as $mb)
-                                        <option data-id="{{$mb->id}}" value="{{ $mb->nama }}">{{ $mb->nama }}</option>
-                                        @endforeach
-                                    </datalist>
                                 </label>
                             </div>
                             <div style="width: 500px;" class="center-container">
@@ -243,8 +241,14 @@
                                         <span class="label-text">Nama Pengirim <span class="text-red-500">*</span></span>
                                     </div>
                                     <input type="text"
-                                        class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                        id="nama_pengirim" name="nama_pengirim" value="PIC 1"  oninput="this.value = this.value.toUpperCase();" required />
+                                    class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
+                                    id="pengirim" name="nama_pengirim" list="pengirim_list" autocomplete="off" oninput="this.value = this.value.toUpperCase();" />
+                                <datalist id="pengirim_list">
+                                    @foreach ($nopol as $np)
+                                    <option value="{{ $np->sopir }}">{{ $np->sopir }}</option>
+                                    @endforeach
+                                </datalist>
+                            </label>
                                 </label>
                             </div>
                             {{-- <div style="width: 500px;" class="center-container">
@@ -307,12 +311,8 @@ document.getElementById("submit").addEventListener("click", function (e) {
         let valid = true;
         let fields = [
             {id: "kepada", name: "Ekspedisi"},
-            {id: "nama_kapal", name: "Nama Kapal"},
-            {id: "no_cont", name: "No. Cont"},
-            {id: "no_seal", name: "No. Seal"},
             {id: "no_pol", name: "No. Pol"},
             {id: "no_po", name: "No. PO"},
-            {id: "no_job", name: "No. Job"},
             {id: "tujuan", name: "Tujuan/Nama Customer"},
             {id: "kota_pengirim", name: "Kota Pengirim"},
             {id: "nama_pengirim", name: "Nama Pengirim"},
@@ -387,7 +387,7 @@ document.getElementById("submit").addEventListener("click", function (e) {
         $('#no_pol').on('input', function () {
             var inputValue = $(this).val();
             var id = $("#no_pol_list option[value='" + inputValue + "']").data('id');
-            $('#id_customer').val(id);
+            $('#id_nopol').val(id);
             $('#txt_no_pol').text(inputValue);
         });
 
@@ -417,7 +417,6 @@ document.getElementById("submit").addEventListener("click", function (e) {
             $('#txt_nama_pengirim').text($('#nama_pengirim').val());
             $('#txt_nama_penerima').text($('#nama_penerima').val());
             $('#txt_no_po').text($('#no_po').val());
-            $('#txt_no_pol').text($('#no_pol').val());
         });
 
         $("#kota_pengirim").on({
@@ -486,7 +485,9 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                         <select name="barang[]" id="barang-${q}" class="select2 form-control my-0" style="width: 500px; border:none>
                                             <option value=""></option>
                                             @foreach ($barang as $item)
-                                            <option value="{{ $item->id }}">{{ $item->nama }} || {{ $item->nama_satuan }} || {{ $item->value }}</option>
+                                           <option value="{{ $item->id }}">{{ $item->nama }} ||
+                                                        {{ $item->nama_satuan }} || Stock : {{ $item->sisa }} ||
+                                                        {{ $item->kode_objek }} || {{ $item->no_bm }}</option>
                                             @endforeach
                                         </select>
                                     </td>
@@ -496,8 +497,7 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                     </td>
                                     <td>
                                         <select name="satuan_jual[]" id="satuan_jual-${q}"
-                                                onchange="inputBarang()" class=" m-1 form-select"
-                                                >
+                                                onchange="inputBarang()" class=" m-1 form-select">
                                                 <option value=""></option>
                                                 @foreach ($satuan as $item)
                                                     <option value="{{ $item->nama_satuan }}">{{ $item->nama_satuan }}
@@ -506,7 +506,7 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                             </select>
                                     </td>
                                     <td>
-                                        <input type="text" style="11000px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}" class="form-control">
+                                        <input type="text" style="1000px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}" class="form-control">
                                     </td>
                                 </tr>`;
                 $('#tbody-list-barang').append(html);

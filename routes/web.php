@@ -57,6 +57,7 @@ Route::get('/surat-jalan/checkBarangCount', [SuratJalanController::class, 'check
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/barang-masuk/monitor-stock', [StockController::class, 'monitor_stock'])->name('monitor-stock');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/surat-jalan-cetak/{surat_jalan}', [SuratJalanController::class, 'cetak'])->name('surat-jalan.cetak');
     Route::get('/surat-jalan-tarif-barang', [SuratJalanController::class, 'tarif'])->name('surat-jalan.barang');
@@ -72,6 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
     // Route::delete('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
     Route::get('/barang-masuk/create', [SuratJalanController::class, 'create_bm'])->name('barang_masuk');
+    Route::get('/surat-jalan/create_noppn', [SuratJalanController::class, 'createNoPPN'])->name('surat-jalan.create_noppn');
     Route::get('/barang-masuk/cetak-nota', [StockController::class, 'cetak_nota'])->name('cetak_nota');
     Route::post('/barang-masuk/store', [SuratJalanController::class, 'store_bm'])->name('barang_masuk.store');
     Route::resource('surat-jalan', SuratJalanController::class);

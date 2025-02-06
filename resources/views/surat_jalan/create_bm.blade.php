@@ -42,6 +42,37 @@
             max-width: 90%;
             margin: auto;
         }
+        .date-input {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 920px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 14px;
+}
+.card-gray {
+    background-color: #e3e6ea; /* Warna abu-abu terang */
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 950px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 14px;
+}
     </style>
     <form action="{{ route('barang_masuk.store') }}" method="post" id="reset" onsubmit="return validateForm()">
         @csrf
@@ -50,6 +81,15 @@
                 <div class="card-body">
                     <h1 class="card-title mb-2">Form Barang Masuk</h1>
                     <div class="block overflow-x-auto w-full">
+                        <div class="card-gray">
+                            <div class="input-container">
+                                <label for="tgl_bm">Tanggal BM:</label>
+                                <input type="date" name="tgl_bm" id="tgl_bm" class="date-input">
+                            </div>
+                        </div>
+                        
+                        
+                        
                         <table class="table w-full border-collapse" id="table-barang" style="font-size: .7rem">
                             <thead>
                                 <tr>
@@ -75,7 +115,7 @@
                                     <td class="text-center">{{ $i }}</td>
                                     <td>
                                        <select name="barang[]" id="barang-{{ $i }}"
-                                                class="select2 form-control my-0" style="width: 500px; border:none">
+                                                class="select2 form-control my-0" style="width: 300px; border:none">
                                                 <option value=""></option>
                                                 @foreach ($barang as $item)
                                                     <option value="{{ $item->id }}">{{ $item->nama }} ||
@@ -100,7 +140,7 @@
                                             </select>
                                     </td>
                                     <td>
-                                        <select  name="supplier[]" id="supplier-{{ $i }}" class="select2 form-control my-0" style="width: 300px; border:none">
+                                        <select  name="supplier[]" id="supplier-{{ $i }}" class="select2 form-control my-0" style="width: 200px; border:none">
                                             <option value=""></option>
                                             @foreach ($supplier as $item)
                                             <option value="{{ $item->id }}">{{ $item->nama }}</option>
@@ -214,6 +254,10 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                     </td>
                                     <td>
                                         <input type="text" style="11000px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}" class="form-control">
+                                    </td>
+                                    <td>
+                                        <input type="datetime" style="width:120px" name="tgl_bm[]" id="tgl_bm-${q}"
+                                            class="form-control">
                                     </td>
                                 </tr>`;
                 $('#tbody-list-barang').append(html);

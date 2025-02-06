@@ -15,6 +15,7 @@
                         <tr>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">#</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Nama Barang</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Jumlah Barang</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Jual Satuan</th>
@@ -26,6 +27,7 @@
                         <tr>
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">{{ $loop->iteration }}</td>
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">{{ $item->barang->nama }}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">{{ $item->satuan_jual }}</td>
                             <td hidden style="border: 1px solid #ddd; padding: 12px; text-align: center;" class="invoice-{{ $item->id }}">
                                 <select hidden name="invoice[{{ $item->id }}][]" class="select w-full">
                                     <option value="1" selected>Invoice Ke - 1</option>

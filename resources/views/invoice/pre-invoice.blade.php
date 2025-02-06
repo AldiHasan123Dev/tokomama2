@@ -8,8 +8,8 @@
                         <tr>
                             <td style="font-weight: bold; padding: 0; text-align: center;">
                                 <img src="{{ asset('assets/img/Tokomama4 (1).PNG') }}" alt="Logo" style="height: 100px; margin-bottom: 1px; margin-left: 60px">
-                                TOKO MAMA <br>
-                                Jayapura Selatan - Papua <br>
+                                MAMA BAHAGIA <br>
+                                Jl. Baru (Ruko depan PLN) Abepura, Jayapura <br>
                             </td>
                         </tr>
                     </thead>                    
@@ -40,7 +40,7 @@
             <table style="width: 100%; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
                 <thead>
                     <tr>
-                        <td style="font-weight: bold; text-align: center">SALES INVOICES</td>
+                        <td style="font-weight: bold; text-align: center">SALES INVOICE : {{ $transaksi->suratJalan->customer->sales }}</td>
                     </tr>
                 </thead>
             </table>
@@ -310,7 +310,7 @@
                         <th style="text-align: left; padding-left: 50px; font-style: italic;">Pembayaran ke rekening:</th>
                     </tr>
                     <tr>
-                        <th style="text-align: left; padding-left: 50px; font-style: italic;">TOKO MAMA</th>
+                        <th style="text-align: left; padding-left: 50px; font-style: italic;">CV. Sarana Bahagia</th>
                     </tr>
                     <tr>
                         <th style="text-align: left; padding-left: 50px; font-style: italic;">Mandiri (Cab.Indrapura) : 14.000.45006.005</th>
@@ -438,7 +438,7 @@
             </tr>
             <tr>
                 <th style="text-align: left; padding-left: 50px;"></th>
-                <th style="padding-top:30px">(Dwi Satria Wardana)</th>
+                <th style="padding-top:30px">(MAMA BAHAGIA)</th>
             </tr>
         </table>
 

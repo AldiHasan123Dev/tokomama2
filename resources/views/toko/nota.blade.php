@@ -27,13 +27,13 @@
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 0.8rem;
             font-weight: bold;
         }
 
         .content {
             margin: 3px;
-            font-size: 1rem;
+            font-size: 0.8rem;
         }
 
         p {
@@ -51,7 +51,7 @@
         td {
             border: 1px solid #000;
             padding: 6px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
 
         th {
@@ -64,7 +64,7 @@
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         .signature-table {
@@ -110,7 +110,7 @@
         }
         @endphp
 <p><strong>No. BM:</strong> {{ $stocks->first()->no_bm }}</p>
-<p><strong>Tanggal Kirim:</strong> {{ $stocks->first()->created_at->format('d-m-Y') }}</p>
+<p><strong>Tanggal Kirim:</strong> {{ $stocks->first()->tgl_bm }}</p>
 
         @for ($page = 1; $page <= $pages; $page++)
         @php
@@ -152,8 +152,8 @@
                         @else
                             {{ ($stock->keterangan != '' || !is_null($stock->keterangan)) ? '= '.$stock->keterangan:'' }}
                         @endif</td>
-                        <td>{{ $stock->jumlah_beli }}</td>
-                        <td>{{ $stock->satuan_beli }}</td>
+                        <td style="text-align: right">{{ number_format($stock->jumlah_beli, 0, ',', '.') }}</td>
+                        <td style="text-align: center">{{ $stock->satuan_beli }}</td>
                         <td>{{ $stock->suppliers->nama }}</td>
                         <td></td>
                     </tr>
@@ -163,7 +163,9 @@
         </table>
 
         @if ($page == $pages)
-        <p><strong>Note:</strong> Barang yang diterima dalam keadaan baik dan lengkap.</p>
+        <p><strong>Note:</strong> Silahkan Crosscheck Barang yang diterima. 
+            <br>
+            Nota penerimaan barang ini di scan dan di kirim ke <a href="gmail:sarana.bahagia0018@gmail.com">sarana.bahagia0018@gmail.com</a>.</p>
         <br>
         <div class="footer">
             <table class="signature-table">

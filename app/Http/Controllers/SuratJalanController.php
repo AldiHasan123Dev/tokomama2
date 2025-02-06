@@ -44,6 +44,7 @@ class SuratJalanController extends Controller
             'transaksi.*'
         )
         ->where('barang.status', 'AKTIF')
+        ->where('barang.status_ppn', 'ya')
         ->whereNull('id_surat_jalan')
         ->where('harga_jual',0)
         ->where('harga_beli', '>', 0)
@@ -57,6 +58,33 @@ class SuratJalanController extends Controller
         $satuan = Satuan::all();
         $supplier = Supplier::all();
         return view('surat_jalan.create', compact('barang', 'nopol', 'customer', 'ekspedisi', 'satuan', 'supplier'));
+    }
+
+    public function createNoPPN()
+    {
+        $barang = Transaction::join('barang', 'transaksi.id_barang', '=', 'barang.id')
+        ->join('satuan', 'barang.id_satuan', '=', 'satuan.id')
+        ->select(
+            'barang.nama',
+            'barang.kode_objek',
+            'satuan.nama_satuan',
+            'transaksi.*'
+        )
+        ->where('barang.status', 'AKTIF')
+        ->where('barang.status_ppn', 'tidak')
+        ->whereNull('id_surat_jalan')
+        ->where('harga_jual',0)
+        ->where('harga_beli', '>', 0)
+        ->where('sisa', '>', 0)
+        ->whereNotNull('transaksi.stts')
+        ->get();
+
+        $nopol = Nopol::where('status', 'aktif')->get();
+        $customer = Customer::all();
+        $ekspedisi = Ekspedisi::all();
+        $satuan = Satuan::all();
+        $supplier = Supplier::all();
+        return view('surat_jalan.create_noppn', compact('barang', 'nopol', 'customer', 'ekspedisi', 'satuan', 'supplier'));
     }
 
     public function create_bm()
@@ -76,18 +104,15 @@ class SuratJalanController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'id_customer' => 'required|exists:customer,id',
-            'kepada' => 'required|exists:ekspedisi,nama',
-            'no_pol' => 'required|exists:nopol,nopol',
-        ], [
-            'id_customer.required' => 'ID Customer tidak valid. Silakan pilih dari daftar yang tersedia.',
-            'id_customer.exists' => 'Customer tidak valid. Silakan pilih dari daftar yang tersedia.',
-            'no_pol.required' => 'Nomor Polisi wajib diisi.',
-            'no_pol.exists' => 'Nomor Polisi tidak valid. Silakan pilih dari daftar yang tersedia.',
-            'kepada.required' => 'Ekspedisi yang dimasukkan tidak valid. Silakan pilih dari daftar yang ada.',
-            'kepada.exists' => 'Ekspedisi yang dimasukkan tidak valid. Silakan pilih dari daftar yang ada.'
-        ]);
+        // $request->validate([
+        //     'id_customer' => 'required|exists:customer,id',
+        //     'no_pol' => 'required|exists:nopol,nopol',
+        // ], [
+        //     'id_customer.required' => 'ID Customer tidak valid. Silakan pilih dari daftar yang tersedia.',
+        //     'id_customer.exists' => 'Customer tidak valid. Silakan pilih dari daftar yang tersedia.',
+        //     'no_pol.required' => 'Nomor Polisi wajib diisi.',
+        //     'no_pol.exists' => 'Nomor Polisi tidak valid. Silakan pilih dari daftar yang tersedia.'
+        // ]);
     
         // Validasi dan cek stok terlebih dahulu
         for ($i = 0; $i < count($request->barang); $i++) {
@@ -136,26 +161,28 @@ class SuratJalanController extends Controller
         }
     
         // Mendapatkan customer berdasarkan id_customer
-        $customer = Customer::find($request->id_customer);
+        $customer = Customer::where('nama',$request->tujuan)->first();
         if (!$customer) {
             return back()->with('error', 'Customer Tidak Ditemukan');
         }
-    
+        
         $data = $request->all();
-        $expedisi = Ekspedisi::where('nama',$request->kepada)->first();
+        $nopol = Nopol::where('nopol',$request->no_pol)->first();
+        // $expedisi = Ekspedisi::where('nama',$request->kepada)->first();
         // Mengatur nomor surat jalan
         if (SuratJalan::count() == 0) {
             $no = 87;
         } else {
             $no = SuratJalan::whereYear('created_at', date('Y'))->max('no') + 1;
         }
+        // $nopol = Nopol::where('s')
     
         // Menentukan nomor surat jalan dalam format roman
         $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII");
         $month_number = date("n", strtotime($request->tgl_sj));
         $month_roman = $roman_numerals[$month_number];
+        $data['kepada']= $customer->nama_npwp;
         $data['no'] = $no;
-        $data['id_ekspedisi'] = $expedisi->id;
         $data['nomor_surat'] = sprintf('%03d', $no) . '/SJ/SB-' . $month_roman . '/' . date('Y', strtotime($request->tgl_sj));
         $sj = SuratJalan::create($data);
     
@@ -239,7 +266,8 @@ class SuratJalanController extends Controller
                     'satuan_beli' => $request->satuan_beli[$i],
                     'id_supplier' => $request->supplier[$i],
                     'no' => $no,
-                    'no_bm' => $no_bm
+                    'no_bm' => $no_bm,
+                    'tgl_bm' => $request->tgl_bm
                 ]);
             }
         }

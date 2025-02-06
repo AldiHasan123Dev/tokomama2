@@ -10,7 +10,7 @@
     <meta content="Themesbrand" name="author">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets/img/Tokomama4 (1).PNG') }}">
+    <link rel="shortcut icon" href="{{ public_path('TokomamaBahagia.png') }}>
     <!-- Layout config Js -->
     <!-- Icons CSS -->
     {{-- @vite('resources/css/app.css') --}}

@@ -213,6 +213,7 @@ if (request('non_tarif') && !request('tarif')) {
                     'id' => $row->id,
                     'aksi' => $this->getActionButton($row),
                     'barang' => $row->barang->nama,
+                    'tgl_bm' => $row->tgl_bm,
                     'profit' => $row->margin ? number_format($row->margin) : '-',
                     'jumlah_jual' => $row->jumlah_jual ? number_format($row->jumlah_jual) : '-',
                     'harga_jual' => $row->harga_jual ? $row->harga_jual : '-',

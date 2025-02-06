@@ -54,8 +54,8 @@ class StockController extends Controller
                 'onclick="window.open(\'' . $cetakNotaUrl . '\', \'_blank\')">' .
                 'Cetak Nota</button>',
                 'no_bm' => $stock->no_bm ?? '-',
-                'vol_bm' => $stock->total_beli ?? 0,
-                'tgl_masuk' => $stock->created_at->format('Y-m-d')?? 0,
+               'vol_bm' => number_format($stock->total_beli, 0, ',', '.') ?? 0,
+                'tgl_masuk' => $stock->tgl_bm?? 0,
                 'harga_beli' => $stock->total_harga_beli?? 0,
                 'sisa' => $stock->sisa ?? 0, // Format aktif jadi Yes/No
                 'index' => $index++ // Menambahkan index nomor urut
@@ -197,6 +197,9 @@ class StockController extends Controller
 
     public function cetak_nota(){
         return view('toko.list-barang');
+    }
+    public function monitor_stock(){
+        return view('toko.monitor-stock');
     }
 
     public function stocks(){

@@ -164,6 +164,13 @@
                         },
                         {
                             search: true,
+                            label: 'Tgl BM',
+                            name: 'tgl_bm',
+                            width: 150,
+                            align: 'center'
+                        },
+                        {
+                            search: true,
                             label: 'No. BM',
                             name: 'no_bm',
                             width: 150,
@@ -267,6 +274,13 @@
                         sortable: false,
                         formatter: 'unformat'
                     },
+                    {
+                            search: true,
+                            label: 'Tgl BM',
+                            name: 'tgl_bm',
+                            width: 150,
+                            align: 'center'
+                        },
                     {
                         label: 'No BM',
                         name: 'no_bm',

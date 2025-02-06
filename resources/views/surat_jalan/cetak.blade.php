@@ -21,19 +21,20 @@
 
         .header {
             position: fixed;
-            top: -130px;
+            top: -110px;
             left: 0;
             right: 0;
             height: 0px;
-
+            
             text-align: center;
             padding: 5px;
             box-sizing: border-box;
         }
-
         .content {
-            height: 20px;
-        }
+    margin-top: 50px; /* Sesuaikan jarak sesuai kebutuhan */
+}
+
+
 
         .logo {
             width: 70px;
@@ -90,22 +91,23 @@
         <table>
             <thead>
                 <tr>
-                    <th rowspan="4" style="width: 20%">
-                        <img src="{{ public_path('logo_sb.svg') }}" class="logo">
+                    <th rowspan="4" style="width: 20%; text-align: left; margin-bottom:20px">
+                        <img src="{{ public_path('TokomamaBahagia.png') }}" class="logo">
                     </th>
-                    <td>TOKO MAMA</td>
+                    <td>MAMA BAHAGIA</td>
                     <td></td>
                     <td>Kepada:</td>
                 </tr>
                 <tr>
-                    <td>Jl. Kalianak 55 Blok G, Surabaya</td>
+                    <td s>Jl. Baru (Ruko Depan PLN) 
+                        <br> Abepura, Jayapura </td>
                     <td></td>
-                    <td>{{ $surat_jalan->kepada }}</td>
+                    <td>{{ $surat_jalan->customer->nama }}</td>
                 </tr>
                 <tr>
-                    <td>Telp: 031-7495507</td>
+                    <td>Telp: 0811269286 / 08112692859</td>
                     <td></td>
-                    <td>{{ $ekspedisi->alamat }}</td>
+                    <td>{{ $surat_jalan->customer->alamat }}</td>
                 </tr>
                 <tr>
                     <td></td>
@@ -113,21 +115,20 @@
                     <td>{{ $ekspedisi->kota }}</td>
                 </tr>
                 <tr>
-                    <th>SURAT JALAN</th>
+                    <th style="text-align: left; margin-right: 20px">SURAT JALAN</th>
                     <td style="font-weight: bold" colspan="2">No: {{ $surat_jalan->nomor_surat }} </td>
                 </tr>
                 <tr class="m-5">
-                    <th>PO</th>
+                    <th style="text-align: left">PO</th>
                     <td style="font-weight: bold" colspan="2">No: {{ $surat_jalan->no_po }} </td>
                 </tr>
                 <tr class="mt-5">
-                    <th>No. Pol</th>
+                    <th style="text-align: left">No. Pol</th>
                     <td style="font-weight: bold" colspan="2">No: {{ $surat_jalan->no_pol }} </td>
                 </tr>
             </thead>
         </table>
     </div>
-
 <div class="content">
     @php
         $items_per_page = 16; // Mengubah jumlah item per halaman menjadi 16
@@ -168,7 +169,6 @@
                 }
             }
         @endphp
-        <br>
         <table class="table border border-black">
             <thead>
                 <tr>
@@ -232,9 +232,9 @@
                 Halaman: {{ $page }} dari {{ $pages }}
             </p>
         </div>
-
+        <br>
         @if ($page == $pages)
-            <div class="footer-content" style="margin-bottom: 70px">
+            <div class="footer-content">
                 <p style="margin-left: 30px;">Note &nbsp; : &nbsp; Barang yang diterima dalam keadaan baik dan lengkap</p>
                 <table>
                     <tr>
@@ -244,7 +244,7 @@
                         </th>
                     </tr>
                     <tr>
-                        <td style="height: 10px"></td>
+                        <td style="height: 20px"></td>
                         <td></td>
                     </tr>
                     <tr>
@@ -252,13 +252,13 @@
                         <th><b>PENGIRIM</b></th>
                     </tr>
                     <tr>
-                        <td style="height: 15px;"></td>
+                        <td style="height: 13px;"></td>
                     <tr>
                         <th style="height: 30px"> </th>
                         <th></th>
                     </tr>
                     <tr>
-                        <th>({{ $surat_jalan->nama_penerima }})</th>
+                        <th>({{ $surat_jalan->customer->nama }})</th>
                         <th>({{ $surat_jalan->nama_pengirim }})</th>
                     </tr>
                 </table>

@@ -111,10 +111,18 @@
                     mtype: "GET",
                     colModel: [
                         {
-                            label: 'No',
-                            name: 'index',
-                            align: 'center',
-                            width: 20
+                            search: true,
+                            label: 'No BM',
+                            name: 'no_bm',
+                            width: 50,
+                            align: "center"
+                        },
+                        {
+                            search: true,
+                            label: 'Tgl Barang Masuk',
+                            name: 'tgl_masuk',
+                            width: 80,
+                            align: "center" // Mengatur alignment menjadi center
                         },
                         {
                         label: 'Aksi',
@@ -126,23 +134,9 @@
                     },
                         {
                             search: true,
-                            label: 'Tgl Barang Masuk',
-                            name: 'tgl_masuk',
-                            width: 80,
-                            align: "center" // Mengatur alignment menjadi center
-                        },
-                        {
-                            search: true,
                             label: 'Volume Masuk',
                             name: 'vol_bm',
                             width: 100,
-                            align: "right"
-                        },
-                        {
-                            search: true,
-                            label: 'No BM',
-                            name: 'no_bm',
-                            width: 50,
                             align: "center"
                         }
                     ],

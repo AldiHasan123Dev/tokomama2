@@ -87,10 +87,10 @@
         <thead>
           <tr>
             <th>ID</th>
+            <th>Sales</th>
             <th>Nama</th>
             <th>NPWP</th>
             <th>TOP
-
             </th>
             <th>Email</th>
             <th>No.Telp</th>
@@ -132,14 +132,21 @@
         <input type="text" placeholder="Nama NPWP" name="nama_npwp"
           class="input input-bordered w-full max-w-xs rounded-md" required />
       </label>
-      <label class="form-control w-full max-w-xs col-start-3">
+      <label class="form-control w-full max-w-xs col-start-4">
         <div class="label">
           <span class="label-text">TOP <span class="text-red-500">*</span></span>
         </div>
-        <input type="text" placeholder="Nama NPWP" name="top"
+        <input type="text" placeholder="Terms Of Payment" name="top"
           class="input input-bordered w-full max-w-xs rounded-md" required />
       </label>
-      <label class="form-control w-full max-w-xs col-start-4">
+      <label class="form-control w-full max-w-xs col-start-1">
+        <div class="label">
+          <span class="label-text">Sales <span class="text-red-500">*</span></span>
+        </div>
+        <input type="text" placeholder="Nama Sales" name="sales"
+          class="input input-bordered w-full max-w-xs rounded-md" required />
+      </label>
+      <label class="form-control w-full max-w-xs col-start-2">
         <div class="label">
           <span class="label-text">Email <span class="text-red-500">*</span></span>
         </div>
@@ -147,14 +154,14 @@
           />
       </label>
 
-      <label class="form-control w-full max-w-xs col-start-1">
+      <label class="form-control w-full max-w-xs col-start-3">
         <div class="label">
           <span class="label-text">No Telp <span class="text-red-500">*</span></span>
         </div>
         <input type="text" placeholder="Nomor Telepon" name="no_telp"
           class="input input-bordered w-full max-w-xs rounded-md" required />
       </label>
-      <label class="form-control w-full max-w-xs col-start-2">
+      <label class="form-control w-full max-w-xs col-start-4">
         <div class="label">
           <span class="label-text">Alamat <span class="text-red-500">*</span></span>
         </div>
@@ -162,21 +169,21 @@
           required />
       </label>
       
-      <label class="form-control w-full max-w-xs col-start-3">
+      <label class="form-control w-full max-w-xs col-start-2">
         <div class="label">
           <span class="label-text">Kota <span class="text-red-500">*</span></span>
         </div>
         <input type="text" placeholder="Kota" name="kota" class="input input-bordered w-full max-w-xs rounded-md"
           required />
       </label>
-      <label class="form-control w-full max-w-xs col-start-4">
+      <label class="form-control w-full max-w-xs col-start-3">
         <div class="label">
           <span class="label-text">Alamat NPWP <span class="text-red-500">*</span></span>
         </div>
         <input type="text" placeholder="Alamat NPWP" name="alamat_npwp"
           class="input input-bordered w-full max-w-xs rounded-md" required />
       </label>
-      <span class="mt-1"><span class="text-red-500">*</span>) Jika tidak ada silahkan isi "-"</span>
+      <span class="mt-5"><span class="text-red-500">*</span>) Jika tidak ada silahkan isi "-"</span>
       <button type="submit" class="btn p-4 mt-3 text-semibold text-white bg-green-500 col-span-4">Simpan Data
         Customer</button>
     </form>
@@ -196,6 +203,7 @@
             },
             columns: [
                 { data: 'DT_RowIndex', name: 'number'},
+                { data: 'sales', name: 'sales' },
                 { data: 'nama', name: 'nama' },
                 { data: 'npwp', name: 'npwp' },
                 { data: 'top', name: 'top'},
@@ -210,7 +218,7 @@
             ]
           })
 
-          function getData(id, nama, npwp, nama_npwp, email, no_telp, alamat, alamat_npwp, kota,top ) 
+          function getData(id, nama, npwp, nama_npwp, email, no_telp, alamat, alamat_npwp, kota,top,sales ) 
           {
             // alert(nama);
             $('#satu').html(`<dialog id="my_modal_5" class="modal">
@@ -230,6 +238,8 @@
                     <input type="text" name="nama_npwp" value="${nama_npwp}" class="input-field" />
                    <label class="form-label">TOP :</label>
                     <input type="text" name="top" value="${top}" class="input-field" />
+                     <label class="form-label">Sales :</label>
+                    <input type="text" name="sales" value="${sales}" class="input-field" />
                   <label class="form-label">Email :</label>
                     <input type="text" name="email" value="${email}" class="input-field" />
                   <label class="form-label">No.Telp :</label>

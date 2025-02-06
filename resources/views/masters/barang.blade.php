@@ -176,7 +176,7 @@
   <x-slot:script>
       <script>
           let table = new DataTable('#table-barang', {
-              pageLength: 100,
+              pageLength: 20,
               ajax: {
                   url: "{{ route('master.barang.list') }}",
                   data: {
@@ -234,9 +234,9 @@
 
               // Set value_ppn berdasarkan pilihan status_ppn
               if (statusPPN === "ya") {
-                  valuePPNInput.value = 11; // Set 100 jika PPN ya
+                  valuePPNInput.value = 12; // Set 100 jika PPN ya
               } else if (statusPPN === "tidak") {
-                  valuePPNInput.value = 0; // Set 0 jika PPN tidak
+                  valuePPNInput.value = 12; // Set 0 jika PPN tidak
               }
           }
 
