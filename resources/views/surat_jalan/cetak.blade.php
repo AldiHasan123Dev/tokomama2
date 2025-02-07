@@ -14,14 +14,14 @@
 
         body {
             width: 100%;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             margin: 0;
             padding: 0;
         }
 
         .header {
             position: fixed;
-            top: -110px;
+            top: -140px;
             left: 0;
             right: 0;
             height: 0px;
@@ -31,7 +31,7 @@
             box-sizing: border-box;
         }
         .content {
-    margin-top: 50px; /* Sesuaikan jarak sesuai kebutuhan */
+    margin-top: 10px;
 }
 
 
@@ -49,6 +49,7 @@
         .border-black {
             border: 1px solid black;
             padding: 0px;
+            margin-top: 20px;
         }
 
         .text-center {
@@ -61,7 +62,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 66px; /* Same as bottom margin of @page */
+            height: 20px; /* Same as bottom margin of @page */
            
             text-align: center;
             width: 100%;
@@ -69,8 +70,6 @@
 
         .footer-content {
             position:fixed;
-            bottom: -1px;
-            padding-top:14px;
             margin-left:15px;
             width:100%;
         }
@@ -102,7 +101,7 @@
                     <td s>Jl. Baru (Ruko Depan PLN) 
                         <br> Abepura, Jayapura </td>
                     <td></td>
-                    <td>{{ $surat_jalan->customer->nama }}</td>
+                    <td>{{ $surat_jalan->customer->nama_npwp }}</td>
                 </tr>
                 <tr>
                     <td>Telp: 0811269286 / 08112692859</td>
@@ -131,44 +130,26 @@
     </div>
 <div class="content">
     @php
-        $items_per_page = 16; // Mengubah jumlah item per halaman menjadi 16
-        $total_items = $surat_jalan->transactions->count();
-        
-        // Calculate the number of pages
+    $items_per_page = 16; // Jumlah item per halaman
+    $min_items_per_page = 10; // Minimal item per halaman
+    $total_items = $surat_jalan->transactions->count();
+    
+    // Hitung jumlah halaman
+    $pages = max(ceil($total_items / $items_per_page), 1);
+
+    // Pastikan halaman terakhir memiliki minimal 10 item
+    while ($pages > 1 && ($total_items % $items_per_page < $min_items_per_page)) {
+        $items_per_page--;
         $pages = ceil($total_items / $items_per_page);
+    }
+@endphp
 
-        // Calculate remaining items after the first page
-        $remaining_items = $total_items % $items_per_page;
-
-        // Sesuaikan jumlah halaman jika halaman terakhir memiliki lebih dari 7 item
-        if ($remaining_items > 7) {
-            $pages++;
-        }
+@for ($page = 1; $page <= $pages; $page++)
+    @php
+        $start = ($page - 1) * $items_per_page;
+        $end = min($start + $items_per_page, $total_items);
     @endphp
 
-    @for ($page = 1; $page <= $pages; $page++)
-        @php
-            if ($page < $pages) {
-                // Halaman pertama dan tengah mengambil item secara normal
-                $start = ($page - 1) * $items_per_page;
-                $end = min($start + $items_per_page, $total_items);
-
-              
-                if ($page == $pages - 1 && $remaining_items > 7) {
-                    $end = $total_items - 1;
-                }
-            } else {
-                // Halaman terakhir, jika ada lebih dari 7 item tersisa, hanya mengambil item terakhir
-                if ($remaining_items > 7) {
-                    $start = $total_items - 1;
-                    $end = $total_items;
-                } else {
-                    // Jika sisa item kurang dari atau sama dengan 7, ambil semua sisa item
-                    $start = $total_items - $remaining_items;
-                    $end = $total_items;
-                }
-            }
-        @endphp
         <table class="table border border-black">
             <thead>
                 <tr>
@@ -176,7 +157,7 @@
                     <th class="border border-black">JUMLAH</th>
                     <th class="border border-black">SATUAN</th>
                     <th class="border border-black">JENIS BARANG</th>
-                    <th class="border border-black">TUJUAN / NAMA CUSTOMER</th>
+                    {{-- <th class="border border-black">TUJUAN / NAMA CUSTOMER</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -194,11 +175,10 @@
                         <td class="text-center" style="vertical-align: top; border-right: 1px solid black">
                             <span>{{ $item->satuan_jual }}</span><br>
                         </td>
-                        <td class="px-2" style="padding: 0px 5px">
-                            <div class="flex justify-between mt-3">
+                        <td class="px-2" style="padding: 0px 2px">
+                            
                                 <span>{{ $item->barang->nama_singkat }}</span>
                                 <span>({{ number_format($item->jumlah_jual) }} {{ $item->satuan_jual }})</span>
-                            </div>
                             @if (str_contains($item->satuan_jual, $item->barang->satuan->nama_satuan))
                                 @php
                                     $t = (int)$item->jumlah_jual;
@@ -216,12 +196,12 @@
                                 {{ ($item->keterangan != '' || !is_null($item->keterangan)) ? '= '.$item->keterangan:'' }}
                             @endif
                         </td>
-                        @if ($i == $start)
+                        {{-- @if ($i == $start)
                             <td class="border border-black text-center" rowspan="{{ $end - $start }}">
                                 {{ $surat_jalan->customer->nama && $surat_jalan->customer->nama !== '-' ? $surat_jalan->customer->nama : '-' }} <br>
                                 {{ $surat_jalan->customer->kota && $surat_jalan->customer->kota !== '-' ? $surat_jalan->customer->kota : '' }} 
                             </td>
-                        @endif
+                        @endif --}}
                     </tr>
                 @endfor
             </tbody>
@@ -232,19 +212,18 @@
                 Halaman: {{ $page }} dari {{ $pages }}
             </p>
         </div>
-        <br>
         @if ($page == $pages)
             <div class="footer-content">
                 <p style="margin-left: 30px;">Note &nbsp; : &nbsp; Barang yang diterima dalam keadaan baik dan lengkap</p>
-                <table>
+                <table style="margin-top: 20px">
                     <tr>
                         <th style="width: 50%;"></th>
-                        <th style="width: 50%; text-align: right; font-weight: normal !important; padding-right:120px">
+                        <th style="width: 50%; text-align: right; font-weight: normal !important; padding-right:130px">
                             {{ $surat_jalan->kota_pengirim }}, {{ date('d M Y', strtotime($surat_jalan->tgl_sj)) }}
                         </th>
                     </tr>
                     <tr>
-                        <td style="height: 20px"></td>
+                        <td></td>
                         <td></td>
                     </tr>
                     <tr>

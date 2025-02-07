@@ -281,20 +281,6 @@ $(function () {
                     decimalPlaces: 2, // Jumlah angka di belakang koma
                     defaultValue: "0.00" // Nilai default jika kosong
                 }
-            },
-            {
-                search: true,
-                label: 'Harga Jual',
-                name: 'total_harga_jual',
-                width: 80,
-                align: "right",
-                formatter: "number",
-                formatoptions: {
-                    decimalSeparator: ".",
-                    thousandsSeparator: ",",
-                    decimalPlaces: 2, // Jumlah angka di belakang koma
-                    defaultValue: "0.00" // Nilai default jika kosong
-                }
             }
         ],
         pager: "#jqGridPager1", // Link pager dengan ID yang benar

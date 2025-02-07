@@ -699,7 +699,7 @@ class SuratJalanController extends Controller
 
     public function editBarang()
     {
-        $transactions = Transaction::with(['suppliers'])->orderBy('id_surat_jalan', 'desc')->get();
+        $transactions = Transaction::with(['suppliers'])->orderBy('id_surat_jalan', 'desc')->whereNotNull('id_surat_jalan')->get();
         $satuans = Satuan::all();
         $barangs = Barang::where('status', 'AKTIF')->get();
         $suppliers = Supplier::all();
@@ -711,7 +711,6 @@ class SuratJalanController extends Controller
     {
         Transaction::where('id', $request->id)->update([
             'jumlah_jual' => $request->jumlah_jual,
-            'jumlah_beli' => $request->jumlah_jual,
             'sisa' => $request->jumlah_jual,
             'satuan_beli' => $request->satuan,
             'satuan_jual' => $request->satuan,

@@ -15,7 +15,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.7rem;
             margin: 0;
             padding: 0;
             width: 100%;
@@ -23,7 +23,7 @@
 
         .header {
             position: fixed;
-            top: -50px;
+            top: -100px;
             left: 0;
             right: 0;
             text-align: center;
@@ -33,18 +33,15 @@
 
         .content {
             margin: 3px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
 
-        p {
-            margin: 5px 0;
-            margin-bottom: 10px;
-        }
+       
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-bottom: 5px;
         }
 
         th,
@@ -60,7 +57,7 @@
 
         .footer {
             position: fixed;
-            bottom: -60px;
+            bottom: -100px;
             left: 0;
             right: 0;
             text-align: center;
@@ -70,7 +67,7 @@
         .signature-table {
             width: 100%;
             text-align: center;
-            margin-top: 30px;
+            margin-top: 100px;
             border: none;
         }
 
@@ -94,14 +91,26 @@
         .total-volume {
             font-weight: bold;
         }
+        .no-border-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: -80px;
+}
+
+.no-border-table th,
+.no-border-table td {
+    border: none;
+    padding: 3px; /* Bisa disesuaikan */
+    text-align: left;
+}
+
     </style>
 </head>
 
 <body>
     <div class="header">NOTA PENGIRIMAN BARANG</div>
-    <div class="content">
         @php
-        $items_per_page = 5;
+        $items_per_page = 10;
         $total_items = $stocks->count();
         $pages = ceil($total_items / $items_per_page);
         $remaining_items = $total_items % $items_per_page;
@@ -109,14 +118,26 @@
             $pages++;
         }
         @endphp
-<p><strong>No. BM:</strong> {{ $stocks->first()->no_bm }}</p>
-<p><strong>Tanggal Kirim:</strong> {{ $stocks->first()->tgl_bm }}</p>
-
         @for ($page = 1; $page <= $pages; $page++)
         @php
             $start = ($page - 1) * $items_per_page;
             $end = min($start + $items_per_page, $total_items);
         @endphp
+    <div class="content">
+        <table class="no-border-table">
+            <thead>
+                <tr>
+                    <th><strong>No. BM:</strong></th>
+                    <td>{{ $stocks->first()->no_bm }}</td>
+                </tr>
+                <tr>
+                    <th><strong>Tanggal Kirim:</strong></th>
+                    <td>{{ $stocks->first()->tgl_bm }}</td>
+                </tr>
+            </thead>
+        </table>
+        
+
         <table>
             <thead>
                 <tr>
@@ -134,10 +155,8 @@
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>                            
-                            <div class="flex justify-between mt-3">
                                 <span>{{ $stock->barang->nama_singkat }}</span>
                                 <span>({{ number_format($stock->jumlah_beli) }} {{ $stock->satuan_beli }})</span>
-                            </div>
                             @if (str_contains($stock->satuan_beli, $stock->barang->satuan->nama_satuan))
                             @php
                                 $t = (int)$stock->jumlah_beli;
@@ -161,7 +180,6 @@
                 @endforeach
             </tbody>
         </table>
-
         @if ($page == $pages)
         <p><strong>Note:</strong> Silahkan Crosscheck Barang yang diterima. 
             <br>
