@@ -37,7 +37,7 @@
 
 
         .logo {
-            width: 70px;
+            width: 90px;
         }
 
         table {
@@ -90,7 +90,7 @@
         <table>
             <thead>
                 <tr>
-                    <th rowspan="4" style="width: 20%; text-align: left; margin-bottom:20px">
+                    <th rowspan="4" style="width: 15%; text-align: left; margin-bottom:20px">
                         <img src="{{ public_path('tokomama.svg') }}" class="logo">
                     </th>
                     <td style="font-weight: bold">MAMA BAHAGIA</td>
