@@ -27,6 +27,7 @@ class StockController extends Controller
         )
         ->with('barang') // Ambil relasi barang
         ->groupBy('no_bm') // Grup berdasarkan kondisi
+        ->whereNull('id_surat_jalan')
         ->whereNotNull('no_bm')
         ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at
         ->get();
@@ -79,7 +80,7 @@ class StockController extends Controller
     public function cetak($no_bm)
     {
         // Ambil data berdasarkan no_bm
-        $stocks = Transaction::where('no_bm', $no_bm)->get();
+        $stocks = Transaction::where('no_bm', $no_bm)->whereNull('id_surat_jalan')->get();
         
         if ($stocks->isEmpty()) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
