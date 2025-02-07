@@ -7,7 +7,7 @@
                     <thead>
                         <tr>
                             <td style="font-weight: bold; padding: 0; text-align: center;">
-                                <img src="{{ asset('tokomama') }}" alt="Logo" style="height: 100px; margin-bottom: 1px; margin-left: 60px">
+                                <img src="../TokomamaBahagia.PNG" alt="Logo" style="height: 100px; margin-bottom: 1px; margin-left: 60px">
                                 MAMA BAHAGIA <br>
                                 Jl. Baru (Ruko depan PLN) Abepura, Jayapura <br>
                             </td>
