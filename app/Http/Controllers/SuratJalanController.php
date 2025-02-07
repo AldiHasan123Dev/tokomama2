@@ -118,33 +118,27 @@ class SuratJalanController extends Controller
         for ($i = 0; $i < count($request->barang); $i++) {
             if ($request->barang[$i] != null && $request->jumlah_jual[$i] != null) {
                 // Ambil stok barang dari database berdasarkan barang yang dipilih
-                $transactions = Transaction::whereIn('id', $request->barang)->get();
-
-                // Jika ada lebih dari satu transaksi (sisa lebih dari satu nilai)
-                if ($transactions->count() > 1) {
-                    // Hitung total stok dari semua transaksi
-                    $totalStok = $transactions->sum('sisa');
-                } else {
-                    // Jika hanya ada satu transaksi, ambil stoknya
-                    $totalStok = $transactions->first()->sisa;
-                }
+                $transactions = Transaction::whereIn('id', $request->barang)->pluck('sisa')->toArray();
         
-                // Ambil jumlah jual untuk barang ini
-                $totalJumlahJual = array_sum(array_filter($request->jumlah_jual, function($value) {
-                    return !is_null($value) && $value !== ''; // Pastikan nilai bukan null dan bukan string kosong
-                }));
-                
-                // Cek apakah stok mencukupi
-                $cek = $totalStok - $totalJumlahJual;
+                // Jika ada lebih dari satu transaksi, hitung total stok
+                $totalStok = count($transactions) > 1 ? $transactions : [$transactions[0] ?? 0];
+        
+                // Ambil jumlah jual dan pastikan dalam bentuk array numerik
+                $totalJumlahJual = array_map('intval', array_filter($request->jumlah_jual));
+        
+        
+                // Lakukan pengurangan stok
+                $cek = array_map(fn($stok, $jual) => $stok - $jual, $totalStok, $totalJumlahJual);
         
                 // Debug output
         
                 // Jika stok kurang, redirect kembali dengan pesan error
-                if ($cek < 0) {
-                    return redirect()->back()->with('error', "Stok barang yang diinput tidak mencukupi! Total stok: {$totalStok}, Jumlah jual: {$totalJumlahJual}");
+                if (min($cek) < 0) {
+                    return redirect()->back()->with('error', "Stok barang tidak mencukupi!");
                 }
             }
         }
+        
         
     
         // Lanjutkan pengecekan untuk satuan jual

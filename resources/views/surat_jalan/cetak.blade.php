@@ -91,20 +91,20 @@
             <thead>
                 <tr>
                     <th rowspan="4" style="width: 20%; text-align: left; margin-bottom:20px">
-                        <img src="{{ public_path('TokomamaBahagia.png') }}" class="logo">
+                        <img src="{{ public_path('tokomama.svg') }}" class="logo">
                     </th>
-                    <td>MAMA BAHAGIA</td>
+                    <td style="font-weight: bold">MAMA BAHAGIA</td>
                     <td></td>
                     <td>Kepada:</td>
                 </tr>
                 <tr>
-                    <td s>Jl. Baru (Ruko Depan PLN) 
+                    <td style="font-weight: bold">Jl. Baru (Ruko Depan PLN) 
                         <br> Abepura, Jayapura </td>
                     <td></td>
                     <td>{{ $surat_jalan->customer->nama_npwp }}</td>
                 </tr>
                 <tr>
-                    <td>Telp: 0811269286 / 08112692859</td>
+                    <td style="font-weight: bold">Telp: 0811269286 / 08112692859</td>
                     <td></td>
                     <td>{{ $surat_jalan->customer->alamat }}</td>
                 </tr>
@@ -114,16 +114,16 @@
                     <td>{{ $ekspedisi->kota }}</td>
                 </tr>
                 <tr>
-                    <th style="text-align: left; margin-right: 20px">SURAT JALAN</th>
-                    <td style="font-weight: bold" colspan="2">No: {{ $surat_jalan->nomor_surat }} </td>
+                    <td style="text-align: left; margin-right: 20px">SURAT JALAN</td>
+                    <td colspan="2">: {{ $surat_jalan->nomor_surat }} </td>
                 </tr>
                 <tr class="m-5">
-                    <th style="text-align: left">PO</th>
-                    <td style="font-weight: bold" colspan="2">No: {{ $surat_jalan->no_po }} </td>
+                    <td style="text-align: left">PO</td>
+                    <td colspan="2">: {{ $surat_jalan->no_po }} </td>
                 </tr>
                 <tr class="mt-5">
-                    <th style="text-align: left">No. Pol</th>
-                    <td style="font-weight: bold" colspan="2">No: {{ $surat_jalan->no_pol }} </td>
+                    <td style="text-align: left">No. Pol</td>
+                    <td colspan="2">: {{ $surat_jalan->no_pol }} </td>
                 </tr>
             </thead>
         </table>
