@@ -79,8 +79,8 @@
 
 <body>
     <div class="header">
-        <div style=" display: flex; border: solid; justify-content: space-between; padding: 5px; margin-top: 10px;">
-        <table style="width: auto; border-collapse: collapse; margin-left: -10px;" >
+        <div style=" display: flex; border: solid; justify-content: space-between; padding: 5px; margin-top: 5px;">
+        <table style="width: auto; border-collapse: collapse; margin-left: 0px;" >
             <thead>
                 <tr>
                     <td style="font-weight: bold; font-size: 0.7rem; margin-left: 10px; text-align: center;">
@@ -94,7 +94,6 @@
         </table>
         </div>
     </div>
-    <br>
     <main>
         
         @php
@@ -168,7 +167,7 @@
                 $end_date = min($start_date + $dates_per_page, $total_dates);
             @endphp
 
-            <table class="table border border-black" style="font-size: 0.7rem;">
+            <table class="table border border-black" style="font-size: 0.7rem; margin-top:20px;">
                 <thead>
                     <tr>
                         <th class="border border-black">No.</th>
