@@ -96,23 +96,23 @@
                     </th>
                     <td style="font-weight: bold">MAMA BAHAGIA</td>
                     <td></td>
-                    <td>Kepada:</td>
+                    <td style="font-weight: bold">Kepada:</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold">Jl. Baru (Ruko Depan PLN) 
                         <br> Abepura, Jayapura </td>
                     <td></td>
-                    <td>{{ $surat_jalan->customer->nama_npwp }}</td>
+                    <td style="font-weight: bold">{{ $surat_jalan->customer->nama_npwp }}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold">Telp: 08112692861 / 08112692859</td>
                     <td></td>
-                    <td>{{ $surat_jalan->customer->alamat }}</td>
+                    <td style="font-weight: bold">{{ $surat_jalan->customer->alamat }}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td></td>
-                    <td>{{ $ekspedisi->kota }}</td>
+                    <td style="font-weight: bold">{{ $ekspedisi->kota }} - {{  $surat_jalan->customer->no_telp }}</td>
                 </tr>
                 <tr>
                     <td style="text-align: left; margin-right: 20px">SURAT JALAN</td>
