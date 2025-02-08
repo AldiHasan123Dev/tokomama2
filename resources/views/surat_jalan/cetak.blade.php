@@ -31,7 +31,7 @@
             box-sizing: border-box;
         }
         .content {
-    margin-top: 30px;
+    margin-top: 50px;
 }
 
 
@@ -215,7 +215,7 @@
         @if ($page == $pages)
             <div class="footer-content">
                 <p style="margin-left: 30px;">Note &nbsp; : &nbsp; Barang yang diterima dalam keadaan baik dan lengkap</p>
-                <table style="margin-top: 20px">
+                <table style="margin-top: 1px">
                     <tr>
                         <th style="width: 50%;"></th>
                         <th style="width: 50%; text-align: right; font-weight: normal !important; padding-right:130px">

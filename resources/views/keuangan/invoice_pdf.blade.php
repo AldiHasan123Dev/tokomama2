@@ -92,6 +92,20 @@
                 </tr>
             </thead>                    
         </table>
+        <div style="margin-right: 100px; width: 48%;">
+            <table style="width: auto; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
+                <thead>
+                    <tr>
+                        <td style="font-weight: bold;">Bill To :</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; margin:2px">{{ $data->first()->transaksi->suratJalan->customer->nama }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;">{{ $data->first()->transaksi->suratJalan->customer->no_telp }}</td>
+                    </tr>
+                </thead>
+            </table>
         </div>
     </div>
     <main>
