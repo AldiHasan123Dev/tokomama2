@@ -80,7 +80,7 @@
 <body>
     <div class="header">
         <div style=" display: flex; border: solid; justify-content: space-between; padding: 5px; margin-top: 5px;">
-        <table style="width: auto; border-collapse: collapse; margin-left: 0px;" >
+        <table style="width: 50%; border-collapse: collapse; margin-left: -130px;" >
             <thead>
                 <tr>
                     <td style="font-weight: bold; font-size: 0.7rem; margin-left: 10px; text-align: center;">
@@ -92,8 +92,8 @@
                 </tr>
             </thead>                    
         </table>
-        <div style="margin-right: 100px; width: 48%;">
-            <table style="width: auto; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
+        <div style="margin-right: 300px; width: 48%;">
+            <table style="width: auto; border: solid; border-collapse: collapse;">
                 <thead>
                     <tr>
                         <td style="font-weight: bold;">Bill To :</td>

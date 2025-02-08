@@ -16,6 +16,7 @@
             width: 100%;
             font-size: 0.8rem;
             margin: 0;
+            font-family: 'Courier New', Courier, monospace;
             padding: 0;
         }
 
@@ -214,7 +215,7 @@
         </div>
         @if ($page == $pages)
             <div class="footer-content">
-                <p style="margin-left: 30px;">Note &nbsp; : &nbsp; Barang yang diterima dalam keadaan baik dan lengkap</p>
+                <p style="margin-left: 30px;">Note &nbsp; : &nbsp; Barang diterima dalam keadaan baik dan lengkap</p>
                 <table style="margin-top: 1px">
                     <tr>
                         <th style="width: 50%;"></th>
@@ -227,8 +228,8 @@
                         <td></td>
                     </tr>
                     <tr>
-                        <th><b>PENERIMA</b></th>
-                        <th><b>PENGIRIM</b></th>
+                        <th style="font-weight: normal;">PENERIMA</th>
+                        <th style="font-weight: normal;">PENGIRIM</th>
                     </tr>
                     <tr>
                         <td style="height: 13px;"></td>
