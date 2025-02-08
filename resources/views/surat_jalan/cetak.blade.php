@@ -14,7 +14,7 @@
 
         body {
             width: 100%;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             margin: 0;
             padding: 0;
         }
@@ -31,7 +31,7 @@
             box-sizing: border-box;
         }
         .content {
-    margin-top: 10px;
+    margin-top: 30px;
 }
 
 

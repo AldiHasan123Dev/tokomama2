@@ -21,7 +21,7 @@
 
         .header {
             position: fixed;
-            top: -130px;
+            top: -120px;
             left: 0;
             right: 0;
             height: 105px;
@@ -33,7 +33,8 @@
 
         table {
             border-collapse: collapse;
-            width: 95%;            
+            width: 95%;   
+            margin-top: 20px;         
             margin:0 auto;
         }
 
@@ -77,41 +78,24 @@
 </head>
 
 <body>
-    <div class="header" style="margin-top:10px">
-        <table>
+    <div class="header">
+        <div style=" display: flex; border: solid; justify-content: space-between; padding: 5px; margin-top: 10px;">
+        <table style="width: auto; border-collapse: collapse; margin-left: -10px;" >
             <thead>
                 <tr>
-                    <th rowspan="4" style="width: 13%; height: 15%;">
-                        <img src="{{ public_path('logo_sb.svg') }}" class="logo" style="width: 60%; height: 55%;">
-                    </th>
-                    <td style="font-weight: bold; font-size: 1rem;">TOKO MAMA</td>
-                    <td></td>
+                    <td style="font-weight: bold; font-size: 0.7rem; margin-left: 10px; text-align: center;">
+                        <img src="{{ public_path('tokomama.svg') }}" alt="Logo" style="height: 70px; margin-bottom: 1px;">
+                        <br>MAMA BAHAGIA <br>
+                        Jl. Baru (Ruko depan PLN) 
+                        <br>Abepura, Jayapura <br>
+                    </td>
                 </tr>
-                <tr>
-                    <td style="font-size: 0.8rem;">Jl. Kalianak 55 Blok G, Surabaya</td>
-                    <td style="font-weight: bold; font-size: 1.2rem; text-align: center;"><u>INVOICE</u></td>
-                </tr>
-                <tr>
-                    <td style="font-size: 0.8rem;">Telp: 031-7495507</td>
-                    <td style="text-align: center; font-size: 0.8rem">NO : {{ $invoice ?? '-' }}</td>
-                </tr>
-            </thead>
+            </thead>                    
         </table>
-        <table class="info-table">
-            <tbody>
-                <tr>
-                    <td class="header-cell" style="text-align:left ;padding-left:40px">Customer : {{ $data->first()->transaksi->suratJalan->customer->nama . ' - ' . $data->first()->transaksi->suratJalan->customer->kota ?? '-' }}</td>
-                    <td class="header-cell" style="text-align:left ;padding-right:40px">KAPAL : {{ $data->first()->transaksi->suratJalan->nama_kapal }}</td>
-                </tr>
-                <tr style="margin-top:30px">
-                    <td class="header-cell" style="text-align:left ;padding-left:40px; margin:90px">PO : {{ $data->first()->transaksi->suratJalan->no_po ?? '-' }}</td>
-                </tr>
-            </tbody>
-        </table>
+        </div>
     </div>
-
+    <br>
     <main>
-        <br>
         
         @php
             $items_per_page = 11;
