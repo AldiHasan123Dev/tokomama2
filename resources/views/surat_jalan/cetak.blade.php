@@ -105,7 +105,7 @@
                     <td style="font-weight: bold">{{ $surat_jalan->customer->nama_npwp }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold">Telp: 08112692861 / 08112692859</td>
+                    <td style="font-weight: bold">HP: 08112692861 / 08112692859</td>
                     <td></td>
                     <td style="font-weight: bold">{{ $surat_jalan->customer->alamat }}</td>
                 </tr>
