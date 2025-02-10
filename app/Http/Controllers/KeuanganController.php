@@ -95,7 +95,7 @@ class KeuanganController extends Controller
     $suratJalan = SuratJalan::where('id', $id_surat_jalan)
     
     ->first();
-    $no_cont = $suratJalan ? $suratJalan->no_cont : null;
+    $po = $suratJalan ? $suratJalan->po : null;
     
     
     $id_barang = $transaksi->id_barang;
@@ -105,7 +105,7 @@ class KeuanganController extends Controller
     $satuan = Satuan::where('id', $barang->id_satuan)->first();
     
     // Pass $no_count ke view
-    $pdf = Pdf::loadView('keuangan/invoice_pdf', compact('data', 'invoice', 'barang', 'formattedDate', 'transaksi', 'satuan', 'no_cont'))->setPaper('a4', 'potrait');
+    $pdf = Pdf::loadView('keuangan/invoice_pdf', compact('data', 'invoice', 'barang', 'formattedDate', 'transaksi', 'satuan', 'po'))->setPaper('a4', 'potrait');
     return $pdf->stream('invoice_pdf.pdf');
 }
 

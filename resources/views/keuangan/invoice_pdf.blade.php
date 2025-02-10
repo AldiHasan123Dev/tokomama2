@@ -204,7 +204,7 @@
                         <th class="border border-black">No.</th>
                         <th class="border border-black">Tgl Barang Masuk</th>
                         <th class="border border-black">Nama Barang</th>
-                        <th class="border border-black">No. Cont</th>
+                        <th class="border border-black">PO</th>
                         <th class="border border-black">Quantity</th>
                         <th class="border border-black">Harga Satuan (Rp)</th>
                         <th class="border border-black">Total (Rp)</th>
@@ -229,7 +229,7 @@
                             </td>
                             <td class="text-center border border-black">
                                 @if($i == 0 || ($i > 0 && ($i % 11 == 0))) {{-- Menampilkan $no_cont pada baris pertama dan setiap kelipatan 11 --}}
-                                    {{ $no_cont ?? '-' }}
+                                    {{ $po ?? '-' }}
                                 @else
                                     -
                                 @endif
