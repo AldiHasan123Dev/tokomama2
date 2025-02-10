@@ -15,13 +15,14 @@
         body {
             width: 100%;
             font-size: 0.8rem;
+             font-family: 'Courier New', Courier, monospace;
             margin: 0;
             padding: 0;
         }
 
         .header {
             position: fixed;
-            top: -130px;
+            top: -90px;
             left: 0;
             right: 0;
             height: 105px;
@@ -77,23 +78,27 @@
 </head>
 
 <body>
-    <div class="header" style="margin-top:10px">
-        <table>
+    <div class="header" style="margin-top:5px">
+        <table style="margin-top: -40px">
             <thead>
                 <tr>
                     <th rowspan="4" style="width: 13%; height: 15%;">
-                        <img src="{{ public_path('logo_sb.svg') }}" class="logo" style="width: 60%; height: 55%;">
+                        <img src="{{ public_path('tokomama.svg') }}" class="logo" style="width: 60%; height: 55%;">
                     </th>
-                    <td style="font-weight: bold; font-size: 1rem;">TOKO MAMA</td>
+                    <td style="font-weight: bold; font-size: 1rem;">MAMA BAHAGIA</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem;">Jl. Kalianak 55 Blok G, Surabaya</td>
+                    <td style="font-size: 0.8rem;">Jl. Baru (Ruko depan PLN) Abepura, Jayapura</td>
                     <td style="font-weight: bold; font-size: 1.2rem; text-align: center;"><u>INVOICE</u></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem;">Telp: 031-7495507</td>
+                    <td style="font-size: 0.8rem;">Telp: 08112692861 / 08112692859</td>
                     <td style="text-align: center; font-size: 0.8rem">NO : {{ $invoice ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="text-align: center; font-size: 0.8rem">TOP : {{ $data->first()->transaksi->suratJalan->customer->top }}</td>
                 </tr>
             </thead>
         </table>
@@ -101,18 +106,19 @@
             <tbody>
                 <tr>
                     <td class="header-cell" style="text-align:left ;padding-left:40px">Customer : {{ $data->first()->transaksi->suratJalan->customer->nama . ' - ' . $data->first()->transaksi->suratJalan->customer->kota ?? '-' }}</td>
-                    <td class="header-cell" style="text-align:left ;padding-right:40px">KAPAL : {{ $data->first()->transaksi->suratJalan->nama_kapal }}</td>
+                    <td class="header-cell" style="padding-right:50px">Sales : {{ $data->first()->transaksi->suratJalan->customer->sales }}</td>
+                </tr>
+                <tr>
+                    <td class="header-cell" style="text-align:left ;padding-left:40px">{{ $data->first()->transaksi->suratJalan->customer->alamat }}</td>
                 </tr>
                 <tr style="margin-top:30px">
-                    <td class="header-cell" style="text-align:left ;padding-left:40px; margin:90px">PO : {{ $data->first()->transaksi->suratJalan->no_po ?? '-' }}</td>
+                    <td class="header-cell" style="text-align:left ;padding-left:40px; margin:90px">({{ $data->first()->transaksi->suratJalan->customer->no_telp ?? '-' }})</td>
                 </tr>
             </tbody>
         </table>
     </div>
-
-    <main>
-        <br>
-        
+    <main style="margin-top: 20px">   
+        <br>     
         @php
             $items_per_page = 11;
             $dates_per_page = 11;
@@ -184,7 +190,7 @@
                 $end_date = min($start_date + $dates_per_page, $total_dates);
             @endphp
 
-            <table class="table border border-black" style="font-size: 0.7rem;">
+            <table class="table border border-black" style="font-size: 0.7rem; margin-top: -10px">
                 <thead>
                     <tr>
                         <th class="border border-black">No.</th>
@@ -233,19 +239,26 @@
                     <td class="text-center border border-black"></td>
                     <td class="text-center border border-black"></td>
                     <td class="border border-black">
-                        DPP
+                        Subtotal
+                        <br>
+                        DPP 11/12
                         <br>
                         @if($barang->status_ppn == 'ya')
-                        PPN 11%
+                        PPN 12%
                         @else
-                        PPN 11% (DIBEBASKAN)
+                        PPN 12% (DIBEBASKAN)
                         @endif
                     </td>
                     <td class="border border-black" style="text-align: right;" >
+                        @php
+                            $dpp = $total * 11/12;
+                        @endphp
                     {{ number_format($total, 0, ',', '.') }}
                     <br>
+                        {{ number_format($dpp, 0, ',', '.') }}
+                        <br>
                     @if($barang->status_ppn == 'ya')
-                        {{ number_format(($barang->value_ppn / 100) * $total, 0, ',', '.') }}
+                        {{ number_format(($barang->value_ppn / 100) * $dpp, 0, ',', '.') }}
                     @else
                         -
                     @endif
@@ -288,7 +301,7 @@
                     <td style="align-items:right ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
                 </tr>
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;">TOKO MAMA</th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
                     <td style="text-align: center;">Hormat Kami</td>
                 </tr>
                 <tr>
@@ -297,7 +310,7 @@
                 </tr>
                 <tr>
                     <th style="text-align: left; padding-left: 50px;"></th>
-                    <th style="padding-top:30px">(Dwi Satria Wardana)</th>
+                    <th style="padding-top:30px">(MAMA BAHAGIA)</th>
                 </tr>
             </table>
         @endif

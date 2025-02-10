@@ -76,22 +76,19 @@
 
     <x-keuangan.card-keuangan>
         <x-slot:tittle>List Surat Jalan</x-slot:tittle>
-        <a href="{{ route('surat-jalan.editBarang') }}" class="edit-button mt-5">Edit by Barang</a>
+        {{-- <a href="{{ route('surat-jalan.editBarang') }}" class="edit-button mt-5">Edit by Barang</a> --}}
         <div class="overflow-x-auto">
             <table class="table" id="table-getfaktur">
                 <!-- head -->
                 <thead>
                     <tr>
                         <th>Aksi</th>
-                        <th>Tanggal SJ</th>
                         <th>Invoice</th>
-                        <th>No. Surat</th>
+                        <th>No. SJ</th>
+                        <th>Tanggal SJ</th>
+                        <th>Customer</th>
                         <th>No. BM</th>
-                        <th>Kepada</th>
-                        <th>No. Pol</th>
-                        <th>No. Job</th>
-                        <th>Profit</th>
-                        <th>No PO</th>
+                        <th>Suppliers</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,10 +115,6 @@
                         name: 'aksi'
                     },
                     {
-                        data: 'tgl_sj',
-                        name: 'Tanggal SJ'
-                    },
-                    {
                         data: 'invoice',
                         name: 'No. Invoice'
                     },
@@ -130,31 +123,26 @@
                         name: 'No. Surat'
                     },
                     {
-                        data: 'no_bm',
-                        name: 'No. BM'
+                        data: 'tgl_sj',
+                        name: 'Tanggal SJ'
                     },
                     {
                         data: 'kepada',
                         name: 'kepada'
                     },
                     {
-                        data: 'no_pol',
-                        name: 'no_pol'
+                        data: 'no_bm',
+                        name: 'No. BM'
+                    },
+                    {
+                        data: 'suppliers',
+                        name: 'suppliers'
                     },
                     {
                         data: 'id',
                         name: 'id',
                         visible: false
-                    },
-                    {
-                        data: 'profit',
-                        name: 'profit'
-                    },
-                    {
-                        data: 'no_po',
-                        name: 'no_po'
-                    },
-
+                    }
                 ]
             });
 

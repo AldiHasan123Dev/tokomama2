@@ -115,6 +115,13 @@ class SuratJalanController extends Controller
         // ]);
     
         // Validasi dan cek stok terlebih dahulu
+        if (
+            empty(array_filter($request->barang)) || 
+            empty(array_filter($request->jumlah_jual)) || 
+            empty(array_filter($request->satuan_jual))
+        ) {
+            return redirect()->back()->with('error', 'Minimal isi satu barang, jumlah jual, dan satuan jual!');
+        }
         for ($i = 0; $i < count($request->barang); $i++) {
             if ($request->barang[$i] != null && $request->jumlah_jual[$i] != null) {
                 // Ambil stok barang dari database berdasarkan barang yang dipilih
@@ -565,13 +572,17 @@ class SuratJalanController extends Controller
     public function dataTable()
     {
         $data = SuratJalan::query()
-        ->with('transactions') // Pastikan relasi transactions dipanggil untuk efisiensi
+        ->with('transactions.suppliers') // Pastikan relasi transactions dipanggil untuk efisiensi
         ->orderBy('created_at', 'desc');
     
         return DataTables::of($data)
         ->addIndexColumn()
         ->addColumn('no_bm', function ($row) {
             return optional($row->transactions->first())->no_bm; // Menghindari error jika tidak ada transaksi
+        })
+        ->addColumn('suppliers', function ($row) {
+            $transaction = $row->transactions->first();
+            return optional($transaction?->suppliers)->nama; // Menghindari error jika tidak ada transaksi
         })
     
             ->addColumn('profit', function ($row) {
@@ -595,10 +606,10 @@ class SuratJalanController extends Controller
             ->addColumn('aksi', function ($row) {
                 $action = '';
                 $sisa = $row->transactions->sum('sisa');
-                if ($sisa > 0) {
-                    $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->kepada) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>
-                                <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
-                }
+                // if ($sisa > 0) {
+                //     $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->kepada) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>
+                //                 <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
+                // }
                 return '<div class="flex gap-3 mt-2">
                                 <a target="_blank" href="' . route('surat-jalan.cetak', $row) . '" class="text-green-500 font-semibold mb-3 self-end"><i class="fa-solid fa-print mt-2"></i></a>
                                 ' . $action . '
@@ -620,8 +631,8 @@ class SuratJalanController extends Controller
                  DB::raw('SUM(harga_beli) as sum_harga_beli'),
                  DB::raw('SUM(jumlah_jual) as total_jumlah_beli'))
         ->where('harga_beli', '>', 0)
-        ->whereNotNull('id_surat_jalan')
-        ->groupBy('id_surat_jalan', 'id_supplier', 'invoice_external')
+        ->whereNull('id_surat_jalan')
+        ->groupBy('no_bm', 'id_supplier', 'invoice_external')
         ->orderBy('created_at', 'desc');
 
     // Tambahkan filter pencarian jika ada
