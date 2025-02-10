@@ -15,10 +15,10 @@
                 id="print">
                 <i class="fas fa-print"></i> Cetak Invoice</button>
             </a>
-            <a href="#" target="_blank" class="btn bg-green-400 text-white my-5 py-4 font-bold hidden"
+            {{-- <a href="#" target="_blank" class="btn bg-green-400 text-white my-5 py-4 font-bold hidden"
                 id="print1">
                 <i class="fas fa-print"></i> Cetak Surat Penerimaan</button>
-            </a>
+            </a> --}}
             <table class="table" id="surat_jalan_table"></table>
             <div id="sjPager"></div>
         </div>

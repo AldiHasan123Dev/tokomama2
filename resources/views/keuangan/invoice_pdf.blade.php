@@ -9,7 +9,7 @@
     <style>
         @page {
             size: 21.59cm 13.97cm;
-            margin: 120px 0px 70px 0px; /* Adjust bottom margin to make space for footer */
+            margin: 145px 0px 50px 0px /* Adjust bottom margin to make space for footer */
         }
 
         body {
@@ -25,7 +25,7 @@
             top: -80px;
             left: 0;
             right: 0;
-            height: 105px;
+            height: 100px;
            
             text-align: center;
             padding: 5px;
@@ -78,19 +78,19 @@
 </head>
 
 <body>
-    <div class="header">
-        <table style="margin-top: -30px">
+    <div class="header" style="margin-top: 10px;">
+        <table style="margin-top: -40px">
             <thead>
                 <tr>
-                    <th rowspan="4" style="width: 13%; height: 15%; margin-bottom:20px;">
-                        <img src="{{ public_path('tokomama.svg') }}" class="logo" style="width: 60%; height: 55%;">
+                    <th rowspan="4" style="width: 15%; margin-bottom:40px;">
+                        <img src="{{ public_path('tokomama.svg') }}" class="logo" style="width: 60%; height: 50%;">
                     </th>
                     <td style="font-weight: bold; font-size: 1rem;">MAMA BAHAGIA</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td style="font-size: 0.8rem;">Jl. Baru (Ruko depan PLN) Abepura, Jayapura</td>
-                    <td style="font-weight: bold; font-size: 1.2rem; text-align: center;"><u>INVOICE</u></td>
+                    <td style="font-weight: bold; font-size: 1rem; text-align: center;"><u>INVOICE</u></td>
                 </tr>
                 <tr>
                     <td style="font-size: 0.8rem;">Telp: 08112692861 / 08112692859</td>
@@ -121,12 +121,12 @@
                     <td class="header-cell" style="padding-right:80px">Sales : {{ $data->first()->transaksi->suratJalan->customer->sales }}</td>
                 </tr>
                 <tr>
-                    <td class="header-cell" style="text-align:left ;padding-left:40px">{{ $data->first()->transaksi->suratJalan->customer->alamat }}</td>
+                    <td style="text-align:left ;padding-left:40px; margin-top20px">{{ $data->first()->transaksi->suratJalan->customer->alamat }}</td>
                 </tr>
             </tbody>
         </table>
     </div>
-    <main style="margin-top: 20px">      
+    <main style="margin-top: 10px">      
         @php
             $items_per_page = 11;
             $dates_per_page = 11;
@@ -198,7 +198,7 @@
                 $end_date = min($start_date + $dates_per_page, $total_dates);
             @endphp
 
-            <table class="table border border-black" style="font-size: 0.7rem; margin-top: -10px">
+            <table class="table border border-black" style="font-size: 0.7rem;">
                 <thead>
                     <tr>
                         <th class="border border-black">No.</th>
@@ -324,7 +324,7 @@
         @endif
     
     </div>
-    <p class="page-number" style=" position: fixed; align-items:bottom ; left: 10px; bottom: -50px; margin: 0; font-size: 0.8rem;">Halaman: {{ $page }} dari {{ $pages }}</p>
+    <p class="page-number" style=" position: fixed; align-items:bottom ; left: 10px; bottom: -20px; margin: 0; font-size: 0.8rem;">Halaman: {{ $page }} dari {{ $pages }}</p>
 
 
             
