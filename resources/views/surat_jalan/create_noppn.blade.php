@@ -157,15 +157,13 @@
                                         <div class="label">
                                             <span class="label-text">Tujuan/NamaCustomer <span class="text-red-500">*</span></span>
                                         </div>
-                                        <input type="text"
-                                            class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                            id="tujuan" name="tujuan" list="customer_list" required autocomplete="off"  oninput="this.value = this.value.toUpperCase();"/>
-                                        <input type="hidden" name="id_customer" id="id_customer">
-                                        <datalist id="customer_list">
-                                            @foreach ($customer as $mb)
-                                            <option data-id="{{$mb->id}}" value="{{ $mb->nama }}">{{ $mb->nama }}</option>
-                                            @endforeach
-                                        </datalist>
+                                        <select name="tujuan" id="id_customer"
+                                                class="select2 form-control my-0" style="width: 318px; border:none">
+                                                <option value=""></option>
+                                                @foreach ($customer as $item)
+                                                    <option value="{{ $item->nama }}">{{ $item->nama }}</option>
+                                                @endforeach
+                                            </select>
                                     </label>
                             </div>
                             {{-- <div>
@@ -204,15 +202,13 @@
                                     <div class="label">
                                         <span class="label-text">No. Pol <span class="text-red-500">*</span></span>
                                     </div>
-                                    <input type="text"
-                                        class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                        id="no_pol" name="no_pol" list="no_pol_list" autocomplete="off" oninput="this.value = this.value.toUpperCase();" />
-                                    <input type="hidden" name="id_nopol" id="id_nopol">
-                                    <datalist id="no_pol_list">
-                                        @foreach ($nopol as $np)
-                                        <option data-id="{{ $np->id }}}" value="{{ $np->nopol }}">{{ $np->nopol }} || {{ $np->sopir }}</option>
-                                        @endforeach
-                                    </datalist>
+                                    <select name="no_pol" id="id_nopol"
+                                    class="select2 form-control my-0" style="width: 318px; border:none">
+                                    <option value=""></option>
+                                    @foreach ($nopol as $np)
+                                        <option value="{{ $np->nopol }}">{{ $np->nopol }}</option>
+                                    @endforeach
+                                </select>
                                 </label>
                             </div>
                             <div style="width: 500px;" class="center-container">
@@ -240,15 +236,13 @@
                                     <div class="label">
                                         <span class="label-text">Nama Pengirim <span class="text-red-500">*</span></span>
                                     </div>
-                                    <input type="text"
-                                    class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                    id="pengirim" name="nama_pengirim" list="pengirim_list" autocomplete="off" oninput="this.value = this.value.toUpperCase();" />
-                                <datalist id="pengirim_list">
+                                    <select name="nama_pengirim" id="pengirim"
+                                    class="select2 form-control my-0" style="width: 318px; border:none">
+                                    <option value=""></option>
                                     @foreach ($nopol as $np)
-                                    <option value="{{ $np->sopir }}">{{ $np->sopir }}</option>
+                                        <option value="{{ $np->sopir }}">{{ $np->sopir }}</option>
                                     @endforeach
-                                </datalist>
-                            </label>
+                                </select>
                                 </label>
                             </div>
                             {{-- <div style="width: 500px;" class="center-container">

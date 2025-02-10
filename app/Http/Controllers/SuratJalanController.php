@@ -182,7 +182,8 @@ class SuratJalanController extends Controller
         $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII");
         $month_number = date("n", strtotime($request->tgl_sj));
         $month_roman = $roman_numerals[$month_number];
-        $data['kepada']= $customer->nama_npwp;
+        $data['id_customer'] = $customer->id;
+        $data['kepada']= $customer->nama_npwp ?? $customer->nama;
         $data['no'] = $no;
         $data['nomor_surat'] = sprintf('%03d', $no) . '/SJ/SB-' . $month_roman . '/' . date('Y', strtotime($request->tgl_sj));
         $sj = SuratJalan::create($data);

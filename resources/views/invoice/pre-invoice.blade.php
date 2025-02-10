@@ -292,7 +292,8 @@
                                         // Jika salah satu item memiliki status PPN 'ya', hitung nilai PPN
                                         if ($items['status_ppn'][$idx] == 'ya') {
                                             $ppn_value = ($items['value_ppn'][$idx] / 100) * $dpp;
-                                            $total_ppn += $ppn_value; // Keluar dari kedua loop jika status PPN ditemukan
+                                            $total_ppn += $ppn_value;
+                                            // dd($total_ppn, $items['value_ppn'][$idx] / 100,$dpp); // Keluar dari kedua loop jika status PPN ditemukan
                                         }
                                     }
                                 }
@@ -316,10 +317,10 @@
                             }
 
                             // Hitung total PPN jika ada
-                            $total_with_ppn = $has_ppn ? $total + $total_ppn : $total;
+                            $total_with_ppn = $has_ppn ? $dpp + $total + $total_ppn : $total;
                         @endphp
                         @if ($barang->status_ppn == 'ya')
-                            {{ ucwords(strtolower(terbilang(round($total_with_ppn * ($items['value_ppn'][$idx] / 100))))) }}
+                            {{ ucwords(strtolower(terbilang(round($total_with_ppn)))) }}
                             Rupiah
                         @else
                             {{ ucwords(strtolower(terbilang(round($total_with_ppn)))) }} Rupiah
@@ -335,8 +336,8 @@
                             </th>
                         </tr>
                         <tr>
-                            <th style="text-align: left; padding-left: 50px; font-style: italic;">Mandiri
-                                (Cab.Indrapura) : 14.000.45006.005</th>
+                            <th style="text-align: left; padding-left: 50px; font-style: italic;"> Bank Mandiri
+                                : 14.000.45006.005</th>
                             <th></th>
                         </tr>
                         <tr>
@@ -382,7 +383,11 @@
                     @php
                         $dpp = (11 / 12) * $total;
                     @endphp
+                    @if($items['status_ppn'][$idx] == 'ya')
                     {{ number_format($dpp, 0, ',', '.') }}
+                @else
+                    -
+                @endif
                     <br style=" border:solid; text-align: right;">
 
                     @php
@@ -407,7 +412,7 @@
                     @if ($total_ppn > 0)
                         {{ number_format($total_ppn, 0, ',', '.') }}
                     @else
-                        0
+                        -
                     @endif
 
                 </td>
@@ -435,7 +440,7 @@
                         }
 
                         // Hitung total PPN jika ada
-                        $total_with_ppn = $has_ppn ? $total + $total_ppn : $total;
+                        $total_with_ppn = $has_ppn ? $dpp + $total + $total_ppn : $total;
                     @endphp
 
                     {{-- Menampilkan total --}}

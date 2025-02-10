@@ -34,7 +34,7 @@
 
         table {
             border-collapse: collapse;
-            width: 95%;            
+            width: 85%;            
             margin:0 auto;
         }
 
@@ -257,26 +257,29 @@
                         @endphp
                     {{ number_format($total, 0, ',', '.') }}
                     <br>
+                        @if($barang->status_ppn == 'ya')
                         {{ number_format($dpp, 0, ',', '.') }}
-                        <br>
+                    @else
+                        -
+                    @endif
+                    <br>
                     @if($barang->status_ppn == 'ya')
-                        {{ number_format(($barang->value_ppn / 100) * $dpp, 0, ',', '.') }}
+                    @php
+                        $ppn = ($barang->value_ppn / 100) * $dpp
+                    @endphp
+                        {{ number_format($ppn, 0, ',', '.') }}
                     @else
                         -
                     @endif
                     </td>
                 </tr>
                 <tr>
-                    <td class="text-center border border-black"></td>
-                    <td class="text-center border border-black"></td>
-                    <td class="text-center border border-black"></td>
-                    <td class="text-center border border-black"></td>
-                    <td class="border border-black">
+                    <td colspan="5" class="border border-black" style="text-align: right;">
                         <b>TOTAL</b>
                     </td>
                     <td class="border border-black" style="text-align: right;" >
                     @if($barang->status_ppn == 'ya')
-                        <b>{{ number_format(($total * 0.11) + ($total), 0, ',', '.') }}</b>
+                        <b>{{ number_format($ppn + $total +$dpp, 0, ',', '.') }}</b>
                     @else
                         <b>{{ number_format($total, 0, ',', '.') }}</b>
                     @endif
@@ -291,7 +294,7 @@
             <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem"> 
                 Terbilang: 
                 @if($barang->status_ppn == 'ya')
-                    {{ ucwords(strtolower(terbilang(round($total * 1.11)))) }} Rupiah
+                    {{ ucwords(strtolower(terbilang(round($ppn + $total + $dpp)))) }} Rupiah
                 @else
                     {{ ucwords(strtolower(terbilang(round($total)))) }} Rupiah
                 @endif
@@ -306,7 +309,7 @@
                     <td style="text-align: center;">Hormat Kami</td>
                 </tr>
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;">Mandiri (Cab.Indrapura) : 14.000.45006.005</th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;"> Bank Mandiri : 14.000.45006.005</th>
                     <th></th>
                 </tr>
                 <tr>
