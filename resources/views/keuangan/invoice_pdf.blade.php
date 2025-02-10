@@ -165,6 +165,7 @@
                     return trim(sprintf('%s puluh %s', $bilangan[$hasil_bagi], $bilangan[$hasil_mod]));
                 } else if ($angka < 200) {
                     return 'seratus ' . terbilang($angka - 100);
+
                 } else if ($angka < 1000) {
                     $hasil_bagi = (int)($angka / 100);
                     $hasil_mod = $angka % 100;
@@ -202,7 +203,6 @@
                 <thead>
                     <tr>
                         <th class="border border-black">No.</th>
-                        <th class="border border-black">Tgl Barang Masuk</th>
                         <th class="border border-black">Nama Barang</th>
                         <th class="border border-black">PO</th>
                         <th class="border border-black">Quantity</th>
@@ -218,7 +218,6 @@
                         @endphp
                         <tr>
                             <td class="text-center border border-black">{{ $i + 1 }}</td>
-                            <td class="text-center border border-black">{{ date('d M Y', strtotime($item->transaksi->suratJalan->tgl_sj)) }}</td>
                             <td class="border border-black">
                                 {{ $item->transaksi->barang->nama }} <br>
                                 @if($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan )
@@ -241,12 +240,7 @@
                     @endfor
                     @if ($page == $pages) 
                     <tr>
-                    <td class="text-center border border-black"></td>
-                    <td class="text-center border border-black"></td>
-                    <td class="text-center border border-black"></td>
-                    <td class="text-center border border-black"></td>
-                    <td class="text-center border border-black"></td>
-                    <td class="border border-black">
+                    <td colspan="5"  style="text-align: right;">
                         Subtotal
                         <br>
                         DPP 11/12
@@ -273,7 +267,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="text-center border border-black"></td>
                     <td class="text-center border border-black"></td>
                     <td class="text-center border border-black"></td>
                     <td class="text-center border border-black"></td>
