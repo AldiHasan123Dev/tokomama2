@@ -22,7 +22,7 @@
 
         .header {
             position: fixed;
-            top: -90px;
+            top: -80px;
             left: 0;
             right: 0;
             height: 105px;
@@ -78,11 +78,11 @@
 </head>
 
 <body>
-    <div class="header" style="margin-top:5px">
-        <table style="margin-top: -40px">
+    <div class="header">
+        <table style="margin-top: -30px">
             <thead>
                 <tr>
-                    <th rowspan="4" style="width: 13%; height: 15%;">
+                    <th rowspan="4" style="width: 13%; height: 15%; margin-bottom:20px;">
                         <img src="{{ public_path('tokomama.svg') }}" class="logo" style="width: 60%; height: 55%;">
                     </th>
                     <td style="font-weight: bold; font-size: 1rem;">MAMA BAHAGIA</td>
@@ -105,20 +105,28 @@
         <table class="info-table">
             <tbody>
                 <tr>
-                    <td class="header-cell" style="text-align:left ;padding-left:40px">Customer : {{ $data->first()->transaksi->suratJalan->customer->nama . ' - ' . $data->first()->transaksi->suratJalan->customer->kota ?? '-' }}</td>
-                    <td class="header-cell" style="padding-right:50px">Sales : {{ $data->first()->transaksi->suratJalan->customer->sales }}</td>
+                    <td class="header-cell" style="text-align:left; padding-left:40px">
+                        Customer : 
+                        @if($data->isNotEmpty() && optional($data->first()->transaksi)->suratJalan)
+                            @php 
+                                $customer = optional($data->first()->transaksi->suratJalan->customer);
+                            @endphp
+                            {{ $customer->nama ?? '-' }} 
+                            ({{ $customer->no_telp ?? '-' }}) - {{ $customer->kota ?? '-' }}
+                        @else
+                            -
+                        @endif
+                    </td>
+                    
+                    <td class="header-cell" style="padding-right:80px">Sales : {{ $data->first()->transaksi->suratJalan->customer->sales }}</td>
                 </tr>
                 <tr>
                     <td class="header-cell" style="text-align:left ;padding-left:40px">{{ $data->first()->transaksi->suratJalan->customer->alamat }}</td>
                 </tr>
-                <tr style="margin-top:30px">
-                    <td class="header-cell" style="text-align:left ;padding-left:40px; margin:90px">({{ $data->first()->transaksi->suratJalan->customer->no_telp ?? '-' }})</td>
-                </tr>
             </tbody>
         </table>
     </div>
-    <main style="margin-top: 20px">   
-        <br>     
+    <main style="margin-top: 20px">      
         @php
             $items_per_page = 11;
             $dates_per_page = 11;

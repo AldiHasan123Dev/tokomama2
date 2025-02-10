@@ -43,8 +43,8 @@
             },
             {
                 search: true,
-                label: 'Surat Jalan',
-                name: 'nomor_surat',
+                label: 'Invoice Supplier',
+                name: 'invoice_external',
                 width: 60
             },
             {
@@ -58,12 +58,6 @@
                 label: 'Supplier',
                 name: 'supplier',
                 width: 80
-            },
-            {
-                search: true,
-                label: 'Invoice Supplier',
-                name: 'invoice_external',
-                width: 60
             },
             {
                 search: true,
