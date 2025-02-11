@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Transaction;
+use App\Models\Jurnal;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
+
 
 class TransactionController extends Controller
 {
@@ -58,24 +63,202 @@ class TransactionController extends Controller
         $transaksi->update($request->all());
         return response('success');
     }
+
     public function update1(Request $request)
-{
+    {
+        DB::transaction(function () use ($request) {
+            $year = date('y');
+            $month = date('m');
+            $totalDebit = 0;
+            $nomor_surat = null;
+            $invoice_external = null;
+    
+            // Ambil nomor terakhir BBK sekali saja di awal
+            $lastJNL = Jurnal::where('tipe', 'JNL')
+                ->whereMonth('tgl', date('m'))
+                ->orderBy('no', 'desc')
+                ->first();
+            $no_JNL = $lastJNL ? $lastJNL->no + 1 : 1;
+            // Nomor Surat BBK (tetap sama untuk semua jurnal dalam transaksi ini)
+            $nomor_surat = "$month-$no_JNL/TM/$year";
+            $lastInvoice = Transaction::whereNotNull('invoice_external')
+            ->orderBy('id', 'desc')
+            ->value('invoice_external');
 
-    foreach ($request->id as $key => $id) {
-        $transaksi = Transaction::find($id);
-        // Update data
-        $transaksi->jumlah_beli = $request->jumlah_beli[$key];
-        $transaksi->sisa = $request->jumlah_beli[$key];
-        $transaksi->stts = $request->stts;
-        $transaksi->save();
+        if ($lastInvoice) {
+            // Pecah string invoice_external untuk mendapatkan angka terakhir
+            $parts = explode('/', $lastInvoice);
+            $lastNumber = is_numeric(end($parts)) ? (int) end($parts) : 0;
+            $invoice_external = "InvSupp/" . ($lastNumber + 1);
+        } else {
+            $invoice_external = "InvSupp/1"; // Jika tidak ada, default ke 1
+        }
+            foreach ($request->id as $key => $id) {
+                $transaksi = Transaction::find($id);
+                if (!$transaksi) continue; // Pastikan transaksi ditemukan
+    
+                // Update data transaksi
+                $transaksi->jumlah_beli = $request->jumlah_beli[$key] ?? 0;
+                $transaksi->sisa = $request->jumlah_beli[$key] ?? 0;
+                $transaksi->stts = $request->stts;
+                $transaksi->invoice_external = $invoice_external;
+                $transaksi->save();
+    
+                // Hitung total debit
+                $harga_beli = $transaksi->harga_beli ?? 0;
+                $jumlah_beli = $transaksi->jumlah_beli ?? 0;
+                $totalDebit += $harga_beli * $jumlah_beli;
+                // Persediaan (Debit)
+                if (!empty($transaksi->invoice_external)){
+                    Jurnal::create([
+                        'coa_id' => 32,
+                        'nomor' => $nomor_surat,
+                        'tgl' => now()->toDateString(),
+                        'keterangan' => 'Persediaan ' . (optional($transaksi->barang)->nama ?? 'Tidak Diketahui') .
+                            ' ( Harga Beli ' . number_format($harga_beli, 0, ',', '.') .
+                            ' Jumlah Beli ' . number_format($jumlah_beli, 0, ',', '.') . ' )',
+                        'debit' => $harga_beli * $jumlah_beli,
+                        'kredit' => 0,
+                        'invoice' => null,
+                        'invoice_external' => $invoice_external,
+                        'id_transaksi' => $transaksi->id,
+                        'nopol' => null,
+                        'container' => null,
+                        'tipe' => 'JNL',
+                        'no' => $no_JNL
+                    ]);
+
+                    if ($transaksi->barang->status_ppn == 'ya') {
+                        $ppn = round($totalDebit * ($transaksi->barang->value_ppn / 100));
+            
+                        Jurnal::create([
+                            'coa_id' => 10,
+                            'nomor' => $nomor_surat,
+                            'tgl' => now()->toDateString(),
+                            'keterangan' => 'PPN Masukan ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
+                            'debit' => 0,
+                            'kredit' => $ppn,
+                            'invoice' => null,
+                            'invoice_external' => $invoice_external,
+                            'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
+                            'nopol' => null,
+                            'container' => null,
+                            'tipe' => 'JNL',
+                            'no' => $no_JNL
+                        ]);
+            
+                        Jurnal::create([
+                            'coa_id' => 46,
+                            'nomor' => $nomor_surat,
+                            'tgl' => now()->toDateString(),
+                            'keterangan' => 'Uang Muka ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
+                            'debit' => 0,
+                            'kredit' => $totalDebit + $ppn,
+                            'invoice' => null,
+                            'invoice_external' => $invoice_external,
+                            'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
+                            'nopol' => null,
+                            'container' => null,
+                            'tipe' => 'JNL',
+                            'no' => $no_JNL
+                        ]);
+                    } else {
+                        // Hutang (Kredit) hanya dibuat jika totalDebit lebih dari 0
+                        Jurnal::create([
+                            'coa_id' => 46,
+                            'nomor' => $nomor_surat,
+                            'tgl' => now()->toDateString(),
+                            'keterangan' => 'Uang Muka ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
+                            'debit' => 0,
+                            'kredit' => $totalDebit,
+                            'invoice' => null,
+                            'invoice_external' => $invoice_external,
+                            'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
+                            'nopol' => null,
+                            'container' => null,
+                            'tipe' => 'JNL',
+                            'no' => $no_JNL
+                        ]);
+                    }
+                } else {
+                Jurnal::create([
+                    'coa_id' => 32,
+                    'nomor' => $nomor_surat,
+                    'tgl' => now()->toDateString(),
+                    'keterangan' => 'Persediaan ' . (optional($transaksi->barang)->nama ?? 'Tidak Diketahui') .
+                        ' ( Harga Beli ' . number_format($harga_beli, 0, ',', '.') .
+                        ' Jumlah Beli ' . number_format($jumlah_beli, 0, ',', '.') . ' )',
+                    'debit' => $harga_beli * $jumlah_beli,
+                    'kredit' => 0,
+                    'invoice' => null,
+                    'invoice_external' => $invoice_external,
+                    'id_transaksi' => $transaksi->id,
+                    'nopol' => null,
+                    'container' => null,
+                    'tipe' => 'JNL',
+                    'no' => $no_JNL
+                ]);
+    
+            if ($transaksi->barang->status_ppn == 'ya') {
+                $ppn = round($totalDebit * ($transaksi->barang->value_ppn / 100));
+    
+                Jurnal::create([
+                    'coa_id' => 10,
+                    'nomor' => $nomor_surat,
+                    'tgl' => now()->toDateString(),
+                    'keterangan' => 'PPN Masukan ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
+                    'debit' => 0,
+                    'kredit' => $ppn,
+                    'invoice' => null,
+                    'invoice_external' => $invoice_external,
+                    'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
+                    'nopol' => null,
+                    'container' => null,
+                    'tipe' => 'JNL',
+                    'no' => $no_JNL
+                ]);
+    
+                Jurnal::create([
+                    'coa_id' => 35,
+                    'nomor' => $nomor_surat,
+                    'tgl' => now()->toDateString(),
+                    'keterangan' => 'Hutang Usaha ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
+                    'debit' => 0,
+                    'kredit' => $totalDebit + $ppn,
+                    'invoice' => null,
+                    'invoice_external' => $invoice_external,
+                    'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
+                    'nopol' => null,
+                    'container' => null,
+                    'tipe' => 'JNL',
+                    'no' => $no_JNL
+                ]);
+            } else {
+                // Hutang (Kredit) hanya dibuat jika totalDebit lebih dari 0
+                Jurnal::create([
+                    'coa_id' => 35,
+                    'nomor' => $nomor_surat,
+                    'tgl' => now()->toDateString(),
+                    'keterangan' => 'Hutang Usaha ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
+                    'debit' => 0,
+                    'kredit' => $totalDebit,
+                    'invoice' => null,
+                    'invoice_external' => $invoice_external,
+                    'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
+                    'nopol' => null,
+                    'container' => null,
+                    'tipe' => 'JNL',
+                    'no' => $no_JNL
+                ]);
+            }
+        }
+        }
+        });
+    
+        return response()->json(['message' => 'Barang Masuk Sudah Diterima'], 200);
     }
-
-    return response()->json(['message' => 'Barang Masuk Sudah Diterima'], 200);
-}
-
     
     
-
     /**
      * Remove the specified resource from storage.
      */

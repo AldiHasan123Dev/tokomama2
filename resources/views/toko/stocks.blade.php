@@ -217,7 +217,7 @@ $(function () {
             },
             {
                 search: true,
-                label: 'Invoice External',
+                label: 'Invoice Supp',
                 name: 'invoice_external',
                 width: 100
             },
@@ -231,6 +231,12 @@ $(function () {
                 search: true,
                 label: 'Barang',
                 name: 'barang.nama',
+                width: 100
+            },
+            {
+                search: true,
+                label: 'Supplier',
+                name: 'supplier',
                 width: 100
             },
             {
@@ -251,14 +257,14 @@ $(function () {
                 search: true,
                 label: 'Satuan Beli',
                 name: 'satuan_beli',
-                width: 70,
+                width: 50,
                 align: "center"
             },
             {
                 search: true,
                 label: 'Satuan Jual',
                 name: 'satuan_jual',
-                width: 70,
+                width: 50,
                 align: "center"
             },
             {
@@ -325,12 +331,12 @@ var barang = $("#jqGrid1 input:checkbox:checked").map(function() {
 console.log("Barang:", barang);
 
 var jumlahBeli = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(7)').text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
+    return $(this).closest('tr').find('td:eq(8)').text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
 }).get();
 console.log("Jumlah Beli:", jumlahBeli);
 
 var satuanBeli = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(9)').text(); // Mengambil satuan beli dari kolom "Satuan Beli"
+    return $(this).closest('tr').find('td:eq(10)').text(); // Mengambil satuan beli dari kolom "Satuan Beli"
 }).get();
 console.log("Satuan Beli:", satuanBeli);
 
@@ -375,7 +381,7 @@ function inputTarif(ids_transaksi, jumlah, nama_barang, satuan_beli, no_bm) {
     // Dinamis menambahkan jumlah beli per barang
     for (let i = 0; i < jumlah.length; i++) {
         $('#jumlah_beli_container').append(`
-
+        <br>
             <div>
                 <input type="hidden" id="ids_transaksi_${i}" value="${ids_transaksi[i]}" class="input-field" />
                 <label for="jumlah_beli_${i}">${nama_barang[i]} (${satuan_beli[i]}) :</label>

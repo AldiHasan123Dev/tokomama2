@@ -89,11 +89,11 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem;">Jl. Baru (Ruko depan PLN) Abepura, Jayapura</td>
+                    <td style="font-size: 0.8rem; font-weight: bold;">Jl. Baru (Ruko depan PLN) Abepura, Jayapura</td>
                     <td style="font-weight: bold; font-size: 1rem; text-align: center;"><u>INVOICE</u></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem;">Telp: 08112692861 / 08112692859</td>
+                    <td style="font-size: 0.8rem; font-weight: bold;">HP: 08112692861 / 08112692859</td>
                     <td style="text-align: center; font-size: 0.8rem">NO : {{ $invoice ?? '-' }}</td>
                 </tr>
                 <tr>
@@ -309,7 +309,7 @@
                     <td style="text-align: center;">Hormat Kami</td>
                 </tr>
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;"> Bank Mandiri : 14.000.45006.005</th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;"> Bank Mandiri <br> 14.000.45006.005</th>
                     <th></th>
                 </tr>
                 <tr>
@@ -320,7 +320,7 @@
         @endif
     
     </div>
-    <p class="page-number" style=" position: fixed; align-items:bottom ; left: 10px; bottom: -20px; margin: 0; font-size: 0.8rem;">Halaman: {{ $page }} dari {{ $pages }}</p>
+    <p class="page-number" style=" position: fixed; align-items:bottom ; left: 10px; bottom: -20px; margin: 0; font-size: 0.8rem;">Hal: {{ $page }} dari {{ $pages }}</p>
 
 
             

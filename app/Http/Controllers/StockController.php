@@ -170,6 +170,7 @@ class StockController extends Controller
                 'no_bm' => $stock->no_bm,
                 'satuan_beli' => $stock->satuan_beli,
                 'satuan_jual' => $stock->satuan_jual,
+                'supplier' => $stock->suppliers->nama ?? '-',
                 'barang.nama' => $stock->barang->nama ?? '-', // Nama barang
                 'total_beli' => $stock->total_beli, // Total jumlah beli
                 'total_jual' => $stock->total_jual,

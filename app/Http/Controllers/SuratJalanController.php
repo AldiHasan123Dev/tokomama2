@@ -185,7 +185,7 @@ class SuratJalanController extends Controller
         $data['id_customer'] = $customer->id;
         $data['kepada']= $customer->nama_npwp ?? $customer->nama;
         $data['no'] = $no;
-        $data['nomor_surat'] = sprintf('%03d', $no) . '/SJ/SB-' . $month_roman . '/' . date('Y', strtotime($request->tgl_sj));
+        $data['nomor_surat'] = sprintf('%03d', $no) . '/SJ/TM-' . $month_roman . '/' . date('Y', strtotime($request->tgl_sj));
         $sj = SuratJalan::create($data);
     
         // Periksa apakah Surat Jalan sudah ada
@@ -256,7 +256,7 @@ class SuratJalanController extends Controller
         $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"); // daftar angka Romawi
         $month_number = date("n", strtotime($request->tgl));
         $month_roman = $roman_numerals[$month_number];
-        $no_bm = sprintf('%03d', $no) . '/BM/SB-' . $month_roman . '/' . date('Y', strtotime($request->tgl));
+        $no_bm = sprintf('%03d', $no) . '/BM/TM-' . $month_roman . '/' . date('Y', strtotime($request->tgl));
         for ($i = 0; $i < count($request->barang); $i++) {
             // dd($request->barang);
             if ($request->barang[$i] != null && $request->supplier[$i] != null) {
@@ -386,7 +386,7 @@ class SuratJalanController extends Controller
     $currentYear = $request->tgl_invx;
     $noBBK = Jurnal::where('tipe', 'BBK')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
     $no_BBK =  $noBBK ? $noBBK->no + 1 : 1;   
-    $nomor_surat = "$no_BBK/BBK-SB/" . date('y');
+    $nomor_surat = "$no_BBK/BBK-TM/" . date('y');
 
 
     // Ambil data transaksi berdasarkan invoice_external
@@ -630,7 +630,7 @@ class SuratJalanController extends Controller
         ->select('no_bm','id_surat_jalan', 'id_supplier', 'invoice_external', 'id_barang',
                  DB::raw('AVG(harga_beli) as avg_harga_beli'),
                  DB::raw('SUM(harga_beli) as sum_harga_beli'),
-                 DB::raw('SUM(jumlah_jual) as total_jumlah_beli'))
+                 DB::raw('SUM(jumlah_beli) as total_jumlah_beli'))
         ->where('harga_beli', '>', 0)
         ->whereNull('id_surat_jalan')
         ->groupBy('no_bm', 'id_supplier', 'invoice_external')

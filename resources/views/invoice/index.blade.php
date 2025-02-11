@@ -5,7 +5,7 @@
             @csrf
             
             <input type="date" name="tgl_invoice" value="{{ date('Y-m-d') }}">
-            <input type="text" value="{{ $no_JNL }}/SB/{{ date('y') }}" name="tipe" readonly>
+            <input type="text" value="{{ $no_JNL }}/TM/{{ date('y') }}" name="tipe" readonly>
             <input type="hidden" name="invoice_count" value="{{ $invoice_count }}">
             
             <div style="overflow-x: auto; margin-top: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">

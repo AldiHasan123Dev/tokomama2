@@ -72,7 +72,7 @@ class InvoiceController extends Controller
             $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII");
             $month_number = $monthNumber;
             $month_roman = $roman_numerals[$month_number];
-            $inv = sprintf('%03d', $no) . '/INV/SB-' . $month_roman . '/' . date('Y');
+            $inv = sprintf('%03d', $no) . '/INV/TM-' . $month_roman . '/' . date('Y');
             
             array_push($array_invoice, [
                 'id_nsfp' => $item->id,

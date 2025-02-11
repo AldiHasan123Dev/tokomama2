@@ -209,8 +209,8 @@
         </table>
 
         <div class="footer">
-            <p class="page-number" style="align-items:bottom; right: 10px; bottom: -40px; margin: 0; font-size: 0.8rem;">
-                Halaman: {{ $page }} dari {{ $pages }}
+            <p class="page-number" style="align-items:bottom; left: 10px; bottom: -20px; margin: 0; font-size: 0.8rem;">
+                Hal: {{ $page }} dari {{ $pages }}
             </p>
         </div>
         @if ($page == $pages)

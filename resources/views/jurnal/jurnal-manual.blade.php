@@ -275,24 +275,24 @@
                                 <select name="tipe" id="tipe" class="select select-bordered w-full max-w-xs"
                                     required>
                                     <option selected></option>
-                                    <option value="{{ $no_JNL }}/{{ 'JNL' }}-SB/{{ date('y') }}">
-                                        Jurnal - {{ $no_JNL }}/{{ 'JNL' }}-SB/{{ date('y') }}</option>
-                                    <option value="{{ $no_BKK }}/{{ 'BKK' }}-SB/{{ date('y') }}">Kas
-                                        Keluar - {{ $no_BKK }}/{{ 'BKK' }}-SB/{{ date('y') }}
+                                    <option value="{{ $no_JNL }}/{{ 'JNL' }}-TM/{{ date('y') }}">
+                                        Jurnal - {{ $no_JNL }}/{{ 'JNL' }}-TM/{{ date('y') }}</option>
+                                    <option value="{{ $no_BKK }}/{{ 'BKK' }}-TM/{{ date('y') }}">Kas
+                                        Keluar - {{ $no_BKK }}/{{ 'BKK' }}-TM/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BKM }}/{{ 'BKM' }}-SB/{{ date('y') }}">
-                                        Kas Masuk - {{ $no_BKM }}/{{ 'BKM' }}-SB/{{ date('y') }}
+                                    <option value="{{ $no_BKM }}/{{ 'BKM' }}-TM/{{ date('y') }}">
+                                        Kas Masuk - {{ $no_BKM }}/{{ 'BKM' }}-TM/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBK }}/{{ 'BBK' }}-SB/{{ date('y') }}">
-                                        Bank Keluar - {{ $no_BBK }}/{{ 'BBK' }}-SB/{{ date('y') }}
+                                    <option value="{{ $no_BBK }}/{{ 'BBK' }}-TM/{{ date('y') }}">
+                                        Bank Keluar - {{ $no_BBK }}/{{ 'BBK' }}-TM/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBM }}/{{ 'BBM' }}-SB/{{ date('y') }}">
-                                        Bank Masuk - {{ $no_BBM }}/{{ 'BBM' }}-SB/{{ date('y') }}
+                                    <option value="{{ $no_BBM }}/{{ 'BBM' }}-TM/{{ date('y') }}">
+                                        Bank Masuk - {{ $no_BBM }}/{{ 'BBM' }}-TM/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBMO }}/{{ 'BBMO' }}-SB/{{ date('y') }}">
+                                    <option value="{{ $no_BBMO }}/{{ 'BBMO' }}-TM/{{ date('y') }}">
                                         Bank Masuk OCBC - {{ $no_BBMO }}/{{ 'BBMO' }}-SB/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBKO }}/{{ 'BBKO' }}-SB/{{ date('y') }}">
+                                    <option value="{{ $no_BBKO }}/{{ 'BBKO' }}-TM/{{ date('y') }}">
                                         Bank Keluar OCBC - {{ $no_BBKO }}/{{ 'BBKO' }}-SB/{{ date('y') }}
                                     </option>
                                 </select>

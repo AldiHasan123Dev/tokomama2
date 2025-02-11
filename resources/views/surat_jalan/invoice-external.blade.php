@@ -69,7 +69,7 @@
             },
             {
                 search: true,
-                label: 'Jumlah Jual',
+                label: 'Jumlah Beli',
                 name: 'jumlah_beli',
                 width: 40,
                 align: 'right'
