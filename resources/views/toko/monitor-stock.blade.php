@@ -149,7 +149,7 @@ $(function () {
             },
             {
                 search: true,
-                label: 'Invoice External',
+                label: 'Invoice Supplier',
                 name: 'invoice_external',
                 width: 100
             },
