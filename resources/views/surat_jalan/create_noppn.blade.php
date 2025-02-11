@@ -56,7 +56,6 @@
                                     <th style="width: 230px">Barang</th>
                                     {{-- <th>Harsat Beli</th> --}}
                                     <th>Jumlah Jual</th>
-                                    <th>Satuan Jual</th>
                                     {{-- <th>Harsat Jual</th> --}}
                                     <th>Keterangan</th>
                                     {{-- <th>Profit</th> --}}
@@ -85,17 +84,6 @@
                                     <td>
                                         <input type="number" style="width:120px" onchange="inputBarang()" name="jumlah_jual[]" id="jumlah_jual-{{ $i }}"
                                             class="form-control">
-                                    </td>
-                                    <td>
-                                        <select name="satuan_jual[]" id="satuan_jual-{{ $i }}"
-                                                onchange="inputBarang()" class=" m-1 form-select"
-                                                >
-                                                <option value=""></option>
-                                                @foreach ($satuan as $item)
-                                                    <option value="{{ $item->nama_satuan }}">{{ $item->nama_satuan }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
                                     </td>
                                     <td>
                                         <input type="text" name="keterangan[]" id="keterangan-{{ $i }}" style="10000px">

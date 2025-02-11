@@ -117,8 +117,7 @@ class SuratJalanController extends Controller
         // Validasi dan cek stok terlebih dahulu
         if (
             empty(array_filter($request->barang)) || 
-            empty(array_filter($request->jumlah_jual)) || 
-            empty(array_filter($request->satuan_jual))
+            empty(array_filter($request->jumlah_jual))
         ) {
             return redirect()->back()->with('error', 'Minimal isi satu barang, jumlah jual, dan satuan jual!');
         }
@@ -149,17 +148,17 @@ class SuratJalanController extends Controller
         
     
         // Lanjutkan pengecekan untuk satuan jual
-        for ($i = 0; $i < count($request->satuan_jual); $i++) {
-            if ($request->satuan_jual[$i] != null) {
-                $satuanJual = Satuan::where('nama_satuan', $request->satuan_jual[$i])->exists();
-                if (!$satuanJual) {
-                    // Jika satuan tidak ada, buat baru
-                    $satuan = new Satuan;
-                    $satuan->nama_satuan = $request->satuan_jual[$i];
-                    $satuan->save();
-                }
-            }
-        }
+        // for ($i = 0; $i < count($request->satuan_jual); $i++) {
+        //     if ($request->satuan_jual[$i] != null) {
+        //         $satuanJual = Satuan::where('nama_satuan', $request->satuan_jual[$i])->exists();
+        //         if (!$satuanJual) {
+        //             // Jika satuan tidak ada, buat baru
+        //             $satuan = new Satuan;
+        //             $satuan->nama_satuan = $request->satuan_jual[$i];
+        //             $satuan->save();
+        //         }
+        //     }
+        // }
     
         // Mendapatkan customer berdasarkan id_customer
         $customer = Customer::where('nama',$request->tujuan)->first();
@@ -204,7 +203,7 @@ class SuratJalanController extends Controller
                                 'id_surat_jalan' => $sj->id, // ID surat jalan yang baru
                                 'jumlah_jual' => $request->jumlah_jual[$i],
                                 'jumlah_beli' => $transaction->jumlah_beli, // Jumlah jual yang baru
-                                'satuan_jual' => $request->satuan_jual[$i],
+                                'satuan_jual' =>  $transaction->satuan_beli,
                                 'satuan_beli' => $transaction->satuan_beli, // Satuan jual yang baru
                                 'keterangan' => $request->keterangan[$i], // Keterangan dari request
                                 'id_barang' => $transaction->id_barang,
@@ -218,7 +217,7 @@ class SuratJalanController extends Controller
                             $transaction->update([
                                 'sisa' => $sisa,
                                 'jumlah_jual' => $bkeluar,
-                                'satuan_jual' => $request->satuan_jual[$i]
+                                'satuan_jual' =>  $transaction->satuan_beli
                             ]);
                         
                     }
