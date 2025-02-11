@@ -81,18 +81,15 @@ class TransactionController extends Controller
             $no_JNL = $lastJNL ? $lastJNL->no + 1 : 1;
             // Nomor Surat BBK (tetap sama untuk semua jurnal dalam transaksi ini)
             $nomor_surat = "$month-$no_JNL/TM/$year";
-            $lastInvoice = Transaction::whereNotNull('invoice_external')
+            $lastInvoice = Transaction::where('invoice_external', 'like', 'InvSupp/%')
             ->orderBy('id', 'desc')
             ->value('invoice_external');
 
-        if ($lastInvoice) {
+
             // Pecah string invoice_external untuk mendapatkan angka terakhir
             $parts = explode('/', $lastInvoice);
             $lastNumber = is_numeric(end($parts)) ? (int) end($parts) : 0;
             $invoice_external = "InvSupp/" . ($lastNumber + 1);
-        } else {
-            $invoice_external = "InvSupp/1"; // Jika tidak ada, default ke 1
-        }
             foreach ($request->id as $key => $id) {
                 $transaksi = Transaction::find($id);
                 if (!$transaksi) continue; // Pastikan transaksi ditemukan

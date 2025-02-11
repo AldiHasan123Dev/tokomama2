@@ -61,26 +61,18 @@
             },
             {
                 search: true,
-                label: 'Harga Beli (AVG)',
-                name: 'harga_beli',
-                width: 70,
-                align: 'right',
-                
-            },
-            {
-                search: true,
                 label: 'Jumlah Beli',
                 name: 'jumlah_beli',
                 width: 40,
                 align: 'right'
             },
-            {
-                search: true,
-                label: 'Sub Total',
-                name: 'total',
-                width: 70,
-                align: 'right'
-            },
+            // {
+            //     search: true,
+            //     label: 'Sub Total',
+            //     name: 'total',
+            //     width: 70,
+            //     align: 'right'
+            // },
             {
                 search: true,
                 label: 'PPN',
@@ -133,7 +125,8 @@
         jumlah_beli,
         status_ppn,
         value_ppn,
-        tgl_jurnal
+        tgl_jurnal,
+        no_bm
     ) {
         // Hitung total
         const total = parseFloat(harga_beli) * parseFloat(jumlah_beli);
@@ -169,13 +162,13 @@
                 <form id="editForm" action="{{ route('surat-jalan-external.data.edit') }}" method="post">
                     @csrf
                     <input type="hidden" name="id_supplier" value="${id_supplier}" />
+                     <label class="input border flex items-center gap-2 mt-3">
+                        No BM :
+                        <input type="text" name="no_bm" value="${no_bm}" class="border-none" readonly />
+                    </label>
                     <label class="input border flex items-center gap-2 mt-3">
                         Nama Supplier :
                         <input type="text" name="nama_supplier" value="${nama_supplier}" class="border-none" readonly />
-                    </label>
-                    <label class="input border flex items-center gap-2 mt-3">
-                        Sub Total :
-                        <input type="text" id="total" name="total" value="${totalFormatted}" class="border-none" readonly />
                     </label>
                     <label class="input border flex items-center gap-2 mt-3">
                         PPN :

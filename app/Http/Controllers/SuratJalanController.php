@@ -328,7 +328,7 @@ class SuratJalanController extends Controller
     public function updateInvoiceExternal(Request $request) 
 {
     // Ambil data transaksi berdasarkan id_surat_jalan dan id_supplier
-    $check = Transaction::where('id_surat_jalan', $request->id_surat_jalan)
+    $check = Transaction::where('no_bm', $request->no_bm)
                         ->where('id_supplier', $request->id_supplier)
                         ->get();
     
@@ -345,12 +345,12 @@ class SuratJalanController extends Controller
 
     // Jika ada invoice_external sebelumnya dan di request baru invoice_external kosong/null
     if ($inext != null && $request->invoice_external == null) {
-        Transaction::where('id_surat_jalan', $request->id_surat_jalan)
+        Transaction::where('no_bm', $request->no_bm)
                    ->where('id_supplier', $request->id_supplier)
                    ->update(['invoice_external' => '-']);
     } else {
         // Jika invoice_external ada dalam request, lakukan update
-        Transaction::where('id_surat_jalan', $request->id_surat_jalan)
+        Transaction::where('no_bm', $request->no_bm)
                    ->where('id_supplier', $request->id_supplier)
                    ->update(['invoice_external' => $request->invoice_external]);
 
@@ -420,7 +420,7 @@ class SuratJalanController extends Controller
             $total = 0;
             foreach ($data as $item) {
                     $value_ppn = $item->barang->value_ppn / 100;
-                    $total += round($item->harga_beli * $item->jumlah_jual * $value_ppn);
+                    $total += round($item->harga_beli * $item->jumlah_beli * $value_ppn);
                     
                     
                     Jurnal::updateOrCreate(
@@ -432,12 +432,12 @@ class SuratJalanController extends Controller
                         [
                             'nomor' => $nomor_surat,
                             'tgl' => $currentYear,
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_jual, 0, ',', '.') . ' ' .  $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suppliers->nama,
-                            'debit' => round($item->harga_beli * $item->jumlah_jual),
+                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_beli, 0, ',', '.') . ' ' .  $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suppliers->nama,
+                            'debit' => round($item->harga_beli * $item->jumlah_beli),
                             'kredit' => 0,
                             'invoice' => null,
                             'invoice_external' => $request->invoice_external,
-                            'nopol' => $item->suratJalan->no_pol,
+                            'nopol' => $item->suratJalan->no_pol ?? null,
                             'container' => null,
                             'id_transaksi'=>$item->id,
                             'tipe' => 'BBK',
@@ -455,12 +455,12 @@ class SuratJalanController extends Controller
                         [
                             'nomor' => $nomor_surat,
                             'tgl' => $currentYear,
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_jual, 0, ',', '.') . ' ' . $item->satuan_jual . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suppliers->nama,
+                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_beli, 0, ',', '.') . ' ' . $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suppliers->nama,
                             'debit' => 0,
-                            'kredit' => round($item->harga_beli * $item->jumlah_jual),
+                            'kredit' => round($item->harga_beli * $item->jumlah_beli),
                             'invoice' => null,
                             'invoice_external' => $request->invoice_external,
-                            'nopol' => $item->suratJalan->no_pol,
+                            'nopol' => $item->suratJalan->no_pol ?? null,
                             'container' => null,
                             'id_transaksi'=>$item->id,
                             'tipe' => 'BBK',
@@ -483,7 +483,7 @@ class SuratJalanController extends Controller
                         'kredit' => 0,
                         'invoice' => null,
                         'invoice_external' => $request->invoice_external,
-                        'nopol' => $data[0]->suratJalan->no_pol,
+                        'nopol' => $data[0]->suratJalan->no_pol ?? null,
                         'container' => null,
                         'id_transaksi'=>$data[0]->id,
                         'tipe' => 'BBK',
@@ -502,7 +502,7 @@ class SuratJalanController extends Controller
                         'kredit' => $total, // PPN amount
                         'invoice' => null,
                         'invoice_external' => $request->invoice_external,
-                        'nopol' => $item->suratJalan->no_pol,
+                        'nopol' => $item->suratJalan->no_pol ?? null,
                         'container' => null,
                         'id_transaksi'=>$item->id,
                         'tipe' => 'BBK',
@@ -680,14 +680,14 @@ class SuratJalanController extends Controller
             'DT_RowIndex' => $index,
             'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
             'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 2, ',', '.') : '-',
-            'sum_harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 4, ',', '.') : '-',
+            'sum_harga_beli' => $row->sum_harga_beli ? number_format($row->sum_harga_beli, 4, ',', '.') : '-',
             'jumlah_beli' => $row->total_jumlah_beli ? number_format($row->total_jumlah_beli, 0, ',', '.') : '-',
             'no_bm' => $row->no_bm ?? '-',
             'total' => number_format($subtotal, 2, ',', '.'),
             'ppn' => number_format($ppn, 2, ',', '.'),
             'supplier' => $row->suppliers->nama ?? '-',
             'invoice_external' => $row->invoice_external,
-            'aksi' => '<button onclick="getData(' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
+            'aksi' => '<button onclick="getData(' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\', \'' . addslashes($row->no_bm) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
         ];
     });
 
