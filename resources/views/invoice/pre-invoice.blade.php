@@ -8,8 +8,8 @@
                         <td style="font-weight: bold; padding: 0; text-align: center;">
                             <img src="{{ asset('tokomama.svg') }}" alt="Logo"
                                 style="height: 100px; margin-bottom: 1px; margin-left: 60px">
-                            MAMA BAHAGIA <br>
-                            Jl. Baru (Ruko depan PLN) Abepura, Jayapura <br>
+                            MAMA BAHAGIA 2 <br>
+                            Jl. Baru - Melati (Ruko depan PLN) Abepura, Jayapura <br>
                         </td>
                     </tr>
                 </thead>
@@ -317,7 +317,7 @@
                             }
 
                             // Hitung total PPN jika ada
-                            $total_with_ppn = $has_ppn ? $total + $total_ppn : $total;
+                            $total_with_ppn = $has_ppn ? $dpp + $total + $total_ppn : $total;
                         @endphp
                         @if ($barang->status_ppn == 'ya')
                             {{ ucwords(strtolower(terbilang(round($total_with_ppn)))) }}
@@ -440,7 +440,7 @@
                         }
 
                         // Hitung total PPN jika ada
-                        $total_with_ppn = $has_ppn ? $total + $total_ppn : $total;
+                        $total_with_ppn = $has_ppn ? $dpp + $total + $total_ppn : $total;
                     @endphp
 
                     {{-- Menampilkan total --}}

@@ -94,12 +94,12 @@
                     <th rowspan="4" style="width: 15%; text-align: left; margin-bottom:20px">
                         <img src="{{ public_path('tokomama.svg') }}" class="logo">
                     </th>
-                    <td style="font-weight: bold">MAMA BAHAGIA</td>
+                    <td style="font-weight: bold">MAMA BAHAGIA 2</td>
                     <td></td>
                     <td style="font-weight: bold">Kepada:</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold">Jl. Baru (Ruko Depan PLN) 
+                    <td style="font-weight: bold">Jl. Baru - Melati (Ruko Depan PLN) 
                         <br> Abepura, Jayapura </td>
                     <td></td>
                     <td style="font-weight: bold">{{ $surat_jalan->customer->nama_npwp }}</td>

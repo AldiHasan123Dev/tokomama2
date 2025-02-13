@@ -85,7 +85,7 @@
                     <th rowspan="4" style="width: 15%; margin-bottom:40px;">
                         <img src="{{ public_path('tokomama.svg') }}" class="logo" style="width: 60%; height: 50%;">
                     </th>
-                    <td style="font-weight: bold; font-size: 1rem;">MAMA BAHAGIA</td>
+                    <td style="font-weight: bold; font-size: 1rem;">MAMA BAHAGIA 2</td>
                     <td></td>
                 </tr>
                 <tr>
@@ -280,7 +280,7 @@
                     </td>
                     <td class="border border-black" style="text-align: right;" >
                     @if($barang->status_ppn == 'ya')
-                        <b>{{ number_format($ppn + $total, 0, ',', '.') }}</b>
+                        <b>{{ number_format($ppn + $total +$dpp, 0, ',', '.') }}</b>
                     @else
                         <b>{{ number_format($total, 0, ',', '.') }}</b>
                     @endif
@@ -295,7 +295,7 @@
             <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem"> 
                 Terbilang: 
                 @if($barang->status_ppn == 'ya')
-                    {{ ucwords(strtolower(terbilang(round($ppn + $total)))) }} Rupiah
+                    {{ ucwords(strtolower(terbilang(round($ppn + $total + $dpp)))) }} Rupiah
                 @else
                     {{ ucwords(strtolower(terbilang(round($total)))) }} Rupiah
                 @endif

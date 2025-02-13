@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>TM | Mama Bahagia </title>
+    <title>TM2 | Mama Bahagia 2 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Tailwind Admin & Dashboard Template" name="description">
     <meta name="csrf-token" content="{{ csrf_token() }}">
