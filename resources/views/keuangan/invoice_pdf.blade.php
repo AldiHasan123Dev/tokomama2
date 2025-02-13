@@ -280,7 +280,7 @@
                     </td>
                     <td class="border border-black" style="text-align: right;" >
                     @if($barang->status_ppn == 'ya')
-                        <b>{{ number_format($ppn + $total +$dpp, 0, ',', '.') }}</b>
+                        <b>{{ number_format($ppn + $total, 0, ',', '.') }}</b>
                     @else
                         <b>{{ number_format($total, 0, ',', '.') }}</b>
                     @endif
@@ -295,7 +295,7 @@
             <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem"> 
                 Terbilang: 
                 @if($barang->status_ppn == 'ya')
-                    {{ ucwords(strtolower(terbilang(round($ppn + $total + $dpp)))) }} Rupiah
+                    {{ ucwords(strtolower(terbilang(round($ppn + $total)))) }} Rupiah
                 @else
                     {{ ucwords(strtolower(terbilang(round($total)))) }} Rupiah
                 @endif

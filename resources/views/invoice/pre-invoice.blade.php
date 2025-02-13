@@ -317,7 +317,7 @@
                             }
 
                             // Hitung total PPN jika ada
-                            $total_with_ppn = $has_ppn ? $dpp + $total + $total_ppn : $total;
+                            $total_with_ppn = $has_ppn ? $total + $total_ppn : $total;
                         @endphp
                         @if ($barang->status_ppn == 'ya')
                             {{ ucwords(strtolower(terbilang(round($total_with_ppn)))) }}
@@ -440,7 +440,7 @@
                         }
 
                         // Hitung total PPN jika ada
-                        $total_with_ppn = $has_ppn ? $dpp + $total + $total_ppn : $total;
+                        $total_with_ppn = $has_ppn ? $total + $total_ppn : $total;
                     @endphp
 
                     {{-- Menampilkan total --}}

@@ -27,6 +27,7 @@ class Transaction extends Model
         'tgl_bm',
         'no',
         'no_bm',
+        'invoice_external',
         'id_supplier'
     ];
 

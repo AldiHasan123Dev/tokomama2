@@ -326,8 +326,10 @@ class InvoiceController extends Controller
         ])
         ->where('invoice', $invoiceArray) // Menggunakan string langsung tanpa loop
         ->get();
+        
         $id_transaksi = $result->pluck('id_transaksi');
-        $cekCoa = Jurnal::whereIn('id_transaksi',$id_transaksi)
+        $id_invx = $result->pluck('transaksi.invoice_external');
+        $cekCoa = Jurnal::whereIn('invoice_external',$id_invx)
         ->where('coa_id', 30)->get();
         $invoice_external1 = Transaction::whereIn('id',$id_transaksi)->get();
         $invoice_external = $invoice_external1->pluck('invoice_external')->first();
@@ -430,22 +432,6 @@ class InvoiceController extends Controller
                                     'no' =>  $maxArray + 2
                                 ]);
                             }
-
-                            Jurnal::create([
-                                'coa_id' => 10,
-                                'nomor' => $jurhut,
-                                'tgl' => $tgl,
-                                'keterangan' => 'PPN Masukkan ' . $result[0]->transaksi->suppliers->nama . ' (FP : )' ,
-                                'debit' => $subtotalPPN, // Menyimpan subtotal sebagai debit
-                                'kredit' =>  0,// Kredit diisi 0
-                                'invoice' => null,
-                                'invoice_external' => $invoice_external,
-                                'id_transaksi' => $result[0]->id_transaksi,
-                                'nopol' => $nopol,
-                                'container' => null,
-                                'tipe' => 'JNL',
-                                'no' => $maxArray + 2
-                            ]);
                             
                              //coa 1.6 = Uang Muka (Kredit)
                             Jurnal::create([
@@ -496,21 +482,6 @@ class InvoiceController extends Controller
 
                                  //coa 1.1.4 = PPN Masukan (Debit)
                             }
-                            Jurnal::create([
-                                'coa_id' => 10,
-                                'nomor' => $jurhut,
-                                'tgl' => $tgl,
-                                'keterangan' => 'PPN Masukkan ' . $result[0]->transaksi->suppliers->nama . ' (FP : )' ,
-                                'debit' => $subtotalPPN, // Menyimpan subtotal sebagai debit
-                                'kredit' =>  0,// Kredit diisi 0
-                                'invoice' => null,
-                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
-                                'id_transaksi' => $result[0]->id_transaksi,
-                                'nopol' => $nopol,
-                                'container' => null,
-                                'tipe' => 'JNL',
-                                'no' => $maxArray + 2
-                            ]);
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
                             Jurnal::create([
                                 'coa_id' => 35,
@@ -518,7 +489,7 @@ class InvoiceController extends Controller
                                 'tgl' => $tgl,
                                 'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
-                                'kredit' => $subtotal + $subtotalPPN, // Kredit diisi 0
+                                'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
                                 'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
                                 'id_transaksi' => $result[0]->id_transaksi,
@@ -573,7 +544,21 @@ class InvoiceController extends Controller
                     }
                     if ($cekCoa->isNotEmpty()) {
                     //Jurnal Hutang No PPN 
-                             
+                    Jurnal::create([
+                        'coa_id' => 32,
+                        'nomor' => $jurhut,
+                        'tgl' => $tgl,
+                        'keterangan' => 'Persediaan ' . $result[0]->transaksi->suppliers->nama,
+                        'debit' => 0, // Menyimpan subtotal sebagai debit
+                        'kredit' => $subtotal, // Kredit diisi 0
+                        'invoice' => null,
+                        'invoice_external' => $invoice_external,
+                        'id_transaksi' => $result[0]->id_transaksi,
+                        'nopol' => $nopol,
+                        'container' => null,
+                        'tipe' => 'JNL',
+                        'no' =>  $maxArray + 2
+                    ]);
                              //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
                              foreach ($result as $item) {
                                 Jurnal::create([
@@ -597,21 +582,7 @@ class InvoiceController extends Controller
                                 ]);
                             }
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
-                             Jurnal::create([
-                                'coa_id' => 30,
-                                'nomor' => $jurhut,
-                                'tgl' => $tgl,
-                                'keterangan' => 'Uang Muka Untuk ' . $result[0]->transaksi->suppliers->nama,
-                                'debit' => 0, // Menyimpan subtotal sebagai debit
-                                'kredit' => $subtotal, // Kredit diisi 0
-                                'invoice' => null,
-                                'invoice_external' => $invoice_external,
-                                'id_transaksi' => $result[0]->id_transaksi,
-                                'nopol' => $nopol,
-                                'container' => null,
-                                'tipe' => 'JNL',
-                                'no' =>  $maxArray + 2
-                            ]);
+                             
                         } else {
                             //Jurnal Hutang No PPN 
                             Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
@@ -800,29 +771,14 @@ class InvoiceController extends Controller
 
                              //coa 1.1.4 = PPN Masukan (Debit)
                         }
-                        Jurnal::create([
-                            'coa_id' => 10,
-                            'nomor' => $jurhutNow,
-                            'tgl' => $tgl,
-                            'keterangan' => 'PPN Masukkan ' . $result[0]->transaksi->suppliers->nama . ' (FP : )' ,
-                            'debit' => $subtotalPPN, // Menyimpan subtotal sebagai debit
-                            'kredit' =>  0,// Kredit diisi 0
-                            'invoice' => null,
-                            'invoice_external' =>"InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
-                            'id_transaksi' => $result[0]->id_transaksi,
-                            'nopol' => $nopol,
-                            'container' => null,
-                            'tipe' => 'JNL',
-                            'no' => $no + 1
-                        ]);
                          //coa 1.6 = Persediaan Barang / Stock (Kredit)
                         Jurnal::create([
-                            'coa_id' => 35,
+                            'coa_id' => 32,
                             'nomor' => $jurhutNow,
                             'tgl' => $tgl,
-                            'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                            'keterangan' => 'Persediaan ' . $result[0]->transaksi->suppliers->nama,
                             'debit' => 0, // Menyimpan subtotal sebagai debit
-                            'kredit' => $subtotal + $subtotalPPN, // Kredit diisi 0
+                            'kredit' => $subtotal, // Kredit diisi 0
                             'invoice' => null,
                             'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
                             'id_transaksi' => $result[0]->id_transaksi,

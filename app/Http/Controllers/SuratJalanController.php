@@ -194,12 +194,15 @@ class SuratJalanController extends Controller
                 if ($request->barang[$i] != null && $request->jumlah_jual[$i] != null) {
                     // Cek stok lagi sebelum update transaksi
                     $transaction = Transaction::where('id', $request->barang[$i])->first();
+                   
                     if ($transaction) {
                        
                             $sisa = $transaction->sisa - $request->jumlah_jual[$i];
                             $bkeluar = $request->jumlah_jual[$i] + $transaction->jumlah_jual;
+                            $invx = $transaction->invoice_external;
                             Transaction::create([
-                                'sisa' => $request->jumlah_jual[$i], // Menggunakan sisa dari transaksi yang ada
+                                'sisa' => $request->jumlah_jual[$i],
+                                'invoice_external' => $invx, // Menggunakan sisa dari transaksi yang ada
                                 'id_surat_jalan' => $sj->id, // ID surat jalan yang baru
                                 'jumlah_jual' => $request->jumlah_jual[$i],
                                 'jumlah_beli' => $transaction->jumlah_beli, // Jumlah jual yang baru

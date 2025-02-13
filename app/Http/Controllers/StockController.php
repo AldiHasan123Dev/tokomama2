@@ -107,25 +107,11 @@ class StockController extends Controller
         
         // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
         $stocks = Transaction::selectRaw(
-            'GROUP_CONCAT(transaksi.id) as transaksi_ids, 
-             GROUP_CONCAT(transaksi.jumlah_beli) as jumlah_belis, 
-             GROUP_CONCAT(barang.nama) as barangs, 
-             GROUP_CONCAT(satuan.nama_satuan) as satuans, 
-             id_barang, 
-             transaksi.*,
-             SUM(jumlah_beli) as total_beli, 
-             SUM(jumlah_jual) as total_jual, 
-             SUM(sisa) as sisa,
-             SUM(harga_beli) as total_harga_beli,
-             SUM(harga_jual) as total_harga_jual,
-             (SUM(harga_jual) - SUM(harga_beli)) as total_profit'
+            'transaksi.*'
         )
-        ->leftJoin('barang', 'transaksi.id_barang', '=', 'barang.id') // Gabungkan barang
-        ->leftJoin('satuan', 'barang.id_satuan', '=', 'satuan.id') // Gabungkan satuan
         ->whereNull('id_surat_jalan')
-        ->where('harga_beli', '>', 0) // Pastikan harga_beli lebih dari 0
-        ->groupByRaw('CASE WHEN invoice_external IS NULL THEN transaksi.id ELSE invoice_external END') // Grup berdasarkan kondisi
-        ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at
+        ->where('harga_beli', '>', 0) // Pastikan harga_beli lebih dari 0 // Grup berdasarkan kondisi
+        ->orderBy('no_bm', 'desc') // Urutkan berdasarkan created_at
         ->get();
     
     
@@ -171,10 +157,10 @@ class StockController extends Controller
         $index = $offset + 1; // Mulai nomor urut sesuai offset
         $formattedStocks = $paginatedData->map(function ($stock) use (&$index) {
             return [
-                'id' => $stock->transaksi_ids,
-                'satuans' => $stock->satuans,
-                'barangs' => $stock->barangs,
-                'jumlah_belis' => $stock->jumlah_belis,
+                'id' => $stock->id,
+                'satuans' => $stock->satuan_beli,
+                'barangs' => $stock->barang->nama,
+                'jumlah_belis' => $stock->jumlah_beli,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
                 'status' => $stock->stts ?? '-',
                 'invoice_external' => $stock->invoice_external,
@@ -183,10 +169,10 @@ class StockController extends Controller
                 'satuan_jual' => $stock->satuan_jual,
                 'supplier' => $stock->suppliers->nama ?? '-',
                 'barang.nama' => $stock->barang->nama ?? '-', // Nama barang
-                'total_beli' => $stock->total_beli, // Total jumlah beli
-                'total_jual' => $stock->total_jual,
-                'total_harga_beli' => $stock->total_harga_beli,
-                'total_harga_jual' => $stock->total_harga_jual,
+                'total_beli' => $stock->jumlah_beli, // Total jumlah beli
+                'total_jual' => $stock->jumlah_jual,
+                'total_harga_beli' => $stock->harga_beli,
+                'total_harga_jual' => $stock->harga_jual,
                 'total_profit' => $stock->total_profit, // Total jumlah jual
                 'sisa' => $stock->sisa, // Stok tersisa
                 'index' => $index++ // Nomor urut
