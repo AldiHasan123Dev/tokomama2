@@ -241,7 +241,7 @@
                     @endfor
                     @if ($page == $pages) 
                     <tr>
-                    <td colspan="5"  style="text-align: right;">
+                    {{-- <td colspan="5"  style="text-align: right;">
                         Subtotal
                         <br>
                         DPP 11/12
@@ -251,11 +251,11 @@
                         @else
                         PPN 12% (DIBEBASKAN)
                         @endif
-                    </td>
-                    <td class="border border-black" style="text-align: right;" >
+                    </td> --}}
                         @php
                             $dpp = $total * 11/12;
                         @endphp
+                    {{-- <td class="border border-black" style="text-align: right;" >
                     {{ number_format($total, 0, ',', '.') }}
                     <br>
                         @if($barang->status_ppn == 'ya')
@@ -265,14 +265,14 @@
                     @endif
                     <br>
                     @if($barang->status_ppn == 'ya')
-                    @php
-                        $ppn = ($barang->value_ppn / 100) * $dpp
-                    @endphp
                         {{ number_format($ppn, 0, ',', '.') }}
                     @else
                         -
                     @endif
-                    </td>
+                    </td> --}}
+                    @php
+                        $ppn = ($barang->value_ppn / 100) * $dpp
+                    @endphp
                 </tr>
                 <tr>
                     <td colspan="5" class="border border-black" style="text-align: right;">
@@ -280,7 +280,7 @@
                     </td>
                     <td class="border border-black" style="text-align: right;" >
                     @if($barang->status_ppn == 'ya')
-                        <b>{{ number_format($ppn + $total +$dpp, 0, ',', '.') }}</b>
+                        <b>{{ number_format($ppn + $total, 0, ',', '.') }}</b>
                     @else
                         <b>{{ number_format($total, 0, ',', '.') }}</b>
                     @endif
@@ -292,7 +292,7 @@
 
     <div class="footer">
         @if ($page == $pages)
-            <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem"> 
+            <p style="font-weight: bold;padding-left:50px; font-size: 0.8rem"> 
                 Terbilang: 
                 @if($barang->status_ppn == 'ya')
                     {{ ucwords(strtolower(terbilang(round($ppn + $total + $dpp)))) }} Rupiah
@@ -302,18 +302,27 @@
             </p>
             <table style="font-size: 0.8rem;">
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;">Pembayaran ke rekening:</th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;">
+                    </th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;">
+                    </th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;">
+                    </th>
                     <td style="align-items:right ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
                 </tr>
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;"></th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;"></th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;"></th>
                     <td style="text-align: center;">Hormat Kami</td>
                 </tr>
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;"> Bank Mandiri <br> 14.000.45006.005</th>
+                    <th style="text-align: left; padding-left: 50px; font-style: italic;"><br></th>
                     <th></th>
                 </tr>
                 <tr>
+                    <th style="text-align: left; padding-left: 50px;"></th>
+                    <th style="text-align: left; padding-left: 50px;"></th>
                     <th style="text-align: left; padding-left: 50px;"></th>
                     <th style="padding-top:30px">(MAMA BAHAGIA)</th>
                 </tr>
