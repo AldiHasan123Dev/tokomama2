@@ -235,6 +235,9 @@ class SuratJalanController extends Controller
     public function store_bm(Request $request)
     {
         $data = $request->all();
+        if (!$request->tgl_bm) {
+            return back()->with('error', 'Silahkan input tanggal barang masuk');
+        }
         if (Transaction::count() == 0) {
             $no = 1;
         } else {
@@ -272,7 +275,7 @@ class SuratJalanController extends Controller
                 ]);
             }
         }
-        return redirect()->route('harga_beli')->with('success', 'Barang Masuk sudah tersimpan!!');
+        return redirect()->route('harga_beli')->with('success', 'Barang Masuk sudah tersimpan, silahkan input harga beli');
         // return redirect back()->route('surat-jalan.cetak', $sj);
     }
 

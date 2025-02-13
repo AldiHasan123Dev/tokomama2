@@ -172,6 +172,7 @@ Route::prefix('toko')->controller(StockController::class)->middleware('auth')->g
     Route::post('stock-barang_masuk', 'barang_masuk')->name('stock.barang_masuk'); 
     Route::get('data-stock', 'dataStock')->name('stock.data');
     Route::get('data-stock1', 'dataStock1')->name('stock.data1');
+    Route::get('data-stock2', 'dataStock2')->name('stock.data2');
 });
 
 Route::prefix('pajak')->middleware('auth')->group(function () {

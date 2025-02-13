@@ -126,7 +126,7 @@
         <script>
 $(function () {
     const table1 = $("#jqGrid1").jqGrid({
-        url: "{{ route('stock.data1') }}", // URL untuk data JSON dari controller
+        url: "{{ route('stock.data2') }}", // URL untuk data JSON dari controller
         datatype: "json",
         mtype: "GET",
         colModel: [

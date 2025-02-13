@@ -210,6 +210,21 @@ $(function () {
                             hidden: true
             },
             {
+                            name: 'satuans',
+                            index: 'satuans',
+                            hidden: true
+            },
+            {
+                            name: 'barangs',
+                            index: 'barangs',
+                            hidden: true
+            },
+            {
+                            name: 'jumlah_belis',
+                            index: 'jumlah_belis',
+                            hidden: true
+            },
+            {
                 label: 'Status',
                 name: 'status',
                 width: 200,
@@ -290,7 +305,7 @@ $(function () {
             }
         ],
         pager: "#jqGridPager1", // Link pager dengan ID yang benar
-        rowNum: 20,
+        rowNum: 10,
         rowList: [50, 100, 500], // Pilihan jumlah baris
         height: 'auto', // Tinggi tabel otomatis menyesuaikan
         viewrecords: true, // Menampilkan jumlah total data
@@ -325,27 +340,29 @@ $('#form').submit(function (e) {
 console.log("IDs:", ids);
 
 
-var barang = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(6)').text(); // Mengambil nama barang dari kolom "Barang"
+var barangs = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(4)').text(); // Mengambil nama barang dari kolom "Barang"
 }).get();
+var barang = barangs.join(",").split(",");
 console.log("Barang:", barang);
 
-var jumlahBeli = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(8)').text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
+var jumlahBelis = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(5)').text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
 }).get();
+var jumlahBeli = jumlahBelis.join(",").split(",");
 console.log("Jumlah Beli:", jumlahBeli);
-
-var satuanBeli = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(10)').text(); // Mengambil satuan beli dari kolom "Satuan Beli"
+var satuanBelis = $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(3)').text(); // Mengambil satuan beli dari kolom "Satuan Beli"
 }).get();
+var satuanBeli= satuanBelis.join(",").split(",");
 console.log("Satuan Beli:", satuanBeli);
 
-var noBm = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(5)').text(); // Mengambil nama barang dari kolom "No BM"
+var noBm= $("#jqGrid1 input:checkbox:checked").map(function() {
+    return $(this).closest('tr').find('td:eq(8)').text(); // Mengambil nama barang dari kolom "No BM"
 }).get();
 console.log("No BM:", noBm);
 var status = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(3)').text(); // Mengambil nama barang dari kolom "No BM"
+    return $(this).closest('tr').find('td:eq(6)').text(); // Mengambil nama barang dari kolom "No BM"
 }).get();
 console.log("Status :", status);
 
@@ -403,9 +420,16 @@ function updateTransaksi1() {
     $('input[id^="jumlah_beli_"]').each(function(index) {
         jumlahBeli.push($(this).val()); // Mengambil value dari setiap input
     });
-    $('input[id^="ids_transaksi_"]').each(function(index) {
-        id.push($(this).val()); // Mengambil value dari setiap input
-    });
+    $('input[id^="ids_transaksi_"]').each(function() {
+    let val = $(this).val();
+    if (val) {
+        // Jika terdapat koma, pecah menjadi array dan gabungkan dengan id[]
+        id = id.concat(val.split(","));
+    }
+});
+
+// Pastikan array bersih dari nilai kosong atau 'undefined'
+id = id.filter(val => val !== "undefined" && val !== "");
 
     // Log data ke console untuk debugging
     console.log("Jumlah Beli:", jumlahBeli);

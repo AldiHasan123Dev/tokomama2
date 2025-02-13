@@ -212,27 +212,27 @@
                             <div style="width: 500px;" class="center-container">
                                 <label class="form-control w-full max-w-xs">
                                     <div class="label">
-                                        <span class="label-text">Kota Pengirim <span class="text-red-500">*</span></span>
-                                    </div>
-                                    <input type="text"
-                                        class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                                        id="kota_pengirim" name="kota_pengirim" value="Jayapura"  oninput="this.value = this.value.toUpperCase();" required />
-                                </label>
-                            </div>
-                            <div style="width: 500px;" class="center-container">
-                                <label class="form-control w-full max-w-xs">
-                                    <div class="label">
                                         <span class="label-text">Nama Pengirim <span class="text-red-500">*</span></span>
                                     </div>
                                     <select name="nama_pengirim" id="pengirim"
                                     class="select2 form-control my-0" style="width: 318px; border:none">
                                     <option value=""></option>
                                     @foreach ($nopol as $np)
-                                        <option value="{{ $np->sopir }}">{{ $np->sopir }}</option>
+                                    <option value="{{ $np->sopir }}">{{ $np->sopir }}</option>
                                     @endforeach
                                 </select>
-                                </label>
-                            </div>
+                            </label>
+                        </div>
+                        <div style="width: 500px;" class="center-container">
+                            <label class="form-control w-full max-w-xs">
+                                <div class="label">
+                                    <span class="label-text">Kota Pengirim <span class="text-red-500">*</span></span>
+                                </div>
+                                <input type="text"
+                                    class="input input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
+                                    id="kota_pengirim" name="kota_pengirim" value="Jayapura"  oninput="this.value = this.value.toUpperCase();" required />
+                            </label>
+                        </div>
                             {{-- <div style="width: 500px;" class="center-container">
                                 <label class="form-control w-full max-w-xs">
                                     <div class="label">

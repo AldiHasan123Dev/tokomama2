@@ -223,7 +223,7 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                     <input type="hidden" name="nama_satuan[]" id="nama_satuan-${q}" />
                                     <td class="text-center">${q}</td>
                                     <td>
-                                        <select name="barang[]" id="barang-${q}" class="select2 form-control my-0" style="width: 500px; border:none">
+                                        <select name="barang[]" id="barang-${q}" class="select2 form-control my-0" style="width: 300px; border:none">
                                             <option value=""></option>
                                             @foreach ($barang as $item)
                                             <option value="{{ $item->id }}">{{ $item->nama }} || {{ $item->nama_satuan }} || {{ $item->value }}</option>
@@ -245,7 +245,7 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                             </select>
                                     </td>
                                     <td>
-                                        <select name="supplier[]" id="supplier-${q}" class="select2 form-control my-0" style="width: 300px; border:none">
+                                        <select name="supplier[]" id="supplier-${q}" class="select2 form-control my-0" style="width: 200px; border:none">
                                             <option value=""></option>
                                             @foreach ($supplier as $item)
                                             <option value="{{ $item->id }}">{{ $item->nama }}</option>
@@ -253,11 +253,7 @@ document.getElementById("submit").addEventListener("click", function (e) {
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="text" style="11000px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}" class="form-control">
-                                    </td>
-                                    <td>
-                                        <input type="datetime" style="width:120px" name="tgl_bm[]" id="tgl_bm-${q}"
-                                            class="form-control">
+                                        <input type="text" style="11000px" onchange="inputBarang()" name="keterangan[]" id="keterangan-${q}">
                                     </td>
                                 </tr>`;
                 $('#tbody-list-barang').append(html);

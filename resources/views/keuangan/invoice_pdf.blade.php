@@ -89,7 +89,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem; font-weight: bold;">Jl. Baru (Ruko depan PLN) 
+                    <td style="font-size: 0.8rem; font-weight: bold;">Jl. Baru - Melati (Ruko depan PLN) 
                         <br> Abepura, Jayapura</td>
                     <td style="font-weight: bold; font-size: 1rem; text-align: center;"><u>INVOICE</u></td>
                 </tr>
