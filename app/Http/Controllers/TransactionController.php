@@ -51,7 +51,6 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
-        //
     }
 
     /**
@@ -218,7 +217,7 @@ class TransactionController extends Controller
                     } else {
                         // Hutang (Kredit) hanya dibuat jika totalDebit lebih dari 0
                         Jurnal::create([
-                            'coa_id' => 46,
+                            'coa_id' => 30,
                             'nomor' => $nomor_surat,
                             'tgl' => now()->toDateString(),
                             'keterangan' => 'Uang Muka Pembelian ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
