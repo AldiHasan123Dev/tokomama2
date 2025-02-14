@@ -182,23 +182,6 @@ class TransactionController extends Controller
         } else {
                     if ($transaksi->barang->status_ppn == 'ya') {
                         $ppn = round($totalDebit * ($transaksi->barang->value_ppn / 100));
-            
-                        Jurnal::create([
-                            'coa_id' => 10,
-                            'nomor' => $nomor_surat,
-                            'tgl' => now()->toDateString(),
-                            'keterangan' => 'PPN Masukan ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
-                            'debit' => $ppn,
-                            'kredit' => 0,
-                            'invoice' => null,
-                            'invoice_external' => $invoice_external,
-                            'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
-                            'nopol' => null,
-                            'container' => null,
-                            'tipe' => 'JNL',
-                            'no' => $no_JNL
-                        ]);
-            
                         Jurnal::create([
                             'coa_id' => 30,
                             'nomor' => $nomor_surat,

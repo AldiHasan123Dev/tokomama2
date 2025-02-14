@@ -437,7 +437,7 @@ class JurnalController extends Controller
                 
                 $barang = $invoiceExternal[0]->barang->nama;
                 $supplier = $invoiceExternal[0]->suppliers->nama;
-                $customer = $invoiceExternal[0]->suratJalan->customer->nama;
+                $customer = $invoiceExternal[0]->suratJalan->customer->nama ?? null;
                 $quantity = $invoiceExternal[0]->jumlah_jual;
                 $satuan = $invoiceExternal[0]->satuan_jual;
                 $hargabeli = $invoiceExternal[0]->harga_beli;
