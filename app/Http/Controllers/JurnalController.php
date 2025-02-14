@@ -206,8 +206,7 @@ class JurnalController extends Controller
                 $ket = $invoices[$index - 1]->transaksi->keterangan;
                 
                 // dd($customer, $satuan, $quantity, $hargabeli, $hargajual, $ket, $supplier, $barang);
-                $keteranganNow = $request->keterangan;
-
+                $keterangan = $request->keterangan;
                 if (str_contains($request->keterangan, '[1]')) {
                     $keterangan = str_replace('[1]', $customer, $keterangan);
                 }
@@ -252,7 +251,7 @@ class JurnalController extends Controller
                 $data->nomor = $request->nomor;
                 $data->debit = $request->debit;
                 $data->kredit = $request->kredit;
-                $data->keterangan = $keteranganNow;
+                $data->keterangan = $keterangan;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
                 $data->invoice = !empty($request->invoice) ? explode('_', $request->invoice)[0] : null;
                 $data->invoice_external = !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null;
