@@ -43,7 +43,7 @@
 
         table {
             border-collapse: collapse;
-            width: 90%;
+            width: 85%;
             margin:0 auto;
         }
 
@@ -215,11 +215,11 @@
         </div>
         @if ($page == $pages)
             <div class="footer-content">
-                <p style="margin-left: 30px;">Note &nbsp; : &nbsp; Barang diterima dalam keadaan baik dan lengkap</p>
+                <p style="margin-left: 45px;">Note &nbsp; : &nbsp; Barang diterima dalam keadaan baik dan lengkap</p>
                 <table style="margin-top: 1px">
                     <tr>
                         <th style="width: 50%;"></th>
-                        <th style="width: 50%; text-align: right; font-weight: normal !important; padding-right:130px">
+                        <th style="width: 50%; text-align: right; font-weight: normal !important; padding-right: 99px">
                             {{ $surat_jalan->kota_pengirim }}, {{ date('d M Y', strtotime($surat_jalan->tgl_sj)) }}
                         </th>
                     </tr>
