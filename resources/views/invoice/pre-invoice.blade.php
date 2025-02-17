@@ -256,17 +256,23 @@
                                                     {{ $items['keterangan'][$idx] != '' || !is_null($items['keterangan'][$idx]) ? '= ' . $items['keterangan'][$idx] : '' }}
                                                 @endif
                                             </td>
-
+                                            @php
+                                             if ($items['status_ppn'][$idx] == 'ya') {
+                                                 $harga_jual = $items['harga_jual'][$idx] * 1.11;
+                                             } else {
+                                                $harga_jual = $items['harga_jual'][$idx];
+                                             }
+                                        @endphp
                                             <td style=" border:solid; text-align: center; padding: 8px;">
                                                 {{ number_format($items['jumlah'][$idx], 0, ',', '.') }}</td>
                                             <td style=" border:solid; text-align: center; padding: 8px;">
                                                 {{ $items['satuan_jual'][$idx] }}</td>
                                             <td style=" border:solid; text-align: right; padding: 8px;">
-                                                {{ number_format($items['harga_jual'][$idx], 0, ',', '.') }}</td>
+                                                {{ number_format($harga_jual, 0, ',', '.') }}</td>
                                             <td style=" border:solid; text-align: center; padding: 8px;">
                                                 {{ $items['no_po'][$idx] }}</td>
                                             <td style=" border:solid; text-align: right; padding: 8px;">
-                                                {{ number_format($items['harga_jual'][$idx] * $items['jumlah'][$idx], 0, ',', '.') }}
+                                                {{ number_format($harga_jual * $items['jumlah'][$idx], 0, ',', '.') }}
                                             </td>
                                             </td>
                                         </tr>
@@ -345,7 +351,7 @@
                         </tr>
                     </table>
                 </td>
-                <td colspan="1" style=" border:solid; text-align: right; padding: 10px;">
+                {{-- <td colspan="1" style=" border:solid; text-align: right; padding: 10px;">
                     Subtotal
                     <br>
                     DPP 11/12
@@ -368,16 +374,15 @@
                         }
                     @endphp
 
-                    {{-- Menampilkan status PPN --}}
+                   
                     @if ($ppn_status == 'PPN 11%')
                         PPN 12%
                     @else
                         PPN 12% (DIBEBASKAN)
                     @endif
 
-                </td>
-                <td style=" border:solid; text-align: right; padding: 8px;">
-                    {{-- Menampilkan total tanpa PPN --}}
+                </td> --}}
+                {{-- <td style=" border:solid; text-align: right; padding: 8px;">
                     {{ number_format($total, 0, ',', '.') }}
                     <br style=" border:solid; text-align: right;">
                     @php
@@ -391,24 +396,24 @@
                     <br style=" border:solid; text-align: right;">
 
                     @php
-                        // Inisialisasi variabel untuk menentukan status PPN
-                        $total_ppn = 0; // Default nilai PPN
+                      
+                        $total_ppn = 0;
 
-                        // Loop melalui data untuk menghitung nilai PPN
+                        
                         foreach ($data as $id_transaksi => $items) {
                             if (isset($items['invoice'])) {
                                 foreach ($items['invoice'] as $idx => $invoice) {
-                                    // Jika salah satu item memiliki status PPN 'ya', hitung nilai PPN
+                                    
                                     if ($items['status_ppn'][$idx] == 'ya') {
                                         $ppn_value = ($items['value_ppn'][$idx] / 100) * $dpp;
-                                        $total_ppn += $ppn_value; // Keluar dari kedua loop jika status PPN ditemukan
+                                        $total_ppn += $ppn_value; 
                                     }
                                 }
                             }
                         }
                     @endphp
 
-                    {{-- Menampilkan nilai PPN --}}
+                   
                     @if ($total_ppn > 0)
                         {{ number_format($total_ppn, 0, ',', '.') }}
                     @else
@@ -416,7 +421,7 @@
                     @endif
 
                 </td>
-            </tr>
+            </tr> --}}
             <tr>
                 <td colspan="6" style=" border:solid; text-align: right; padding: 8px;">
                     <b>TOTAL</b>

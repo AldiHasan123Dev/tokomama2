@@ -17,7 +17,8 @@
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Nama Barang</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Jumlah Barang</th>
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli Satuan</th>
+                            {{-- <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli Satuan</th> --}}
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Jual Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Total Harga</th>
                         </tr>
@@ -39,9 +40,19 @@
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
                                 <input onclick="this.select()" id="qty-{{ $item->id }}-1" type="number" onchange="inputBarang({{ $item->id }}, this.value,{{ $item->harga_jual }}, {{ $item->jumlah_jual }})" name="jumlah[{{ $item->id }}][]" value="{{ $item->sisa }}">
                             </td>
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align: end;" id="harga_beli-{{ $item->id }}-1">{{ number_format($item->harga_beli) }}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: end;" id="harga_beli_ppn-{{ $item->id }}-1">
+                                @if ($item->barang->status_ppn == 'ya')    
+                                    {{ number_format(($item->harga_beli) + (($item->harga_beli * 11 / 12) * ($item->barang->value_ppn / 100))) }}
+                                @else
+                                    {{ number_format($item->harga_beli) }}
+                                @endif
+                            </td>                            
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: end;">
+                                @if ($item->barang->status_ppn == 'ya')  
+                                <input onclick="this.select()" id="price-{{ $item->id }}-1" type="number"  onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), this.value, {{ $item->jumlah_jual }})" name="harga_jual[{{ $item->id }}][]" value="{{ round($item->harga_jual * 0.11) }}">
+                                @else
                                 <input onclick="this.select()" id="price-{{ $item->id }}-1" type="number"  onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), this.value, {{ $item->jumlah_jual }})" name="harga_jual[{{ $item->id }}][]" value="{{ $item->harga_jual }}">
+                                @endif
                             </td>                            
                             <td style="border: 1px solid #ddd; padding: 12px; text-align:end" id="total-{{ $item->id }}-1">{{ number_format($item->harga_jual * $item->jumlah_jual) }}</td>
                         </tr>
@@ -68,6 +79,7 @@
 
     <x-slot:script>
     <script>
+        
          function formatRibuan(input) {
                 let angka = input.value.replace(/,/g, ''); // Hapus koma
                 input.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Format dengan koma

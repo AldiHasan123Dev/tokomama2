@@ -34,7 +34,7 @@
 
         table {
             border-collapse: collapse;
-            width: 85%;            
+            width: 80%;            
             margin:0 auto;
         }
 
@@ -235,13 +235,39 @@
                                 @endif
                             </td>                    
                             <td class="text-center border border-black">{{ number_format($item->jumlah, 0, ',', '.') }} {{ $item->transaksi->satuan_jual }}</td>
-                            <td class="border border-black" style="text-align: right;">{{ number_format($item->harga, 0, ',', '.') }}</td>
-                            <td class="border border-black" style="text-align: right;">{{ number_format($item->harga * $item->jumlah, 0, ',', '.') }}</td>
+                            <td class="border border-black" style="text-align: right;">
+                                @if($barang->status_ppn == 'ya')
+                                {{ number_format($item->harga * 1.11, 0, ',', '.') }}
+                                @else
+                                {{ number_format($item->harga, 0, ',', '.') }}
+                                @endif
+                            </td>
+                            <td class="border border-black" style="text-align: right;">
+                                @if($barang->status_ppn == 'ya')
+                                {{ number_format(($item->harga * 1.11) * $item->jumlah, 0, ',', '.') }}
+                                @else
+                                {{ number_format($item->harga * $item->jumlah, 0, ',', '.') }}
+                                @endif
+                            </td>
                         </tr>
                     @endfor
                     @if ($page == $pages) 
                     <tr>
-                    <td colspan="5"  style="text-align: right;">
+                        @php
+                        $dpp = $total * 11/12;
+                        $ppn = ($barang->value_ppn / 100) * $dpp;
+                    @endphp
+                        <td colspan="5" class="border border-black" style="text-align: right;">
+                            <b>TOTAL</b>
+                        </td>
+                        <td class="border border-black" style="text-align: right;" >
+                        @if($barang->status_ppn == 'ya')
+                            <b>{{ number_format($total * 1.11, 0, ',', '.') }}</b>
+                        @else
+                            <b>{{ number_format($total, 0, ',', '.') }}</b>
+                        @endif
+                        </td>
+                    {{-- <td colspan="5"  style="text-align: right;">
                         Subtotal
                         <br>
                         DPP 11/12
@@ -272,10 +298,10 @@
                     @else
                         -
                     @endif
-                    </td>
+                    </td> --}}
                 </tr>
-                <tr>
-                    <td colspan="5" class="border border-black" style="text-align: right;">
+                {{-- <tr> --}}
+                    {{-- <td colspan="5" class="border border-black" style="text-align: right;">
                         <b>TOTAL</b>
                     </td>
                     <td class="border border-black" style="text-align: right;" >
@@ -284,8 +310,8 @@
                     @else
                         <b>{{ number_format($total, 0, ',', '.') }}</b>
                     @endif
-                    </td>
-                </tr>
+                    </td> --}}
+                {{-- </tr> --}}
                 </tbody>
                 @endif
             </table>

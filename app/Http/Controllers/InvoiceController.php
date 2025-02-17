@@ -48,6 +48,25 @@ class InvoiceController extends Controller
 
     public function preview(Request $request)
     {
+        foreach ($request->harga_jual as $id_transaksi => $harga_jual) {
+            foreach ($harga_jual as $idx => $item) {
+                $data[$id_transaksi]['harga_jual'][$idx] = $item; 
+                if ($item == 0){
+                    return back()->with('error', 'Silahkan input harga jual');
+                }
+                $trx1 = Transaction::find($id_transaksi);
+                $barangs = Barang::find($trx1->id_barang);
+                if($barangs->status_ppn == 'ya'){
+                    $item =round($item / 1.11 ,4);
+                }
+                $margin = $trx1->harga_beli - $item;
+                
+                $trx1->update([
+                    'harga_jual' => $item,
+                    'margin' => $margin
+                ]);
+            }
+        }
         $tgl_inv2 = $request->tgl_invoice; // Asumsikan ini adalah string tanggal atau objek DateTime
         $date = date_create($tgl_inv2);
         $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
@@ -82,19 +101,6 @@ class InvoiceController extends Controller
             
             $no++;
         }
-
-        foreach ($request->harga_jual as $id_transaksi => $harga_jual) {
-            foreach ($harga_jual as $idx => $item) {
-                $data[$id_transaksi]['harga_jual'][$idx] = $item;
-                $trx1 = Transaction::find($id_transaksi);
-                $margin = $trx1->harga_beli - $item;
-                $trx1->update([
-                    'harga_jual' => $item,
-                    'margin' => $margin
-                ]);
-            }
-        }
-    
         foreach ($request->invoice as $id_transaksi => $invoice) {
             foreach ($invoice as $idx => $item) {
                 $data[$id_transaksi]['invoice'][$idx] = $item;
@@ -353,9 +359,9 @@ class InvoiceController extends Controller
                     });
 
                     if ($result[0]->transaksi->barang->status_ppn == 'ya'){
-                        $value_ppn = $result[0]->transaksi->barang->value_ppn/100;
+                        $value_ppn = 11/100;
                         $subtotalPPN = $result->sum(function ($item) {
-                            $value_ppn = $item->transaksi->barang->value_ppn / 100;
+                            $value_ppn = 11 / 100;
                             return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual * $value_ppn);
                         });
                         $temp_debit = round(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn, 4);
@@ -637,14 +643,14 @@ class InvoiceController extends Controller
                     return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                 });
                 $subtotalPPN = $result->sum(function ($item) {
-                    $value_ppn = $item->transaksi->barang->value_ppn / 100;
+                    $value_ppn = 11 / 100;
                     return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual * $value_ppn);
                 });
                 // Menginisialisasi variabel sebelum loop
                 $temp_debit = 0; 
                 $nopol = $result[0]->transaksi->suratJalan->no_pol; // Asumsikan nopol sama untuk semua item
                 if ($result[0]->transaksi->barang->status_ppn == 'ya'){
-                    $value_ppn = $result[0]->transaksi->barang->value_ppn/100;
+                    $value_ppn = 11 /100;
                     $temp_debit = round(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn);
                     Jurnal::create([
                         'coa_id' => 8,
