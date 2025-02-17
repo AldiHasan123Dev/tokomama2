@@ -38,7 +38,8 @@
                                 </select>
                             </td>                       
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
-                                <input onclick="this.select()" id="qty-{{ $item->id }}-1" style="border: none; text-align: center" type="number" onchange="inputBarang({{ $item->id }}, this.value,{{ $item->harga_jual }}, {{ $item->jumlah_jual }})" name="jumlah[{{ $item->id }}][]" value="{{ $item->sisa }}" disabled>
+                                <input type="hidden" id="qty-{{ $item->id }}-1" name="jumlah[{{ $item->id }}][]" value="{{ $item->sisa }}">
+                                {{ $item->sisa }}
                             </td>
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: end;" id="harga_beli_ppn-{{ $item->id }}-1">
                                 @if ($item->barang->status_ppn == 'ya')    
