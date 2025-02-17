@@ -18,7 +18,7 @@
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Jumlah Barang</th>
                             {{-- <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli Satuan</th> --}}
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Jual Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Total Harga</th>
                         </tr>
