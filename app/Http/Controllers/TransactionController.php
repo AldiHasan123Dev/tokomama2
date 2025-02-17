@@ -80,7 +80,7 @@ class TransactionController extends Controller
                 ->first();
             $no_JNL = $lastJNL ? $lastJNL->no + 1 : 1;
             // Nomor Surat BBK (tetap sama untuk semua jurnal dalam transaksi ini)
-            $nomor_surat = "$month-$no_JNL/TMRAS1/$year";
+            $nomor_surat = "$month-$no_JNL/TMR1/$year";
 
 
             // Pecah string invoice_external untuk mendapatkan angka terakhir

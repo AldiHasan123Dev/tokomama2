@@ -184,7 +184,7 @@ class SuratJalanController extends Controller
         $data['id_customer'] = $customer->id;
         $data['kepada']= $customer->nama_npwp ?? $customer->nama;
         $data['no'] = $no;
-        $data['nomor_surat'] = sprintf('%03d', $no) . '/SJ/TMRAS1-' . $month_roman . '/' . date('Y', strtotime($request->tgl_sj));
+        $data['nomor_surat'] = sprintf('%03d', $no) . '/SJ/TMR1-' . $month_roman . '/' . date('Y', strtotime($request->tgl_sj));
         $sj = SuratJalan::create($data);
     
         // Periksa apakah Surat Jalan sudah ada
@@ -261,7 +261,7 @@ class SuratJalanController extends Controller
         $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"); // daftar angka Romawi
         $month_number = date("n", strtotime($request->tgl));
         $month_roman = $roman_numerals[$month_number];
-        $no_bm = sprintf('%03d', $no) . '/BM/TMRAS1-' . $month_roman . '/' . date('Y', strtotime($request->tgl));
+        $no_bm = sprintf('%03d', $no) . '/BM/TMR1-' . $month_roman . '/' . date('Y', strtotime($request->tgl));
         for ($i = 0; $i < count($request->barang); $i++) {
             // dd($request->barang);
             if ($request->barang[$i] != null && $request->supplier[$i] != null) {
