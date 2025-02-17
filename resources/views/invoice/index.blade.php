@@ -50,12 +50,18 @@
                             </td>                            
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: end;">
                                 @if ($item->barang->status_ppn == 'ya')  
-                                <input onclick="this.select()" id="price-{{ $item->id }}-1" type="number"  onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), this.value, {{ $item->jumlah_jual }})" name="harga_jual[{{ $item->id }}][]" value="{{ round($item->harga_jual * 0.11) }}">
+                                <input onclick="this.select()" id="price-{{ $item->id }}-1" type="number"  onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), this.value, {{ $item->jumlah_jual }})" name="harga_jual[{{ $item->id }}][]" value="{{ round($item->harga_jual * 1.11) }}">
                                 @else
                                 <input onclick="this.select()" id="price-{{ $item->id }}-1" type="number"  onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), this.value, {{ $item->jumlah_jual }})" name="harga_jual[{{ $item->id }}][]" value="{{ $item->harga_jual }}">
                                 @endif
                             </td>                            
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align:end" id="total-{{ $item->id }}-1">{{ number_format($item->harga_jual * $item->jumlah_jual) }}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align:end" id="total-{{ $item->id }}-1">
+                                @if ($item->barang->status_ppn == 'ya')  
+                                {{ number_format(($item->harga_jual * $item->jumlah_jual) * 1.11) }}
+                                @else
+                                {{ number_format($item->harga_jual * $item->jumlah_jual) }}
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
