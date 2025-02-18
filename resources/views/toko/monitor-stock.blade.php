@@ -154,6 +154,13 @@ $(function () {
                 width: 100
             },
             {
+                label: 'Nomor Jurnal',
+                name: 'jurnal',
+                align: "center",
+                width: 100,
+                sortable: false,
+            },
+            {
                 search: true,
                 label: 'No BM',
                 name: 'no_bm',
