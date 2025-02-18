@@ -16,7 +16,7 @@
         <form action="{{ route('preview.invoice') }}" method="post" id="form">
             @csrf
             <p class="server-time">
-                Silahkan pilih tanggal invoice, Sebab tgl server adalah : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
+                Silahkan pilih tanggal invoice, Sebab tgl dan jam server adalah : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
             </p>
             <input type="date" name="tgl_invoice" value="{{ date('Y-m-d') }}">
             <input type="text" value="{{ $no_JNL }}/TM/{{ date('y') }}" name="tipe" readonly>
