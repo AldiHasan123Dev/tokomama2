@@ -146,7 +146,16 @@
                 /* Garis tepi */
                 text-align: center;
             }
-
+            .server-time {
+        font-size: 18px;
+        font-weight: bold;
+        color: #ffffff;
+        background-color: #007bff;
+        padding: 10px 15px;
+        border-radius: 5px;
+        display: inline-block;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    } 
             /* Pengaturan untuk header tabel */
             table.dataTable thead th {
                 background-color: #f4f4f4;
@@ -196,6 +205,7 @@
 
         <x-slot:tittle>Menu Jurnal</x-slot:tittle>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <p class="server-time">Tanggal Server: {{ date('Y-m-d H:i:s') }}</p>
         <div class="overflow-x-auto mt-8">
             <a href="{{ route('jurnal-manual.index') }}">
                 <button class="btn bg-green-500 text-white font-bold hover:bg-green-700 m-2x">Input Jurnal</button>

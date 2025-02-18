@@ -43,6 +43,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect('login');
 });
+
+Route::get('/server-time', function () {
+    return response()->json(['time' => now()->format('Y-m-d H:i:s')]);
+})->name('server.time');
 // Route::get('test', function () {
 //     $data1 = SuratJalan::get();
 //     $data = SuratJalanResource::collection($data1);
