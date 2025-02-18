@@ -51,6 +51,7 @@ class InvoiceController extends Controller
         foreach ($request->harga_jual as $id_transaksi => $harga_jual) {
             foreach ($harga_jual as $idx => $item) {
                 $data[$id_transaksi]['harga_jual'][$idx] = $item; 
+                $item = (int) str_replace(',', '', $item);
                 if ($item == 0){
                     return back()->with('error', 'Silahkan input harga jual');
                 }
@@ -60,16 +61,15 @@ class InvoiceController extends Controller
                     $item =round($item / 1.11 ,4);
                 }
                 $margin = $trx1->harga_beli - $item;
-                
                 $trx1->update([
                     'harga_jual' => $item,
                     'margin' => $margin
                 ]);
             }
         }
-        $tgl_inv2 = $request->tgl_invoice; // Asumsikan ini adalah string tanggal atau objek DateTime
+        $tgl_inv2 = $request->tgl_invoice; 
         $date = date_create($tgl_inv2);
-        $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
+        $tgl_inv1 = date_format($date, 'd F Y'); 
        
         $tgl_inv = date('m', strtotime($tgl_inv2));
         $tipe = $tgl_inv . '-' . $request->tipe;

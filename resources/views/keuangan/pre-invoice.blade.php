@@ -48,8 +48,7 @@
                     url: "{{ route('invoice.pre-invoice') }}", // Ganti dengan URL API yang benar
                     mtype: "GET",
                     datatype: "json",
-                    colModel: [
-                        {
+                    colModel: [{
                             name: 'checkbox',
                             index: 'checkbox',
                             label: 'Pilih',
@@ -104,8 +103,8 @@
                             label: 'Harga Jual',
                             width: 100,
                             formatoptions: {
-                                decimalPlaces: 4, 
-                                thousandsSeparator: ',', 
+                                decimalPlaces: 4,
+                                thousandsSeparator: ',',
                             },
                             align: 'right',
                             formatter: function(cellValue) {
@@ -129,8 +128,8 @@
                             index: 'subtotal',
                             label: 'Subtotal',
                             formatoptions: {
-                                decimalPlaces: 4, 
-                                thousandsSeparator: ',', 
+                                decimalPlaces: 4,
+                                thousandsSeparator: ',',
                             },
                             align: 'right',
                             formatter: 'number'
@@ -208,14 +207,24 @@
             });
 
             // Menghandle form submit untuk mengambil ID transaksi yang dipilih
-            $('#form').submit(function (e) {
-                e.preventDefault();
-                var ids = $("#table-getfaktur input:checkbox:checked").map(function(){
-                    return $(this).closest('tr').find('td:last-child').text(); // Mengambil ID dari kolom terakhir
+            $('#form').submit(function(e) {
+                e.preventDefault(); // Mencegah form untuk submit otomatis
+                var ids = $("#table-getfaktur input:checkbox:checked").map(function() {
+                    return $(this).closest('tr').find('td:last-child')
+                .text(); // Mengambil ID dari kolom terakhir
                 }).get();
-                $('#id_transaksi').val(ids);
-                this.submit();
+
+                // Cek apakah ids kosong
+                if (ids.length === 0) {
+                    // Jika tidak ada ID yang dipilih, tampilkan alert
+                    alert('Silakan pilih item data terlebih dahulu.');
+                } else {
+                    // Jika ada ID, set nilai dan submit form
+                    $('#id_transaksi').val(ids);
+                    this.submit();
+                }
             });
+
 
             // Menampilkan versi jQuery dan mengecek apakah jqGrid telah dimuat
             console.log('jQuery version:', $.fn.jquery);

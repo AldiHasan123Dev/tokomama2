@@ -64,11 +64,23 @@
                             </td>                            
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: end;">
                                 @if ($item->barang->status_ppn == 'ya')  
-                                <input onclick="this.select()" id="price-{{ $item->id }}-1" type="number"  onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), this.value, {{ $item->jumlah_jual }})" name="harga_jual[{{ $item->id }}][]" value="{{ round($item->harga_jual * 1.11) }}">
+                                    <input onclick="this.select()" 
+                                           id="price-{{ $item->id }}-1" 
+                                           type="text" 
+                                           oninput="formatRibuan(this)" 
+                                           onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), getCleanNumber(this.value), {{ $item->jumlah_jual }})" 
+                                           name="harga_jual[{{ $item->id }}][]" 
+                                           value="{{ number_format(round($item->harga_jual * 1.11), 0, '.', ',') }}">
                                 @else
-                                <input onclick="this.select()" id="price-{{ $item->id }}-1" type="number"  onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), this.value, {{ $item->jumlah_jual }})" name="harga_jual[{{ $item->id }}][]" value="{{ $item->harga_jual }}">
+                                    <input onclick="this.select()" 
+                                           id="price-{{ $item->id }}-1" 
+                                           type="text" 
+                                           oninput="formatRibuan(this)" 
+                                           onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), getCleanNumber(this.value), {{ $item->jumlah_jual }})" 
+                                           name="harga_jual[{{ $item->id }}][]" 
+                                           value="{{ number_format($item->harga_jual, 0, '.', ',') }}">
                                 @endif
-                            </td>                            
+                            </td>                          
                             <td style="border: 1px solid #ddd; padding: 12px; text-align:end" id="total-{{ $item->id }}-1">
                                 @if ($item->barang->status_ppn == 'ya')  
                                 {{ number_format(($item->harga_jual * $item->jumlah_jual) * 1.11) }}
@@ -100,6 +112,17 @@
 
     <x-slot:script>
         <script>
+    function formatRibuan(input) {
+        let angka = input.value.replace(/,/g, ''); // Hapus semua koma
+        input.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Tambahkan format ribuan
+    }
+
+    function getCleanNumber(value) {
+        let cleanValue = value.replace(/,/g, ''); // Hapus semua koma
+        return isNaN(cleanValue) ? 0 : Number(cleanValue); // Konversi ke angka
+    }
+</script>
+        <script>
             document.addEventListener("DOMContentLoaded", function () {
              // Fungsi untuk memperbarui waktu
              function updateServerTime() {
@@ -119,21 +142,6 @@
          });
          </script>
     <script>
-        
-         function formatRibuan(input) {
-                let angka = input.value.replace(/,/g, ''); // Hapus koma
-                input.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Format dengan koma
-            }
-
-            function getCleanNumber(value) {
-                // Ganti koma dengan kosong dan titik terakhir dengan koma
-                const cleanValue = value.replace(/,/g, '').replace(/\.(?=.*\.)/g, ''); // Hapus koma
-                const decimalIndex = value.lastIndexOf('.');
-                if (decimalIndex !== -1) {
-                    return parseFloat(cleanValue); // Menggunakan parseFloat untuk angka desimal
-                }
-                return parseInt(cleanValue) || 0; // Ubah ke integer, default 0 jika NaN
-            }
         let idx = 1;
         let ids = @json($ids);
         let array_jumlah = @json($array_jumlah);
