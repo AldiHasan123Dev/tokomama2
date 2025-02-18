@@ -1,9 +1,23 @@
 <x-Layout.layout>
     <x-keuangan.card-keuangan>
+        <style>
+            .server-time {
+                font-size: 18px;
+                font-weight: bold;
+                color: #fff04d;
+                background-color: #ff0000;
+                padding: 10px 15px;
+                border-radius: 5px;
+                display: inline-block;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            }
+        </style>
         <x-slot:tittle>Pengambilan Nomor Faktur Untuk Invoice</x-slot:tittle>
         <form action="{{ route('preview.invoice') }}" method="post" id="form">
             @csrf
-            
+            <p class="server-time">
+                Silahkan pilih tanggal invoice, Sebab tgl server adalah : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
+            </p>
             <input type="date" name="tgl_invoice" value="{{ date('Y-m-d') }}">
             <input type="text" value="{{ $no_JNL }}/TM/{{ date('y') }}" name="tipe" readonly>
             <input type="hidden" name="invoice_count" value="{{ $invoice_count }}">
@@ -85,6 +99,25 @@
     </x-keuangan.card-keuangan>
 
     <x-slot:script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+             // Fungsi untuk memperbarui waktu
+             function updateServerTime() {
+                 fetch("{{ route('server.time') }}")
+                     .then(response => response.json()) // Mengambil data JSON dari server
+                     .then(data => {
+                         document.getElementById("server-time").textContent = data.time; // Update elemen dengan id "server-time"
+                     })
+                     .catch(error => console.error('Error fetching server time:', error)); // Tangani error
+             }
+     
+             // Perbarui waktu server pertama kali saat halaman dimuat
+             updateServerTime();
+     
+             // Perbarui setiap detik
+             setInterval(updateServerTime, 1000);
+         });
+         </script>
     <script>
         
          function formatRibuan(input) {
