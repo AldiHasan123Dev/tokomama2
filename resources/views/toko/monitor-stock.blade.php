@@ -160,6 +160,24 @@ $(function () {
                 width: 100,
                 sortable: false,
             },
+//             {
+//     label: 'Nomor Jurnal',
+//     name: 'jurnal',
+//     align: "center",
+//     width: 100,
+//     sortable: false,
+//     formatter: function(cellvalue, options, rowObject) {
+//         if (!cellvalue || cellvalue === '-') {
+//             return '-'; // Jika tidak ada nomor jurnal, tampilkan tanda "-"
+//         }
+//         let jurnalNumbers = cellvalue.split(', '); // Memisahkan nomor jurnal jika lebih dari satu
+//         let links = jurnalNumbers.map(num => {
+//             let encodedNum = encodeURIComponent(num); // Encode nomor jurnal agar sesuai dengan URL
+//             return `<a href="/jurnal-edit?nomor=${encodedNum}" class="text-primary" target="_blank" rel="noopener noreferrer">${num}</a>`;y
+//         });
+//         return links.join(', '); // Gabungkan semua link dengan koma
+//     }
+// },
             {
                 search: true,
                 label: 'No BM',

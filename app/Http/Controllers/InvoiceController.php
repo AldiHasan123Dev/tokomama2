@@ -441,10 +441,10 @@ class InvoiceController extends Controller
                             
                              //coa 1.6 = Uang Muka (Kredit)
                             Jurnal::create([
-                                'coa_id' => 30,
+                                'coa_id' => 32,
                                 'nomor' => $jurhut,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Uang Muka untuk ' . $result[0]->transaksi->suppliers->nama,
+                                'keterangan' => 'Persediaan Barang  ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
@@ -490,10 +490,10 @@ class InvoiceController extends Controller
                             }
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
                             Jurnal::create([
-                                'coa_id' => 35,
+                                'coa_id' => 32,
                                 'nomor' => $jurhut,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                                'keterangan' => 'Persediaan Barang ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
@@ -620,10 +620,10 @@ class InvoiceController extends Controller
                     }
                      //coa 1.6 = Persediaan Barang / Stock (Kredit)
                      Jurnal::create([
-                        'coa_id' => 35,
+                        'coa_id' => 32,
                         'nomor' => $jurhut,
                         'tgl' => $tgl,
-                        'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                        'keterangan' => 'Persediaan Barang ' . $result[0]->transaksi->suppliers->nama,
                         'debit' => 0, // Menyimpan subtotal sebagai debit
                         'kredit' => $subtotal, // Kredit diisi 0
                         'invoice' => null,
@@ -732,10 +732,10 @@ class InvoiceController extends Controller
                             
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
                             Jurnal::create([
-                                'coa_id' => 30,
+                                'coa_id' => 32,
                                 'nomor' => $jurhutNow,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Uang Muka ' . $result[0]->transaksi->suppliers->nama,
+                                'keterangan' => 'Persediaan Barang ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
@@ -865,10 +865,10 @@ class InvoiceController extends Controller
                             }
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
                              Jurnal::create([
-                                'coa_id' => 30,
+                                'coa_id' => 32,
                                 'nomor' => $jurhutNow,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Uang Muka Untuk ' . $result[0]->transaksi->suppliers->nama,
+                                'keterangan' => 'Persediaan Barang ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
@@ -909,10 +909,10 @@ class InvoiceController extends Controller
                 }
                  //coa 1.6 = Persediaan Barang / Stock (Kredit)
                  Jurnal::create([
-                    'coa_id' => 35,
+                    'coa_id' => 32,
                     'nomor' => $jurhutNow,
                     'tgl' => $tgl,
-                    'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                    'keterangan' => 'Persediaan Barang ' . $result[0]->transaksi->suppliers->nama,
                     'debit' => 0, // Menyimpan subtotal sebagai debit
                     'kredit' => $subtotal, // Kredit diisi 0
                     'invoice' => null,
