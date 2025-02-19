@@ -86,9 +86,7 @@ class JurnalManualController extends Controller
         }
 
         $transaksi = DB::table('jurnal as j1')
-        ->where('j1.tipe', 'JNL') // Kondisi tipe JNL
         ->where('j1.kredit', '>', 0) // Kondisi debit lebih besar dari 0
-        ->where('j1.coa_id', 35) // Kondisi coa_id
         ->groupBy('j1.invoice_external')
         ->orderBy('j1.created_at', 'desc')
         ->get();
