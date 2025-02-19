@@ -87,24 +87,30 @@
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="closeModal()">✕</button>
             </form>
             <h1 class="text-lg mb-3">Form Tambah Barang Surat Jalan</h1>
+            <p class="text-sm text-red-500 mt-1">* Pilih salah satu antara stock Barang PPN atau Barang No PPN.</p>
             <form action="{{ route('surat-jalan.tambahBarang') }}" method="post">
                 @csrf
                 <input type="hidden" id="modal_data" name="id_surat_jalan" value="" readonly>
-                <label for="id_barang" class="form-label">Barang</label>
-                <select class="select-field" name="id_barang" id="id_barang">
-                    @foreach ($barangs as $bar)
-                        <option value="{{ $bar->id }}">{{ $bar->nama }} || {{ $bar->satuan->nama_satuan }} || {{ $bar->value }}  - {{ $bar->kode_objek }}</option>
+                <label for="id_barang" class="form-label">Stock Barang PPN</label>
+                <select class="select-field" name="id_barang_ppn" id="id_barang">
+                    <option value=""></option>
+                    @foreach ($stocksPpn as $bar)
+                        <option value="{{ $bar->id }}">{{ $bar->nama }} || {{ $bar->nama_satuan }} || {{ $bar->value }}  - {{ $bar->kode_objek }} || {{ $bar->sisa }}
+                            || {{ $bar->no_bm }}
+                        </option>
                     @endforeach
                 </select>
-                <label for="id_supplier" class="form-label">Supplier</label>
-                <select class="select-field" name="id_supplier" id="id_supplier">
-                    @foreach ($suppliers as $sup)
-                        <option value="{{ $sup->id }}">{{ $sup->nama }}</option>
+                <label for="id_barang1" class="form-label">Stock Barang No PPN</label>
+                <select class="select-field" name="id_barang_no_ppn" id="id_barang1">
+                    <option value=""></option>
+                    @foreach ($stocksNoppn as $bar)
+                        <option value="{{ $bar->id }}">{{ $bar->nama }} || {{ $bar->nama_satuan }} || {{ $bar->value }}  - {{ $bar->kode_objek }} || {{ $bar->sisa }} 
+                            || {{ $bar->no_bm }}</option>
                     @endforeach
                 </select>
-                <label for="jumlah_jual" class="form-label">Jumlah Jual & Jumlah Beli</label>
+                <label for="jumlah_jual" class="form-label">Jumlah Jual</label>
                 <input type="number" name="jumlah_jual" id="jumlah_jual" class="input-field input-sm w-full">
-                <label for="satuan_jual" class="form-label">Satuan Jual & Satuan Beli</label>
+                <label for="satuan_jual" class="form-label">Satuan Jual</label>
                 <select class="select-field" name="satuan_jual" id="satuan_jual">
                     @foreach ($satuans as $satu)
                         <option value="{{ $satu->nama_satuan }}">{{ $satu->nama_satuan }}</option>
@@ -134,7 +140,7 @@
                         <th>Harga Beli</th>
                         <th>Satuan Jual</th>
                         <th>Satuan Beli</th>
-                        <th>Margin</th>
+                        {{-- <th>Margin</th> --}}
                         <th>Keterangan</th>
                         <th>Supplier</th>
                     </tr>
@@ -143,27 +149,32 @@
                     @foreach ($transactions as $trans)
                         <tr>
                             <td>
-                                @if ($trans->sisa > 0)
+                                {{-- @if ($trans->sisa > 0) --}}
                                     <button onclick="openModal({{ $trans->suratJalan->id }})"><i class="fa-solid fa-plus text-green-500 mr-5"></i></button>
                                     <button onclick="getData({{ $trans->id }}, {{ $trans->id_supplier }}, {{ $trans->jumlah_jual }}, '{{ $trans->satuan_jual }}', '{{  $trans->suratJalan->nomor_surat }}',' {{ $trans->suppliers->nama }}', '{{ $trans->keterangan }}')" class="text-yellow-300"><i class="fa-solid fa-pencil"></i></button>
-                                    <form onsubmit="deleteData({{ $trans->id }}, {{ $trans->id_surat_jalan }}); return false;">
+                                    {{-- <form onsubmit="deleteData({{ $trans->id }}, {{ $trans->id_surat_jalan }}); return false;">
                                         @csrf
                                         @method('delete')
                                         <button type="submit"><i class="fa-solid fa-trash text-red-500"></i></button>
-                                    </form>
+                                    </form> --}}
                                     
                                     
-                                @endif
+                                {{-- @endif --}}
                             </td>
                             <td>{{ $trans->suratJalan->nomor_surat }}</td>
                             <td>{{ $trans->barang->nama }}</td>
                             <td>{{ $trans->jumlah_jual }}</td>
                             <td>{{ $trans->jumlah_beli }}</td>
-                            <td>{{ $trans->harga_jual }}</td>
-                            <td>{{ $trans->harga_beli }}</td>
+                            @if ($trans->barang->status_ppn == 'ya')     
+                            <td>{{ number_format(round($trans->harga_jual * 1.11), 0, '.', ',') }}</td>
+                            <td>{{ number_format(round($trans->harga_beli * 1.11), 0, '.', ',') }}</td>
+                            @else
+                            <td>{{ number_format(round($trans->harga_jual), 0, '.', ',') }}</td>
+                            <td>{{number_format(round($trans->harga_beli), 0, '.', ',') }}</td>
+                            @endif
                             <td>{{ $trans->satuan_jual }}</td>
                             <td>{{ $trans->satuan_beli }}</td>
-                            <td>{{ number_format($trans->margin) }}</td>
+                            {{-- <td>{{ number_format($trans->margin) }}</td> --}}
                             <td>{{ $trans->keterangan ? $trans->keterangan : '-' }}</td>
                             <td>{{ $trans->suppliers ? $trans->suppliers->nama : '-' }}</td>
                         </tr>
@@ -178,8 +189,9 @@
         <script>
             // Inisialisasi DataTable
             let table = $('#editBarang').DataTable({
-                pageLength: 100,
-                order: [[1, 'desc']]
+                pageLength: 20,
+                ordering: false,
+                scrollX: true,
             });
         
             // Fungsi untuk menampilkan modal edit barang
@@ -197,13 +209,6 @@
                                 <input type="hidden" name="id_supplier" value="${id_supplier}" class="border-none" />
                                 <label class="form-label">Jumlah Jual & Jumlah Beli :</label>
                                 <input type="number" name="jumlah_jual" class="input-field" value="${kuantitas}" />
-                                <label class="form-label">Supplier</label>
-                                <select class="select-field" name="supplier" id="supplier">
-                                    <option value="${id_supplier}" selected>${supplier}</option>
-                                    @foreach ($suppliers as $su)
-                                        <option value="{{ $su->id }}">{{ $su->nama }} </option>
-                                    @endforeach
-                                </select>
                                 <label class="form-label">Satuan</label>
                                 <select class="select-field" name="satuan" id="satuan">
                                     @foreach ($satuans as $s)
@@ -243,6 +248,22 @@
         
                 // Inisialisasi select2 untuk modal ini
                 $('#id_barang').select2({ dropdownParent: $(`#my_modal_3`) });
+                $('#id_barang1').select2({ dropdownParent: $(`#my_modal_3`) });
+                $('#id_barang').on('change', function() {
+        if ($(this).val()) {
+            $('#id_barang1').prop('disabled', true);
+        } else {
+            $('#id_barang1').prop('disabled', false);
+        }
+    });
+
+    $('#id_barang1').on('change', function() {
+        if ($(this).val()) {
+            $('#id_barang').prop('disabled', true);
+        } else {
+            $('#id_barang').prop('disabled', false);
+        }
+    });
                 $('#id_supplier').select2({ dropdownParent: $(`#my_modal_3`) });
                 $('#satuan_jual').select2({ dropdownParent: $(`#my_modal_3`) });
             }
@@ -269,7 +290,7 @@
             // Cek apakah barang yang akan dihapus adalah satu-satunya barang
             if (response.count === 1) {
                 // Jika hanya ada 1 barang di surat jalan
-                confirm('Ini adalah satu-satunya barang dalam surat jalan, Apa anda yakin akan menghapusnya ?');
+                alert('Ini adalah satu-satunya barang dalam surat jalan yang akan anda hapus, silakan tambahkan barang terlebih dahulu');
             } else {
                 // Tampilkan konfirmasi untuk penghapusan jika barang lebih dari 1
                 if (confirm('Apa anda yakin akan menghapus data ini?')) {

@@ -434,15 +434,14 @@ class JurnalController extends Controller
                 $invoiceExternal = Transaction::where('invoice_external', $request->invoice_external)
                 ->with(['suratJalan.customer', 'barang', 'suppliers'])
                 ->get();
-                
-                $barang = $invoiceExternal[0]->barang->nama;
-                $supplier = $invoiceExternal[0]->suppliers->nama;
+                $barang = $invoiceExternal[0]->barang->nama ?? null;
+                $supplier = $invoiceExternal[0]->suppliers->nama ?? null;
                 $customer = $invoiceExternal[0]->suratJalan->customer->nama ?? null;
-                $quantity = $invoiceExternal[0]->jumlah_jual;
-                $satuan = $invoiceExternal[0]->satuan_jual;
-                $hargabeli = $invoiceExternal[0]->harga_beli;
-                $hargajual = $invoiceExternal[0]->harga_jual;
-                $ket = $invoiceExternal[0]->keterangan;
+                $quantity = $invoiceExternal[0]->jumlah_jual ?? null;
+                $satuan = $invoiceExternal[0]->satuan_jual ?? null;
+                $hargabeli = $invoiceExternal[0]->harga_beli ?? null;
+                $hargajual = $invoiceExternal[0]->harga_jual ?? null;
+                $ket = $invoiceExternal[0]->keterangan ?? null;
                 
                 // dd($request->invoice_external);
                 $keterangan = $request->keterangan;

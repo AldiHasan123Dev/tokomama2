@@ -328,20 +328,28 @@
             </p>
             <table style="font-size: 0.8rem;">
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;">Pembayaran ke rekening:</th>
-                    <td style="align-items:right ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
+                    <th style="text-align: left; padding-right: 50px; font-style: italic;">Pembayaran ke rekening:</th>
+                    <td style="padding-left: 40px;">Penerima</td>
+                    <td style="align-items:left ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
                 </tr>
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
+                    <th style="text-align: left; padding-right: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
+                    <td></td>
                     <td style="text-align: center;">Hormat Kami</td>
                 </tr>
                 <tr>
-                    <th style="text-align: left; padding-left: 50px; font-style: italic;"> Bank Mandiri <br> 14.000.45006.005</th>
+                    <th style="text-align: left; padding-right: 50px; font-style: italic;"> Bank Mandiri <br> 14.000.45006.005</th>
                     <th></th>
                 </tr>
                 <tr>
                     <th style="text-align: left; padding-left: 50px;"></th>
+                    <td style="padding-top:30px;">_____________________</td>
                     <th style="padding-top:30px">(MAMA BAHAGIA)</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>TD. Tgn & Nama Terang</td>
+                    <td></td>
                 </tr>
             </table>
         @endif

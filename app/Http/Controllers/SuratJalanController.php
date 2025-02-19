@@ -612,10 +612,10 @@ class SuratJalanController extends Controller
             ->addColumn('aksi', function ($row) {
                 $action = '';
                 $sisa = $row->transactions->sum('sisa');
-                // if ($sisa > 0) {
-                //     $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->kepada) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>
-                //                 <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
-                // }
+                if ($sisa > 0) {
+                    // $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->kepada) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>';
+                                // <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
+                }
                 return '<div class="flex gap-3 mt-2">
                                 <a target="_blank" href="' . route('surat-jalan.cetak', $row) . '" class="text-green-500 font-semibold mb-3 self-end"><i class="fa-solid fa-print mt-2"></i></a>
                                 ' . $action . '
@@ -712,10 +712,49 @@ class SuratJalanController extends Controller
     {
         $transactions = Transaction::with(['suppliers'])->orderBy('id_surat_jalan', 'desc')->whereNotNull('id_surat_jalan')->get();
         $satuans = Satuan::all();
-        $barangs = Barang::where('status', 'AKTIF')->get();
         $suppliers = Supplier::all();
+        $stocksNoppn = Transaction::join('barang', 'transaksi.id_barang', '=', 'barang.id')
+                        ->join('satuan', 'barang.id_satuan', '=', 'satuan.id')
+                        ->join('suppliers', 'transaksi.id_supplier', '=', 'suppliers.id') // Join langsung ke transaksi
+                        ->select(
+                            'barang.*',
+                            'suppliers.nama as nama_supplier',
+                            'suppliers.id as supplier_id',
+                            'barang.kode_objek',
+                            'satuan.nama_satuan',
+                            'transaksi.*'
+                        )
+                        ->where('barang.status', 'AKTIF')
+                        ->where('barang.status_ppn', 'tidak')
+                        ->whereNull('id_surat_jalan')
+                        ->where('harga_jual',0)
+                        ->where('harga_beli', '>', 0)
+                        ->where('sisa', '>', 0)
+                        ->whereNotNull('transaksi.stts')
+                        ->get();
+
+        $stocksPpn = Transaction::join('barang', 'transaksi.id_barang', '=', 'barang.id')
+                    ->join('satuan', 'barang.id_satuan', '=', 'satuan.id')
+                    ->join('suppliers', 'transaksi.id_supplier', '=', 'suppliers.id') // Join langsung ke transaksi
+                    ->select(
+                        'barang.*',
+                        'suppliers.nama as nama_supplier',
+                        'suppliers.id as supplier_id',
+                        'barang.kode_objek',
+                        'satuan.nama_satuan',
+                        'satuan.id as id_satuan',
+                        'transaksi.*'
+                    )
+                    ->where('barang.status', 'AKTIF')
+                    ->where('barang.status_ppn', 'ya')
+                    ->whereNull('transaksi.id_surat_jalan')
+                    ->where('transaksi.harga_jual', '=', 0)
+                    ->where('transaksi.harga_beli', '>', 0)
+                    ->where('transaksi.sisa', '>', 0)
+                    ->whereNotNull('transaksi.stts')
+                    ->get();
         // dd($transactions[0]->suppliers);
-        return view('surat_jalan.editBarang', compact('transactions', 'satuans', 'barangs', 'suppliers'));
+        return view('surat_jalan.editBarang', compact('transactions', 'stocksPpn', 'stocksNoppn','satuans','suppliers'));
     }
 
     public function editBarangPost(Request $request)
@@ -725,7 +764,6 @@ class SuratJalanController extends Controller
             'sisa' => $request->jumlah_jual,
             'satuan_beli' => $request->satuan,
             'satuan_jual' => $request->satuan,
-            'id_supplier' => $request->supplier,
             'keterangan' => $request->keterangan,
         ]);
         return redirect()->back()->with('success', 'Data berhasil diupdate!!');
@@ -733,27 +771,81 @@ class SuratJalanController extends Controller
 
     public function hapusBarang(Request $request)
     {
+        $trx = $request->id;
+        $transaksi = Transaction::find($trx);
+    
+        if (!$transaksi) {
+            Log::error("Transaksi dengan ID $trx tidak ditemukan.");
+            return redirect()->back()->with('error', 'Transaksi tidak ditemukan.');
+        }
+    
+        Log::info("Menghapus transaksi: ", $transaksi->toArray());
+    
+        $transaksi1 = Transaction::where('no_bm', $transaksi->no_bm)
+            ->whereNull('id_surat_jalan')
+            ->where('invoice_external') // <--- Ini seharusnya ada perbandingan, misal: ->whereNotNull('invoice_external')
+            ->where('id_barang', $transaksi->id_barang)
+            ->where('harga_beli', $transaksi->harga_beli)
+            ->where('jumlah_beli', $transaksi->jumlah_beli)
+            ->where('id_supplier', $transaksi->id_supplier)
+            ->first();
+    
+        if (!$transaksi1) {
+            Log::error("Transaksi terkait tidak ditemukan.");
+            return redirect()->back()->with('error', 'Data transaksi terkait tidak ditemukan.');
+        }
+    
+        Log::info("Transaksi terkait ditemukan: ", $transaksi1->toArray());
+    
+        $sisa = $transaksi1->sisa - $transaksi->jumlah_jual;
+        $bkeluar = $transaksi->jumlah_jual + $transaksi1->jumlah_jual;
+    
+        Log::info("Sisa setelah update: $sisa, Barang keluar: $bkeluar");
+    
+        $transaksi1->update([
+            'sisa' => $sisa,
+            'jumlah_jual' => $bkeluar,
+            'satuan_jual' => null
+        ]);
+    
+        Log::info("Transaksi setelah update: ", $transaksi1->toArray());
+    
         Transaction::where('id', $request->id)->delete();
+        Log::info("Transaksi dengan ID $trx berhasil dihapus.");
+    
         return redirect()->back()->with('success', 'Data barang berhasil dihapus.');
     }
+    
 
     public function tambahBarang(Request $request)
     {
-        // dd($request->id_surat_jalan);
+        $ppn = $request->id_barang_ppn ?? null;
+        $noppn = $request->id_barang_no_ppn ?? null;
+        $trans = Transaction::find($ppn ?? $noppn);
+        $sisa = $trans->sisa - $request->jumlah_jual;
+        $bkeluar = $request->jumlah_jual + $trans->jumlah_jual;
         Transaction::create([
             'id_surat_jalan' => $request->id_surat_jalan,
-            'id_barang' => $request->id_barang,
-            'id_supplier' => $request->id_supplier,
+            'id_barang' => $trans->id_barang,
+            'id_supplier' => $trans->id_supplier,
             'jumlah_jual' => $request->jumlah_jual,
+            'invoice_external' => $trans->invoice_external,
             'jumlah_beli' => $request->jumlah_jual,
             'sisa' => $request->jumlah_jual,
             'satuan_jual' => $request->satuan_jual,
-            'satuan_beli' => $request->satuan_jual,
+            'satuan_beli' => $trans->satuan_beli,
             'harga_jual' => 0,
-            'harga_beli' => 0,
-            'margin' => 0,
-            'keterangan' => $request->keterangan,
+            'harga_beli' => $trans->harga_beli,
+            'no_bm' => $trans->no_bm,
+            'stts' => $trans->stts,
+            'keterangan' => $request->keterangan
         ]);
+        $trans->update([
+            'sisa' => $sisa,
+            'jumlah_jual' => $bkeluar,
+            'satuan_jual' =>  $request->satuan_jual
+        ]);
+
 
         return redirect()->back()->with('success', 'Data barang berhasil ditambahkan.');
     }
