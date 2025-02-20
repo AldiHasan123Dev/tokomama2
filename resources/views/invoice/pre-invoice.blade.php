@@ -285,7 +285,7 @@
                     <p style="font-weight: bold; padding-left: 30px; font-size: 0.8rem">
                         Terbilang:
                         @php
-                            $dpp = (11 / 12) * $total;
+                            $dpp = $total;
                         @endphp
                         @php
                             // Inisialisasi variabel untuk menentukan status PPN
