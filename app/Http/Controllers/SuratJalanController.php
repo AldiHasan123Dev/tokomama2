@@ -613,7 +613,7 @@ class SuratJalanController extends Controller
                 $action = '';
                 $sisa = $row->transactions->sum('sisa');
                 if ($sisa > 0) {
-                    // $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->kepada) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>';
+                    $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->kepada) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>';
                                 // <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
                 }
                 return '<div class="flex gap-3 mt-2">
@@ -759,60 +759,56 @@ class SuratJalanController extends Controller
 
     public function editBarangPost(Request $request)
     {
+        $trx = Transaction::find($request->id);
+        
+        if (!$trx) {
+            return redirect()->back()->with('error', 'Transaksi tidak ditemukan.');
+        }
+    
+        $stock = Transaction::whereNull('id_surat_jalan')
+            ->where('no_bm', $trx->no_bm)
+            ->where('id_barang', $trx->id_barang)
+            ->where('id_supplier', $trx->id_supplier)
+            ->first();
+    
+        if (!$stock) {
+            return redirect()->back()->with('error', 'Stok tidak ditemukan.');
+        }
+        if($request->jumlah_jual > $trx->jumlah_jual){
+            $jumlah_jual = $stock->jumlah_jual - $request->jumlah_jual;
+            $qty = $stock->sisa - $request->jumlah_jual;
+        } else {
+            $jumlah_jual = $stock->jumlah_jual + $request->jumlah_jual;
+            $qty = $stock->sisa - $jumlah_jual;
+        }
+        dd($qty,$jumlah_jual,$stock->sisa,$request->jumlah_jual, $trx->jumlah_jual,  $request->jumlah_jual < $trx->jumlah_jual);
+        if ($qty == 0) { // Perbaikan: Jika stok tidak cukup
+            return redirect()->back()->with('error', 'Qty yang ada di stok melebihi batas' . $tstock->barang->nama . ' = ' . $stock->sisa);
+        }
+    
+        // Update stok awal
+        $stock->update([
+            'sisa' => $qty,
+            'jumlah_jual' => $jumlah_jual
+        ]);
+    
+        // Update transaksi yang diedit
         Transaction::where('id', $request->id)->update([
             'jumlah_jual' => $request->jumlah_jual,
+            'jumlah_beli' => $request->jumlah_jual,
             'sisa' => $request->jumlah_jual,
             'satuan_beli' => $request->satuan,
             'satuan_jual' => $request->satuan,
             'keterangan' => $request->keterangan,
         ]);
-        return redirect()->back()->with('success', 'Data berhasil diupdate!!');
+    
+        return redirect()->back()->with('success', 'Data berhasil diupdate! ID yang diupdate: ' . $trx->id . ', ID stok yang diupdate: ' . $stock->id);
     }
+    
 
     public function hapusBarang(Request $request)
     {
-        $trx = $request->id;
-        $transaksi = Transaction::find($trx);
-    
-        if (!$transaksi) {
-            Log::error("Transaksi dengan ID $trx tidak ditemukan.");
-            return redirect()->back()->with('error', 'Transaksi tidak ditemukan.');
-        }
-    
-        Log::info("Menghapus transaksi: ", $transaksi->toArray());
-    
-        $transaksi1 = Transaction::where('no_bm', $transaksi->no_bm)
-            ->whereNull('id_surat_jalan')
-            ->where('invoice_external') // <--- Ini seharusnya ada perbandingan, misal: ->whereNotNull('invoice_external')
-            ->where('id_barang', $transaksi->id_barang)
-            ->where('harga_beli', $transaksi->harga_beli)
-            ->where('jumlah_beli', $transaksi->jumlah_beli)
-            ->where('id_supplier', $transaksi->id_supplier)
-            ->first();
-    
-        if (!$transaksi1) {
-            Log::error("Transaksi terkait tidak ditemukan.");
-            return redirect()->back()->with('error', 'Data transaksi terkait tidak ditemukan.');
-        }
-    
-        Log::info("Transaksi terkait ditemukan: ", $transaksi1->toArray());
-    
-        $sisa = $transaksi1->sisa - $transaksi->jumlah_jual;
-        $bkeluar = $transaksi->jumlah_jual + $transaksi1->jumlah_jual;
-    
-        Log::info("Sisa setelah update: $sisa, Barang keluar: $bkeluar");
-    
-        $transaksi1->update([
-            'sisa' => $sisa,
-            'jumlah_jual' => $bkeluar,
-            'satuan_jual' => null
-        ]);
-    
-        Log::info("Transaksi setelah update: ", $transaksi1->toArray());
-    
         Transaction::where('id', $request->id)->delete();
-        Log::info("Transaksi dengan ID $trx berhasil dihapus.");
-    
         return redirect()->back()->with('success', 'Data barang berhasil dihapus.');
     }
     

@@ -87,7 +87,7 @@
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="closeModal()">✕</button>
             </form>
             <h1 class="text-lg mb-3">Form Tambah Barang Surat Jalan</h1>
-            <p class="text-sm text-red-500 mt-1">* Pilih salah satu antara stock Barang PPN atau Barang No PPN.</p>
+            <p class="text-sm text-red-500 mt-1">* List stock barang akan muncul sesuai status ppn yang di pilih.</p>
             <form action="{{ route('surat-jalan.tambahBarang') }}" method="post">
                 @csrf
                 <input type="hidden" id="modal_data" name="id_surat_jalan" value="" readonly>
@@ -149,8 +149,10 @@
                     @foreach ($transactions as $trans)
                         <tr>
                             <td>
-                                {{-- @if ($trans->sisa > 0) --}}
-                                    <button onclick="openModal({{ $trans->suratJalan->id }})"><i class="fa-solid fa-plus text-green-500 mr-5"></i></button>
+                                @if ($trans->sisa != 0)
+                                <button onclick="openModal({{ $trans->suratJalan->id }}, '{{ $trans->barang->status_ppn }}')">
+                                    <i class="fa-solid fa-plus text-green-500 mr-5"></i>
+                                </button>                                
                                     <button onclick="getData({{ $trans->id }}, {{ $trans->id_supplier }}, {{ $trans->jumlah_jual }}, '{{ $trans->satuan_jual }}', '{{  $trans->suratJalan->nomor_surat }}',' {{ $trans->suppliers->nama }}', '{{ $trans->keterangan }}')" class="text-yellow-300"><i class="fa-solid fa-pencil"></i></button>
                                     {{-- <form onsubmit="deleteData({{ $trans->id }}, {{ $trans->id_surat_jalan }}); return false;">
                                         @csrf
@@ -159,7 +161,7 @@
                                     </form> --}}
                                     
                                     
-                                {{-- @endif --}}
+                                @endif
                             </td>
                             <td>{{ $trans->suratJalan->nomor_surat }}</td>
                             <td>{{ $trans->barang->nama }}</td>
@@ -207,7 +209,7 @@
                                 @csrf
                                 <input type="hidden" name="id" value="${id}" class="border-none" />
                                 <input type="hidden" name="id_supplier" value="${id_supplier}" class="border-none" />
-                                <label class="form-label">Jumlah Jual & Jumlah Beli :</label>
+                                <label class="form-label">Jumlah Jual :</label>
                                 <input type="number" name="jumlah_jual" class="input-field" value="${kuantitas}" />
                                 <label class="form-label">Satuan</label>
                                 <select class="select-field" name="satuan" id="satuan">
@@ -241,32 +243,44 @@
             }
         
             // Fungsi untuk membuka modal lainnya
-            function openModal(data) {
-                // Menyimpan data ke input tersembunyi
-                document.getElementById('modal_data').value = data;
-                document.getElementById('my_modal_3').showModal();
-        
-                // Inisialisasi select2 untuk modal ini
-                $('#id_barang').select2({ dropdownParent: $(`#my_modal_3`) });
-                $('#id_barang1').select2({ dropdownParent: $(`#my_modal_3`) });
-                $('#id_barang').on('change', function() {
-        if ($(this).val()) {
-            $('#id_barang1').prop('disabled', true);
-        } else {
-            $('#id_barang1').prop('disabled', false);
-        }
-    });
+            function openModal(data, statusPpn) {
+    // Menyimpan data ke input tersembunyi
+    document.getElementById('modal_data').value = data;
+    document.getElementById('my_modal_3').showModal();
 
-    $('#id_barang1').on('change', function() {
-        if ($(this).val()) {
-            $('#id_barang').prop('disabled', true);
-        } else {
-            $('#id_barang').prop('disabled', false);
-        }
-    });
-                $('#id_supplier').select2({ dropdownParent: $(`#my_modal_3`) });
-                $('#satuan_jual').select2({ dropdownParent: $(`#my_modal_3`) });
-            }
+    // Inisialisasi Select2 untuk modal ini
+    $('#id_barang').select2({ dropdownParent: $('#my_modal_3') });
+    $('#id_barang1').select2({ dropdownParent: $('#my_modal_3') });
+    $('#id_supplier').select2({ dropdownParent: $('#my_modal_3') });
+    $('#satuan_jual').select2({ dropdownParent: $('#my_modal_3') });
+
+    // Filter barang berdasarkan status_ppn
+    if (statusPpn === 'ya') {
+        $('#id_barang').prop('disabled', false);
+        $('#id_barang1').prop('disabled', true).val(null).trigger('change'); // Reset dan disable yang non-PPN
+    } else {
+        $('#id_barang').prop('disabled', true).val(null).trigger('change'); // Reset dan disable yang PPN
+        $('#id_barang1').prop('disabled', false);
+    }
+
+    // Pastikan hanya satu select yang bisa dipilih
+    // $('#id_barang').on('change', function () {
+    //     if ($(this).val()) {
+    //         $('#id_barang1').prop('disabled', true).val(null).trigger('change');
+    //     } else {
+    //         $('#id_barang1').prop('disabled', false);
+    //     }
+    // });
+
+    // $('#id_barang1').on('change', function () {
+    //     if ($(this).val()) {
+    //         $('#id_barang').prop('disabled', true).val(null).trigger('change');
+    //     } else {
+    //         $('#id_barang').prop('disabled', false);
+    //     }
+    // });
+}
+
         
             // Fungsi untuk menutup modal
             function closeModal() {
