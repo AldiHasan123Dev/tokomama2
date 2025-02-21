@@ -7,6 +7,7 @@ use App\Models\Jurnal;
 use App\Models\Invoice;
 use App\Models\Transaction;
 use App\Models\Coa;
+use App\Models\Customer;
 use Carbon\Carbon;
 class LaporanController extends Controller
 {
@@ -287,7 +288,7 @@ public function dataLapPiutang(Request $request)
         },
         'transaksi.barang' // Menambahkan relasi transaksi.barang
     ])
-    ->where('tgl_invoice', '>', '2024-08-01')
+    ->where('tgl_invoice', '>', '2025-01-01')
     ->orderBy('created_at', 'desc')
     ->get();
 
@@ -303,15 +304,17 @@ public function dataLapPiutang(Request $request)
                 $ppn += $invoice->subtotal * ($barang->value_ppn / 100); // Menghitung PPN
             }
         }
-
         $jumlah_harga = round($subtotal + $ppn);
-
+        $customer = $group->first()->transaksi->suratJalan->customer->nama;
+        $top = Customer::where('nama', $customer)->pluck('top')->first();
         return [
+            'tanggal' => date('Y-m-d'),
             'invoice' => $group->first()->invoice,
             'customer' => $group->first()->transaksi->suratJalan->customer->nama,
             'jumlah_harga' => $jumlah_harga,
+            'top' => $top,
             'ditagih_tgl' => $group->first()->tgl_invoice,
-            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays(60),
+            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top),
             'dibayar_tgl' => null,
             'sebesar' => 0,
             'kurang_bayar' => $jumlah_harga,
@@ -354,13 +357,17 @@ public function dataLapPiutang(Request $request)
                 }
 
                 $totalHarga = $subtotal + $ppn;
+                $customer = $invoicesForJurnal->invoice->transaksi->suratJalan->customer->nama;
+                $top = Customer::where('nama', $customer)->pluck('top')->first();
 
                 $data->put($jurnal->invoice, [
+                    'tanggal' => date('Y-m-d'),
                     'invoice' => $invoicesForJurnal->invoice,
                     'customer' => $invoicesForJurnal->transaksi->suratJalan->customer->nama,
                     'jumlah_harga' => $totalHarga,
+                    'top' => $top,
                     'ditagih_tgl' => $invoicesForJurnal->tgl_invoice,
-                    'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays(60),
+                    'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top),
                     'dibayar_tgl' => $jurnal->tgl,
                     'sebesar' => $jurnal->debit,
                     'kurang_bayar' => $totalHarga,
@@ -387,10 +394,12 @@ public function dataLapPiutang(Request $request)
     $data = $paginatedData->map(function($row) use (&$indexStart) {
         $indexStart++;
         return [
+            'tanggal' => date('Y-m-d'),
             'invoice' => $row['invoice'], // Mengakses dengan notasi array
             'customer' => $row['customer'],
             'jumlah_harga' => $row['jumlah_harga'],
             'ditagih_tgl' => $row['ditagih_tgl'],
+            'top' => $row['top'],
             'tempo' => $row['tempo'],
             'dibayar_tgl' => $row['dibayar_tgl'],
             'sebesar' => $row['sebesar'],
@@ -436,7 +445,7 @@ public function dataLapPiutangTotal(Request $request)
         ->where('tipe', 'BBM')
         ->whereNull('deleted_at')
         ->where('debit', '!=', 0)
-        ->where('tgl', '>', '2024-08-01')
+        ->where('tgl', '>', '2025-01-01')
         ->whereNotNull('invoice')
         ->orderBy('tgl', 'desc')
         ->get();
@@ -447,7 +456,7 @@ public function dataLapPiutangTotal(Request $request)
         },
         'transaksi.barang'
     ])
-    ->where('tgl_invoice', '>', '2024-08-01')
+    ->where('tgl_invoice', '>', '2025-01-01')
     ->orderBy('created_at', 'desc')
     ->get();
      // Mengambil nilai dan me-reset kunci array

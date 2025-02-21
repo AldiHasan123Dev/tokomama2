@@ -107,10 +107,10 @@ class TransactionController extends Controller
                 $totalDebit += $harga_beli * $jumlah_beli;
                 // Persediaan (Debit)
                 Jurnal::create([
-                    'coa_id' => 32,
+                    'coa_id' => 89,
                     'nomor' => $nomor_surat,
                     'tgl' => now()->toDateString(),
-                    'keterangan' => 'Persediaan ' . (optional($transaksi->barang)->nama ?? 'Tidak Diketahui') .
+                    'keterangan' => 'Persediaan Jayapura ' . (optional($transaksi->barang)->nama ?? 'Tidak Diketahui') .
                         ' ( Harga Beli ' . number_format($harga_beli, 0, ',', '.') .
                         ' Jumlah Beli ' . number_format($jumlah_beli, 0, ',', '.') . ' )' . 
                         ' Status ' . '(' . $transaksi->stts . ')',
@@ -125,49 +125,12 @@ class TransactionController extends Controller
                     'no' => $no_JNL
                 ]);
             }
-        if ($transaksi->invoice_external == null){
-                    
-            if ($transaksi->barang->status_ppn == 'ya') {
-                $ppn = round($totalDebit * ($transaksi->barang->value_ppn / 100));
-    
-                Jurnal::create([
-                    'coa_id' => 10,
-                    'nomor' => $nomor_surat,
-                    'tgl' => now()->toDateString(),
-                    'keterangan' => 'PPN Masukan ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
-                    'debit' => 0,
-                    'kredit' => $ppn,
-                    'invoice' => null,
-                    'invoice_external' => $invoice_external,
-                    'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
-                    'nopol' => null,
-                    'container' => null,
-                    'tipe' => 'JNL',
-                    'no' => $no_JNL
-                ]);
-    
-                Jurnal::create([
-                    'coa_id' => 35,
-                    'nomor' => $nomor_surat,
-                    'tgl' => now()->toDateString(),
-                    'keterangan' => 'Hutang Usaha ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
-                    'debit' => 0,
-                    'kredit' => $totalDebit + $ppn,
-                    'invoice' => null,
-                    'invoice_external' => $invoice_external,
-                    'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
-                    'nopol' => null,
-                    'container' => null,
-                    'tipe' => 'JNL',
-                    'no' => $no_JNL
-                ]);
-            } else {
                 // Hutang (Kredit) hanya dibuat jika totalDebit lebih dari 0
                 Jurnal::create([
-                    'coa_id' => 35,
+                    'coa_id' => 90,
                     'nomor' => $nomor_surat,
                     'tgl' => now()->toDateString(),
-                    'keterangan' => 'Hutang Usaha ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
+                    'keterangan' => 'Persediaan Perjalanan ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
                     'debit' => 0,
                     'kredit' => $totalDebit,
                     'invoice' => null,
@@ -178,44 +141,6 @@ class TransactionController extends Controller
                     'tipe' => 'JNL',
                     'no' => $no_JNL
                 ]);
-            } 
-        } else {
-                    if ($transaksi->barang->status_ppn == 'ya') {
-                        $ppn = round($totalDebit * ($transaksi->barang->value_ppn / 100));
-                        Jurnal::create([
-                            'coa_id' => 30,
-                            'nomor' => $nomor_surat,
-                            'tgl' => now()->toDateString(),
-                            'keterangan' => 'Uang Muka Pembelian ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
-                            'debit' => 0,
-                            'kredit' => $totalDebit + $ppn,
-                            'invoice' => null,
-                            'invoice_external' => $invoice_external,
-                            'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
-                            'nopol' => null,
-                            'container' => null,
-                            'tipe' => 'JNL',
-                            'no' => $no_JNL
-                        ]);
-                    } else {
-                        // Hutang (Kredit) hanya dibuat jika totalDebit lebih dari 0
-                        Jurnal::create([
-                            'coa_id' => 30,
-                            'nomor' => $nomor_surat,
-                            'tgl' => now()->toDateString(),
-                            'keterangan' => 'Uang Muka Pembelian ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
-                            'debit' => 0,
-                            'kredit' => $totalDebit,
-                            'invoice' => null,
-                            'invoice_external' => $invoice_external,
-                            'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
-                            'nopol' => null,
-                            'container' => null,
-                            'tipe' => 'JNL',
-                            'no' => $no_JNL
-                        ]);
-                    }
-        }
         foreach ($request->id as $key => $id) {
             $transaksi1 = Transaction::find($id);
         $transaksi1->invoice_external = $invoice_external;

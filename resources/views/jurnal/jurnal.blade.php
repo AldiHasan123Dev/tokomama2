@@ -210,15 +210,15 @@
             <a href="{{ route('jurnal-manual.index') }}">
                 <button class="btn bg-green-500 text-white font-bold hover:bg-green-700 m-2x">Input Jurnal</button>
             </a>
-            <a href="/invoice-external">
-                <button class="btn bg-blue-500 text-white font-bold hover:bg-gray-700">Jurnal Uang Muka</button>
-            </a>
             <a href="{{ route('jurnal.jurnal-merger') }}">
                 <button class="btn bg-gray-500 text-white font-bold hover:bg-gray-700 mb-2px">Merge Jurnal</button>
             </a>
-
+            
             <button class="btn bg-red-500 text-white font-bold hover:bg-gray-700 mb-2px" id="ipt_jurnal">Export
                 Jurnal</button>
+                <a href="/invoice-external">
+                    <button class="btn bg-blue-500 text-white font-bold hover:bg-gray-700">Penerimaan Tagihan</button>
+                </a>
 
             <div class="flex flex-row mb-16 mt-8">
                 <label for="month" class="font-bold mt-2">Bulan:</label>
