@@ -240,7 +240,9 @@ Route::prefix('master')->controller(SupplierController::class)->middleware('auth
 Route::prefix('laporan')->controller(LaporanController::class)->middleware('auth')->group(function () {
     Route::get('hutang-vendor', 'dataLHV')->name('laporan.LHV');
     Route::get('piutang-customer', 'dataLPC')->name('laporan.LPC');
+    Route::get('lap-penjualan-harian', 'LapPenjualan')->name('laporan.LaporanPenjualanHarian');
     Route::get('data-lap-piutang', 'dataLapPiutang')->name('laporan.DataPiutang');
+    Route::get('data-lap-penjualan-harian', 'dataPenjualanHarian')->name('laporan.DataPenjualanHarian');
     Route::get('data-total-lap-piutang', 'dataLapPiutangTotal')->name('laporan.TotalDataPiutang');
     Route::get('lap-piutang', 'LapPiutang')->name('laporan.Piutang');
 });

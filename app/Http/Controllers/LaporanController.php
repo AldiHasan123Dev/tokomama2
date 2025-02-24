@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Transaction;
 use App\Models\Coa;
 use App\Models\Customer;
+use App\Models\Barang;
 use Carbon\Carbon;
 class LaporanController extends Controller
 {
@@ -256,7 +257,6 @@ $months = [
 ];
     return view('laporan.lap-piutang-customer',compact('mergedResults', 'data' ,'months', 'summaryData'));
         }
-
 
 public function dataLapPiutang(Request $request)
 {
@@ -545,4 +545,209 @@ public function dataLapPiutangTotal(Request $request)
         return view('jurnal.lap-piutang');
     }
 
+    public function lapPenjualan()
+    {
+        return view('laporan.lap-penjualan-harian');
+    }
+
+//     public function dataPenjualanHarian(Request $request)
+// {
+//     // Ambil parameter untuk pagination dari request
+//       // Filter berdasarkan kolom pencarian
+//       $searchField = $request->input('searchField');
+//       $searchString = $request->input('searchString');
+  
+//       // Query data berdasarkan filter dan pagination
+//       $query = Invoice::query();
+  
+//       if ($searchField && $searchString) {
+//           $query->where($searchField, 'like', "%$searchString%");
+//       }
+//     // Ambil data dari tabel Jurnals dengan pagination, urutkan berdasarkan 'tgl' descending
+
+//     // Ambil data dari tabel Invoices, urutkan berdasarkan 'created_at' descending
+//     $invoices = Invoice::with([
+//         'transaksi.suratJalan.customer' => function($query) {
+//             $query->select('id', 'nama');
+//         },
+//         'transaksi.barang' // Menambahkan relasi transaksi.barang
+//     ])
+//     ->where('tgl_invoice', '>', '2025-01-01')
+//     ->orderBy('created_at', 'desc')
+//     ->get();
+
+//     // Mengelompokkan dan menghitung subtotal untuk setiap invoice
+//     $data = $invoices->groupBy('tgl_invoice')->map(function($group) {
+//         $subtotal = $group->sum('subtotal'); // Jumlahkan subtotal untuk setiap invoice
+//         $ppn = 0; // Inisialisasi PPN
+
+//         // Menghitung PPN jika ada barang dengan status_ppn == 'ya'
+//         foreach ($group as $invoice) {
+//             $barang = $invoice->transaksi->barang;
+//             $nama_barang = $invoice->transaksi->barang->nama;
+//             if ($barang && $barang->status_ppn == 'ya') {
+//                 $ppn += $invoice->subtotal * ($barang->value_ppn / 100); // Menghitung PPN
+//             }
+//         }
+//         $jumlah_harga = round($subtotal + $ppn);
+//         $customer = $group->first()->transaksi->suratJalan->customer->nama;
+//         $top = Customer::where('nama', $customer)->pluck('top')->first();
+//         return [
+//             'tgl_invoice' => $group->first()->tgl_invoice,
+//             'invoice' => implode('', array_map(fn($inv) => "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>$inv</div>", $group->pluck('invoice')->unique()->toArray())),
+//            'tagihan' => implode('', array_map(fn($inv) => 
+//     "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>" . 
+//     number_format((float) $inv, 2, ',', '.') . 
+//     "</div>", 
+//     array_filter($group->pluck('subtotal')->unique()->toArray(), fn($val) => is_numeric($val)))
+// ),
+
+//             'barang' => implode('', array_map(fn($item) => "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>$item</div>", $group->pluck('transaksi.barang.nama')->toArray())),
+//             'customer' => implode('', array_map(fn($name) => "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>$name</div>", $group->pluck('transaksi.suratJalan.customer.nama')->unique()->toArray())),
+//             'jumlah_harga' => $jumlah_harga,
+//         ];
+//     });
+
+//     // Menambahkan nomor urut
+//     $result = [];
+//     $index = 1;
+//     foreach ($data as $item) {
+//         $item['no'] = $index++;
+//         $result[] = $item;
+//     }
+    
+//     // Pagination
+//     $currentPage = $request->input('page', 1); // Halaman saat ini, default 1
+//     $perPage = $request->input('rows', 20); // Jumlah baris per halaman, default 10
+//     $totalRecords = count($result);
+//     $totalPages = ceil($totalRecords / $perPage);
+//     $indexStart = ($currentPage - 1) * $perPage;
+//     $paginatedData = collect($result)->slice($indexStart)->values();
+//     $data = $paginatedData->map(function($row) use (&$indexStart) {
+//         $indexStart++;
+//         return [
+//             'tgl_invoice' => $row['tgl_invoice'],
+//             'tagihan' => $row['tagihan'],
+//             'invoice' => $row['invoice'], // Mengakses dengan notasi array
+//             'customer' => $row['customer'],
+//             'jumlah_harga' => $row['jumlah_harga'],
+//             'barang' => $row['barang'],
+//             'no' => $indexStart, // Menggunakan nomor urut
+//         ];
+//     });
+//     return response()->json([
+//         'rows' => $data,
+//         'current_page' => $currentPage, // Halaman saat ini
+//         'last_page' => ceil($totalRecords / $perPage), // Total halaman
+//         'total' => $totalRecords, // Total record setelah filter
+//         'records' => $totalRecords,
+//     ]);
+// }
+
+public function dataPenjualanHarian(Request $request)
+{
+    // Ambil parameter untuk pagination dari request
+      // Filter berdasarkan kolom pencarian
+      $searchField = $request->input('searchField');
+      $searchString = $request->input('searchString');
+  
+      // Query data berdasarkan filter dan pagination
+      $query = Invoice::query();
+  
+      if ($searchField && $searchString) {
+          $query->where($searchField, 'like', "%$searchString%");
+      }
+    // Ambil data dari tabel Jurnals dengan pagination, urutkan berdasarkan 'tgl' descending
+
+    // Ambil data dari tabel Invoices, urutkan berdasarkan 'created_at' descending
+    $invoices = Invoice::with([
+        'transaksi.suratJalan.customer' => function($query) {
+            $query->select('id', 'nama');
+        },
+        'transaksi.barang' // Menambahkan relasi transaksi.barang
+    ])
+    ->where('tgl_invoice', '>', '2025-01-01')
+    ->orderBy('created_at', 'desc')
+    ->get();
+
+    // Mengelompokkan dan menghitung subtotal untuk setiap invoice
+    $data = $invoices->groupBy('tgl_invoice')->map(function($group) {
+        $subtotal = $group->sum('subtotal');
+        $subtotal1 = implode('', array_map(fn($item) => 
+    "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>" . 
+    number_format($item, 0, '.', ',') . 
+    "</div>", 
+    $group->pluck('subtotal')->toArray()
+));
+        $ppn = 0; // Inisialisasi PPN
+
+        // Menghitung PPN jika ada barang dengan status_ppn == 'ya'
+        foreach ($group as $invoice) {
+            $barang = $invoice->transaksi->barang;
+            $nama_barang = $invoice->transaksi->barang->nama;
+            
+            if ($barang && $barang->status_ppn == 'ya') {
+                $subtotal = $group->sum('subtotal');
+                $subtotal = ($subtotal * ($barang->value_ppn / 100 + 1));
+                $subtotal_ppn = round($invoice->subtotal * 1.11);
+                $ppn += ($subtotal_ppn * ($barang->value_ppn / 100)); // Menghitung PPN
+                $subtotal1 = implode('', array_map(fn($item) => 
+    "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>" . 
+    number_format($item * 1.11, 0, '.', ',') . 
+    "</div>", 
+    $group->pluck('subtotal')->toArray()
+));
+
+$jumlah_harga = round($subtotal); 
+            }
+            $jumlah_harga = round($subtotal); 
+        $customer = $group->first()->transaksi->suratJalan->customer->nama;
+        $top = Customer::where('nama', $customer)->pluck('top')->first();
+        return [
+            'tgl_invoice' => $invoice->tgl_invoice,
+            'invoice' =>$invoice->invoice,
+            'barang' => implode('', array_map(fn($item) => "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>$item</div>", $group->pluck('transaksi.barang.nama')->toArray())),
+            'customer' =>$invoice->transaksi->suratJalan->customer->nama,
+            'tagihan' =>$subtotal1,
+            'jumlah_harga' =>$jumlah_harga,
+        ];
+    }
+    });
+
+    // Menambahkan nomor urut
+    $result = [];
+    $index = 1;
+    foreach ($data as $item) {
+        $item['no'] = $index++;
+        $result[] = $item;
+    }
+    
+    // Pagination
+    $currentPage = $request->input('page', 1); // Halaman saat ini, default 1
+    $perPage = $request->input('rows', 20); // Jumlah baris per halaman, default 10
+    $totalRecords = count($result);
+    $totalPages = ceil($totalRecords / $perPage);
+    $indexStart = ($currentPage - 1) * $perPage;
+    $paginatedData = collect($result)->slice($indexStart)->values();
+    $data = $paginatedData->map(function($row) use (&$indexStart) {
+        $indexStart++;
+        return [
+            'tgl_invoice' => $row['tgl_invoice'],
+            'tagihan' => $row['tagihan'],
+            'invoice' => $row['invoice'], // Mengakses dengan notasi array
+            'customer' => $row['customer'],
+            'jumlah_harga' => $row['jumlah_harga'],
+            'barang' => $row['barang'],
+            'no' => $indexStart, // Menggunakan nomor urut
+        ];
+    });
+    return response()->json([
+        'rows' => $data,
+        'current_page' => $currentPage, // Halaman saat ini
+        'last_page' => ceil($totalRecords / $perPage), // Total halaman
+        'total' => $totalRecords, // Total record setelah filter
+        'records' => $totalRecords,
+    ]);
+}
+    
     }
