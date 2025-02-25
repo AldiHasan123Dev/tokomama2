@@ -303,8 +303,8 @@
                         }
                     ],
                     pager: "#jqGridPager1", // Link pager dengan ID yang benar
-                    rowNum: 10,
-                    rowList: [50, 100, 500], // Pilihan jumlah baris
+                    rowNum: 20,
+                    rowList: [20, 50, 100], // Pilihan jumlah baris
                     height: 'auto', // Tinggi tabel otomatis menyesuaikan
                     viewrecords: true, // Menampilkan jumlah total data
                     autowidth: true, // Menyesuaikan lebar tabel dengan kontainer

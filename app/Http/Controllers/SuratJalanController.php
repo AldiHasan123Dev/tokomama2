@@ -560,7 +560,7 @@ class SuratJalanController extends Controller
                         'coa_id' => 91, // COA bank mandiri,
                         'nomor' => $nomor_surat1,
                         'tgl' => $currentYear,
-                        'keterangan' => 'Persediaan SBY dari ' . $item->suppliers->nama,
+                        'keterangan' => 'Persediaan SBY - ' . $item->suppliers->nama,
                         'debit' => 0,
                         'kredit' => $total, // PPN amount
                         'invoice' => null,
@@ -571,8 +571,7 @@ class SuratJalanController extends Controller
                         'tipe' => 'JNL',
                         'no' => $no_JNL1
                     ]
-                    );
-                
+                );           
         });
     }
 }
@@ -761,10 +760,31 @@ class SuratJalanController extends Controller
         'total' => $totalRecords, // Total record setelah filter
         'data' => $result, // Data untuk halaman ini
     ]);
+} 
+
+public function getStock($id)
+{
+    $trx = Transaction::find($id);
+
+    if (!$trx) {
+        return response()->json([
+            'message' => 'Transaksi tidak ditemukan'
+        ], 404);
+    }
+
+    $stock = Transaction::whereNull('id_surat_jalan')
+        ->where('no_bm', $trx->no_bm)
+        ->where('id_barang', $trx->id_barang)
+        ->where('id_supplier', $trx->id_supplier)
+        ->first();
+
+        $tag = $stock->barang->nama . ' || Stock ' . $stock->sisa . ' || ' . $stock->no_bm;
+        return response()->json([
+        'stock' => $tag ?? 'tidak diketahui',
+        'trx_jumlah_jual' => $trx->jumlah_jual
+    ]);
 }
 
-    
-    
 
     public function editBarang()
     {
@@ -832,40 +852,60 @@ class SuratJalanController extends Controller
         if (!$stock) {
             return redirect()->back()->with('error', 'Stok tidak ditemukan.');
         }
-        if($request->jumlah_jual > $trx->jumlah_jual){
-            $jumlah_jual = $stock->jumlah_jual - $request->jumlah_jual;
-            $qty = $stock->sisa - $request->jumlah_jual;
+        if ($request->qty == 'tambah') {
+            $jumlah_jual_stock = $stock->jumlah_jual + $request->tambah;
+            $qty = $stock->sisa - $request->tambah;
+            $jumlah_jual = $trx->jumlah_jual + $request->tambah;
         } else {
-            $jumlah_jual = $stock->jumlah_jual + $request->jumlah_jual;
-            $qty = $stock->sisa - $jumlah_jual;
+            $jumlah_jual_stock = $stock->jumlah_jual - $request->kurangi;
+            $qty = $stock->sisa + $request->kurangi;
+            $jumlah_jual = $trx->jumlah_jual - $request->kurangi;
+        }        
+        if ($qty < 0) { // Jika stok tidak mencukupi
+            return redirect()->back()->with(
+                'error',
+                'Stok tidak mencukupi! Barang: ' . (optional($tstock->barang)->nama ?? 'Tidak diketahui') . 
+                ', Sisa Stok: ' . ($stock->sisa ?? 0)
+            );
         }
-        if ($qty == 0) { // Perbaikan: Jika stok tidak cukup
-            return redirect()->back()->with('error', 'Qty yang ada di stok melebihi batas' . $tstock->barang->nama . ' = ' . $stock->sisa);
-        }
-    
+        
         // Update stok awal
         $stock->update([
             'sisa' => $qty,
-            'jumlah_jual' => $jumlah_jual
+            'jumlah_jual' => $jumlah_jual_stock
         ]);
-    
         // Update transaksi yang diedit
         Transaction::where('id', $request->id)->update([
-            'jumlah_jual' => $request->jumlah_jual,
-            'jumlah_beli' => $request->jumlah_jual,
-            'sisa' => $request->jumlah_jual,
-            'satuan_beli' => $request->satuan,
-            'satuan_jual' => $request->satuan,
+            'jumlah_jual' => $jumlah_jual,
+            'jumlah_beli' => $stock->jumlah_beli,
+            'sisa' => $jumlah_jual,
+            'satuan_beli' => $stock->satuan_beli,
+            'satuan_jual' => $stock->satuan_jual,
             'keterangan' => $request->keterangan,
         ]);
     
-        return redirect()->back()->with('success', 'Data berhasil diupdate! ID yang diupdate: ' . $trx->id . ', ID stok yang diupdate: ' . $stock->id);
+        return redirect()->back()->with('success', 'Data berhasil diupdate!!');
     }
     
 
     public function hapusBarang(Request $request)
     {
-        Transaction::where('id', $request->id)->delete();
+        $trx = Transaction::find($request->id);
+        $stock = Transaction::whereNull('id_surat_jalan')
+            ->where('no_bm', $trx->no_bm)
+            ->where('id_barang', $trx->id_barang)
+            ->where('id_supplier', $trx->id_supplier)
+            ->first();
+        $jumlah_jual = $stock->jumlah_jual - $trx->jumlah_jual;
+        $qty = $stock->sisa + $trx->jumlah_jual;
+        if($stock->sisa == 0 || $stock->sisa < 0){
+            $trx->delete();
+        }
+        $stock->update([
+                'sisa' => $qty,
+                'jumlah_jual' => $jumlah_jual
+            ]);
+        $trx->delete();
         return redirect()->back()->with('success', 'Data barang berhasil dihapus.');
     }
     
@@ -883,9 +923,9 @@ class SuratJalanController extends Controller
             'id_supplier' => $trans->id_supplier,
             'jumlah_jual' => $request->jumlah_jual,
             'invoice_external' => $trans->invoice_external,
-            'jumlah_beli' => $request->jumlah_jual,
+            'jumlah_beli' => $trans->jumlah_beli,
             'sisa' => $request->jumlah_jual,
-            'satuan_jual' => $request->satuan_jual,
+            'satuan_jual' => $trans->satuan_beli,
             'satuan_beli' => $trans->satuan_beli,
             'harga_jual' => 0,
             'harga_beli' => $trans->harga_beli,

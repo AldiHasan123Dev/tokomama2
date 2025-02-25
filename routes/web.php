@@ -59,6 +59,7 @@ Route::get('/dashboard', function () {
 Route::get('/surat-jalan/checkBarangCount', [SuratJalanController::class, 'checkBarangCount'])->name('surat-jalan.checkBarangCount');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/get-stock/{id}', [SuratJalanController::class, 'getStock'])->name('sj.getStock');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/barang-masuk/monitor-stock', [StockController::class, 'monitor_stock'])->name('monitor-stock');
