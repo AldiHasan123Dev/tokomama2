@@ -9,6 +9,7 @@
             <th>Nama akun</th>
             <th>Invoice</th>
             <th>Debit</th>
+            <th>Kredit</th>
             <th>Keterangan</th>
             <th>Invoice Supplier</th>
             <th>Nopol</th>
