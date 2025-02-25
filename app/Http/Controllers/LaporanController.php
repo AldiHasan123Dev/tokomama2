@@ -646,108 +646,96 @@ public function dataLapPiutangTotal(Request $request)
 
 public function dataPenjualanHarian(Request $request)
 {
-    // Ambil parameter untuk pagination dari request
-      // Filter berdasarkan kolom pencarian
-      $searchField = $request->input('searchField');
-      $searchString = $request->input('searchString');
-  
-      // Query data berdasarkan filter dan pagination
-      $query = Invoice::query();
-  
-      if ($searchField && $searchString) {
-          $query->where($searchField, 'like', "%$searchString%");
-      }
-    // Ambil data dari tabel Jurnals dengan pagination, urutkan berdasarkan 'tgl' descending
+    $searchField = $request->input('searchField');
+    $searchString = $request->input('searchString');
 
-    // Ambil data dari tabel Invoices, urutkan berdasarkan 'created_at' descending
-    $invoices = Invoice::with([
-        'transaksi.suratJalan.customer' => function($query) {
-            $query->select('id', 'nama');
-        },
-        'transaksi.barang' // Menambahkan relasi transaksi.barang
+    $query = Invoice::with([
+        'transaksi.suratJalan.customer:id,nama',
+        'transaksi.barang'
     ])
     ->where('tgl_invoice', '>', '2025-01-01')
-    ->orderBy('created_at', 'desc')
-    ->get();
+    ->orderBy('tgl_invoice', 'desc')
+    ->orderBy('created_at', 'desc');
 
-    // Mengelompokkan dan menghitung subtotal untuk setiap invoice
-    $data = $invoices->groupBy('tgl_invoice')->map(function($group) {
-        $subtotal = $group->sum('subtotal');
-        $subtotal1 = implode('', array_map(fn($item) => 
-    "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>" . 
-    number_format($item, 0, '.', ',') . 
-    "</div>", 
-    $group->pluck('subtotal')->toArray()
-));
-        $ppn = 0; // Inisialisasi PPN
-
-        // Menghitung PPN jika ada barang dengan status_ppn == 'ya'
-        foreach ($group as $invoice) {
-            $barang = $invoice->transaksi->barang;
-            $nama_barang = $invoice->transaksi->barang->nama;
-            
-            if ($barang && $barang->status_ppn == 'ya') {
-                $subtotal = $group->sum('subtotal');
-                $subtotal = ($subtotal * ($barang->value_ppn / 100 + 1));
-                $subtotal_ppn = round($invoice->subtotal * 1.11);
-                $ppn += ($subtotal_ppn * ($barang->value_ppn / 100)); // Menghitung PPN
-                $subtotal1 = implode('', array_map(fn($item) => 
-    "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>" . 
-    number_format($item * 1.11, 0, '.', ',') . 
-    "</div>", 
-    $group->pluck('subtotal')->toArray()
-));
-
-$jumlah_harga = round($subtotal); 
-            }
-            $jumlah_harga = round($subtotal); 
-        $customer = $group->first()->transaksi->suratJalan->customer->nama;
-        $top = Customer::where('nama', $customer)->pluck('top')->first();
-        return [
-            'tgl_invoice' => $invoice->tgl_invoice,
-            'invoice' =>$invoice->invoice,
-            'barang' => implode('', array_map(fn($item) => "<div style='border: 1px solid #ccc; padding: 5px; margin-bottom: 2px;'>$item</div>", $group->pluck('transaksi.barang.nama')->toArray())),
-            'customer' =>$invoice->transaksi->suratJalan->customer->nama,
-            'tagihan' =>$subtotal1,
-            'jumlah_harga' =>$jumlah_harga,
-        ];
+    if ($searchField && $searchString) {
+        $query->where($searchField, 'like', "%$searchString%");
     }
+
+    $invoices = $query->get();
+
+    // Hitung jumlah invoice per tanggal dan total subtotal
+    $invoiceGroups = $invoices->groupBy('tgl_invoice')->map(function ($items) {
+        return [
+            'count' => $items->count(),
+            'total' => $items->sum(function ($item) {
+                $subtotal = $item->subtotal;
+
+                // Tambahkan PPN jika barang memiliki status_ppn "ya"
+                if ($item->transaksi->barang && $item->transaksi->barang->status_ppn === 'ya') {
+                    $subtotal += $subtotal * 0.11; // Tambahkan PPN 11%
+                }
+
+                return $subtotal;
+            })
+        ];
     });
 
-    // Menambahkan nomor urut
+    // Kelompokkan berdasarkan invoice & ambil distinct customer + barang
+    $groupedInvoices = $invoices->groupBy('invoice')->map(function ($items) {
+        $firstInvoice = $items->first();
+        
+        return [
+            'tgl_invoice' => $firstInvoice->tgl_invoice,
+            'invoice' => $firstInvoice->invoice,
+            'customer' => $items->pluck('transaksi.suratJalan.customer.nama')->unique()->implode(', '),
+            'tagihan' => $items->sum('subtotal'),
+            'barang' => $items->pluck('transaksi.barang.nama')->unique()->implode(', '),
+            'subtotal' => $firstInvoice->subtotal,
+            'hasPPN' => $items->pluck('transaksi.barang.status_ppn')->contains('ya')
+        ];
+    })->values(); // Reset indeks array
+
+    // Tambahkan nomor urut & hitung tagihan
     $result = [];
-    $index = 1;
-    foreach ($data as $item) {
-        $item['no'] = $index++;
-        $result[] = $item;
-    }
+    $seenDates = [];
+    foreach ($groupedInvoices as $index => $item) {
+        // Ambil nilai asli tagihan sebelum formatting
+        $tagihan = $item['tagihan'];
     
-    // Pagination
-    $currentPage = $request->input('page', 1); // Halaman saat ini, default 1
-    $perPage = $request->input('rows', 20); // Jumlah baris per halaman, default 10
-    $totalRecords = count($result);
-    $totalPages = ceil($totalRecords / $perPage);
-    $indexStart = ($currentPage - 1) * $perPage;
-    $paginatedData = collect($result)->slice($indexStart)->values();
-    $data = $paginatedData->map(function($row) use (&$indexStart) {
-        $indexStart++;
-        return [
-            'tgl_invoice' => $row['tgl_invoice'],
-            'tagihan' => $row['tagihan'],
-            'invoice' => $row['invoice'], // Mengakses dengan notasi array
-            'customer' => $row['customer'],
-            'jumlah_harga' => $row['jumlah_harga'],
-            'barang' => $row['barang'],
-            'no' => $indexStart, // Menggunakan nomor urut
+        // Jika ada barang dengan status_ppn = 'ya', tambahkan PPN 11%
+        if ($item['hasPPN']) {
+            $tagihan = round($tagihan * 1.11);
+        }
+    
+        // Format tagihan setelah perhitungan
+        $formattedTagihan = number_format($tagihan, 0, '.', ',');
+    
+        // Tampilkan jumlah_harga hanya untuk baris pertama setiap tgl_invoice
+        if (!isset($seenDates[$item['tgl_invoice']])) {
+            $jumlah_harga = round($invoiceGroups[$item['tgl_invoice']]['total']);
+            $seenDates[$item['tgl_invoice']] = true;
+        } else {
+            $jumlah_harga = null;
+        }
+    
+        $result[] = [
+            'no' => $index + 1,
+            'tgl_invoice' => $item['tgl_invoice'],
+            'invoice' => $item['invoice'],
+            'customer' => $item['customer'],
+            'barang' => $item['barang'],
+            'tagihan' => $formattedTagihan,
+            'jumlah_harga' => $jumlah_harga // Tampilkan hanya di baris pertama
         ];
-    });
+    }    
+
     return response()->json([
-        'rows' => $data,
-        'current_page' => $currentPage, // Halaman saat ini
-        'last_page' => ceil($totalRecords / $perPage), // Total halaman
-        'total' => $totalRecords, // Total record setelah filter
-        'records' => $totalRecords,
+        'rows' => $result,
+        'records' => count($result),
+        'total' => 1, // loadonce butuh total = 1
+        'page' => 1
     ]);
 }
-    
+
+
     }

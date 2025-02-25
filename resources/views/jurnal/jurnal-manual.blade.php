@@ -275,8 +275,8 @@
                                 <select name="tipe" id="tipe" class="select select-bordered w-full max-w-xs"
                                     required>
                                     <option selected></option>
-                                    <option value="{{ $no_JNL }}/{{ 'JNL' }}-TM/{{ date('y') }}">
-                                        Jurnal - {{ $no_JNL }}/{{ 'JNL' }}-TM/{{ date('y') }}</option>
+                                    <option value="{{ $no_JNL }}/{{ 'JNL' }}TM/{{ date('y') }}">
+                                        Jurnal - {{ $no_JNL }}/{{ 'JNL' }}TM/{{ date('y') }}</option>
                                     <option value="{{ $no_BKK }}/{{ 'BKK' }}-TM/{{ date('y') }}">Kas
                                         Keluar - {{ $no_BKK }}/{{ 'BKK' }}-TM/{{ date('y') }}
                                     </option>

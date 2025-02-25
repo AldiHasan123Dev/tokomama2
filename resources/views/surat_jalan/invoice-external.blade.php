@@ -65,21 +65,7 @@
                 name: 'jumlah_beli',
                 width: 40,
                 align: 'right'
-            },
-            // {
-            //     search: true,
-            //     label: 'Sub Total',
-            //     name: 'total',
-            //     width: 70,
-            //     align: 'right'
-            // },
-            {
-                search: true,
-                label: 'PPN',
-                name: 'ppn',
-                width: 70,
-                align: 'right'
-            },
+            }
         ],
         pager: "#sjPager", // Elemen pager
         rowNum: 20, // Jumlah baris per halaman

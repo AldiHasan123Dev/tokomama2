@@ -111,6 +111,7 @@ class StockController extends Controller
         $stocks = Transaction::selectRaw(
             'transaksi.*'
         )
+        ->with('jurnals')
         ->whereNull('id_surat_jalan')
         ->where('harga_beli', '>', 0) // Pastikan harga_beli lebih dari 0 // Grup berdasarkan kondisi
         ->orderBy('no_bm', 'desc') // Urutkan berdasarkan created_at
@@ -161,6 +162,7 @@ class StockController extends Controller
             return [
                 'id' => $stock->id,
                 'satuans' => $stock->satuan_beli,
+               'jurnal' => optional($stock->jurnals->firstWhere('coa_id', 35))->nomor ?? '-',
                 'barangs' => $stock->barang->nama,
                 'jumlah_belis' => $stock->jumlah_beli,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
