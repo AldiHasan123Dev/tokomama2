@@ -154,7 +154,6 @@
                         <th>Nama Barang</th>
                         <th>Jumlah Jual</th>
                         <th>Satuan Jual</th>
-                        <th>Satuan Standard</th>
                         {{-- <th>Margin</th> --}}
                         <th>Keterangan</th>
                         <th>No BM</th>
@@ -164,7 +163,7 @@
                     @foreach ($transactions as $trans)
                         <tr>
                             <td>
-                                @if ($trans->sisa != 0)
+                                @if ($trans->sisa > 0)
                                 <button
                                     onclick="openModal({{ $trans->suratJalan->id }}, '{{ $trans->barang->status_ppn }}')">
                                     <i class="fa-solid fa-plus text-green-500 mr-5"></i>
@@ -182,12 +181,12 @@
                             <td>{{ $trans->suratJalan->nomor_surat }}</td>
                             <td>{{ $trans->barang->nama }}</td>
                             <td>{{ $trans->jumlah_jual }}</td>
-                            <td @if($trans->satuan_jual !== $trans->satuan_beli) style="background-color: red; color: white;" @endif>
+                            <td>
                                 {{ $trans->satuan_jual }}
                             </td>
-                            <td @if($trans->satuan_jual !== $trans->satuan_beli) style="background-color: red; color: white;" @endif>
+                            {{-- <td @if($trans->satuan_jual !== $trans->satuan_beli) style="background-color: red; color: white;" @endif>
                                 {{ $trans->satuan_beli }}
-                            </td>                            
+                            </td>                             --}}
                             {{-- <td>{{ number_format($trans->margin) }}</td> --}}
                             <td>{{ $trans->keterangan ? $trans->keterangan : '-' }}</td>
                             <td>{{ $trans->no_bm }}</td>

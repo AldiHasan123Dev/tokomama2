@@ -28,7 +28,8 @@ class SuratJalanController extends Controller
     public function index()
     {
         $nopol = Nopol::where('status', 'aktif')->get();
-        return view('surat_jalan.index', compact('nopol'));
+        $customer = Customer::all();
+        return view('surat_jalan.index', compact('nopol','customer'));
     }
 
     /**
@@ -307,9 +308,11 @@ class SuratJalanController extends Controller
     {
         // id, invoice, nomor_surat, kepada, jumlah, satuan, jenis_barang, nama_kapal, no_cont, no_seal, no_pol, no_job
         $data = SuratJalan::find($request->id);
+        $customer = Customer::find($request->kepada);
         $data->invoice = $request->invoice;
         $data->nomor_surat = $request->nomor_surat;
-        $data->kepada = $request->kepada;
+        $data->id_customer = $customer->id;
+        $data->kepada = $customer->nama;
         $data->jumlah = $request->jumlah;
         $data->satuan = $request->satuan;
         // $data->jenis_barang = $request->jenis_barang;
@@ -670,7 +673,7 @@ class SuratJalanController extends Controller
                 $action = '';
                 $sisa = $row->transactions->sum('sisa');
                 if ($sisa > 0) {
-                    // $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->kepada) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>';
+                    $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->customer->nama) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>';
                                 // <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
                 }
                 return '<div class="flex gap-3 mt-2">
