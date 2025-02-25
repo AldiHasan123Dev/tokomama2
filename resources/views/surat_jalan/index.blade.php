@@ -76,7 +76,7 @@
 
     <x-keuangan.card-keuangan>
         <x-slot:tittle>List Surat Jalan</x-slot:tittle>
-        <a href="{{ route('surat-jalan.editBarang') }}" class="edit-button mt-5">Edit by Barang</a>
+        <a href="{{ route('surat-jalan.editBarang') }}" class="edit-button mt-5">Edit isi (Barang SJ)</a>
         <div class="overflow-x-auto">
             <table class="table" id="table-getfaktur">
                 <!-- head -->
