@@ -104,7 +104,7 @@ class TransactionController extends Controller
                 // Hitung total debit
                 $harga_beli = $transaksi->harga_beli ?? 0;
                 $jumlah_beli = $transaksi->jumlah_beli ?? 0;
-                $totalDebit += $harga_beli * $jumlah_beli;
+                $totalDebit += round($harga_beli * $jumlah_beli);
                 // Persediaan (Debit)
                 Jurnal::create([
                     'coa_id' => 89,
@@ -114,7 +114,7 @@ class TransactionController extends Controller
                         ' ( Harga Beli ' . number_format($harga_beli, 0, ',', '.') .
                         ' Jumlah Beli ' . number_format($jumlah_beli, 0, ',', '.') . ' )' . 
                         ' Status ' . '(' . $transaksi->stts . ')',
-                    'debit' => $harga_beli * $jumlah_beli,
+                    'debit' => round($harga_beli * $jumlah_beli),
                     'kredit' => 0,
                     'invoice' => null,
                     'invoice_external' => $invoice_external,
@@ -125,14 +125,22 @@ class TransactionController extends Controller
                     'no' => $no_JNL
                 ]);
             }
+            foreach ($request->id as $key => $id) {
+                $transaksi = Transaction::find($id);
+                $harga_beli = $transaksi->harga_beli ?? 0;
+                $jumlah_beli = $transaksi->jumlah_beli ?? 0;
+                $totalDebit += round($harga_beli * $jumlah_beli);
                 // Hutang (Kredit) hanya dibuat jika totalDebit lebih dari 0
                 Jurnal::create([
                     'coa_id' => 90,
                     'nomor' => $nomor_surat,
                     'tgl' => now()->toDateString(),
-                    'keterangan' => 'Persediaan Perjalanan ' . (optional($transaksi->suppliers)->nama ?? 'Tidak Diketahui'),
+                   'keterangan' => 'Persediaan Perjalanan ' . (optional($transaksi->barang)->nama ?? 'Tidak Diketahui') .
+                        ' ( Harga Beli ' . number_format($harga_beli, 0, ',', '.') .
+                        ' Jumlah Beli ' . number_format($jumlah_beli, 0, ',', '.') . ' )' . 
+                        ' Status ' . '(' . $transaksi->stts . ')',
                     'debit' => 0,
-                    'kredit' => $totalDebit,
+                    'kredit' => round($harga_beli * $jumlah_beli),
                     'invoice' => null,
                     'invoice_external' => $invoice_external,
                     'id_transaksi' => $request->id[0], // Ambil ID transaksi pertama
@@ -141,6 +149,7 @@ class TransactionController extends Controller
                     'tipe' => 'JNL',
                     'no' => $no_JNL
                 ]);
+            }
         foreach ($request->id as $key => $id) {
             $transaksi1 = Transaction::find($id);
         $transaksi1->invoice_external = $invoice_external;

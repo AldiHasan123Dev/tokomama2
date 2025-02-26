@@ -296,7 +296,23 @@ class StockController extends Controller
         return view('toko.list-barang');
     }
     public function monitor_stock(){
-        return view('toko.monitor-stock');
+        $jayapura = Transaction::whereNotNull('stts')
+        ->whereNull('id_surat_jalan')
+        ->get()
+        ->sum(function ($transaction) {
+            $multiplier = ($transaction->barang->status_ppn ?? 'tidak') == 'ya' ? 1.11 : 1;
+            return round($transaction->harga_beli * $transaction->sisa * $multiplier);
+        });
+    
+    $perjalanan = Transaction::whereNull('stts')
+        ->whereNull('id_surat_jalan')
+        ->get()
+        ->sum(function ($transaction) {
+            $multiplier = ($transaction->barang->status_ppn ?? 'tidak') == 'ya' ? 1.11 : 1;
+            return round($transaction->harga_beli * $transaction->sisa * $multiplier);
+        });
+    
+    return view('toko.monitor-stock', compact('jayapura', 'perjalanan'));
     }
 
     public function stocks(){

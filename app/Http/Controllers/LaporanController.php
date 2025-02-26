@@ -12,6 +12,70 @@ use App\Models\Barang;
 use Carbon\Carbon;
 class LaporanController extends Controller
 {
+    public function dataLOC() {
+        // Mengambil tahun yang unik dari data invoice
+        $years = Invoice::selectRaw('YEAR(tgl_invoice) as year')
+            ->groupBy('year')
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+    
+        // Query untuk mendapatkan data laporan omzet
+        $invoices = Invoice::selectRaw('
+            c.id as customer_id,
+            c.nama as customer_nama,
+            DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+            YEAR(i.tgl_invoice) as year, 
+            COUNT(DISTINCT i.invoice) as invoice_count,  
+            SUM(
+                CASE 
+                    WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11
+                    ELSE t.harga_jual * t.jumlah_jual
+                END
+            ) as omzet
+        ')
+        ->from('invoice as i')
+        ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+        ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
+        ->join('customer as c', 'sj.id_customer', '=', 'c.id')
+        ->join('barang as b', 't.id_barang', '=', 'b.id')
+        ->whereYear('i.tgl_invoice', 2025) // Filter tahun default
+        ->groupBy('c.id', 'year', 'month')
+        ->orderBy('year', 'asc')
+        ->orderByRaw('MONTH(i.tgl_invoice) ASC')
+        ->get();
+    
+        $mergedResults = [];
+        foreach ($invoices as $invoice) {
+            if (!isset($mergedResults[$invoice->customer_id])) {
+                $mergedResults[$invoice->customer_id] = [
+                    'customer_name' => $invoice->customer_nama,
+                    'years' => []
+                ];
+            }
+    
+            if (!isset($mergedResults[$invoice->customer_id]['years'][$invoice->year])) {
+                $mergedResults[$invoice->customer_id]['years'][$invoice->year] = [];
+            }
+    
+            $mergedResults[$invoice->customer_id]['years'][$invoice->year][$invoice->month] = [
+                'month' => $invoice->month,
+                'year' => $invoice->year,
+                'invoice_count' => $invoice->invoice_count,
+                'omzet' => $invoice->omzet / 1000
+            ];
+        }
+    
+        $months = [
+            'January', 'February', 'March', 'April', 'May', 
+            'June', 'July', 'August', 'September', 
+            'October', 'November', 'December'
+        ];
+    
+        return view('laporan.lap-omzet-customer', compact('mergedResults', 'months', 'years'));
+    }
+    
+    
+
     public function dataLHV(){
         $jurnals = Jurnal::where('coa_id', 5)
         ->whereNotNull('invoice_external')

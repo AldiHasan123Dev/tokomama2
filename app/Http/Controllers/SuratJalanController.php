@@ -437,7 +437,7 @@ class SuratJalanController extends Controller
             foreach ($data as $item) {
                     $value_ppn = $item->barang->value_ppn / 100;
                     $total_ppn += round($item->harga_beli * $item->jumlah_beli * $value_ppn);
-                    $total  += $item->harga_beli * $item->jumlah_beli;
+                    $total  += round($item->harga_beli * $item->jumlah_beli);
                     
                     //Jurnal Persediaan
                     Jurnal::updateOrCreate(
@@ -531,7 +531,7 @@ class SuratJalanController extends Controller
                 foreach ($data as $item) {
                     $value_ppn = $item->barang->value_ppn / 100;
                     $total_ppn += round($item->harga_beli * $item->jumlah_beli * $value_ppn);
-                    $total  += $item->harga_beli * $item->jumlah_beli;
+                    $total  += round($item->harga_beli * $item->jumlah_beli);
                     
                     //Jurnal Persediaan
                     Jurnal::updateOrCreate(
@@ -556,6 +556,7 @@ class SuratJalanController extends Controller
                         ]
                     );
                 }
+                foreach ($data as $item) {
                 Jurnal::create(
                     [
                         'id_transaksi' => $item->id,
@@ -563,9 +564,9 @@ class SuratJalanController extends Controller
                         'coa_id' => 91, // COA bank mandiri,
                         'nomor' => $nomor_surat1,
                         'tgl' => $currentYear,
-                        'keterangan' => 'Persediaan SBY - ' . $item->suppliers->nama,
+                        'keterangan' => 'Persediaan SBY ' . $item->barang->nama . ' (' .  number_format($item->jumlah_beli, 0, ',', '.') . ' ' .  $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') - ' . $item->suppliers->nama,
                         'debit' => 0,
-                        'kredit' => $total, // PPN amount
+                        'kredit' => round($item->harga_beli * $item->jumlah_beli), // PPN amount
                         'invoice' => null,
                         'invoice_external' => $request->invoice_external,
                         'nopol' => $item->suratJalan->no_pol ?? null,
@@ -574,7 +575,8 @@ class SuratJalanController extends Controller
                         'tipe' => 'JNL',
                         'no' => $no_JNL1
                     ]
-                );           
+                );     
+            }      
         });
     }
 }
