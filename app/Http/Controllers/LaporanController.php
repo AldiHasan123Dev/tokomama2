@@ -40,9 +40,11 @@ class LaporanController extends Controller
         ->join('barang as b', 't.id_barang', '=', 'b.id')
         ->whereYear('i.tgl_invoice', 2025) // Filter tahun default
         ->groupBy('c.id', 'year', 'month')
+        ->orderBy('omzet', 'desc') // Urutkan berdasarkan omzet terbesar
         ->orderBy('year', 'asc')
         ->orderByRaw('MONTH(i.tgl_invoice) ASC')
         ->get();
+
     
         $mergedResults = [];
         foreach ($invoices as $invoice) {

@@ -61,7 +61,6 @@
 
             th, td {
                 padding: 8px 10px;
-                text-align: center;
                 border: 1px solid #ddd;
                 transition: background-color 0.3s ease;
             }
@@ -120,9 +119,9 @@
                                 $omzet = $data['omzet'] ?? 0;
                                 $totalOmzet += $omzet;
                             @endphp
-                            <td>{{ number_format($omzet, 0, ',', '.') }}</td>
+                            <td style="text-align: right">{{ number_format($omzet, 0, ',', '.') }}</td>
                         @endforeach
-                        <td class="bg-total">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
+                        <td class="bg-total" style="text-align: right">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
                 </tbody>
