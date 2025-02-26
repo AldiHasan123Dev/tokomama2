@@ -423,11 +423,8 @@ class SuratJalanController extends Controller
         // Jika jurnal sudah ada, cukup update nomor jurnalnya
         foreach ($existingJournals as $journal) {
             $journal->update([
-                'nomor' => $nomor_surat,
-                'invoice_external' => $invoice_external,
-                'tgl' => $currentYear // Pastikan $invoice_external berisi nilai yang diinginkan
+                'invoice_external' => $invoice_external
             ]);
-            
         }
     } else {
         // Buat atau update entri jurnal baru hanya jika belum ada jurnal yang sesuai
