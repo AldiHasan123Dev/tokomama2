@@ -398,8 +398,8 @@ class SuratJalanController extends Controller
     $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $month)->orderBy('no', 'desc')->first() ?? 0;
     $no_JNL =  $noJNL ? $noJNL->no + 1 : 1;   
     $no_JNL1 =  $no_JNL + 1;   
-    $nomor_surat = "$month-$no_JNL/TM/$year";
-    $nomor_surat1 = "$month-$no_JNL1/TM/$year";
+    $nomor_surat = "$month-$no_JNL/TMR1/$year";
+    $nomor_surat1 = "$month-$no_JNL1/TMR1/$year";
 
 
     // Ambil data transaksi berdasarkan invoice_external
