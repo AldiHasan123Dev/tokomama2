@@ -27,11 +27,27 @@ class JurnalController extends Controller
     public function index()
     {
         if (isset($_GET['tipe']) && isset($_GET['month']) && isset($_GET['year'])) {
-            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->where('tipe', $_GET['tipe'])->orderBy('no', 'desc')->orderBy('created_at', 'desc')->orderBy('id', 'desc')->orderBy('tgl', 'desc')->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->where('tipe', $_GET['tipe'])
+            ->orderBy('no', 'desc')
+            ->orderBy('id', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('tgl', 'desc')
+            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+
         } elseif (isset($_GET['month']) && isset($_GET['year'])) {
-            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->orderBy('no', 'desc')->orderBy('created_at', 'desc')->orderBy('id', 'desc')->orderBy('tgl', 'desc')->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])
+            ->orderBy('no', 'desc')
+            ->orderBy('id', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('tgl', 'desc')
+            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+
         } else {
-            $data = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->orderBy('no', 'desc')->orderBy('created_at', 'desc')->orderBy('id', 'desc')->orderBy('tgl', 'desc')->get();
+            $data = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+            ->orderBy('no', 'desc')
+            ->orderBy('id', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('tgl', 'desc')->get();
         }
 
         // bulan
