@@ -262,7 +262,7 @@ class SuratJalanController extends Controller
             }
         }
         $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"); // daftar angka Romawi
-        $month_number = date("n", strtotime($request->tgl));
+        $month_number = date("n", strtotime($request->tgl_bm));
         $month_roman = $roman_numerals[$month_number];
         $no_bm = sprintf('%03d', $no) . '/BM/TM-' . $month_roman . '/' . date('Y', strtotime($request->tgl));
         for ($i = 0; $i < count($request->barang); $i++) {
@@ -741,7 +741,7 @@ class SuratJalanController extends Controller
             'ppn' => number_format($ppn, 2, ',', '.'),
             'supplier' => $row->suppliers->nama ?? '-',
             'invoice_external' => $row->invoice_external,
-            'aksi' => is_null($row->invoice_external) ? '<button onclick="getData(' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\', \'' . addslashes($row->no_bm) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>' : ''
+            'aksi' =>'<button onclick="getData(' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\', \'' . addslashes($row->no_bm) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
         ];
     });
 
