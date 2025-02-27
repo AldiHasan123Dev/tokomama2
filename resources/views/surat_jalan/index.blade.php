@@ -76,7 +76,7 @@
 
     <x-keuangan.card-keuangan>
         <x-slot:tittle>List Surat Jalan</x-slot:tittle>
-        {{-- <a href="{{ route('surat-jalan.editBarang') }}" class="edit-button mt-5">Edit by Barang</a> --}}
+        <a href="{{ route('surat-jalan.editBarang') }}" class="edit-button mt-5">Edit isi (Barang SJ)</a>
         <div class="overflow-x-auto">
             <table class="table" id="table-getfaktur">
                 <!-- head -->
@@ -167,8 +167,12 @@
                             <option value="{{ $n->nopol }}" ${no_pol === '{{ $n->nopol }}' ? 'selected' : ''}>{{ $n->nopol }}</option>
                         @endforeach
                     </select>
-                         <label class="form-label">Kepada</label>
-                        <input type="text" name="kepada" value="${kepada}" class="input-field" />
+                    <label class="form-label">Kepada</label>
+                         <select class="select-field" name="kepada" id="kepada">
+                        @foreach ($customer as $c)
+                            <option value="{{ $c->id }}" ${kepada === '{{ $c->nama }}' ? 'selected' : ''}>{{ $c->nama }}</option>
+                        @endforeach
+                    </select>
                     <label class="form-label">Nomor PO </label>
                         <input type="text" name="no_po" value="${no_po}" class="input-field" />
                     <label class="form-label">Tanggal Surat Jalan</label>
@@ -183,8 +187,19 @@
                     width: '100%',
                     height: '40px' // Atur lebar select2 di sini
                 });
+                $('#kepada').select2({
+                    dropdownParent: $(`#my_modal_5`),
+                    width: '100%',
+                    height: '40px' // Atur lebar select2 di sini
+                });
 
                 $('#nopol').on('select2:open', function() {
+                    $('.select2-results__options').css({
+                        'max-height': '200px', // Atur tinggi dropdown select2 di sini
+                        'overflow-y': 'auto' // Mengaktifkan scroll jika tinggi melebihi batas
+                    });
+                });
+                $('#kepada').on('select2:open', function() {
                     $('.select2-results__options').css({
                         'max-height': '200px', // Atur tinggi dropdown select2 di sini
                         'overflow-y': 'auto' // Mengaktifkan scroll jika tinggi melebihi batas

@@ -116,9 +116,31 @@
                         <div id="jqGridPager"></div>
                     </div>
                 </div>
-            <!-- Adjusted table ID and pager ID for jqGrid -->
-            <table id="jqGrid1" class="table"></table>
-            <div id="jqGridPager1"></div>
+                <!-- Adjusted table ID and pager ID for jqGrid -->
+                <table id="jqGrid1" class="table"></table>
+                <div id="jqGridPager1"></div>
+                <div class="container mt-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-success" style="background: #e2190a !important;">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success" style="color: #ffffff;">Persediaan Dalam Perjalanan </h5>
+                                    <p class="card-text fs-4 fw-bold text-success" style="color: #ffffff;">Rp {{ number_format($perjalanan, 0, ',', '.') }} (Terjurnal HTG Rp {{ number_format($perjalanan2, 0, ',', '.') }}) , (Belum Terjurnal Rp {{ number_format($perjalanan1, 0, ',', '.') }})</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-teal" style="background: #20c997 !important;">
+                                <div class="card-body">
+                                    <h5 class="card-title" style="color: #ffffff;">Persediaan Jayapura</h5>
+                                    <p class="card-text fs-4 fw-bold" style="color: #ffffff;">Rp {{ number_format($jayapura, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
         </div>
     </x-keuangan.card-keuangan>
 
@@ -153,6 +175,31 @@ $(function () {
                 name: 'invoice_external',
                 width: 100
             },
+            {
+                label: 'Nomor Jurnal',
+                name: 'jurnal',
+                align: "center",
+                width: 100,
+                sortable: false,
+            },
+//             {
+//     label: 'Nomor Jurnal',
+//     name: 'jurnal',
+//     align: "center",
+//     width: 100,
+//     sortable: false,
+//     formatter: function(cellvalue, options, rowObject) {
+//         if (!cellvalue || cellvalue === '-') {
+//             return '-'; // Jika tidak ada nomor jurnal, tampilkan tanda "-"
+//         }
+//         let jurnalNumbers = cellvalue.split(', '); // Memisahkan nomor jurnal jika lebih dari satu
+//         let links = jurnalNumbers.map(num => {
+//             let encodedNum = encodeURIComponent(num); // Encode nomor jurnal agar sesuai dengan URL
+//             return `<a href="/jurnal-edit?nomor=${encodedNum}" class="text-primary" target="_blank" rel="noopener noreferrer">${num}</a>`;y
+//         });
+//         return links.join(', '); // Gabungkan semua link dengan koma
+//     }
+// },
             {
                 search: true,
                 label: 'No BM',

@@ -43,6 +43,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect('login');
 });
+
+Route::get('/server-time', function () {
+    return response()->json(['time' => now()->format('Y-m-d H:i:s')]);
+})->name('server.time');
 // Route::get('test', function () {
 //     $data1 = SuratJalan::get();
 //     $data = SuratJalanResource::collection($data1);
@@ -55,6 +59,7 @@ Route::get('/dashboard', function () {
 Route::get('/surat-jalan/checkBarangCount', [SuratJalanController::class, 'checkBarangCount'])->name('surat-jalan.checkBarangCount');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/get-stock/{id}', [SuratJalanController::class, 'getStock'])->name('sj.getStock');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/barang-masuk/monitor-stock', [StockController::class, 'monitor_stock'])->name('monitor-stock');
@@ -235,8 +240,12 @@ Route::prefix('master')->controller(SupplierController::class)->middleware('auth
 
 Route::prefix('laporan')->controller(LaporanController::class)->middleware('auth')->group(function () {
     Route::get('hutang-vendor', 'dataLHV')->name('laporan.LHV');
+    Route::get('lap-sales', 'dataLS')->name('laporan.LS');
+    Route::get('lap-omzet-cust', 'dataLOC')->name('laporan.LOC');
     Route::get('piutang-customer', 'dataLPC')->name('laporan.LPC');
+    Route::get('lap-penjualan-harian', 'LapPenjualan')->name('laporan.LaporanPenjualanHarian');
     Route::get('data-lap-piutang', 'dataLapPiutang')->name('laporan.DataPiutang');
+    Route::get('data-lap-penjualan-harian', 'dataPenjualanHarian')->name('laporan.DataPenjualanHarian');
     Route::get('data-total-lap-piutang', 'dataLapPiutangTotal')->name('laporan.TotalDataPiutang');
     Route::get('lap-piutang', 'LapPiutang')->name('laporan.Piutang');
 });

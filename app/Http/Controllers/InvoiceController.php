@@ -48,9 +48,28 @@ class InvoiceController extends Controller
 
     public function preview(Request $request)
     {
-        $tgl_inv2 = $request->tgl_invoice; // Asumsikan ini adalah string tanggal atau objek DateTime
+        foreach ($request->harga_jual as $id_transaksi => $harga_jual) {
+            foreach ($harga_jual as $idx => $item) {
+                $data[$id_transaksi]['harga_jual'][$idx] = $item; 
+                $item = (int) str_replace(',', '', $item);
+                if ($item == 0){
+                    return back()->with('error', 'Silahkan input harga jual');
+                }
+                $trx1 = Transaction::find($id_transaksi);
+                $barangs = Barang::find($trx1->id_barang);
+                if($barangs->status_ppn == 'ya'){
+                    $item =round($item / 1.11 ,4);
+                }
+                $margin = $trx1->harga_beli - $item;
+                $trx1->update([
+                    'harga_jual' => $item,
+                    'margin' => $margin
+                ]);
+            }
+        }
+        $tgl_inv2 = $request->tgl_invoice; 
         $date = date_create($tgl_inv2);
-        $tgl_inv1 = date_format($date, 'd F Y'); // Format: "05 October 2024"
+        $tgl_inv1 = date_format($date, 'd F Y'); 
        
         $tgl_inv = date('m', strtotime($tgl_inv2));
         $tipe = $tgl_inv . '-' . $request->tipe;
@@ -82,19 +101,6 @@ class InvoiceController extends Controller
             
             $no++;
         }
-
-        foreach ($request->harga_jual as $id_transaksi => $harga_jual) {
-            foreach ($harga_jual as $idx => $item) {
-                $data[$id_transaksi]['harga_jual'][$idx] = $item;
-                $trx1 = Transaction::find($id_transaksi);
-                $margin = $trx1->harga_beli - $item;
-                $trx1->update([
-                    'harga_jual' => $item,
-                    'margin' => $margin
-                ]);
-            }
-        }
-    
         foreach ($request->invoice as $id_transaksi => $invoice) {
             foreach ($invoice as $idx => $item) {
                 $data[$id_transaksi]['invoice'][$idx] = $item;
@@ -353,9 +359,9 @@ class InvoiceController extends Controller
                     });
 
                     if ($result[0]->transaksi->barang->status_ppn == 'ya'){
-                        $value_ppn = $result[0]->transaksi->barang->value_ppn/100;
+                        $value_ppn = 11/100;
                         $subtotalPPN = $result->sum(function ($item) {
-                            $value_ppn = $item->transaksi->barang->value_ppn / 100;
+                            $value_ppn = 11 / 100;
                             return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual * $value_ppn);
                         });
                         $temp_debit = round(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn, 4);
@@ -416,7 +422,7 @@ class InvoiceController extends Controller
                                     'coa_id' => 63,
                                     'nomor' => $jurhut,
                                     'tgl' => $tgl,
-                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                    'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
                                 ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
@@ -435,10 +441,10 @@ class InvoiceController extends Controller
                             
                              //coa 1.6 = Uang Muka (Kredit)
                             Jurnal::create([
-                                'coa_id' => 30,
+                                'coa_id' => 89,
                                 'nomor' => $jurhut,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Uang Muka untuk ' . $result[0]->transaksi->suppliers->nama,
+                                'keterangan' => 'Persediaan Jayapura  ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
@@ -464,7 +470,7 @@ class InvoiceController extends Controller
                                     'coa_id' => 63,
                                     'nomor' => $jurhut,
                                     'tgl' => $tgl,
-                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                    'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
                                 ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
@@ -484,10 +490,10 @@ class InvoiceController extends Controller
                             }
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
                             Jurnal::create([
-                                'coa_id' => 35,
+                                'coa_id' => 89,
                                 'nomor' => $jurhut,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                                'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
@@ -545,10 +551,10 @@ class InvoiceController extends Controller
                     if ($cekCoa->isNotEmpty()) {
                     //Jurnal Hutang No PPN 
                     Jurnal::create([
-                        'coa_id' => 32,
+                        'coa_id' => 89,
                         'nomor' => $jurhut,
                         'tgl' => $tgl,
-                        'keterangan' => 'Persediaan ' . $result[0]->transaksi->suppliers->nama,
+                        'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
                         'debit' => 0, // Menyimpan subtotal sebagai debit
                         'kredit' => $subtotal, // Kredit diisi 0
                         'invoice' => null,
@@ -565,7 +571,7 @@ class InvoiceController extends Controller
                                     'coa_id' => 63,
                                     'nomor' => $jurhut,
                                     'tgl' => $tgl,
-                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                    'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
                                 ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
@@ -596,7 +602,7 @@ class InvoiceController extends Controller
                             'coa_id' => 63,
                             'nomor' => $jurhut,
                             'tgl' => $tgl,
-                            'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                            'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
                         ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
                         $item->transaksi->satuan_jual . ' Harsat ' . 
                         number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
@@ -614,10 +620,10 @@ class InvoiceController extends Controller
                     }
                      //coa 1.6 = Persediaan Barang / Stock (Kredit)
                      Jurnal::create([
-                        'coa_id' => 35,
+                        'coa_id' => 89,
                         'nomor' => $jurhut,
                         'tgl' => $tgl,
-                        'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                        'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
                         'debit' => 0, // Menyimpan subtotal sebagai debit
                         'kredit' => $subtotal, // Kredit diisi 0
                         'invoice' => null,
@@ -637,14 +643,14 @@ class InvoiceController extends Controller
                     return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                 });
                 $subtotalPPN = $result->sum(function ($item) {
-                    $value_ppn = $item->transaksi->barang->value_ppn / 100;
+                    $value_ppn = 11 / 100;
                     return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual * $value_ppn);
                 });
                 // Menginisialisasi variabel sebelum loop
                 $temp_debit = 0; 
                 $nopol = $result[0]->transaksi->suratJalan->no_pol; // Asumsikan nopol sama untuk semua item
                 if ($result[0]->transaksi->barang->status_ppn == 'ya'){
-                    $value_ppn = $result[0]->transaksi->barang->value_ppn/100;
+                    $value_ppn = 11 /100;
                     $temp_debit = round(array_sum(array_column($result->toArray(), 'subtotal')) * $value_ppn);
                     Jurnal::create([
                         'coa_id' => 8,
@@ -705,7 +711,7 @@ class InvoiceController extends Controller
                                     'coa_id' => 63,
                                     'nomor' => $jurhutNow,
                                     'tgl' => $tgl,
-                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                    'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
                                 ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
@@ -726,10 +732,10 @@ class InvoiceController extends Controller
                             
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
                             Jurnal::create([
-                                'coa_id' => 30,
+                                'coa_id' => 89,
                                 'nomor' => $jurhutNow,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Uang Muka ' . $result[0]->transaksi->suppliers->nama,
+                                'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
@@ -753,7 +759,7 @@ class InvoiceController extends Controller
                                 'coa_id' => 63,
                                 'nomor' => $jurhutNow,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
                             ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
                             $item->transaksi->satuan_jual . ' Harsat ' . 
                             number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
@@ -773,10 +779,10 @@ class InvoiceController extends Controller
                         }
                          //coa 1.6 = Persediaan Barang / Stock (Kredit)
                         Jurnal::create([
-                            'coa_id' => 32,
+                            'coa_id' => 89,
                             'nomor' => $jurhutNow,
                             'tgl' => $tgl,
-                            'keterangan' => 'Persediaan ' . $result[0]->transaksi->suppliers->nama,
+                            'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
                             'debit' => 0, // Menyimpan subtotal sebagai debit
                             'kredit' => $subtotal, // Kredit diisi 0
                             'invoice' => null,
@@ -841,7 +847,7 @@ class InvoiceController extends Controller
                                     'coa_id' => 63,
                                     'nomor' => $jurhutNow,
                                     'tgl' => $tgl,
-                                    'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                                    'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
                                 ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
@@ -859,10 +865,10 @@ class InvoiceController extends Controller
                             }
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
                              Jurnal::create([
-                                'coa_id' => 30,
+                                'coa_id' => 89,
                                 'nomor' => $jurhutNow,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Uang Muka Untuk ' . $result[0]->transaksi->suppliers->nama,
+                                'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
@@ -885,7 +891,7 @@ class InvoiceController extends Controller
                         'coa_id' => 63,
                         'nomor' => $jurhutNow,
                         'tgl' => $tgl,
-                        'keterangan' => 'Pembelian ' . $item->transaksi->barang->nama . 
+                        'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
                     ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
                     $item->transaksi->satuan_jual . ' Harsat ' . 
                     number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
@@ -903,10 +909,10 @@ class InvoiceController extends Controller
                 }
                  //coa 1.6 = Persediaan Barang / Stock (Kredit)
                  Jurnal::create([
-                    'coa_id' => 35,
+                    'coa_id' => 89,
                     'nomor' => $jurhutNow,
                     'tgl' => $tgl,
-                    'keterangan' => 'Hutang Usaha ' . $result[0]->transaksi->suppliers->nama,
+                    'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
                     'debit' => 0, // Menyimpan subtotal sebagai debit
                     'kredit' => $subtotal, // Kredit diisi 0
                     'invoice' => null,

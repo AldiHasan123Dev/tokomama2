@@ -134,7 +134,7 @@
                     </form>
                     <h3 class="text-lg font-bold">Konfirmasi Penerimaan: <span id="barang1"></span></h3>
                     <label class="form-control w-full max-w">
-                       
+
                         <!-- Menampilkan semua jumlah beli di sini -->
                         <div id="jumlah_beli_container"></div>
                     </label>
@@ -142,38 +142,37 @@
                         <div class="form-label">
                             <span class="form-label">Status</span>
                         </div>
-                        <input type="text" class="input-field" id="status" required/>
+                        <input type="text" class="input-field" id="status" required />
                     </label>
                     <button type="button" class="submit-button" onclick="updateTransaksi1()">Diterima</button>
                 </div>
             </dialog>
-            
+
             <x-slot:button>
                 <form action="" method="get" id="form">
                     <input type="hidden" name="id_transaksi" id="id_transaksi">
                     <div class="flex gap-2">
                         <div class="flex-gap-2">
                             <input type="hidden" name="invoice_count" id="count" value="1"
-                            class="rounded-md form-control text-center" min="1" style="height: 28px">
+                                class="rounded-md form-control text-center" min="1" style="height: 28px">
                         </div>
-                        <button type="submit" class="btn font-semibold bg-green-500 btn-sm text-white mt-4"
-                        >
-                        Konfirmasi Penerimaan
-                    </button>
-                    
-                        </div>
-                    </form>
-                </x-slot:button>
-                <div class="overflow-x-auto mt-5">
-                    <div class="table-responsive">
-                        <!-- Checkbox "Select All" di luar tabel -->
-                        <div class="mb-2">
-                            <input type="checkbox" class="m-2" id="select-all" /> Pilih Semua
-                        </div>
-                        <table class="table" id="table-getfaktur"></table>
-                        <div id="jqGridPager"></div>
+                        <button type="submit" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">
+                            Konfirmasi Penerimaan
+                        </button>
+
                     </div>
+                </form>
+            </x-slot:button>
+            <div class="overflow-x-auto mt-5">
+                <div class="table-responsive">
+                    <!-- Checkbox "Select All" di luar tabel -->
+                    <div class="mb-2">
+                        <input type="checkbox" class="m-2" id="select-all" /> Pilih Semua
+                    </div>
+                    <table class="table" id="table-getfaktur"></table>
+                    <div id="jqGridPager"></div>
                 </div>
+            </div>
             <!-- Adjusted table ID and pager ID for jqGrid -->
             <table id="jqGrid1" class="table"></table>
             <div id="jqGridPager1"></div>
@@ -182,222 +181,264 @@
 
     <x-slot:script>
         <script>
-$(function () {
-    const table1 = $("#jqGrid1").jqGrid({
-        url: "{{ route('stock.data1') }}", // URL untuk data JSON dari controller
-        datatype: "json",
-        mtype: "GET",
-        colModel: [
-            {
-                label: 'No',
-                name: 'index',
-                align: 'center',
-                width: 20
-            },
-            {
-                name: 'checkbox',
-                index: 'checkbox',
-                label: 'Pilih',
-                width: 50,
-                align: 'center',
-                formatter: function() {
-                    return '<input type="checkbox" class="row-checkbox" />'; // Checkbox untuk setiap baris
-                }
-            },
-            {
+            $(function() {
+                const table1 = $("#jqGrid1").jqGrid({
+                    url: "{{ route('stock.data1') }}", // URL untuk data JSON dari controller
+                    datatype: "json",
+                    mtype: "GET",
+                    colModel: [{
+                            label: 'No',
+                            name: 'index',
+                            align: 'center',
+                            width: 20
+                        },
+                        {
+                            name: 'checkbox',
+                            index: 'checkbox',
+                            label: 'Pilih',
+                            width: 50,
+                            align: 'center',
+                            formatter: function() {
+                                return '<input type="checkbox" class="row-checkbox" />'; // Checkbox untuk setiap baris
+                            }
+                        },
+                        {
                             name: 'id',
                             index: 'id',
                             hidden: true
-            },
-            {
+                        },
+                        {
                             name: 'satuans',
                             index: 'satuans',
                             hidden: true
-            },
-            {
+                        },
+                        {
                             name: 'barangs',
                             index: 'barangs',
                             hidden: true
-            },
-            {
+                        },
+                        {
                             name: 'jumlah_belis',
                             index: 'jumlah_belis',
                             hidden: true
-            },
-            {
-                label: 'Status',
-                name: 'status',
-                width: 200,
-                sortable: false,
-            },
-            {
-                search: true,
-                label: 'Invoice Supp',
-                name: 'invoice_external',
-                width: 100
-            },
-            {
-                search: true,
-                label: 'No BM',
-                name: 'no_bm',
-                width: 100
-            },
-            {
-                search: true,
-                label: 'Barang',
-                name: 'barang.nama',
-                width: 100
-            },
-            {
-                search: true,
-                label: 'Supplier',
-                name: 'supplier',
-                width: 100
-            },
-            {
-                search: true,
-                label: 'Volume Masuk',
-                name: 'total_beli',
-                width: 80,
-                align: "right"
-            },
-            {
-                search: true,
-                label: 'Volume Keluar',
-                name: 'total_jual',
-                width: 80,
-                align: "right"
-            },
-            {
-                search: true,
-                label: 'Satuan Beli',
-                name: 'satuan_beli',
-                width: 50,
-                align: "center"
-            },
-            {
-                search: true,
-                label: 'Satuan Jual',
-                name: 'satuan_jual',
-                width: 50,
-                align: "center"
-            },
-            {
-                search: true,
-                label: 'Sisa',
-                name: 'sisa',
-                width: 50,
-                align: "right"
-            },
-            {
-                search: true,
-                label: 'Harga Beli',
-                name: 'total_harga_beli',
-                width: 80,
-                align: "right",
-                formatter: "number",
-                formatoptions: {
-                    decimalSeparator: ".",
-                    thousandsSeparator: ",",
-                    decimalPlaces: 2, // Jumlah angka di belakang koma
-                    defaultValue: "0.00" // Nilai default jika kosong
+                        },
+                        {
+                            label: 'Status',
+                            name: 'status',
+                            width: 200,
+                            sortable: false,
+                        },
+                        {
+                            search: true,
+                            label: 'Invoice Supp',
+                            name: 'invoice_external',
+                            width: 100
+                        },
+                        {
+                            search: true,
+                            label: 'No BM',
+                            name: 'no_bm',
+                            width: 100
+                        },
+                        {
+                            search: true,
+                            label: 'Barang',
+                            name: 'barang.nama',
+                            width: 100
+                        },
+                        {
+                            search: true,
+                            label: 'Supplier',
+                            name: 'supplier',
+                            width: 100
+                        },
+                        {
+                            search: true,
+                            label: 'Volume Masuk',
+                            name: 'total_beli',
+                            width: 80,
+                            align: "right"
+                        },
+                        {
+                            search: true,
+                            label: 'Volume Keluar',
+                            name: 'total_jual',
+                            width: 80,
+                            align: "right"
+                        },
+                        {
+                            search: true,
+                            label: 'Satuan Beli',
+                            name: 'satuan_beli',
+                            width: 50,
+                            align: "center"
+                        },
+                        {
+                            search: true,
+                            label: 'Satuan Jual',
+                            name: 'satuan_jual',
+                            width: 50,
+                            align: "center"
+                        },
+                        {
+                            search: true,
+                            label: 'Sisa',
+                            name: 'sisa',
+                            width: 50,
+                            align: "right"
+                        },
+                        {
+                            search: true,
+                            label: 'Harga Beli',
+                            name: 'total_harga_beli',
+                            width: 80,
+                            align: "right",
+                            formatter: "number",
+                            formatoptions: {
+                                decimalSeparator: ".",
+                                thousandsSeparator: ",",
+                                decimalPlaces: 2, // Jumlah angka di belakang koma
+                                defaultValue: "0.00" // Nilai default jika kosong
+                            }
+                        }
+                    ],
+                    pager: "#jqGridPager1", // Link pager dengan ID yang benar
+                    rowNum: 20,
+                    rowList: [20, 50, 100], // Pilihan jumlah baris
+                    height: 'auto', // Tinggi tabel otomatis menyesuaikan
+                    viewrecords: true, // Menampilkan jumlah total data
+                    autowidth: true, // Menyesuaikan lebar tabel dengan kontainer
+                    caption: "List Barang Masuk", // Judul tabel
+                    loadonce: true, // Memuat semua data hanya sekali
+                    search: true, // Mengaktifkan toolbar pencarian
+                    toolbar: [true, "top"], // Menampilkan toolbar di bagian atas tabel
+                    filterToolbar: true, // Mengaktifkan filter toolbar
+                    gridComplete: function() {
+                        // Optional: Tambahkan logika jika diperlukan
+                    }
+                });
+
+                // Aktifkan filter toolbar (opsional jika sudah diaktifkan di opsi)
+                $("#jqGrid1").jqGrid('filterToolbar');
+                $('#select-all').change(function() {
+                    var checked = $(this).is(':checked');
+                    $('.row-checkbox').prop('checked', checked);
+                });
+            });
+
+            // Menghandle form submit untuk mengambil ID transaksi yang dipilih
+            $('#form').submit(function(e) {
+                e.preventDefault(); // Mencegah form untuk submit secara langsung
+
+                var ids = $("#jqGrid1 input:checkbox:checked").map(function() {
+                    var rowId = $(this).closest('tr').attr('id'); // Ambil row ID
+                    return $("#jqGrid1").jqGrid('getCell', rowId, 'id'); // Ambil kolom 'id' yang di-hidden
+                }).get();
+
+                console.log("IDs:", ids);
+
+
+                var barangs = $("#jqGrid1 input:checkbox:checked").map(function() {
+                    return $(this).closest('tr').find('td:eq(4)')
+                .text(); // Mengambil nama barang dari kolom "Barang"
+                }).get();
+                var barang = barangs.join(",").split(",");
+                console.log("Barang:", barang);
+
+                var jumlahBelis = $("#jqGrid1 input:checkbox:checked").map(function() {
+                    return $(this).closest('tr').find('td:eq(5)')
+                .text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
+                }).get();
+                var jumlahBeli = jumlahBelis.join(",").split(",");
+                console.log("Jumlah Beli:", jumlahBeli);
+                var satuanBelis = $("#jqGrid1 input:checkbox:checked").map(function() {
+                    return $(this).closest('tr').find('td:eq(3)')
+                .text(); // Mengambil satuan beli dari kolom "Satuan Beli"
+                }).get();
+                var satuanBeli = satuanBelis.join(",").split(",");
+                console.log("Satuan Beli:", satuanBeli);
+
+                var noBm = $("#jqGrid1 input:checkbox:checked").map(function() {
+                    return $(this).closest('tr').find('td:eq(8)')
+                .text(); // Mengambil nama barang dari kolom "No BM"
+                }).get();
+                console.log("No BM:", noBm);
+                var status = $("#jqGrid1 input:checkbox:checked").map(function() {
+                    return $(this).closest('tr').find('td:eq(6)')
+                .text(); // Mengambil nama barang dari kolom "No BM"
+                }).get();
+                console.log("Status :", status);
+                var suppliers = $("#jqGrid1 input:checkbox:checked").map(function() {
+                    return $(this).closest('tr').find('td:eq(10)').text()
+                .trim(); // Ambil dan hapus spasi ekstra
+                }).get();
+
+                // Pecah data jika ada yang dipisahkan koma
+                var supplier = suppliers.join(",").split(",");
+
+                // Hapus duplikasi dan cek jumlah unique supplier
+                var uniqueSuppliers = [...new Set(supplier)];
+                
+                var no_bms = $("#jqGrid1 input:checkbox:checked").map(function() {
+                    return $(this).closest('tr').find('td:eq(8)').text()
+                .trim(); // Ambil dan hapus spasi ekstra
+                }).get();
+
+                // Pecah data jika ada yang dipisahkan koma
+                var no_bm = no_bms.join(",").split(",");
+
+                // Hapus duplikasi dan cek jumlah unique supplier
+                var uniqueno_bms = [...new Set(no_bm)];
+
+                console.log("Supplier:", supplier);
+                console.log("Unique Suppliers:", uniqueSuppliers);
+                console.log("No BM:", no_bm);
+                console.log("Unique No BMs:", uniqueno_bms);
+
+                if (uniqueSuppliers.length > 1) {
+                    alert("Item data yang anda pilih dari supplier yang berbeda,Silahkan pilih Supplier yang sama!");
+                    return;
                 }
-            }
-        ],
-        pager: "#jqGridPager1", // Link pager dengan ID yang benar
-        rowNum: 10,
-        rowList: [50, 100, 500], // Pilihan jumlah baris
-        height: 'auto', // Tinggi tabel otomatis menyesuaikan
-        viewrecords: true, // Menampilkan jumlah total data
-        autowidth: true, // Menyesuaikan lebar tabel dengan kontainer
-        caption: "List Barang Masuk", // Judul tabel
-        loadonce: true, // Memuat semua data hanya sekali
-        search: true, // Mengaktifkan toolbar pencarian
-        toolbar: [true, "top"], // Menampilkan toolbar di bagian atas tabel
-        filterToolbar: true, // Mengaktifkan filter toolbar
-        gridComplete: function () {
-            // Optional: Tambahkan logika jika diperlukan
-        }
-    });
-
-    // Aktifkan filter toolbar (opsional jika sudah diaktifkan di opsi)
-    $("#jqGrid1").jqGrid('filterToolbar');
-    $('#select-all').change(function() {
-        var checked = $(this).is(':checked');
-        $('.row-checkbox').prop('checked', checked);
-    });
-});
-
-// Menghandle form submit untuk mengambil ID transaksi yang dipilih
-$('#form').submit(function (e) {
-    e.preventDefault(); // Mencegah form untuk submit secara langsung
-
-    var ids = $("#jqGrid1 input:checkbox:checked").map(function() {
-    var rowId = $(this).closest('tr').attr('id'); // Ambil row ID
-    return $("#jqGrid1").jqGrid('getCell', rowId, 'id'); // Ambil kolom 'id' yang di-hidden
-}).get();
-
-console.log("IDs:", ids);
 
 
-var barangs = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(4)').text(); // Mengambil nama barang dari kolom "Barang"
-}).get();
-var barang = barangs.join(",").split(",");
-console.log("Barang:", barang);
+                if (uniqueno_bms.length > 1) {
+                    alert("Item data yang anda pilih dari No BM yang berbeda,Silahkan pilih No BM yang sama!");
+                    return;
+                }
 
-var jumlahBelis = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(5)').text(); // Mengambil jumlah beli dari kolom "Volume Masuk"
-}).get();
-var jumlahBeli = jumlahBelis.join(",").split(",");
-console.log("Jumlah Beli:", jumlahBeli);
-var satuanBelis = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(3)').text(); // Mengambil satuan beli dari kolom "Satuan Beli"
-}).get();
-var satuanBeli= satuanBelis.join(",").split(",");
-console.log("Satuan Beli:", satuanBeli);
 
-var noBm= $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(8)').text(); // Mengambil nama barang dari kolom "No BM"
-}).get();
-console.log("No BM:", noBm);
-var status = $("#jqGrid1 input:checkbox:checked").map(function() {
-    return $(this).closest('tr').find('td:eq(6)').text(); // Mengambil nama barang dari kolom "No BM"
-}).get();
-console.log("Status :", status);
+                if (status.some(s => s !== "-")) {
+                    alert("Status sudah divalidasi!");
+                    return;
+                }
+                if (ids.length > 0) {
+                    // Jika ada checkbox yang dicentang, tampilkan modal dengan data yang sesuai
+                    // Iterasi untuk semua item yang dipilih
+                    inputTarif(ids, jumlahBeli, barang, satuanBeli,
+                    noBm); // Tampilkan data untuk semua item yang dipilih
+                } else {
+                    alert("Pilih barang masuk terlebih dahulu!");
+                }
+            });
 
-if (status.some(s => s !== "-")) {
-    alert("Status sudah divalidasi!");
-    return;
-} 
-if (ids.length > 0) {
-    // Jika ada checkbox yang dicentang, tampilkan modal dengan data yang sesuai
-    // Iterasi untuk semua item yang dipilih
-    inputTarif(ids, jumlahBeli, barang, satuanBeli, noBm); // Tampilkan data untuk semua item yang dipilih
-} 
-else {
-    alert("Pilih barang masuk terlebih dahulu!");
-}
-});
+            function inputTarif(ids_transaksi, jumlah, nama_barang, satuan_beli, no_bm) {
+                let itemsHTML = ''; // Tempat untuk menampung data yang ingin ditampilkan
 
-function inputTarif(ids_transaksi, jumlah, nama_barang, satuan_beli, no_bm) {
-    let itemsHTML = ''; // Tempat untuk menampung data yang ingin ditampilkan
+                // Menggunakan Set untuk mengambil nilai unik dari no_bm
+                let uniqueNoBm = [...new Set(no_bm)];
 
-    // Menggunakan Set untuk mengambil nilai unik dari no_bm
-    let uniqueNoBm = [...new Set(no_bm)];
+                // Menampilkan informasi barang yang dipilih dalam modal (dengan no_bm yang unik)
+                for (let i = 0; i < uniqueNoBm.length; i++) {
+                    let decodedNamaBarang = decodeURIComponent(uniqueNoBm[i].replace(/\+/g, ' ')); // Decode nama barang
+                    itemsHTML += `<p>${decodedNamaBarang}</p>`;
+                }
 
-    // Menampilkan informasi barang yang dipilih dalam modal (dengan no_bm yang unik)
-    for (let i = 0; i < uniqueNoBm.length; i++) {
-        let decodedNamaBarang = decodeURIComponent(uniqueNoBm[i].replace(/\+/g, ' ')); // Decode nama barang
-        itemsHTML += `<p>${decodedNamaBarang}</p>`;
-    }
+                $('#barang1').html(itemsHTML); // Menampilkan semua item yang dipilih
+                $('#jumlah_beli_container').html(''); // Clear previous entries
 
-    $('#barang1').html(itemsHTML); // Menampilkan semua item yang dipilih
-    $('#jumlah_beli_container').html(''); // Clear previous entries
-
-    // Dinamis menambahkan jumlah beli per barang
-    for (let i = 0; i < jumlah.length; i++) {
-        $('#jumlah_beli_container').append(`
+                // Dinamis menambahkan jumlah beli per barang
+                for (let i = 0; i < jumlah.length; i++) {
+                    $('#jumlah_beli_container').append(`
         <br>
             <div>
                 <input type="hidden" id="ids_transaksi_${i}" value="${ids_transaksi[i]}" class="input-field" />
@@ -405,71 +446,71 @@ function inputTarif(ids_transaksi, jumlah, nama_barang, satuan_beli, no_bm) {
                 <input type="text" id="jumlah_beli_${i}" value="${jumlah[i]}" class="input-field" />
             </div>
         `);
-    }
+                }
 
-    my_modal_1.showModal(); // Menampilkan modal
-}
+                my_modal_1.showModal(); // Menampilkan modal
+            }
 
 
-function updateTransaksi1() {
-    let jumlahBeli = [];
-    let id = [];
-    let status = $('#status').val();
+            function updateTransaksi1() {
+                let jumlahBeli = [];
+                let id = [];
+                let status = $('#status').val();
 
-    // Ambil nilai jumlah beli dari semua input yang telah ditampilkan
-    $('input[id^="jumlah_beli_"]').each(function(index) {
-        jumlahBeli.push($(this).val()); // Mengambil value dari setiap input
-    });
-    $('input[id^="ids_transaksi_"]').each(function() {
-    let val = $(this).val();
-    if (val) {
-        // Jika terdapat koma, pecah menjadi array dan gabungkan dengan id[]
-        id = id.concat(val.split(","));
-    }
-});
+                // Ambil nilai jumlah beli dari semua input yang telah ditampilkan
+                $('input[id^="jumlah_beli_"]').each(function(index) {
+                    jumlahBeli.push($(this).val()); // Mengambil value dari setiap input
+                });
+                $('input[id^="ids_transaksi_"]').each(function() {
+                    let val = $(this).val();
+                    if (val) {
+                        // Jika terdapat koma, pecah menjadi array dan gabungkan dengan id[]
+                        id = id.concat(val.split(","));
+                    }
+                });
 
-// Pastikan array bersih dari nilai kosong atau 'undefined'
-id = id.filter(val => val !== "undefined" && val !== "");
+                // Pastikan array bersih dari nilai kosong atau 'undefined'
+                id = id.filter(val => val !== "undefined" && val !== "");
 
-    // Log data ke console untuk debugging
-    console.log("Jumlah Beli:", jumlahBeli);
-    console.log("ID Transaksi:", id);
-    console.log("Status:", status);
+                // Log data ke console untuk debugging
+                console.log("Jumlah Beli:", jumlahBeli);
+                console.log("ID Transaksi:", id);
+                console.log("Status:", status);
 
-    // Validasi apakah jumlah beli dan status sudah diisi
-    if (jumlahBeli.some(jumlah => !jumlah) || status === "") {
-        alert("Silakan diisi status/keterangan. Contoh : Sesuai");
-        return; // Hentikan eksekusi jika input kosong
-    }
+                // Validasi apakah jumlah beli dan status sudah diisi
+                if (jumlahBeli.some(jumlah => !jumlah) || status === "") {
+                    alert("Silakan diisi status/keterangan. Contoh : Sesuai");
+                    return; // Hentikan eksekusi jika input kosong
+                }
 
-    if (confirm('Apakah Anda yakin?')) {
-    let dataKirim = {
-        id: id, // Array ID transaksi
-        jumlah_beli: jumlahBeli, // Array jumlah beli
-        stts: status, // Status transaksi
-        _token: "{{ csrf_token() }}"
-    };
+                if (confirm('Apakah Anda yakin?')) {
+                    let dataKirim = {
+                        id: id, // Array ID transaksi
+                        jumlah_beli: jumlahBeli, // Array jumlah beli
+                        stts: status, // Status transaksi
+                        _token: "{{ csrf_token() }}"
+                    };
 
-    console.log("Data yang dikirim ke server:", dataKirim); // Debugging
+                    console.log("Data yang dikirim ke server:", dataKirim); // Debugging
 
-    $.ajax({
-        type: "PUT",
-        url: "{{ route('transaksi.update1') }}",
-        data: dataKirim,
-        success: function(response) {
-            console.log("Response dari server:", response);
-            refreshTable();
-            alert("Update Berhasil!");
-            my_modal_1.close();
-        },
-        error: function(xhr, status, error) {
-            console.log("Error:", xhr.responseText);
-            alert("Update gagal! Cek console untuk detail.");
-        }
-    });
-}
+                    $.ajax({
+                        type: "PUT",
+                        url: "{{ route('transaksi.update1') }}",
+                        data: dataKirim,
+                        success: function(response) {
+                            console.log("Response dari server:", response);
+                            refreshTable();
+                            alert("Update Berhasil!");
+                            my_modal_1.close();
+                        },
+                        error: function(xhr, status, error) {
+                            console.log("Error:", xhr.responseText);
+                            alert("Update gagal! Cek console untuk detail.");
+                        }
+                    });
+                }
 
-}
+            }
 
 
 
@@ -488,19 +529,19 @@ id = id.filter(val => val !== "undefined" && val !== "");
                 }
                 return parseInt(cleanValue) || 0; // Ubah ke integer, default 0 jika NaN
             }
-            function refreshTable() {
-    // Pastikan tabel sudah diinisialisasi sebelum dipanggil
-    if ($("#jqGrid1").getGridParam) {
-        $("#jqGrid1")
-            .setGridParam({
-                datatype: 'json', // Atur ulang tipe data agar data baru diambil
-            })
-            .trigger("reloadGrid"); // Muat ulang tabel
-    } else {
-        console.error("Tabel jqGrid1 belum diinisialisasi.");
-    }
-}
 
+            function refreshTable() {
+                // Pastikan tabel sudah diinisialisasi sebelum dipanggil
+                if ($("#jqGrid1").getGridParam) {
+                    $("#jqGrid1")
+                        .setGridParam({
+                            datatype: 'json', // Atur ulang tipe data agar data baru diambil
+                        })
+                        .trigger("reloadGrid"); // Muat ulang tabel
+                } else {
+                    console.error("Tabel jqGrid1 belum diinisialisasi.");
+                }
+            }
         </script>
     </x-slot:script>
 

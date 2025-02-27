@@ -34,7 +34,7 @@
 
         table {
             border-collapse: collapse;
-            width: 85%;            
+            width: 80%;            
             margin:0 auto;
         }
 
@@ -235,12 +235,41 @@
                                 @endif
                             </td>                    
                             <td class="text-center border border-black">{{ number_format($item->jumlah, 0, ',', '.') }} {{ $item->transaksi->satuan_jual }}</td>
-                            <td class="border border-black" style="text-align: right;">{{ number_format($item->harga, 0, ',', '.') }}</td>
-                            <td class="border border-black" style="text-align: right;">{{ number_format($item->harga * $item->jumlah, 0, ',', '.') }}</td>
+                            <td class="border border-black" style="text-align: right;">
+                                @if($barang->status_ppn == 'ya')
+                                {{ number_format($item->harga * 1.11, 0, ',', '.') }}
+                                @else
+                                {{ number_format($item->harga, 0, ',', '.') }}
+                                @endif
+                            </td>
+                            <td class="border border-black" style="text-align: right;">
+                                @if($barang->status_ppn == 'ya')
+                                {{ number_format(($item->harga * 1.11) * $item->jumlah, 0, ',', '.') }}
+                                @else
+                                {{ number_format($item->harga * $item->jumlah, 0, ',', '.') }}
+                                @endif
+                            </td>
                         </tr>
                     @endfor
                     @if ($page == $pages) 
                     <tr>
+<<<<<<< HEAD
+=======
+                        @php
+                        $dpp = $total * 11/12;
+                        $ppn = ($barang->value_ppn / 100) * $dpp;
+                    @endphp
+                        <td colspan="5" class="border border-black" style="text-align: right;">
+                            <b>TOTAL</b>
+                        </td>
+                        <td class="border border-black" style="text-align: right;" >
+                        @if($barang->status_ppn == 'ya')
+                            <b>{{ number_format($total * 1.11, 0, ',', '.') }}</b>
+                        @else
+                            <b>{{ number_format($total, 0, ',', '.') }}</b>
+                        @endif
+                        </td>
+>>>>>>> upstream/main
                     {{-- <td colspan="5"  style="text-align: right;">
                         Subtotal
                         <br>
@@ -270,12 +299,15 @@
                         -
                     @endif
                     </td> --}}
+<<<<<<< HEAD
                     @php
                         $ppn = ($barang->value_ppn / 100) * $dpp
                     @endphp
+=======
+>>>>>>> upstream/main
                 </tr>
-                <tr>
-                    <td colspan="5" class="border border-black" style="text-align: right;">
+                {{-- <tr> --}}
+                    {{-- <td colspan="5" class="border border-black" style="text-align: right;">
                         <b>TOTAL</b>
                     </td>
                     <td class="border border-black" style="text-align: right;" >
@@ -284,8 +316,8 @@
                     @else
                         <b>{{ number_format($total, 0, ',', '.') }}</b>
                     @endif
-                    </td>
-                </tr>
+                    </td> --}}
+                {{-- </tr> --}}
                 </tbody>
                 @endif
             </table>
@@ -302,6 +334,7 @@
             </p>
             <table style="font-size: 0.8rem;">
                 <tr>
+<<<<<<< HEAD
                     <th style="text-align: left; padding-left: 50px; font-style: italic;">
                     </th>
                     <th style="text-align: left; padding-left: 50px; font-style: italic;">
@@ -318,13 +351,35 @@
                 </tr>
                 <tr>
                     <th style="text-align: left; padding-left: 50px; font-style: italic;"><br></th>
+=======
+                    <th style="text-align: left; padding-right: 50px; font-style: italic;">Pembayaran ke rekening:</th>
+                    <td style="padding-left: 40px;">Penerima</td>
+                    <td style="align-items:left ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding-right: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
+                    <td></td>
+                    <td style="text-align: center;">Hormat Kami</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding-right: 50px; font-style: italic;"> Bank Mandiri <br> 14.000.45006.005</th>
+>>>>>>> upstream/main
                     <th></th>
                 </tr>
                 <tr>
                     <th style="text-align: left; padding-left: 50px;"></th>
+<<<<<<< HEAD
                     <th style="text-align: left; padding-left: 50px;"></th>
                     <th style="text-align: left; padding-left: 50px;"></th>
+=======
+                    <td style="padding-top:30px;">_____________________</td>
+>>>>>>> upstream/main
                     <th style="padding-top:30px">(MAMA BAHAGIA)</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>TD. Tgn & Nama Terang</td>
+                    <td></td>
                 </tr>
             </table>
         @endif

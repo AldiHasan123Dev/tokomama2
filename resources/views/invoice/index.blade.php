@@ -1,9 +1,23 @@
 <x-Layout.layout>
     <x-keuangan.card-keuangan>
+        <style>
+            .server-time {
+                font-size: 18px;
+                font-weight: bold;
+                color: #fff04d;
+                background-color: #ff0000;
+                padding: 10px 15px;
+                border-radius: 5px;
+                display: inline-block;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            }
+        </style>
         <x-slot:tittle>Pengambilan Nomor Faktur Untuk Invoice</x-slot:tittle>
         <form action="{{ route('preview.invoice') }}" method="post" id="form">
             @csrf
-            
+            <p class="server-time">
+                Silakan pilih Tgl Invoice, sebab Tgl dan Jam Server adalah : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
+            </p>
             <input type="date" name="tgl_invoice" value="{{ date('Y-m-d') }}">
             <input type="text" value="{{ $no_JNL }}/TM/{{ date('y') }}" name="tipe" readonly>
             <input type="hidden" name="invoice_count" value="{{ $invoice_count }}">
@@ -17,6 +31,7 @@
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Nama Barang</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Jumlah Barang</th>
+                            {{-- <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli Satuan</th> --}}
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Beli Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Harga Jual Satuan</th>
                             <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Total Harga</th>
@@ -37,13 +52,42 @@
                                 </select>
                             </td>                       
                             <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
-                                <input onclick="this.select()" id="qty-{{ $item->id }}-1" type="number" onchange="inputBarang({{ $item->id }}, this.value,{{ $item->harga_jual }}, {{ $item->jumlah_jual }})" name="jumlah[{{ $item->id }}][]" value="{{ $item->sisa }}">
+                                <input type="hidden" id="qty-{{ $item->id }}-1" name="jumlah[{{ $item->id }}][]" value="{{ $item->sisa }}">
+                                {{ $item->sisa }}
                             </td>
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align: end;" id="harga_beli-{{ $item->id }}-1">{{ number_format($item->harga_beli) }}</td>
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align: end;">
-                                <input onclick="this.select()" id="price-{{ $item->id }}-1" type="number"  onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), this.value, {{ $item->jumlah_jual }})" name="harga_jual[{{ $item->id }}][]" value="{{ $item->harga_jual }}">
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: end;" id="harga_beli_ppn-{{ $item->id }}-1">
+                                @if ($item->barang->status_ppn == 'ya')    
+                                    {{ number_format(($item->harga_beli) + (($item->harga_beli * 11 / 12) * ($item->barang->value_ppn / 100))) }}
+                                @else
+                                    {{ number_format($item->harga_beli) }}
+                                @endif
                             </td>                            
-                            <td style="border: 1px solid #ddd; padding: 12px; text-align:end" id="total-{{ $item->id }}-1">{{ number_format($item->harga_jual * $item->jumlah_jual) }}</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align: end;">
+                                @if ($item->barang->status_ppn == 'ya')  
+                                    <input onclick="this.select()" 
+                                           id="price-{{ $item->id }}-1" 
+                                           type="text" 
+                                           oninput="formatRibuan(this)" 
+                                           onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), getCleanNumber(this.value), {{ $item->jumlah_jual }})" 
+                                           name="harga_jual[{{ $item->id }}][]" 
+                                           value="{{ number_format(round($item->harga_jual * 1.11), 0, '.', ',') }}">
+                                @else
+                                    <input onclick="this.select()" 
+                                           id="price-{{ $item->id }}-1" 
+                                           type="text" 
+                                           oninput="formatRibuan(this)" 
+                                           onchange="inputBarang({{ $item->id }}, $('#qty-{{ $item->id }}-1').val(), getCleanNumber(this.value), {{ $item->jumlah_jual }})" 
+                                           name="harga_jual[{{ $item->id }}][]" 
+                                           value="{{ number_format($item->harga_jual, 0, '.', ',') }}">
+                                @endif
+                            </td>                          
+                            <td style="border: 1px solid #ddd; padding: 12px; text-align:end" id="total-{{ $item->id }}-1">
+                                @if ($item->barang->status_ppn == 'ya')  
+                                {{ number_format(($item->harga_jual * $item->jumlah_jual) * 1.11) }}
+                                @else
+                                {{ number_format($item->harga_jual * $item->jumlah_jual) }}
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -67,21 +111,37 @@
     </x-keuangan.card-keuangan>
 
     <x-slot:script>
-    <script>
-         function formatRibuan(input) {
-                let angka = input.value.replace(/,/g, ''); // Hapus koma
-                input.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Format dengan koma
-            }
+        <script>
+    function formatRibuan(input) {
+        let angka = input.value.replace(/,/g, ''); // Hapus semua koma
+        input.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Tambahkan format ribuan
+    }
 
-            function getCleanNumber(value) {
-                // Ganti koma dengan kosong dan titik terakhir dengan koma
-                const cleanValue = value.replace(/,/g, '').replace(/\.(?=.*\.)/g, ''); // Hapus koma
-                const decimalIndex = value.lastIndexOf('.');
-                if (decimalIndex !== -1) {
-                    return parseFloat(cleanValue); // Menggunakan parseFloat untuk angka desimal
-                }
-                return parseInt(cleanValue) || 0; // Ubah ke integer, default 0 jika NaN
-            }
+    function getCleanNumber(value) {
+        let cleanValue = value.replace(/,/g, ''); // Hapus semua koma
+        return isNaN(cleanValue) ? 0 : Number(cleanValue); // Konversi ke angka
+    }
+</script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+             // Fungsi untuk memperbarui waktu
+             function updateServerTime() {
+                 fetch("{{ route('server.time') }}")
+                     .then(response => response.json()) // Mengambil data JSON dari server
+                     .then(data => {
+                         document.getElementById("server-time").textContent = data.time; // Update elemen dengan id "server-time"
+                     })
+                     .catch(error => console.error('Error fetching server time:', error)); // Tangani error
+             }
+     
+             // Perbarui waktu server pertama kali saat halaman dimuat
+             updateServerTime();
+     
+             // Perbarui setiap detik
+             setInterval(updateServerTime, 1000);
+         });
+         </script>
+    <script>
         let idx = 1;
         let ids = @json($ids);
         let array_jumlah = @json($array_jumlah);

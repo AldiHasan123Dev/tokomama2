@@ -41,6 +41,18 @@
         #table-barang td {
             padding: 0px;
         }
+        .server-time {
+                font-size: 18px;
+                margin-bottom: 15px;
+                margin-left: 150px;
+                font-weight: bold;
+                color: #fff04d;
+                background-color: #ff0000;
+                padding: 10px 15px;
+                border-radius: 5px;
+                display: inline-block;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            }
     </style>
     <form action="{{ route('surat-jalan.store') }}" target="_blank" method="post" id="reset" onsubmit="return validateForm()">
         @csrf
@@ -123,6 +135,9 @@
             <div class="card bg-base-400 shadow-xl mb-5">
                 <div class="card-body">
                     <div class="block overflow-x-auto w-full">
+                        <p class="server-time">
+                            Silakan pilih Tgl Surat Jalan, sebab Tgl dan Jam Server adalah : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
+                        </p>
                         <div class="grid grid-cols-2 gap-4 mb-5">
                             <div style="width: 500px;" class="center-container">
                                 <input type="hidden" name="id_ekspedisi" value="1" id="id_ekspedisi">
@@ -264,6 +279,25 @@
             </div>
         </div>
     </form>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+         // Fungsi untuk memperbarui waktu
+         function updateServerTime() {
+             fetch("{{ route('server.time') }}")
+                 .then(response => response.json()) // Mengambil data JSON dari server
+                 .then(data => {
+                     document.getElementById("server-time").textContent = data.time; // Update elemen dengan id "server-time"
+                 })
+                 .catch(error => console.error('Error fetching server time:', error)); // Tangani error
+         }
+ 
+         // Perbarui waktu server pertama kali saat halaman dimuat
+         updateServerTime();
+ 
+         // Perbarui setiap detik
+         setInterval(updateServerTime, 1000);
+     });
+     </script>
     <script>
 document.getElementById("submit").addEventListener("click", function (e) {
     let isFilled = true; // Menganggap form terisi sampai terbukti tidak terisi

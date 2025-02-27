@@ -28,10 +28,11 @@ class JurnalALLExport implements FromView
 
         // Ambil data jurnal berdasarkan rentang tanggal
         $jurnal = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
-            ->whereBetween('jurnal.tgl', [$mulai, $sampai]) // Rentang tanggal
-            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->orderBy('jurnal.tgl')
-            ->get();
+        ->whereBetween('jurnal.tgl', [$mulai, $sampai]) // Rentang tanggal
+        ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+        ->orderBy('jurnal.tgl', 'desc')->orderBy('jurnal.created_at', 'desc')->orderBy('jurnal.no', 'desc')->orderBy('jurnal.id', 'asc')
+        ->get();
+    
             // dd($jurnal,$mulai,$sampai);
 
             return view('export.laporan-jurnal', [

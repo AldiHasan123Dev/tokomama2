@@ -65,21 +65,7 @@
                 name: 'jumlah_beli',
                 width: 40,
                 align: 'right'
-            },
-            // {
-            //     search: true,
-            //     label: 'Sub Total',
-            //     name: 'total',
-            //     width: 70,
-            //     align: 'right'
-            // },
-            {
-                search: true,
-                label: 'PPN',
-                name: 'ppn',
-                width: 70,
-                align: 'right'
-            },
+            }
         ],
         pager: "#sjPager", // Elemen pager
         rowNum: 20, // Jumlah baris per halaman
@@ -170,10 +156,7 @@
                         Nama Supplier :
                         <input type="text" name="nama_supplier" value="${nama_supplier}" class="border-none" readonly />
                     </label>
-                    <label class="input border flex items-center gap-2 mt-3">
-                        PPN :
-                        <input type="text" id="ppn" name="ppn" value="${ppnFormatted}" class="border-none" readonly />
-                    </label>
+                        <input type="hidden" id="ppn" name="ppn" value="${ppnFormatted}" class="border-none" readonly />
                     <label class="input border flex items-center gap-2 mt-3">
                         Invoice External :
                         <input type="text" id="invoice_external" name="invoice_external" value="${invoice_external}" required class="border-none" autofocus />

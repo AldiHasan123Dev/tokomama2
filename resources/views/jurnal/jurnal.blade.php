@@ -146,7 +146,16 @@
                 /* Garis tepi */
                 text-align: center;
             }
-
+            .server-time {
+        font-size: 18px;
+        font-weight: bold;
+        color: #ffffff;
+        background-color: #007bff;
+        padding: 10px 15px;
+        border-radius: 5px;
+        display: inline-block;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    } 
             /* Pengaturan untuk header tabel */
             table.dataTable thead th {
                 background-color: #f4f4f4;
@@ -196,19 +205,20 @@
 
         <x-slot:tittle>Menu Jurnal</x-slot:tittle>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <p class="server-time">Tanggal Server: {{ date('Y-m-d H:i:s') }}</p>
         <div class="overflow-x-auto mt-8">
             <a href="{{ route('jurnal-manual.index') }}">
                 <button class="btn bg-green-500 text-white font-bold hover:bg-green-700 m-2x">Input Jurnal</button>
             </a>
-            <a href="/invoice-external">
-                <button class="btn bg-blue-500 text-white font-bold hover:bg-gray-700">Jurnal Uang Muka</button>
-            </a>
             <a href="{{ route('jurnal.jurnal-merger') }}">
                 <button class="btn bg-gray-500 text-white font-bold hover:bg-gray-700 mb-2px">Merge Jurnal</button>
             </a>
-
+            
             <button class="btn bg-red-500 text-white font-bold hover:bg-gray-700 mb-2px" id="ipt_jurnal">Export
                 Jurnal</button>
+                <a href="/invoice-external">
+                    <button class="btn bg-blue-500 text-white font-bold hover:bg-gray-700">Penerimaan Tagihan</button>
+                </a>
 
             <div class="flex flex-row mb-16 mt-8">
                 <label for="month" class="font-bold mt-2">Bulan:</label>

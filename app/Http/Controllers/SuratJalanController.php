@@ -9,6 +9,7 @@ use App\Models\Jurnal;
 use App\Models\Nopol;
 use App\Models\Invoice;
 use App\Models\Satuan;
+use DateTime;
 use App\Models\Supplier;
 use App\Models\SuratJalan;
 use App\Models\Transaction;
@@ -27,7 +28,8 @@ class SuratJalanController extends Controller
     public function index()
     {
         $nopol = Nopol::where('status', 'aktif')->get();
-        return view('surat_jalan.index', compact('nopol'));
+        $customer = Customer::all();
+        return view('surat_jalan.index', compact('nopol','customer'));
     }
 
     /**
@@ -224,6 +226,7 @@ class SuratJalanController extends Controller
                             ]);
                         
                     }
+
                 }
             }
         } else {
@@ -305,9 +308,11 @@ class SuratJalanController extends Controller
     {
         // id, invoice, nomor_surat, kepada, jumlah, satuan, jenis_barang, nama_kapal, no_cont, no_seal, no_pol, no_job
         $data = SuratJalan::find($request->id);
+        $customer = Customer::find($request->kepada);
         $data->invoice = $request->invoice;
         $data->nomor_surat = $request->nomor_surat;
-        $data->kepada = $request->kepada;
+        $data->id_customer = $customer->id;
+        $data->kepada = $customer->nama;
         $data->jumlah = $request->jumlah;
         $data->satuan = $request->satuan;
         // $data->jenis_barang = $request->jenis_barang;
@@ -364,14 +369,12 @@ class SuratJalanController extends Controller
             Jurnal::where('invoice_external', $inext)
                   ->where('tipe', 'BBK')
                   ->whereNotNull('nomor') // Tambahkan validasi nomor tidak kosong
-                  ->update(['invoice_external' => $request->invoice_external,
-                            'tgl' => $request->tgl_invx]);
+                  ->update(['invoice_external' => $request->invoice_external]);
 
                   Jurnal::where('invoice_external', $inext)
                   ->where('tipe', 'JNL')
                   ->whereNotNull('nomor') // Tambahkan validasi nomor tidak kosong
-                  ->update(['invoice_external' => $request->invoice_external,
-                            'tgl' => $request->tgl_invx]);
+                  ->update(['invoice_external' => $request->invoice_external]);
         }
     }
 
@@ -389,9 +392,14 @@ class SuratJalanController extends Controller
     private function autoInvoiceExternalJurnal($request)
 {
     $currentYear = $request->tgl_invx;
-    $noBBK = Jurnal::where('tipe', 'BBK')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
-    $no_BBK =  $noBBK ? $noBBK->no + 1 : 1;   
-    $nomor_surat = "$no_BBK/BBK-TM/" . date('y');
+    $date = new DateTime($currentYear);
+    $month = $date->format('m');
+    $year = $date->format('y');
+    $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $month)->orderBy('no', 'desc')->first() ?? 0;
+    $no_JNL =  $noJNL ? $noJNL->no + 1 : 1;   
+    $no_JNL1 =  $no_JNL + 1;   
+    $nomor_surat = "$month-$no_JNL/TM/$year";
+    $nomor_surat1 = "$month-$no_JNL1/TM/$year";
 
 
     // Ambil data transaksi berdasarkan invoice_external
@@ -408,36 +416,32 @@ class SuratJalanController extends Controller
         ->where('invoice_external', $request->tgl_invx)
         ->where('keterangan', 'like', '%Pembelian%')
         ->get();
-
-    if ($existingJournals->isNotEmpty()) {
+        
+        if ($existingJournals->isNotEmpty()) {
         // Jika jurnal sudah ada, cukup update nomor jurnalnya
         foreach ($existingJournals as $journal) {
             $journal->update([
-                'nomor' => $nomor_surat,
-                'invoice_external' => $invoice_external,
-                'tgl' => $currentYear // Pastikan $invoice_external berisi nilai yang diinginkan
+                'invoice_external' => $request->invoice_external
             ]);
-            
         }
     } else {
         // Buat atau update entri jurnal baru hanya jika belum ada jurnal yang sesuai
-        DB::transaction(function () use ($data, $currentYear, $request, $no_BBK, $nomor_surat) {
             $total = 0;
+            $total_ppn = 0;
             foreach ($data as $item) {
                     $value_ppn = $item->barang->value_ppn / 100;
-                    $total += round($item->harga_beli * $item->jumlah_beli * $value_ppn);
+                    $total_ppn += round($item->harga_beli * $item->jumlah_beli * $value_ppn);
+                    $total  += round($item->harga_beli * $item->jumlah_beli);
                     
-                    
-                    Jurnal::updateOrCreate(
+                    //Jurnal Persediaan
+                    Jurnal::create(
                         [
                             'id_transaksi' => $item->id,
-                            'tipe' => 'BBK',
-                            'coa_id' => 30 // Harsat beli
-                        ],
-                        [
+                            'tipe' => 'JNL',
+                            'coa_id' => 91,
                             'nomor' => $nomor_surat,
                             'tgl' => $currentYear,
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' .  number_format($item->jumlah_beli, 0, ',', '.') . ' ' .  $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suppliers->nama,
+                            'keterangan' => 'Persediaan SBY ' . $item->barang->nama . ' (' .  number_format($item->jumlah_beli, 0, ',', '.') . ' ' .  $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') - ' . $item->suppliers->nama,
                             'debit' => round($item->harga_beli * $item->jumlah_beli),
                             'kredit' => 0,
                             'invoice' => null,
@@ -445,77 +449,122 @@ class SuratJalanController extends Controller
                             'nopol' => $item->suratJalan->no_pol ?? null,
                             'container' => null,
                             'id_transaksi'=>$item->id,
-                            'tipe' => 'BBK',
-                            'no' => $no_BBK
+                            'tipe' => 'JNL',
+                            'no' => $no_JNL
                         ]
                     );
-    
-                    // Jurnal Kredit
-                    Jurnal::updateOrCreate(
+                }
+                if ($data[0]->barang->status_ppn == 'ya') {
+                    Jurnal::create(
                         [
-                            'id_transaksi' => $item->id,
-                            'tipe' => 'BBK',
-                            'coa_id' => 5
-                        ],
-                        [
+                            'id_transaksi' => $data[0]->id,
+                            'tipe' => 'JNL',
+                            'coa_id' => 10,
                             'nomor' => $nomor_surat,
                             'tgl' => $currentYear,
-                            'keterangan' => 'Pembelian ' . $item->barang->nama . ' (' . number_format($item->jumlah_beli, 0, ',', '.') . ' ' . $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') untuk ' . $item->suppliers->nama,
+                            'keterangan' => 'PPN Masukan ' . $data[0]->suppliers->nama,
+                            'debit' => $total_ppn,
+                            'kredit' => 0,
+                            'invoice' => null,
+                            'invoice_external' => $request->invoice_external,
+                            'nopol' => $data[0]->suratJalan->no_pol ?? null,
+                            'container' => null,
+                            'id_transaksi'=>$data[0]->id,
+                            'tipe' => 'JNL',
+                            'no' => $no_JNL
+                        ]
+                    );
+
+                    Jurnal::create(
+                        [
+                            'id_transaksi' => $item->id,
+                            'tipe' => 'JNL',
+                            'coa_id' => 35, // COA bank mandiri,
+                            'nomor' => $nomor_surat,
+                            'tgl' => $currentYear,
+                            'keterangan' => 'Hutang ' . $item->suppliers->nama,
                             'debit' => 0,
-                            'kredit' => round($item->harga_beli * $item->jumlah_beli),
+                            'kredit' => $total + $total_ppn, // PPN amount
                             'invoice' => null,
                             'invoice_external' => $request->invoice_external,
                             'nopol' => $item->suratJalan->no_pol ?? null,
                             'container' => null,
                             'id_transaksi'=>$item->id,
-                            'tipe' => 'BBK',
-                            'no' => $no_BBK
+                            'tipe' => 'JNL',
+                            'no' => $no_JNL
+                        ]
+                    );
+                } else {
+                    Jurnal::create(
+                     [
+                         'id_transaksi' => $item->id,
+                         'tipe' => 'JNL',
+                         'coa_id' => 35, // COA bank mandiri,
+                         'nomor' => $nomor_surat,
+                         'tgl' => $currentYear,
+                         'keterangan' => 'Hutang ' . $item->suppliers->nama,
+                         'debit' => 0,
+                         'kredit' => $total, // PPN amount
+                         'invoice' => null,
+                         'invoice_external' => $request->invoice_external,
+                         'nopol' => $item->suratJalan->no_pol ?? null,
+                         'container' => null,
+                         'id_transaksi'=>$item->id,
+                         'tipe' => 'JNL',
+                         'no' => $no_JNL
+                     ]
+                 );
+                }
+                    // Jurnal Hutang
+                $total = 0;
+                $total_ppn = 0;
+                foreach ($data as $item) {
+                    $value_ppn = $item->barang->value_ppn / 100;
+                    $total_ppn += round($item->harga_beli * $item->jumlah_beli * $value_ppn);
+                    $total  += round($item->harga_beli * $item->jumlah_beli);
+                    
+                    //Jurnal Persediaan
+                    Jurnal::create(
+                        [
+                            'id_transaksi' => $item->id,
+                            'tipe' => 'JNL',
+                            'coa_id' => 90,
+                            'nomor' => $nomor_surat1,
+                            'tgl' => $currentYear,
+                            'keterangan' => 'Persediaan Perjalanan ' . $item->barang->nama . ' (' .  number_format($item->jumlah_beli, 0, ',', '.') . ' ' .  $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') - ' . $item->suppliers->nama,
+                            'debit' => round($item->harga_beli * $item->jumlah_beli),
+                            'kredit' => 0,
+                            'invoice' => null,
+                            'invoice_external' => $request->invoice_external,
+                            'nopol' => $item->suratJalan->no_pol ?? null,
+                            'container' => null,
+                            'id_transaksi'=>$item->id,
+                            'tipe' => 'JNL',
+                            'no' => $no_JNL1
                         ]
                     );
                 }
-                if ($data[0]->barang->status_ppn == 'ya') {
-                Jurnal::updateOrCreate(
-                    [
-                        'id_transaksi' => $data[0]->id,
-                        'tipe' => 'BBK',
-                        'coa_id' => 10 // COA PPN masukan
-                    ],
-                    [
-                        'nomor' => $nomor_surat,
-                        'tgl' => $currentYear,
-                        'keterangan' => 'PPN Masukan ' . $data[0]->suppliers->nama,
-                        'debit' => $total,
-                        'kredit' => 0,
-                        'invoice' => null,
-                        'invoice_external' => $request->invoice_external,
-                        'nopol' => $data[0]->suratJalan->no_pol ?? null,
-                        'container' => null,
-                        'id_transaksi'=>$data[0]->id,
-                        'tipe' => 'BBK',
-                        'no' => $no_BBK
-                    ]
-                );
+                foreach ($data as $item) {
                 Jurnal::create(
                     [
                         'id_transaksi' => $item->id,
-                        'tipe' => 'BBK',
-                        'coa_id' => 5, // COA bank mandiri,
-                        'nomor' => $nomor_surat,
+                        'tipe' => 'JNL',
+                        'coa_id' => 91, // COA bank mandiri,
+                        'nomor' => $nomor_surat1,
                         'tgl' => $currentYear,
-                        'keterangan' => 'PPN Masukan ' . $item->suppliers->nama,
+                        'keterangan' => 'Persediaan SBY ' . $item->barang->nama . ' (' .  number_format($item->jumlah_beli, 0, ',', '.') . ' ' .  $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') - ' . $item->suppliers->nama,
                         'debit' => 0,
-                        'kredit' => $total, // PPN amount
+                        'kredit' => round($item->harga_beli * $item->jumlah_beli), // PPN amount
                         'invoice' => null,
                         'invoice_external' => $request->invoice_external,
                         'nopol' => $item->suratJalan->no_pol ?? null,
                         'container' => null,
                         'id_transaksi'=>$item->id,
-                        'tipe' => 'BBK',
-                        'no' => $no_BBK
+                        'tipe' => 'JNL',
+                        'no' => $no_JNL1
                     ]
-                );
-            }
-        });
+                );     
+            }      
     }
 }
 
@@ -612,10 +661,10 @@ class SuratJalanController extends Controller
             ->addColumn('aksi', function ($row) {
                 $action = '';
                 $sisa = $row->transactions->sum('sisa');
-                // if ($sisa > 0) {
-                //     $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->kepada) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>
-                //                 <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
-                // }
+                if ($sisa > 0) {
+                    $action = '<button onclick="getData(' . $row->id . ', \'' . addslashes($row->invoice) . '\', \'' . addslashes($row->nomor_surat) . '\', \'' . addslashes($row->customer->nama) . '\', \'' . addslashes($row->jumlah) . '\', \'' . addslashes($row->satuan) . '\', \'' . addslashes($row->nama_kapal) . '\', \'' . addslashes($row->no_cont) . '\', \'' . addslashes($row->no_seal) . '\', \'' . addslashes($row->no_pol) . '\', \'' . addslashes($row->no_job) . '\',  \'' . addslashes($row->tgl_sj) . '\', \'' . addslashes($row->no_po) . '\')" id="edit" class="text-yellow-400 font-semibold mb-3 self-end"><i class="fa-solid fa-pencil"></i></button>';
+                                // <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
+                }
                 return '<div class="flex gap-3 mt-2">
                                 <a target="_blank" href="' . route('surat-jalan.cetak', $row) . '" class="text-green-500 font-semibold mb-3 self-end"><i class="fa-solid fa-print mt-2"></i></a>
                                 ' . $action . '
@@ -692,7 +741,7 @@ class SuratJalanController extends Controller
             'ppn' => number_format($ppn, 2, ',', '.'),
             'supplier' => $row->suppliers->nama ?? '-',
             'invoice_external' => $row->invoice_external,
-            'aksi' => '<button onclick="getData(' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\', \'' . addslashes($row->no_bm) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>'
+            'aksi' => is_null($row->invoice_external) ? '<button onclick="getData(' . $row->id_supplier . ', \'' . addslashes($row->suppliers->nama) . '\', \'' . addslashes($row->invoice_external) . '\', ' . $row->avg_harga_beli . ', ' . $row->total_jumlah_beli . ', \'' . ($barang->status_ppn ?? '-') . '\', ' . ($barang->value_ppn ?? 0) . ', \'' . addslashes($tgl_jurnal ?? format('Y-m-d')) . '\', \'' . addslashes($row->no_bm) . '\')" id="edit" class="text-yellow-400 font-semibold self-end"><i class="fa-solid fa-pencil"></i></button>' : ''
         ];
     });
 
@@ -703,57 +752,185 @@ class SuratJalanController extends Controller
         'total' => $totalRecords, // Total record setelah filter
         'data' => $result, // Data untuk halaman ini
     ]);
+} 
+
+public function getStock($id)
+{
+    $trx = Transaction::find($id);
+
+    if (!$trx) {
+        return response()->json([
+            'message' => 'Transaksi tidak ditemukan'
+        ], 404);
+    }
+
+    $stock = Transaction::whereNull('id_surat_jalan')
+        ->where('no_bm', $trx->no_bm)
+        ->where('id_barang', $trx->id_barang)
+        ->where('id_supplier', $trx->id_supplier)
+        ->first();
+
+        $tag = $stock->barang->nama . ' || Stock ' . $stock->sisa . ' || ' . $stock->no_bm;
+        return response()->json([
+        'stock' => $tag ?? 'tidak diketahui',
+        'trx_jumlah_jual' => $trx->jumlah_jual
+    ]);
 }
 
-    
-    
 
     public function editBarang()
     {
         $transactions = Transaction::with(['suppliers'])->orderBy('id_surat_jalan', 'desc')->whereNotNull('id_surat_jalan')->get();
         $satuans = Satuan::all();
-        $barangs = Barang::where('status', 'AKTIF')->get();
         $suppliers = Supplier::all();
+        $stocksNoppn = Transaction::join('barang', 'transaksi.id_barang', '=', 'barang.id')
+                        ->join('satuan', 'barang.id_satuan', '=', 'satuan.id')
+                        ->join('suppliers', 'transaksi.id_supplier', '=', 'suppliers.id') // Join langsung ke transaksi
+                        ->select(
+                            'barang.*',
+                            'suppliers.nama as nama_supplier',
+                            'suppliers.id as supplier_id',
+                            'barang.kode_objek',
+                            'satuan.nama_satuan',
+                            'transaksi.*'
+                        )
+                        ->where('barang.status', 'AKTIF')
+                        ->where('barang.status_ppn', 'tidak')
+                        ->whereNull('id_surat_jalan')
+                        ->where('harga_jual',0)
+                        ->where('harga_beli', '>', 0)
+                        ->where('sisa', '>', 0)
+                        ->whereNotNull('transaksi.stts')
+                        ->get();
+
+        $stocksPpn = Transaction::join('barang', 'transaksi.id_barang', '=', 'barang.id')
+                    ->join('satuan', 'barang.id_satuan', '=', 'satuan.id')
+                    ->join('suppliers', 'transaksi.id_supplier', '=', 'suppliers.id') // Join langsung ke transaksi
+                    ->select(
+                        'barang.*',
+                        'suppliers.nama as nama_supplier',
+                        'suppliers.id as supplier_id',
+                        'barang.kode_objek',
+                        'satuan.nama_satuan',
+                        'satuan.id as id_satuan',
+                        'transaksi.*'
+                    )
+                    ->where('barang.status', 'AKTIF')
+                    ->where('barang.status_ppn', 'ya')
+                    ->whereNull('transaksi.id_surat_jalan')
+                    ->where('transaksi.harga_jual', '=', 0)
+                    ->where('transaksi.harga_beli', '>', 0)
+                    ->where('transaksi.sisa', '>', 0)
+                    ->whereNotNull('transaksi.stts')
+                    ->get();
         // dd($transactions[0]->suppliers);
-        return view('surat_jalan.editBarang', compact('transactions', 'satuans', 'barangs', 'suppliers'));
+        return view('surat_jalan.editBarang', compact('transactions', 'stocksPpn', 'stocksNoppn','satuans','suppliers'));
     }
 
     public function editBarangPost(Request $request)
     {
+        $trx = Transaction::find($request->id);
+        
+        if (!$trx) {
+            return redirect()->back()->with('error', 'Transaksi tidak ditemukan.');
+        }
+    
+        $stock = Transaction::whereNull('id_surat_jalan')
+            ->where('no_bm', $trx->no_bm)
+            ->where('id_barang', $trx->id_barang)
+            ->where('id_supplier', $trx->id_supplier)
+            ->first();
+    
+        if (!$stock) {
+            return redirect()->back()->with('error', 'Stok tidak ditemukan.');
+        }
+        if ($request->qty == 'tambah') {
+            $jumlah_jual_stock = $stock->jumlah_jual + $request->tambah;
+            $qty = $stock->sisa - $request->tambah;
+            $jumlah_jual = $trx->jumlah_jual + $request->tambah;
+        } else {
+            $jumlah_jual_stock = $stock->jumlah_jual - $request->kurangi;
+            $qty = $stock->sisa + $request->kurangi;
+            $jumlah_jual = $trx->jumlah_jual - $request->kurangi;
+        }        
+        if ($qty < 0) { // Jika stok tidak mencukupi
+            return redirect()->back()->with(
+                'error',
+                'Stok tidak mencukupi! Barang: ' . (optional($tstock->barang)->nama ?? 'Tidak diketahui') . 
+                ', Sisa Stok: ' . ($stock->sisa ?? 0)
+            );
+        }
+        
+        // Update stok awal
+        $stock->update([
+            'sisa' => $qty,
+            'jumlah_jual' => $jumlah_jual_stock
+        ]);
+        // Update transaksi yang diedit
         Transaction::where('id', $request->id)->update([
-            'jumlah_jual' => $request->jumlah_jual,
-            'sisa' => $request->jumlah_jual,
-            'satuan_beli' => $request->satuan,
-            'satuan_jual' => $request->satuan,
-            'id_supplier' => $request->supplier,
+            'jumlah_jual' => $jumlah_jual,
+            'jumlah_beli' => $stock->jumlah_beli,
+            'sisa' => $jumlah_jual,
+            'satuan_beli' => $stock->satuan_beli,
+            'satuan_jual' => $stock->satuan_jual,
             'keterangan' => $request->keterangan,
         ]);
+    
         return redirect()->back()->with('success', 'Data berhasil diupdate!!');
     }
+    
 
     public function hapusBarang(Request $request)
     {
-        Transaction::where('id', $request->id)->delete();
+        $trx = Transaction::find($request->id);
+        $stock = Transaction::whereNull('id_surat_jalan')
+            ->where('no_bm', $trx->no_bm)
+            ->where('id_barang', $trx->id_barang)
+            ->where('id_supplier', $trx->id_supplier)
+            ->first();
+        $jumlah_jual = $stock->jumlah_jual - $trx->jumlah_jual;
+        $qty = $stock->sisa + $trx->jumlah_jual;
+        if($stock->sisa == 0 || $stock->sisa < 0){
+            $trx->delete();
+        }
+        $stock->update([
+                'sisa' => $qty,
+                'jumlah_jual' => $jumlah_jual
+            ]);
+        $trx->delete();
         return redirect()->back()->with('success', 'Data barang berhasil dihapus.');
     }
+    
 
     public function tambahBarang(Request $request)
     {
-        // dd($request->id_surat_jalan);
+        $ppn = $request->id_barang_ppn ?? null;
+        $noppn = $request->id_barang_no_ppn ?? null;
+        $trans = Transaction::find($ppn ?? $noppn);
+        $sisa = $trans->sisa - $request->jumlah_jual;
+        $bkeluar = $request->jumlah_jual + $trans->jumlah_jual;
         Transaction::create([
             'id_surat_jalan' => $request->id_surat_jalan,
-            'id_barang' => $request->id_barang,
-            'id_supplier' => $request->id_supplier,
+            'id_barang' => $trans->id_barang,
+            'id_supplier' => $trans->id_supplier,
             'jumlah_jual' => $request->jumlah_jual,
-            'jumlah_beli' => $request->jumlah_jual,
+            'invoice_external' => $trans->invoice_external,
+            'jumlah_beli' => $trans->jumlah_beli,
             'sisa' => $request->jumlah_jual,
-            'satuan_jual' => $request->satuan_jual,
-            'satuan_beli' => $request->satuan_jual,
+            'satuan_jual' => $trans->satuan_beli,
+            'satuan_beli' => $trans->satuan_beli,
             'harga_jual' => 0,
-            'harga_beli' => 0,
-            'margin' => 0,
-            'keterangan' => $request->keterangan,
+            'harga_beli' => $trans->harga_beli,
+            'no_bm' => $trans->no_bm,
+            'stts' => $trans->stts,
+            'keterangan' => $request->keterangan
         ]);
+        $trans->update([
+            'sisa' => $sisa,
+            'jumlah_jual' => $bkeluar,
+            'satuan_jual' =>  $request->satuan_jual
+        ]);
+
 
         return redirect()->back()->with('success', 'Data barang berhasil ditambahkan.');
     }

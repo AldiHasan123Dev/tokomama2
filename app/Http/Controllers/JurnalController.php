@@ -27,11 +27,27 @@ class JurnalController extends Controller
     public function index()
     {
         if (isset($_GET['tipe']) && isset($_GET['month']) && isset($_GET['year'])) {
-            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->where('tipe', $_GET['tipe'])->orderBy('tgl', 'desc')->orderBy('created_at', 'desc')->orderBy('no', 'desc')->orderBy('id', 'asc')->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->where('tipe', $_GET['tipe'])
+            ->orderBy('no', 'desc')
+            ->orderBy('id', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('tgl', 'desc')
+            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+
         } elseif (isset($_GET['month']) && isset($_GET['year'])) {
-            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->orderBy('tgl', 'desc')->orderBy('created_at', 'desc')->orderBy('no', 'desc')->orderBy('id', 'asc')->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])
+            ->orderBy('no', 'desc')
+            ->orderBy('id', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('tgl', 'desc')
+            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
+
         } else {
-            $data = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->orderBy('tgl', 'desc')->orderBy('created_at', 'desc')->orderBy('no', 'desc')->orderBy('id', 'asc')->get();
+            $data = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+            ->orderBy('no', 'desc')
+            ->orderBy('id', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('tgl', 'desc')->get();
         }
 
         // bulan
@@ -206,8 +222,7 @@ class JurnalController extends Controller
                 $ket = $invoices[$index - 1]->transaksi->keterangan;
                 
                 // dd($customer, $satuan, $quantity, $hargabeli, $hargajual, $ket, $supplier, $barang);
-                $keteranganNow = $request->keterangan;
-
+                $keterangan = $request->keterangan;
                 if (str_contains($request->keterangan, '[1]')) {
                     $keterangan = str_replace('[1]', $customer, $keterangan);
                 }
@@ -252,7 +267,7 @@ class JurnalController extends Controller
                 $data->nomor = $request->nomor;
                 $data->debit = $request->debit;
                 $data->kredit = $request->kredit;
-                $data->keterangan = $keteranganNow;
+                $data->keterangan = $keterangan;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
                 $data->invoice = !empty($request->invoice) ? explode('_', $request->invoice)[0] : null;
                 $data->invoice_external = !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null;
@@ -357,12 +372,13 @@ class JurnalController extends Controller
                 
                 $invoice_external = Transaction::where('invoice_external', $invext)
                 ->with(['suratJalan.customer', 'barang', 'suppliers'])
+                ->whereNotNull('id_surat_jalan')
                 ->get();
                 
                 
                 $barang = $invoice_external[$index - 1]->barang->nama;
                 $supplier = $invoice_external[$index - 1]->suppliers->nama;
-                $customer = $invoice_external[$index - 1]->suratJalan->customer->nama;
+                $customer = $invoice_external[$index - 1]->suratJalan->customer->nama ??$invoice_external[$index - 1]->suratJalan->customer->nama ;
                 $quantity = $invoice_external[$index - 1]->jumlah_jual;
                 $satuan = $invoice_external[$index - 1]->satuan_jual;
                 $hargabeli = $invoice_external[$index - 1]->harga_beli;
@@ -435,15 +451,14 @@ class JurnalController extends Controller
                 $invoiceExternal = Transaction::where('invoice_external', $request->invoice_external)
                 ->with(['suratJalan.customer', 'barang', 'suppliers'])
                 ->get();
-                
-                $barang = $invoiceExternal[0]->barang->nama;
-                $supplier = $invoiceExternal[0]->suppliers->nama;
-                $customer = $invoiceExternal[0]->suratJalan->customer->nama;
-                $quantity = $invoiceExternal[0]->jumlah_jual;
-                $satuan = $invoiceExternal[0]->satuan_jual;
-                $hargabeli = $invoiceExternal[0]->harga_beli;
-                $hargajual = $invoiceExternal[0]->harga_jual;
-                $ket = $invoiceExternal[0]->keterangan;
+                $barang = $invoiceExternal[0]->barang->nama ?? null;
+                $supplier = $invoiceExternal[0]->suppliers->nama ?? null;
+                $customer = $invoiceExternal[0]->suratJalan->customer->nama ?? null;
+                $quantity = $invoiceExternal[0]->jumlah_jual ?? null;
+                $satuan = $invoiceExternal[0]->satuan_jual ?? null;
+                $hargabeli = $invoiceExternal[0]->harga_beli ?? null;
+                $hargajual = $invoiceExternal[0]->harga_jual ?? null;
+                $ket = $invoiceExternal[0]->keterangan ?? null;
                 
                 // dd($request->invoice_external);
                 $keterangan = $request->keterangan;

@@ -10,6 +10,8 @@ use App\Models\Invoice;
 use App\Models\Barang;
 use App\Models\Transaction;
 
+use App\Models\Jurnal;
+
 class StockController extends Controller
 {
     public function dataStock()
@@ -109,6 +111,7 @@ class StockController extends Controller
         $stocks = Transaction::selectRaw(
             'transaksi.*'
         )
+        ->with('jurnals')
         ->whereNull('id_surat_jalan')
         ->where('harga_beli', '>', 0) // Pastikan harga_beli lebih dari 0 // Grup berdasarkan kondisi
         ->orderBy('no_bm', 'desc') // Urutkan berdasarkan created_at
@@ -159,6 +162,7 @@ class StockController extends Controller
             return [
                 'id' => $stock->id,
                 'satuans' => $stock->satuan_beli,
+               'jurnal' => optional($stock->jurnals->firstWhere('coa_id', 35))->nomor ?? '-',
                 'barangs' => $stock->barang->nama,
                 'jumlah_belis' => $stock->jumlah_beli,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
@@ -199,14 +203,13 @@ class StockController extends Controller
         // Ambil parameter pagination
         
         // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
-        $stocks = Transaction::selectRaw(
-            'id_barang, 
-             transaksi.*'
-        )
-        ->whereNull('id_surat_jalan')
-        ->where('harga_beli', '>', 0) // Pastikan harga_beli lebih dari 0// Grup berdasarkan kondisi
-        ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at
-        ->get();
+        $stocks = Transaction::select('id_barang', 'transaksi.*')  // Seleksi kolom dengan jelas
+    ->whereNull('id_surat_jalan')  // Pastikan id_surat_jalan bernilai null
+    ->where('harga_beli', '>', 0)  // Pastikan harga_beli lebih dari 0
+    ->with('jurnals')  // Memuat relasi jurnals
+    ->orderBy('created_at', 'desc')  // Urutkan berdasarkan created_at
+    ->get();
+
     
     
     
@@ -257,6 +260,7 @@ class StockController extends Controller
                 'jumlah_belis' => $stock->jumlah_belis,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
                 'status' => $stock->stts ?? '-',
+                'jurnal' => $stock->jurnals->first()->nomor ?? '-',
                 'invoice_external' => $stock->invoice_external,
                 'no_bm' => $stock->no_bm,
                 'satuan_beli' => $stock->satuan_beli,
@@ -292,7 +296,33 @@ class StockController extends Controller
         return view('toko.list-barang');
     }
     public function monitor_stock(){
-        return view('toko.monitor-stock');
+        $jayapura = Transaction::whereNotNull('stts')
+        ->whereNull('id_surat_jalan')
+    ->get()
+    ->sum(function ($transaction) {
+        return $transaction->harga_beli * $transaction->sisa;
+    });
+    $perjalanan = Transaction::whereNull('stts')
+    ->whereNull('id_surat_jalan')
+    ->get()
+    ->sum(function ($transaction) {
+        return $transaction->harga_beli * $transaction->sisa;
+    });
+    $perjalanan1 = Transaction::whereNull('stts')
+    ->whereNull('id_surat_jalan')
+    ->whereNull('invoice_external')
+    ->get()
+    ->sum(function ($transaction) {
+        return $transaction->harga_beli * $transaction->sisa;
+    });
+    $perjalanan2 = Transaction::whereNull('stts')
+    ->whereNull('id_surat_jalan')
+    ->whereNotNull('invoice_external')
+    ->get()
+    ->sum(function ($transaction) {
+        return $transaction->harga_beli * $transaction->sisa;
+    });
+    return view('toko.monitor-stock', compact('jayapura', 'perjalanan','perjalanan1','perjalanan2'));
     }
 
     public function stocks(){
