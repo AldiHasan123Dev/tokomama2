@@ -46,7 +46,6 @@ class SuratJalanController extends Controller
             'transaksi.*'
         )
         ->where('barang.status', 'AKTIF')
-        ->where('barang.status_ppn', 'ya')
         ->whereNull('id_surat_jalan')
         ->where('harga_jual',0)
         ->where('harga_beli', '>', 0)
@@ -73,7 +72,6 @@ class SuratJalanController extends Controller
             'transaksi.*'
         )
         ->where('barang.status', 'AKTIF')
-        ->where('barang.status_ppn', 'tidak')
         ->whereNull('id_surat_jalan')
         ->where('harga_jual',0)
         ->where('harga_beli', '>', 0)
@@ -262,7 +260,7 @@ class SuratJalanController extends Controller
             }
         }
         $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"); // daftar angka Romawi
-        $month_number = date("n", strtotime($request->tgl));
+        $month_number = date("n", strtotime($request->tgl_bm));
         $month_roman = $roman_numerals[$month_number];
         $no_bm = sprintf('%03d', $no) . '/BM/TMR1-' . $month_roman . '/' . date('Y', strtotime($request->tgl));
         for ($i = 0; $i < count($request->barang); $i++) {
