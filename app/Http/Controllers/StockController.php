@@ -308,7 +308,21 @@ class StockController extends Controller
     ->sum(function ($transaction) {
         return $transaction->harga_beli * $transaction->sisa;
     });
-    return view('toko.monitor-stock', compact('jayapura', 'perjalanan'));
+    $perjalanan1 = Transaction::whereNull('stts')
+    ->whereNull('id_surat_jalan')
+    ->whereNull('invoice_external')
+    ->get()
+    ->sum(function ($transaction) {
+        return $transaction->harga_beli * $transaction->sisa;
+    });
+    $perjalanan2 = Transaction::whereNull('stts')
+    ->whereNull('id_surat_jalan')
+    ->whereNotNull('invoice_external')
+    ->get()
+    ->sum(function ($transaction) {
+        return $transaction->harga_beli * $transaction->sisa;
+    });
+    return view('toko.monitor-stock', compact('jayapura', 'perjalanan','perjalanan1','perjalanan2'));
     }
 
     public function stocks(){

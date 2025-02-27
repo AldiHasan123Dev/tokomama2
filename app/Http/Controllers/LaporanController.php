@@ -606,10 +606,10 @@ public function dataLapPiutangTotal(Request $request)
             // Menghitung PPN
             $barang = $invoice->transaksi->barang;
             if ($barang && $barang->status_ppn == 'ya') {
-                $ppn += round($invoice->subtotal * ($barang->value_ppn / 100));
+                $ppn += $invoice->subtotal * ($barang->value_ppn / 100);
             }
     
-            $jumlah_harga = $subtotal + $ppn;
+            $jumlah_harga = round($subtotal + $ppn);
     
             // Cek apakah ada jurnal untuk invoice tersebut
             $jurnal = $jurnals

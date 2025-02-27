@@ -369,14 +369,12 @@ class SuratJalanController extends Controller
             Jurnal::where('invoice_external', $inext)
                   ->where('tipe', 'BBK')
                   ->whereNotNull('nomor') // Tambahkan validasi nomor tidak kosong
-                  ->update(['invoice_external' => $request->invoice_external,
-                            'tgl' => $request->tgl_invx]);
+                  ->update(['invoice_external' => $request->invoice_external]);
 
                   Jurnal::where('invoice_external', $inext)
                   ->where('tipe', 'JNL')
                   ->whereNotNull('nomor') // Tambahkan validasi nomor tidak kosong
-                  ->update(['invoice_external' => $request->invoice_external,
-                            'tgl' => $request->tgl_invx]);
+                  ->update(['invoice_external' => $request->invoice_external]);
         }
     }
 
@@ -418,17 +416,16 @@ class SuratJalanController extends Controller
         ->where('invoice_external', $request->tgl_invx)
         ->where('keterangan', 'like', '%Pembelian%')
         ->get();
-
-    if ($existingJournals->isNotEmpty()) {
+        
+        if ($existingJournals->isNotEmpty()) {
         // Jika jurnal sudah ada, cukup update nomor jurnalnya
         foreach ($existingJournals as $journal) {
             $journal->update([
-                'invoice_external' => $invoice_external
+                'invoice_external' => $request->invoice_external
             ]);
         }
     } else {
         // Buat atau update entri jurnal baru hanya jika belum ada jurnal yang sesuai
-        DB::transaction(function () use ($data, $currentYear, $request, $no_JNL, $nomor_surat, $no_JNL1, $nomor_surat1) {
             $total = 0;
             $total_ppn = 0;
             foreach ($data as $item) {
@@ -437,13 +434,11 @@ class SuratJalanController extends Controller
                     $total  += round($item->harga_beli * $item->jumlah_beli);
                     
                     //Jurnal Persediaan
-                    Jurnal::updateOrCreate(
+                    Jurnal::create(
                         [
                             'id_transaksi' => $item->id,
                             'tipe' => 'JNL',
-                            'coa_id' => 91 // Harsat beli
-                        ],
-                        [
+                            'coa_id' => 91,
                             'nomor' => $nomor_surat,
                             'tgl' => $currentYear,
                             'keterangan' => 'Persediaan SBY ' . $item->barang->nama . ' (' .  number_format($item->jumlah_beli, 0, ',', '.') . ' ' .  $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') - ' . $item->suppliers->nama,
@@ -460,13 +455,11 @@ class SuratJalanController extends Controller
                     );
                 }
                 if ($data[0]->barang->status_ppn == 'ya') {
-                    Jurnal::updateOrCreate(
+                    Jurnal::create(
                         [
                             'id_transaksi' => $data[0]->id,
                             'tipe' => 'JNL',
-                            'coa_id' => 10 // COA PPN masukan
-                        ],
-                        [
+                            'coa_id' => 10,
                             'nomor' => $nomor_surat,
                             'tgl' => $currentYear,
                             'keterangan' => 'PPN Masukan ' . $data[0]->suppliers->nama,
@@ -531,13 +524,11 @@ class SuratJalanController extends Controller
                     $total  += round($item->harga_beli * $item->jumlah_beli);
                     
                     //Jurnal Persediaan
-                    Jurnal::updateOrCreate(
+                    Jurnal::create(
                         [
                             'id_transaksi' => $item->id,
                             'tipe' => 'JNL',
-                            'coa_id' => 90 // Harsat beli
-                        ],
-                        [
+                            'coa_id' => 90,
                             'nomor' => $nomor_surat1,
                             'tgl' => $currentYear,
                             'keterangan' => 'Persediaan Perjalanan ' . $item->barang->nama . ' (' .  number_format($item->jumlah_beli, 0, ',', '.') . ' ' .  $item->satuan_beli . ' Harsat ' .  number_format($item->harga_beli, 2, ',', '.') . ') - ' . $item->suppliers->nama,
@@ -574,7 +565,6 @@ class SuratJalanController extends Controller
                     ]
                 );     
             }      
-        });
     }
 }
 
