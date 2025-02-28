@@ -95,7 +95,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th class="bg-thn" rowspan="2">Customer</th>
+                        <th class="bg-thn" rowspan="2">Sales</th>
                         <th class="bg-thn" colspan="{{ count($months) }}">Bulan</th>
                         <th class="bg-total">Total</th>
                     </tr>

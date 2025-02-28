@@ -7,6 +7,7 @@ use App\Models\Stock;
 use App\Models\Supplier;
 use PDF;
 use App\Models\Invoice;
+use Illuminate\Support\Facades\DB;
 use App\Models\Barang;
 use App\Models\Transaction;
 
@@ -203,12 +204,25 @@ class StockController extends Controller
         // Ambil parameter pagination
         
         // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
-        $stocks = Transaction::select('id_barang', 'transaksi.*')  // Seleksi kolom dengan jelas
-    ->whereNull('id_surat_jalan')  // Pastikan id_surat_jalan bernilai null
-    ->where('harga_beli', '>', 0)  // Pastikan harga_beli lebih dari 0
-    ->with('jurnals')  // Memuat relasi jurnals
-    ->orderBy('created_at', 'desc')  // Urutkan berdasarkan created_at
-    ->get();
+        $stocks = Transaction::leftJoin('jurnal', function ($join) {
+            $join->on('jurnal.id_transaksi', '=', 'transaksi.id')
+                 ->where('jurnal.tipe', 'JNL')
+                 ->where('jurnal.debit', '>', 0)
+                 ->where('jurnal.coa_id', 89);
+        })
+        ->select([
+            'id_barang',
+            'transaksi.*',
+            'jurnal.nomor AS nomor_jurnal',
+            'jurnal.tgl AS tgl_jurnal', // Menambahkan nomor jurnal ke hasil query
+        ])
+        ->whereNull('transaksi.id_surat_jalan')  // Pastikan id_surat_jalan bernilai null
+        ->where('transaksi.harga_beli', '>', 0)  // Pastikan harga_beli lebih dari 0
+        ->with('jurnals')  // Memuat relasi jurnals untuk akses lebih lanjut
+        ->orderByDesc('transaksi.created_at')  // Urutkan berdasarkan created_at secara descending
+        ->get();
+
+    
 
     
     
@@ -260,7 +274,8 @@ class StockController extends Controller
                 'jumlah_belis' => $stock->jumlah_belis,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
                 'status' => $stock->stts ?? '-',
-                'jurnal' => $stock->jurnals->first()->nomor ?? '-',
+                'tgl_jurnal' =>  $stock->tgl_jurnal ?? '-',
+              'jurnal' =>  $stock->nomor_jurnal ?? '-',
                 'invoice_external' => $stock->invoice_external,
                 'no_bm' => $stock->no_bm,
                 'satuan_beli' => $stock->satuan_beli,

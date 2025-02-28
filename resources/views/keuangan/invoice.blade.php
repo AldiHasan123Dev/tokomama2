@@ -55,12 +55,21 @@
                         search: true,
                         label: 'Nomor Jurnal',
                         name: 'nomor',
+                        align: 'center',
+                        width: 150
+                    },
+                    {
+                        search: true,
+                        label: 'TGL Invoice',
+                        name: 'tgl_inv',
+                        align: 'center',
                         width: 150
                     },
                     {
                         search: true,
                         label: 'Invoice',
                         name: 'invoice',
+                        align: 'center',
                         width: 150
                     },
                     {
