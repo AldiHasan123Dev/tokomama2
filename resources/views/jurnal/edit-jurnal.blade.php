@@ -199,7 +199,8 @@
             '{{ addslashes($item->coa_id) }}',
             '{{ addslashes($item->nama_akun) }}',
             '{{ addslashes($item->no_akun) }}',
-            '{{ addslashes($item->keterangan_buku_besar_pembantu) }}')"><i
+            '{{ addslashes($item->keterangan_buku_besar_pembantu) }}', 
+              '{{ addslashes($item->id_transaksi) }}')"><i
                                         class="fa-solid fa-pencil"></i></button> |
                                 <button id="delete-faktur-all" onclick="deleteItemJurnal('{{ $item->id }}')"
                                     class="text-red-600 font-semibold mb-3 self-end"><i
@@ -269,7 +270,7 @@
         });
 
             function editJurnal(id, nomor, tgl, debit, kredit, keterangan, invoice, invoice_external, nopol, tipe, coa_id,
-                nama_akun, no_akun, keterangan_buku_besar_pembantu) {
+                nama_akun, no_akun, keterangan_buku_besar_pembantu,id_transaksi) {
                 invoice = (invoice === '0') ? '' : invoice;
                 invoice_external = (invoice_external === '0') ? '' : invoice_external;
                 $("#dialog").html(`
@@ -334,6 +335,7 @@
             <span class="label-info">*ex: [1]customer [2]supplier [3]barang</span>
 
                <input name="id" type="hidden" value="${id}" />
+               <input name="id_transaksi" type="hidden" value="${id_transaksi}" />
                <input name="nomor" type="hidden" value="${nomor}" />
                
                <input name="tgl" type="hidden" value="${tgl}" />

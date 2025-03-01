@@ -200,7 +200,6 @@ class JurnalController extends Controller
      */
     public function update(Request $request, Jurnal $jurnal)
     {
-        // dd($request->all());
         if ($request->invoice != null) {
             if (str_contains($request->invoice, '_')) {
                 $inv = explode('_', $request->invoice)[0];
@@ -260,10 +259,11 @@ class JurnalController extends Controller
                 }
                 $data = Jurnal::find($request->id);
                 if ($request->invoice === null && $request->invoice_external === null) {
-                    $data->id_transaksi = null;
+                    $data->id_transaksi = $request->id_transaksi;
                 } else {
                     $data->id_transaksi = $id_transaksi;
                 }
+                $data->id_transaksi = $request->id_transaksi;
                 $data->nomor = $request->nomor;
                 $data->debit = $request->debit;
                 $data->kredit = $request->kredit;
@@ -341,7 +341,7 @@ class JurnalController extends Controller
                 }
                 $data = Jurnal::find($request->id);
                 if ($request->invoice === null && $request->invoice_external === null) {
-                    $data->id_transaksi = null;
+                    $data->id_transaksi = $request->id_transaksi;
                 } else {
                     $data->id_transaksi = $id_transaksi;
                 }
@@ -425,7 +425,7 @@ class JurnalController extends Controller
                 $data = Jurnal::find($request->id);
                 $data->nomor = $request->nomor;
                 if ($request->invoice === null && $request->invoice_external === null) {
-                    $data->id_transaksi = null;
+                    $data->id_transaksi = $request->id_transaksi;
                 } else {
                     $data->id_transaksi = $id_transaksi;
                 }
@@ -506,7 +506,7 @@ class JurnalController extends Controller
                 }
                 $data = Jurnal::find($request->id);
                 if ($request->invoice === null && $request->invoice_external === null) {
-                    $data->id_transaksi = null;
+                    $data->id_transaksi = $request->id_transaksi;
                 } else {
                     $data->id_transaksi = $id_transaksi;
                 }
@@ -591,7 +591,7 @@ class JurnalController extends Controller
                 }
                 $data = Jurnal::find($request->id);
                 if ($request->invoice === null && $request->invoice_external === null) {
-                    $data->id_transaksi = null;
+                    $data->id_transaksi = $request->id_transaksi;
                 } else {
                     $data->id_transaksi = $id_transaksi;
                 }
@@ -676,10 +676,11 @@ class JurnalController extends Controller
                 
                 $data = Jurnal::find($request->id);
                 if ($request->invoice === null && $request->invoice_external === null) {
-                    $data->id_transaksi = null;
+                    $data->id_transaksi = $request->id_transaksi;
                 } else {
                     $data->id_transaksi = $id_transaksi;
                 }
+                $data->id_transaksi = $request->id_transaksi;
                 $data->nomor = $request->nomor;
                 $data->debit = $request->debit;
                 $data->kredit = $request->kredit;
