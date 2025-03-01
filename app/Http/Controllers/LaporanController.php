@@ -103,7 +103,7 @@ class LaporanController extends Controller
         ->join('customer as c', 'sj.id_customer', '=', 'c.id')
         ->join('barang as b', 't.id_barang', '=', 'b.id')
         ->whereYear('i.tgl_invoice', 2025) // Filter tahun default
-        ->groupBy('c.id', 'year', 'month')
+        ->groupBy('c.sales', 'year', 'month')
         ->orderBy('omzet', 'desc') // Urutkan berdasarkan omzet terbesar
         ->orderBy('year', 'asc')
         ->orderByRaw('MONTH(i.tgl_invoice) ASC')

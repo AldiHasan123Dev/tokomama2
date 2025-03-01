@@ -458,12 +458,6 @@ class InvoiceController extends Controller
                         } else{
                             //Jurnal Hutang PPN 
                              //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
-                             Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
-                            ->where('id_supplier', $result[0]->transaksi->id_supplier)
-                            ->update([
-                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1]
-                            ]);
-
                              
                              foreach ($result as $item) {
                                 Jurnal::create([
@@ -478,7 +472,7 @@ class InvoiceController extends Controller
                                     'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                                     'kredit' => 0, // Menggunakan total debit sebagai kredit
                                     'invoice' => null,
-                                    'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                                    'invoice_external' => $invoice_external,
                                     'id_transaksi' => $item->id_transaksi,
                                     'nopol' => $nopol,
                                     'container' => null,
@@ -497,7 +491,7 @@ class InvoiceController extends Controller
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => $subtotal, // Kredit diisi 0
                                 'invoice' => null,
-                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                                'invoice_external' => $invoice_external,
                                 'id_transaksi' => $result[0]->id_transaksi,
                                 'nopol' => $nopol,
                                 'container' => null,
@@ -591,11 +585,6 @@ class InvoiceController extends Controller
                              
                         } else {
                             //Jurnal Hutang No PPN 
-                            Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
-                            ->where('id_supplier', $result[0]->transaksi->id_supplier)
-                            ->update([
-                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1]
-                            ]);
                      //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
                      foreach ($result as $item) {
                         Jurnal::create([
@@ -610,7 +599,7 @@ class InvoiceController extends Controller
                             'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                             'kredit' => 0, // Menggunakan total debit sebagai kredit
                             'invoice' => null,
-                            'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                            'invoice_external' => $invoice_external,
                             'id_transaksi' => $item->id_transaksi,
                             'nopol' => $nopol,
                             'container' => null,
@@ -627,7 +616,7 @@ class InvoiceController extends Controller
                         'debit' => 0, // Menyimpan subtotal sebagai debit
                         'kredit' => $subtotal, // Kredit diisi 0
                         'invoice' => null,
-                        'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                        'invoice_external' => $invoice_external,
                         'id_transaksi' => $result[0]->id_transaksi,
                         'nopol' => $nopol,
                         'container' => null,
@@ -748,11 +737,6 @@ class InvoiceController extends Controller
                             ]);
                         }else {
                             //Jurnal Hutang PPN
-                            Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
-                            ->where('id_supplier', $result[0]->transaksi->id_supplier)
-                            ->update([
-                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1]
-                            ]);
                          //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
                          foreach ($result as $item) {
                             Jurnal::create([
@@ -767,7 +751,7 @@ class InvoiceController extends Controller
                                 'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                                 'kredit' => 0, // Menggunakan total debit sebagai kredit
                                 'invoice' => null,
-                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                                'invoice_external' => $invoice_external,
                                 'id_transaksi' => $item->id_transaksi,
                                 'nopol' => $nopol,
                                 'container' => null,
@@ -786,7 +770,7 @@ class InvoiceController extends Controller
                             'debit' => 0, // Menyimpan subtotal sebagai debit
                             'kredit' => $subtotal, // Kredit diisi 0
                             'invoice' => null,
-                            'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                            'invoice_external' => $invoice_external,
                             'id_transaksi' => $result[0]->id_transaksi,
                             'nopol' => $nopol,
                             'container' => null,
@@ -880,11 +864,6 @@ class InvoiceController extends Controller
                                 'no' =>  $no + 1
                             ]);
                         } else {
-                            Transaction::where('id_surat_jalan', $result[0]->transaksi->id_surat_jalan)
-                            ->where('id_supplier', $result[0]->transaksi->id_supplier)
-                            ->update([
-                                'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1]
-                            ]);
                  //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
                  foreach ($result as $item) {
                     Jurnal::create([
@@ -899,7 +878,7 @@ class InvoiceController extends Controller
                         'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                         'kredit' => 0, // Menggunakan total debit sebagai kredit
                         'invoice' => null,
-                        'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                        'invoice_external' => $invoice_external,
                         'id_transaksi' => $item->id_transaksi,
                         'nopol' => $nopol,
                         'container' => null,
@@ -916,7 +895,7 @@ class InvoiceController extends Controller
                     'debit' => 0, // Menyimpan subtotal sebagai debit
                     'kredit' => $subtotal, // Kredit diisi 0
                     'invoice' => null,
-                    'invoice_external' => "InvSupp/" . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[0] . '/' . explode('/', $result[0]->transaksi->suratJalan->nomor_surat)[1],
+                    'invoice_external' => $invoice_external,
                     'id_transaksi' => $result[0]->id_transaksi,
                     'nopol' => $nopol,
                     'container' => null,
