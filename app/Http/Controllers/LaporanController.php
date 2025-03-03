@@ -112,25 +112,24 @@ class LaporanController extends Controller
     
         $mergedResults = [];
         foreach ($invoices as $invoice) {
-            if (!isset($mergedResults[$invoice->customer_id])) {
-                $mergedResults[$invoice->customer_id] = [
+            if (!isset($mergedResults[$invoice->customer_sales])) {
+                $mergedResults[$invoice->customer_sales] = [
                     'sales_name' => $invoice->customer_sales,
                     'years' => []
                 ];
             }
     
-            if (!isset($mergedResults[$invoice->customer_id]['years'][$invoice->year])) {
-                $mergedResults[$invoice->customer_id]['years'][$invoice->year] = [];
+            if (!isset($mergedResults[$invoice->customer_sales]['years'][$invoice->year])) {
+                $mergedResults[$invoice->customer_sales]['years'][$invoice->year] = [];
             }
     
-            $mergedResults[$invoice->customer_id]['years'][$invoice->year][$invoice->month] = [
+            $mergedResults[$invoice->customer_sales]['years'][$invoice->year][$invoice->month] = [
                 'month' => $invoice->month,
                 'year' => $invoice->year,
                 'invoice_count' => $invoice->invoice_count,
                 'omzet' => $invoice->omzet / 1000
             ];
         }
-    
         $months = [
             'January', 'February', 'March', 'April', 'May', 
             'June', 'July', 'August', 'September', 
