@@ -107,34 +107,35 @@
             records: "records"
         },
         rowattr: function(rowData) {
-            if (!rowData.tempo) return {}; 
+    if (parseInt(rowData.top) === 0) return {}; // Pastikan top diperiksa sebagai angka
 
-            let today = new Date();
-            let tempoDate = new Date(rowData.tempo);
-            let timeDiff = tempoDate - today;
-            let daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    let today = new Date();
+    let tempoDate = new Date(rowData.tempo);
+    let timeDiff = tempoDate - today;
+    let daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
-            console.log(`Row Data: ${JSON.stringify(rowData)}`);
-            console.log(`Tanggal Hari Ini: ${today.toISOString().split('T')[0]}`);
-            console.log(`Jatuh Tempo: ${rowData.tempo}`);
-            console.log(`Selisih Hari: ${daysDiff}`);
+    console.log(`Row Data: ${JSON.stringify(rowData)}`);
+    console.log(`Tanggal Hari Ini: ${today.toISOString().split('T')[0]}`);
+    console.log(`Jatuh Tempo: ${rowData.tempo}`);
+    console.log(`Selisih Hari: ${daysDiff}`);
+    console.log(`TOP: ${rowData.top}`); // Debugging
 
-            // Jika kurang bayar = 0, beri warna hijau
-            if (parseFloat(rowData.kurang_bayar) === 0) {
-                console.log(`Lunas: Kurang bayar 0!`);
-                return { "style": "background-color: #3fae43; color: white;" };
-            }
+    // Jika kurang bayar = 0, beri warna hijau
+    if (parseFloat(rowData.kurang_bayar) === 0) {
+        console.log(`Lunas: Kurang bayar 0!`);
+        return { "style": "background-color: #3fae43; color: white;" };
+    }
 
-            if (daysDiff > 0 && daysDiff <= 3) {
-                console.log(`Warning: Jatuh tempo dalam ${daysDiff} hari!`);
-                return { "style": "background-color: yellow;" };
-            } else if (daysDiff < 0 || daysDiff == 0) {
-                console.log(`Overdue: Sudah lewat jatuh tempo ${Math.abs(daysDiff)} hari!`);
-                return { "style": "background-color: red; color: white;" };
-            }
+    if (daysDiff > 0 && daysDiff <= 3) {
+        console.log(`Warning: Jatuh tempo dalam ${daysDiff} hari!`);
+        return { "style": "background-color: yellow;" };
+    } else if (daysDiff < 0 || daysDiff == 0) {
+        console.log(`Overdue: Sudah lewat jatuh tempo ${Math.abs(daysDiff)} hari!`);
+        return { "style": "background-color: red; color: white;" };
+    }
 
-            return {};
-        },
+    return {};
+},
         loadComplete: function(data) {
             console.log("Load complete: ", data);
             $("#table-lp").jqGrid('filterToolbar');
