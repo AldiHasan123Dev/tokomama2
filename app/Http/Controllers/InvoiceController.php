@@ -455,11 +455,11 @@ class InvoiceController extends Controller
                                     $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                             
                                     // Jika supplier sudah ada, tambahkan jumlah kreditnya
-                                    if (isset($supplierJournals[$supplierId])) {
-                                        $supplierJournals[$supplierId]['kredit'] += $kredit;
+                                    if (isset($supplierJournals[$inv_x])) {
+                                        $supplierJournals[$inv_x]['kredit'] += $kredit;
                                     } else {
                                         // Simpan data jurnal sementara
-                                        $supplierJournals[$supplierId] = [
+                                        $supplierJournals[$inv_x] = [
                                             'coa_id' => 89,
                                             'nomor' => $jurhut,
                                             'tgl' => $tgl,
@@ -528,11 +528,11 @@ class InvoiceController extends Controller
                                      $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                              
                                      // Jika supplier sudah ada, tambahkan jumlah kreditnya
-                                     if (isset($supplierJournals[$supplierId])) {
-                                         $supplierJournals[$supplierId]['kredit'] += $kredit;
+                                     if (isset($supplierJournals[$inv_x])) {
+                                         $supplierJournals[$inv_x]['kredit'] += $kredit;
                                      } else {
                                          // Simpan data jurnal sementara
-                                         $supplierJournals[$supplierId] = [
+                                         $supplierJournals[$inv_x] = [
                                              'coa_id' => 89,
                                              'nomor' => $jurhut,
                                              'tgl' => $tgl,
@@ -619,11 +619,11 @@ class InvoiceController extends Controller
                             $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                     
                             // Jika supplier sudah ada, tambahkan jumlah kreditnya
-                            if (isset($supplierJournals[$supplierId])) {
-                                $supplierJournals[$supplierId]['kredit'] += $kredit;
+                            if (isset($supplierJournals[$inv_x])) {
+                                $supplierJournals[$inv_x]['kredit'] += $kredit;
                             } else {
                                 // Simpan data jurnal sementara
-                                $supplierJournals[$supplierId] = [
+                                $supplierJournals[$inv_x] = [
                                     'coa_id' => 89,
                                     'nomor' => $jurhut,
                                     'tgl' => $tgl,
@@ -713,11 +713,11 @@ class InvoiceController extends Controller
                              $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                      
                              // Jika supplier sudah ada, tambahkan jumlah kreditnya
-                             if (isset($supplierJournals[$supplierId])) {
-                                 $supplierJournals[$supplierId]['kredit'] += $kredit;
+                             if (isset($supplierJournals[$inv_x])) {
+                                 $supplierJournals[$inv_x]['kredit'] += $kredit;
                              } else {
                                  // Simpan data jurnal sementara
-                                 $supplierJournals[$supplierId] = [
+                                 $supplierJournals[$inv_x] = [
                                      'coa_id' => 89,
                                      'nomor' => $jurhut,
                                      'tgl' => $tgl,
@@ -854,11 +854,11 @@ class InvoiceController extends Controller
                                      $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                              
                                      // Jika supplier sudah ada, tambahkan jumlah kreditnya
-                                     if (isset($supplierJournals[$supplierId])) {
-                                         $supplierJournals[$supplierId]['kredit'] += $kredit;
+                                     if (isset($supplierJournals[$inv_x])) {
+                                         $supplierJournals[$inv_x]['kredit'] += $kredit;
                                      } else {
                                          // Simpan data jurnal sementara
-                                         $supplierJournals[$supplierId] = [
+                                         $supplierJournals[$inv_x] = [
                                              'coa_id' => 89,
                                              'nomor' => $jurhut,
                                              'tgl' => $tgl,
@@ -926,11 +926,11 @@ class InvoiceController extends Controller
                                  $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                          
                                  // Jika supplier sudah ada, tambahkan jumlah kreditnya
-                                 if (isset($supplierJournals[$supplierId])) {
-                                     $supplierJournals[$supplierId]['kredit'] += $kredit;
+                                 if (isset($supplierJournals[$inv_x])) {
+                                     $supplierJournals[$inv_x]['kredit'] += $kredit;
                                  } else {
                                      // Simpan data jurnal sementara
-                                     $supplierJournals[$supplierId] = [
+                                     $supplierJournals[$inv_x] = [
                                          'coa_id' => 89,
                                          'nomor' => $jurhut,
                                          'tgl' => $tgl,
@@ -1042,11 +1042,11 @@ class InvoiceController extends Controller
                                      $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                              
                                      // Jika supplier sudah ada, tambahkan jumlah kreditnya
-                                     if (isset($supplierJournals[$supplierId])) {
-                                         $supplierJournals[$supplierId]['kredit'] += $kredit;
+                                     if (isset($supplierJournals[$inv_x])) {
+                                         $supplierJournals[$inv_x]['kredit'] += $kredit;
                                      } else {
                                          // Simpan data jurnal sementara
-                                         $supplierJournals[$supplierId] = [
+                                         $supplierJournals[$inv_x] = [
                                              'coa_id' => 89,
                                              'nomor' => $jurhut,
                                              'tgl' => $tgl,
@@ -1111,11 +1111,11 @@ class InvoiceController extends Controller
                          $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
                  
                          // Jika supplier sudah ada, tambahkan jumlah kreditnya
-                         if (isset($supplierJournals[$supplierId])) {
-                             $supplierJournals[$supplierId]['kredit'] += $kredit;
+                         if (isset($supplierJournals[$inv_x])) {
+                             $supplierJournals[$inv_x]['kredit'] += $kredit;
                          } else {
                              // Simpan data jurnal sementara
-                             $supplierJournals[$supplierId] = [
+                             $supplierJournals[$inv_x] = [
                                  'coa_id' => 89,
                                  'nomor' => $jurhut,
                                  'tgl' => $tgl,
