@@ -107,7 +107,7 @@
             records: "records"
         },
         rowattr: function(rowData) {
-    if (!rowData.tempo) return {}; // Jika tidak ada tempo, tidak ada warna
+     // Jika tidak ada tempo, tidak ada warna
     
     let today = new Date();
     let tempoDate = new Date(rowData.tempo);

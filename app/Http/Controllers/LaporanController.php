@@ -532,7 +532,7 @@ public function dataLapPiutang(Request $request)
             'ditagih_tgl' => $row['ditagih_tgl'],
             'top' => $row['top'],
             'tempo' => $row['tempo'],
-            'tempo' => $row['hitung_tempo'],
+            'hitung_tempo' => $row['hitung_tempo'],
             'dibayar_tgl' => $row['dibayar_tgl'],
             'sebesar' => $row['sebesar'],
             'kurang_bayar' =>$row['kurang_bayar'],
