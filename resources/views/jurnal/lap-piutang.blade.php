@@ -141,7 +141,7 @@
     } 
     
     // Warna merah jika sudah jatuh tempo atau jatuh tempo hari ini
-    if (daysDiff < 0 || daysDiff == 0) {
+    if (daysDiff < 0) {
         console.log(`Overdue: Sudah lewat jatuh tempo ${Math.abs(daysDiff)} hari!`);
         return { "style": "background-color: red; color: white;" };
     }
