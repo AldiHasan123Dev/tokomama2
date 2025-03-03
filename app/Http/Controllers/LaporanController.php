@@ -443,7 +443,8 @@ public function dataLapPiutang(Request $request)
             'jumlah_harga' => $jumlah_harga,
             'top' => $top,
             'ditagih_tgl' => $group->first()->tgl_invoice,
-            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top)->format('Y-m-d'),
+            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top)->format('Y-m-d') ,
+            'hitung_tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top),
             'dibayar_tgl' => null,
             'sebesar' => 0,
             'kurang_bayar' => $jumlah_harga,
@@ -488,7 +489,6 @@ public function dataLapPiutang(Request $request)
                 $totalHarga = $subtotal + $ppn;
                 $customer = $invoicesForJurnal->invoice->transaksi->suratJalan->customer->nama;
                 $top = Customer::where('nama', $customer)->pluck('top')->first();
-                dd(Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top + 1));
 
                 $data->put($jurnal->invoice, [
                     'tanggal' => date('Y-m-d'),
@@ -498,6 +498,7 @@ public function dataLapPiutang(Request $request)
                     'top' => $top,
                     'ditagih_tgl' => $invoicesForJurnal->tgl_invoice,
                     'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top + 1),
+                    'hitung_tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top),
                     'dibayar_tgl' => $jurnal->tgl,
                     'sebesar' => $jurnal->debit,
                     'kurang_bayar' => $totalHarga,
@@ -531,6 +532,7 @@ public function dataLapPiutang(Request $request)
             'ditagih_tgl' => $row['ditagih_tgl'],
             'top' => $row['top'],
             'tempo' => $row['tempo'],
+            'tempo' => $row['hitung_tempo'],
             'dibayar_tgl' => $row['dibayar_tgl'],
             'sebesar' => $row['sebesar'],
             'kurang_bayar' =>$row['kurang_bayar'],

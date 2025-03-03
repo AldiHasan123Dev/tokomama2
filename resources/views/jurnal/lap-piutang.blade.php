@@ -107,8 +107,8 @@
             records: "records"
         },
         rowattr: function(rowData) {
-    if (parseInt(rowData.top) === 0) return {}; // Pastikan top diperiksa sebagai angka
-
+    if (!rowData.tempo) return {}; // Jika tidak ada tempo, tidak ada warna
+    
     let today = new Date();
     let tempoDate = new Date(rowData.tempo);
     let timeDiff = tempoDate - today;
@@ -118,18 +118,29 @@
     console.log(`Tanggal Hari Ini: ${today.toISOString().split('T')[0]}`);
     console.log(`Jatuh Tempo: ${rowData.tempo}`);
     console.log(`Selisih Hari: ${daysDiff}`);
-    console.log(`TOP: ${rowData.top}`); // Debugging
+    console.log(`TOP: ${rowData.top}`);
+    console.log(`Kurang Bayar: ${rowData.kurang_bayar}`);
 
-    // Jika kurang bayar = 0, beri warna hijau
+    // Jika kurang bayar = 0, semua kondisi tetap hijau
     if (parseFloat(rowData.kurang_bayar) === 0) {
         console.log(`Lunas: Kurang bayar 0!`);
         return { "style": "background-color: #3fae43; color: white;" };
     }
 
+    // Jika TOP = 0, tidak diberi warna
+    if (parseInt(rowData.top) === 0) {
+        console.log(`TOP 0: Tidak diberi warna`);
+        return {};
+    }
+
+    // Warna oranye untuk jatuh tempo dalam 1-3 hari
     if (daysDiff > 0 && daysDiff <= 3) {
         console.log(`Warning: Jatuh tempo dalam ${daysDiff} hari!`);
-        return { "style": "background-color: yellow;" };
-    } else if (daysDiff < 0 || daysDiff == 0) {
+        return { "style": "background-color: orange;" };
+    } 
+    
+    // Warna merah jika sudah jatuh tempo atau jatuh tempo hari ini
+    if (daysDiff < 0 || daysDiff == 0) {
         console.log(`Overdue: Sudah lewat jatuh tempo ${Math.abs(daysDiff)} hari!`);
         return { "style": "background-color: red; color: white;" };
     }
