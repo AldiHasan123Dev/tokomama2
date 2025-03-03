@@ -107,16 +107,17 @@
             records: "records"
         },
         rowattr: function(rowData) {
-     // Jika tidak ada tempo, tidak ada warna
+    if (!rowData.tempo) return {}; // Jika tidak ada tempo, tidak ada warna
     
-    let today = new Date();
-    let tempoDate = new Date(rowData.tempo);
-    let timeDiff = tempoDate - today;
+    let today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    let tempoDate = new Date(rowData.tempo).toISOString().split('T')[0];
+
+    let timeDiff = new Date(rowData.tempo) - new Date();
     let daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
     console.log(`Row Data: ${JSON.stringify(rowData)}`);
-    console.log(`Tanggal Hari Ini: ${today.toISOString().split('T')[0]}`);
-    console.log(`Jatuh Tempo: ${rowData.tempo}`);
+    console.log(`Tanggal Hari Ini: ${today}`);
+    console.log(`Jatuh Tempo: ${tempoDate}`);
     console.log(`Selisih Hari: ${daysDiff}`);
     console.log(`TOP: ${rowData.top}`);
     console.log(`Kurang Bayar: ${rowData.kurang_bayar}`);
@@ -127,9 +128,9 @@
         return { "style": "background-color: #3fae43; color: white;" };
     }
 
-    // Jika TOP = 0, tidak diberi warna
-    if (parseInt(rowData.top) === 0) {
-        console.log(`TOP 0: Tidak diberi warna`);
+    // Jika TOP = 0 dan jatuh tempo hari ini, tidak diberi warna
+    if (parseInt(rowData.top) === 0 && tempoDate === today) {
+        console.log(`TOP 0 & Jatuh Tempo Hari Ini: Tidak diberi warna`);
         return {};
     }
 
