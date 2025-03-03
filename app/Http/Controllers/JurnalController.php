@@ -201,11 +201,10 @@ class JurnalController extends Controller
     public function update(Request $request, Jurnal $jurnal)
     {
         $data = Jurnal::find($request->id);
-
         if (!$data) {
             return back()->with('error', 'Data Jurnal tidak ditemukan');
         }
-        if ($request->invoice === null && $request->invoice_external === null) {
+        if ($request->invoice_external === null) {
             $data->id_transaksi = null;
         }
         $data->save(); 
@@ -438,6 +437,7 @@ class JurnalController extends Controller
                 } else {
                     $data->id_transaksi = $id_transaksi ?? $id;
                 }
+                $data->id_transaksi = $data->id_transaksi;
                 $data->debit = $request->debit;
                 $data->kredit = $request->kredit;
                 $data->keterangan = $keteranganNow;
@@ -462,6 +462,7 @@ class JurnalController extends Controller
                 ->get();
                 $barang = $invoiceExternal[0]->barang->nama ?? null;
                 $supplier = $invoiceExternal[0]->suppliers->nama ?? null;
+                $id = $invoiceExternal[0]->id ?? null;
                 $customer = $invoiceExternal[0]->suratJalan->customer->nama ?? null;
                 $quantity = $invoiceExternal[0]->jumlah_jual ?? null;
                 $satuan = $invoiceExternal[0]->satuan_jual ?? null;
@@ -499,7 +500,7 @@ class JurnalController extends Controller
 
                 $keteranganNow = $keterangan;
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first();
+                $id_transaksi = Transaction::whereNull('id_surat_jalan')->where('id_barang', $id_barang)->pluck('id')->first();
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -517,7 +518,7 @@ class JurnalController extends Controller
                 if ($request->invoice === null && $request->invoice_external === null) {
                     $data->id_transaksi = $data->id_transaksi;
                 } else {
-                    $data->id_transaksi = $id_transaksi;
+                    $data->id_transaksi = $id_transaksi ?? $data->id_transaksi;
                 }
                 $data->nomor = $request->nomor;
                 $data->debit = $request->debit;
