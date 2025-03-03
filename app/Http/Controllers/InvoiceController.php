@@ -313,7 +313,7 @@ class InvoiceController extends Controller
         if ($nomorArray == []){
             $nomorArray = [0];
         }
-        $maxArray = max($nomorArray);
+        $maxArray = end($nomorArray);
 
         $break = explode('/', $tipe1);
         $part = $break[0];
@@ -351,7 +351,6 @@ class InvoiceController extends Controller
             $temp_debit = 0;
             
             if ($bulan < $bulanNow) {
-                DB::transaction(function () use ($invoice_external, $result, $jurhutNow, $jurhut, $tgl, $newNoJNL, $maxArray, &$nopol, &$temp_debit, $invoice, $nsfp,$cekCoa) {
                     $temp_debit = 0; 
                     $nopol = $result[0]->transaksi->suratJalan->no_pol; 
                     $subtotal = $result->sum(function ($item) {
@@ -626,7 +625,6 @@ class InvoiceController extends Controller
                         }
                             //End Jurnal Hutang NO PPN
                     }
-                });
             } else {
                 $subtotal = $result->sum(function ($item) {
                     return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
@@ -654,7 +652,7 @@ class InvoiceController extends Controller
                         'nopol' => $nopol,
                         'container' => null,
                         'tipe' => 'JNL',
-                        'no' => $maxArray + 1
+                        'no' => $no
                     ]);
                     foreach ($result as $item) {
                         $temp_debit += round($item->subtotal); // Total debit
@@ -679,7 +677,7 @@ class InvoiceController extends Controller
                 }
                     Jurnal::create([
                         'coa_id' => 12, // COA untuk PPN Keluaran
-                        'nomor' => $newNoJNL,
+                        'nomor' => $tipe1,
                         'tgl' => $tgl,
                         'keterangan' => 'PPN Keluaran ' . $result[0]->transaksi->suratJalan->customer->nama . ' (FP: ' . $nsfp . ')',
                         'debit' => 0, // Debit diisi 0
