@@ -285,18 +285,14 @@
                         $ppn = ($barang->value_ppn / 100) * $dpp
                     @endphp
               
-                {{-- <tr> --}}
-                    {{-- <td colspan="5" class="border border-black" style="text-align: right;">
+                  <tr>
+                    <td colspan="5" class="border border-black" style="text-align: right;">
                         <b>TOTAL</b>
                     </td>
                     <td class="border border-black" style="text-align: right;" >
-                    @if($barang->status_ppn == 'ya')
-                        <b>{{ number_format($ppn + $total, 0, ',', '.') }}</b>
-                    @else
                         <b>{{ number_format($total, 0, ',', '.') }}</b>
-                    @endif
-                    </td> --}}
-                {{-- </tr> --}}
+                    </td>
+                 </tr>
                 </tbody>
                 @endif
             </table>
