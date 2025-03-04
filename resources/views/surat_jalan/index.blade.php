@@ -146,7 +146,7 @@
                 ]
             });
 
-            function getData(id, invoice, nomor_surat, kepada, jumlah, satuan, no_pol,
+            function getData(id, invoice, nomor_surat, kepada, no_pol,
                 tgl_sj, no_po) {
 
                 $('#dialog').html(`<dialog id="my_modal_5" class="modal">

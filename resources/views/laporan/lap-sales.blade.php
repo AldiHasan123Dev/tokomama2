@@ -107,7 +107,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($mergedResults as $customer_id => $customerData)
+                    @foreach ($mergedResults as $customer_sales => $customerData)
                     @php
                         $totalOmzet = 0;
                     @endphp

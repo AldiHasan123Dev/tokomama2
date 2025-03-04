@@ -112,25 +112,24 @@ class LaporanController extends Controller
     
         $mergedResults = [];
         foreach ($invoices as $invoice) {
-            if (!isset($mergedResults[$invoice->customer_id])) {
-                $mergedResults[$invoice->customer_id] = [
+            if (!isset($mergedResults[$invoice->customer_sales])) {
+                $mergedResults[$invoice->customer_sales] = [
                     'sales_name' => $invoice->customer_sales,
                     'years' => []
                 ];
             }
     
-            if (!isset($mergedResults[$invoice->customer_id]['years'][$invoice->year])) {
-                $mergedResults[$invoice->customer_id]['years'][$invoice->year] = [];
+            if (!isset($mergedResults[$invoice->customer_sales]['years'][$invoice->year])) {
+                $mergedResults[$invoice->customer_sales]['years'][$invoice->year] = [];
             }
     
-            $mergedResults[$invoice->customer_id]['years'][$invoice->year][$invoice->month] = [
+            $mergedResults[$invoice->customer_sales]['years'][$invoice->year][$invoice->month] = [
                 'month' => $invoice->month,
                 'year' => $invoice->year,
                 'invoice_count' => $invoice->invoice_count,
                 'omzet' => $invoice->omzet / 1000
             ];
         }
-    
         $months = [
             'January', 'February', 'March', 'April', 'May', 
             'June', 'July', 'August', 'September', 
@@ -444,7 +443,8 @@ public function dataLapPiutang(Request $request)
             'jumlah_harga' => $jumlah_harga,
             'top' => $top,
             'ditagih_tgl' => $group->first()->tgl_invoice,
-            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top),
+            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top)->format('Y-m-d') ,
+            'hitung_tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top),
             'dibayar_tgl' => null,
             'sebesar' => 0,
             'kurang_bayar' => $jumlah_harga,
@@ -497,7 +497,8 @@ public function dataLapPiutang(Request $request)
                     'jumlah_harga' => $totalHarga,
                     'top' => $top,
                     'ditagih_tgl' => $invoicesForJurnal->tgl_invoice,
-                    'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top),
+                    'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top + 1),
+                    'hitung_tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top),
                     'dibayar_tgl' => $jurnal->tgl,
                     'sebesar' => $jurnal->debit,
                     'kurang_bayar' => $totalHarga,
@@ -531,6 +532,7 @@ public function dataLapPiutang(Request $request)
             'ditagih_tgl' => $row['ditagih_tgl'],
             'top' => $row['top'],
             'tempo' => $row['tempo'],
+            'hitung_tempo' => $row['hitung_tempo'],
             'dibayar_tgl' => $row['dibayar_tgl'],
             'sebesar' => $row['sebesar'],
             'kurang_bayar' =>$row['kurang_bayar'],

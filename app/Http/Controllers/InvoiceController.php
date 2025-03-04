@@ -313,7 +313,7 @@ class InvoiceController extends Controller
         if ($nomorArray == []){
             $nomorArray = [0];
         }
-        $maxArray = max($nomorArray);
+        $maxArray = end($nomorArray);
 
         $break = explode('/', $tipe1);
         $part = $break[0];
@@ -351,7 +351,6 @@ class InvoiceController extends Controller
             $temp_debit = 0;
             
             if ($bulan < $bulanNow) {
-                DB::transaction(function () use ($invoice_external, $result, $jurhutNow, $jurhut, $tgl, $newNoJNL, $maxArray, &$nopol, &$temp_debit, $invoice, $nsfp,$cekCoa) {
                     $temp_debit = 0; 
                     $nopol = $result[0]->transaksi->suratJalan->no_pol; 
                     $subtotal = $result->sum(function ($item) {
@@ -430,7 +429,7 @@ class InvoiceController extends Controller
                                     'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                                     'kredit' => 0, // Menggunakan total debit sebagai kredit
                                     'invoice' => null,
-                                    'invoice_external' => $invoice_external,
+                                    'invoice_external' => $item->transaksi->invoice_external,
                                     'id_transaksi' => $item->id_transaksi,
                                     'nopol' => $nopol,
                                     'container' => null,
@@ -438,23 +437,51 @@ class InvoiceController extends Controller
                                     'no' =>  $maxArray + 2
                                 ]);
                             }
+                            $supplierJournals = [];
+
+                            foreach ($result as $item) {
+                                // Pastikan transaksi tersedia
+                                if (!$item->transaksi || !$item->transaksi->suppliers) {
+                                    continue; // Lewati jika transaksi atau supplier tidak ada
+                                }
                             
-                             //coa 1.6 = Uang Muka (Kredit)
-                            Jurnal::create([
-                                'coa_id' => 89,
-                                'nomor' => $jurhut,
-                                'tgl' => $tgl,
-                                'keterangan' => 'Persediaan Jayapura  ' . $result[0]->transaksi->suppliers->nama,
-                                'debit' => 0, // Menyimpan subtotal sebagai debit
-                                'kredit' => $subtotal, // Kredit diisi 0
-                                'invoice' => null,
-                                'invoice_external' => $invoice_external,
-                                'id_transaksi' => $result[0]->id_transaksi,
-                                'nopol' => $nopol,
-                                'container' => null,
-                                'tipe' => 'JNL',
-                                'no' =>  $maxArray + 2
-                            ]);
+                                // Ambil semua supplier dalam bentuk array/koleksi
+                                $suppliers = is_iterable($item->transaksi->suppliers) ? $item->transaksi->suppliers : [$item->transaksi->suppliers];
+                            
+                                foreach ($suppliers as $supplier) {
+                                    $supplierId = $supplier->id;
+                                    $supplierName = $supplier->nama;
+                                    $inv_x = $item->transaksi->invoice_external;
+                                    $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                            
+                                    // Jika supplier sudah ada, tambahkan jumlah kreditnya
+                                    if (isset($supplierJournals[$inv_x])) {
+                                        $supplierJournals[$inv_x]['kredit'] += $kredit;
+                                    } else {
+                                        // Simpan data jurnal sementara
+                                        $supplierJournals[$inv_x] = [
+                                            'coa_id' => 89,
+                                            'nomor' => $jurhut,
+                                            'tgl' => $tgl,
+                                            'keterangan' => 'Persediaan Jayapura ' . $supplierName,
+                                            'debit' => 0,
+                                            'kredit' => $kredit,
+                                            'invoice' => null,
+                                            'invoice_external' => $inv_x,
+                                            'id_transaksi' => $item->id_transaksi,
+                                            'nopol' => $nopol,
+                                            'container' => null,
+                                            'tipe' => 'JNL',
+                                            'no' => $maxArray + 2
+                                        ];
+                                    }
+                                }
+                            }
+                            
+                            // Simpan jurnal setelah semua data dikumpulkan
+                            foreach ($supplierJournals as $jurnalData) {
+                                Jurnal::create($jurnalData);
+                            }                                                         
                         } else{
                             //Jurnal Hutang PPN 
                              //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
@@ -472,7 +499,7 @@ class InvoiceController extends Controller
                                     'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                                     'kredit' => 0, // Menggunakan total debit sebagai kredit
                                     'invoice' => null,
-                                    'invoice_external' => $invoice_external,
+                                    'invoice_external' => $item->transaksi->invoice_external,
                                     'id_transaksi' => $item->id_transaksi,
                                     'nopol' => $nopol,
                                     'container' => null,
@@ -483,21 +510,51 @@ class InvoiceController extends Controller
                                  //coa 1.1.4 = PPN Masukan (Debit)
                             }
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
-                            Jurnal::create([
-                                'coa_id' => 89,
-                                'nomor' => $jurhut,
-                                'tgl' => $tgl,
-                                'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
-                                'debit' => 0, // Menyimpan subtotal sebagai debit
-                                'kredit' => $subtotal, // Kredit diisi 0
-                                'invoice' => null,
-                                'invoice_external' => $invoice_external,
-                                'id_transaksi' => $result[0]->id_transaksi,
-                                'nopol' => $nopol,
-                                'container' => null,
-                                'tipe' => 'JNL',
-                                'no' =>  $maxArray + 2
-                            ]);
+                             $supplierJournals = [];
+
+                             foreach ($result as $item) {
+                                 // Pastikan transaksi tersedia
+                                 if (!$item->transaksi || !$item->transaksi->suppliers) {
+                                     continue; // Lewati jika transaksi atau supplier tidak ada
+                                 }
+                             
+                                 // Ambil semua supplier dalam bentuk array/koleksi
+                                 $suppliers = is_iterable($item->transaksi->suppliers) ? $item->transaksi->suppliers : [$item->transaksi->suppliers];
+                             
+                                 foreach ($suppliers as $supplier) {
+                                     $supplierId = $supplier->id;
+                                     $supplierName = $supplier->nama;
+                                     $inv_x = $item->transaksi->invoice_external;
+                                     $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                             
+                                     // Jika supplier sudah ada, tambahkan jumlah kreditnya
+                                     if (isset($supplierJournals[$inv_x])) {
+                                         $supplierJournals[$inv_x]['kredit'] += $kredit;
+                                     } else {
+                                         // Simpan data jurnal sementara
+                                         $supplierJournals[$inv_x] = [
+                                             'coa_id' => 89,
+                                             'nomor' => $jurhut,
+                                             'tgl' => $tgl,
+                                             'keterangan' => 'Persediaan Jayapura ' . $supplierName,
+                                             'debit' => 0,
+                                             'kredit' => $kredit,
+                                             'invoice' => null,
+                                             'invoice_external' => $inv_x,
+                                             'id_transaksi' => $item->id_transaksi,
+                                             'nopol' => $nopol,
+                                             'container' => null,
+                                             'tipe' => 'JNL',
+                                             'no' => $maxArray + 2
+                                         ];
+                                     }
+                                 }
+                             }
+                             
+                             // Simpan jurnal setelah semua data dikumpulkan
+                             foreach ($supplierJournals as $jurnalData) {
+                                 Jurnal::create($jurnalData);
+                             }                                                                           
                         }
                             //End PPN Bulan $bulan < $bulanNow
                     } else{
@@ -543,22 +600,52 @@ class InvoiceController extends Controller
                             ]);
                     }
                     if ($cekCoa->isNotEmpty()) {
-                    //Jurnal Hutang No PPN 
-                    Jurnal::create([
-                        'coa_id' => 89,
-                        'nomor' => $jurhut,
-                        'tgl' => $tgl,
-                        'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
-                        'debit' => 0, // Menyimpan subtotal sebagai debit
-                        'kredit' => $subtotal, // Kredit diisi 0
-                        'invoice' => null,
-                        'invoice_external' => $invoice_external,
-                        'id_transaksi' => $result[0]->id_transaksi,
-                        'nopol' => $nopol,
-                        'container' => null,
-                        'tipe' => 'JNL',
-                        'no' =>  $maxArray + 2
-                    ]);
+                    //Jurnal Hutang No PPN
+                    $supplierJournals = [];
+
+                    foreach ($result as $item) {
+                        // Pastikan transaksi tersedia
+                        if (!$item->transaksi || !$item->transaksi->suppliers) {
+                            continue; // Lewati jika transaksi atau supplier tidak ada
+                        }
+                    
+                        // Ambil semua supplier dalam bentuk array/koleksi
+                        $suppliers = is_iterable($item->transaksi->suppliers) ? $item->transaksi->suppliers : [$item->transaksi->suppliers];
+                    
+                        foreach ($suppliers as $supplier) {
+                            $supplierId = $supplier->id;
+                            $supplierName = $supplier->nama;
+                            $inv_x = $item->transaksi->invoice_external;
+                            $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                    
+                            // Jika supplier sudah ada, tambahkan jumlah kreditnya
+                            if (isset($supplierJournals[$inv_x])) {
+                                $supplierJournals[$inv_x]['kredit'] += $kredit;
+                            } else {
+                                // Simpan data jurnal sementara
+                                $supplierJournals[$inv_x] = [
+                                    'coa_id' => 89,
+                                    'nomor' => $jurhut,
+                                    'tgl' => $tgl,
+                                    'keterangan' => 'Persediaan Jayapura ' . $supplierName,
+                                    'debit' => 0,
+                                    'kredit' => $kredit,
+                                    'invoice' => null,
+                                    'invoice_external' => $inv_x,
+                                    'id_transaksi' => $item->id_transaksi,
+                                    'nopol' => $nopol,
+                                    'container' => null,
+                                    'tipe' => 'JNL',
+                                    'no' => $maxArray + 2
+                                ];
+                            }
+                        }
+                    }
+                    
+                    // Simpan jurnal setelah semua data dikumpulkan
+                    foreach ($supplierJournals as $jurnalData) {
+                        Jurnal::create($jurnalData);
+                    }                    
                              //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
                              foreach ($result as $item) {
                                 Jurnal::create([
@@ -573,7 +660,7 @@ class InvoiceController extends Controller
                                     'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                                     'kredit' => 0, // Menggunakan total debit sebagai kredit
                                     'invoice' => null,
-                                    'invoice_external' => $invoice_external,
+                                    'invoice_external' => $item->transaksi->invoice_external,
                                     'id_transaksi' => $item->id_transaksi,
                                     'nopol' => $nopol,
                                     'container' => null,
@@ -599,7 +686,7 @@ class InvoiceController extends Controller
                             'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                             'kredit' => 0, // Menggunakan total debit sebagai kredit
                             'invoice' => null,
-                            'invoice_external' => $invoice_external,
+                            'invoice_external' => $item->transaksi->invoice_external,
                             'id_transaksi' => $item->id_transaksi,
                             'nopol' => $nopol,
                             'container' => null,
@@ -608,25 +695,54 @@ class InvoiceController extends Controller
                         ]);
                     }
                      //coa 1.6 = Persediaan Barang / Stock (Kredit)
-                     Jurnal::create([
-                        'coa_id' => 89,
-                        'nomor' => $jurhut,
-                        'tgl' => $tgl,
-                        'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
-                        'debit' => 0, // Menyimpan subtotal sebagai debit
-                        'kredit' => $subtotal, // Kredit diisi 0
-                        'invoice' => null,
-                        'invoice_external' => $invoice_external,
-                        'id_transaksi' => $result[0]->id_transaksi,
-                        'nopol' => $nopol,
-                        'container' => null,
-                        'tipe' => 'JNL',
-                        'no' =>  $maxArray + 2
-                    ]);
+                     $supplierJournals = [];
+
+                     foreach ($result as $item) {
+                         // Pastikan transaksi tersedia
+                         if (!$item->transaksi || !$item->transaksi->suppliers) {
+                             continue; // Lewati jika transaksi atau supplier tidak ada
+                         }
+                     
+                         // Ambil semua supplier dalam bentuk array/koleksi
+                         $suppliers = is_iterable($item->transaksi->suppliers) ? $item->transaksi->suppliers : [$item->transaksi->suppliers];
+                     
+                         foreach ($suppliers as $supplier) {
+                             $supplierId = $supplier->id;
+                             $supplierName = $supplier->nama;
+                             $inv_x = $item->transaksi->invoice_external;
+                             $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                     
+                             // Jika supplier sudah ada, tambahkan jumlah kreditnya
+                             if (isset($supplierJournals[$inv_x])) {
+                                 $supplierJournals[$inv_x]['kredit'] += $kredit;
+                             } else {
+                                 // Simpan data jurnal sementara
+                                 $supplierJournals[$inv_x] = [
+                                     'coa_id' => 89,
+                                     'nomor' => $jurhut,
+                                     'tgl' => $tgl,
+                                     'keterangan' => 'Persediaan Jayapura ' . $supplierName,
+                                     'debit' => 0,
+                                     'kredit' => $kredit,
+                                     'invoice' => null,
+                                     'invoice_external' => $inv_x,
+                                     'id_transaksi' => $item->id_transaksi,
+                                     'nopol' => $nopol,
+                                     'container' => null,
+                                     'tipe' => 'JNL',
+                                     'no' => $maxArray + 2
+                                 ];
+                             }
+                         }
+                     }
+                     
+                     // Simpan jurnal setelah semua data dikumpulkan
+                     foreach ($supplierJournals as $jurnalData) {
+                         Jurnal::create($jurnalData);
+                     }                                         
                         }
                             //End Jurnal Hutang NO PPN
                     }
-                });
             } else {
                 $subtotal = $result->sum(function ($item) {
                     return round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
@@ -654,7 +770,7 @@ class InvoiceController extends Controller
                         'nopol' => $nopol,
                         'container' => null,
                         'tipe' => 'JNL',
-                        'no' => $maxArray + 1
+                        'no' => $no
                     ]);
                     foreach ($result as $item) {
                         $temp_debit += round($item->subtotal); // Total debit
@@ -679,7 +795,7 @@ class InvoiceController extends Controller
                 }
                     Jurnal::create([
                         'coa_id' => 12, // COA untuk PPN Keluaran
-                        'nomor' => $newNoJNL,
+                        'nomor' => $tipe1,
                         'tgl' => $tgl,
                         'keterangan' => 'PPN Keluaran ' . $result[0]->transaksi->suratJalan->customer->nama . ' (FP: ' . $nsfp . ')',
                         'debit' => 0, // Debit diisi 0
@@ -708,7 +824,7 @@ class InvoiceController extends Controller
                                     'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                                     'kredit' => 0, // Menggunakan total debit sebagai kredit
                                     'invoice' => null,
-                                    'invoice_external' => $invoice_external,
+                                    'invoice_external' => $item->transaksi->invoice_external,
                                     'id_transaksi' => $item->id_transaksi,
                                     'nopol' => $nopol,
                                     'container' => null,
@@ -720,21 +836,51 @@ class InvoiceController extends Controller
                             }
                             
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
-                            Jurnal::create([
-                                'coa_id' => 89,
-                                'nomor' => $jurhutNow,
-                                'tgl' => $tgl,
-                                'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
-                                'debit' => 0, // Menyimpan subtotal sebagai debit
-                                'kredit' => $subtotal, // Kredit diisi 0
-                                'invoice' => null,
-                                'invoice_external' => $invoice_external,
-                                'id_transaksi' => $result[0]->id_transaksi,
-                                'nopol' => $nopol,
-                                'container' => null,
-                                'tipe' => 'JNL',
-                                'no' =>  $no + 1
-                            ]);
+                             $supplierJournals = [];
+
+                             foreach ($result as $item) {
+                                 // Pastikan transaksi tersedia
+                                 if (!$item->transaksi || !$item->transaksi->suppliers) {
+                                     continue; // Lewati jika transaksi atau supplier tidak ada
+                                 }
+                             
+                                 // Ambil semua supplier dalam bentuk array/koleksi
+                                 $suppliers = is_iterable($item->transaksi->suppliers) ? $item->transaksi->suppliers : [$item->transaksi->suppliers];
+                             
+                                 foreach ($suppliers as $supplier) {
+                                     $supplierId = $supplier->id;
+                                     $supplierName = $supplier->nama;
+                                     $inv_x = $item->transaksi->invoice_external;
+                                     $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                             
+                                     // Jika supplier sudah ada, tambahkan jumlah kreditnya
+                                     if (isset($supplierJournals[$inv_x])) {
+                                         $supplierJournals[$inv_x]['kredit'] += $kredit;
+                                     } else {
+                                         // Simpan data jurnal sementara
+                                         $supplierJournals[$inv_x] = [
+                                             'coa_id' => 89,
+                                             'nomor' => $jurhut,
+                                             'tgl' => $tgl,
+                                             'keterangan' => 'Persediaan Jayapura ' . $supplierName,
+                                             'debit' => 0,
+                                             'kredit' => $kredit,
+                                             'invoice' => null,
+                                             'invoice_external' => $inv_x,
+                                             'id_transaksi' => $item->id_transaksi,
+                                             'nopol' => $nopol,
+                                             'container' => null,
+                                             'tipe' => 'JNL',
+                                             'no' => $maxArray + 2
+                                         ];
+                                     }
+                                 }
+                             }
+                             
+                             // Simpan jurnal setelah semua data dikumpulkan
+                             foreach ($supplierJournals as $jurnalData) {
+                                 Jurnal::create($jurnalData);
+                             }                                                         
                         }else {
                             //Jurnal Hutang PPN
                          //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
@@ -751,7 +897,7 @@ class InvoiceController extends Controller
                                 'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                                 'kredit' => 0, // Menggunakan total debit sebagai kredit
                                 'invoice' => null,
-                                'invoice_external' => $invoice_external,
+                                'invoice_external' => $item->transaksi->invoice_external,
                                 'id_transaksi' => $item->id_transaksi,
                                 'nopol' => $nopol,
                                 'container' => null,
@@ -762,21 +908,51 @@ class InvoiceController extends Controller
                              //coa 1.1.4 = PPN Masukan (Debit)
                         }
                          //coa 1.6 = Persediaan Barang / Stock (Kredit)
-                        Jurnal::create([
-                            'coa_id' => 89,
-                            'nomor' => $jurhutNow,
-                            'tgl' => $tgl,
-                            'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
-                            'debit' => 0, // Menyimpan subtotal sebagai debit
-                            'kredit' => $subtotal, // Kredit diisi 0
-                            'invoice' => null,
-                            'invoice_external' => $invoice_external,
-                            'id_transaksi' => $result[0]->id_transaksi,
-                            'nopol' => $nopol,
-                            'container' => null,
-                            'tipe' => 'JNL',
-                            'no' =>  $no + 1
-                        ]);
+                         $supplierJournals = [];
+
+                         foreach ($result as $item) {
+                             // Pastikan transaksi tersedia
+                             if (!$item->transaksi || !$item->transaksi->suppliers) {
+                                 continue; // Lewati jika transaksi atau supplier tidak ada
+                             }
+                         
+                             // Ambil semua supplier dalam bentuk array/koleksi
+                             $suppliers = is_iterable($item->transaksi->suppliers) ? $item->transaksi->suppliers : [$item->transaksi->suppliers];
+                         
+                             foreach ($suppliers as $supplier) {
+                                 $supplierId = $supplier->id;
+                                 $supplierName = $supplier->nama;
+                                 $inv_x = $item->transaksi->invoice_external;
+                                 $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                         
+                                 // Jika supplier sudah ada, tambahkan jumlah kreditnya
+                                 if (isset($supplierJournals[$inv_x])) {
+                                     $supplierJournals[$inv_x]['kredit'] += $kredit;
+                                 } else {
+                                     // Simpan data jurnal sementara
+                                     $supplierJournals[$inv_x] = [
+                                         'coa_id' => 89,
+                                         'nomor' => $jurhut,
+                                         'tgl' => $tgl,
+                                         'keterangan' => 'Persediaan Jayapura ' . $supplierName,
+                                         'debit' => 0,
+                                         'kredit' => $kredit,
+                                         'invoice' => null,
+                                         'invoice_external' => $inv_x,
+                                         'id_transaksi' => $item->id_transaksi,
+                                         'nopol' => $nopol,
+                                         'container' => null,
+                                         'tipe' => 'JNL',
+                                         'no' => $maxArray + 2
+                                     ];
+                                 }
+                             }
+                         }
+                         
+                         // Simpan jurnal setelah semua data dikumpulkan
+                         foreach ($supplierJournals as $jurnalData) {
+                             Jurnal::create($jurnalData);
+                         }                                                 
                         }
 
                             //End PPN Bulan $bulan < $bulanNow
@@ -839,7 +1015,7 @@ class InvoiceController extends Controller
                                     'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                                     'kredit' => 0, // Menggunakan total debit sebagai kredit
                                     'invoice' => null,
-                                    'invoice_external' => $invoice_external,
+                                    'invoice_external' => $item->transaksi->invoice_external,
                                     'id_transaksi' => $item->id_transaksi,
                                     'nopol' => $nopol,
                                     'container' => null,
@@ -848,21 +1024,51 @@ class InvoiceController extends Controller
                                 ]);
                             }
                              //coa 1.6 = Persediaan Barang / Stock (Kredit)
-                             Jurnal::create([
-                                'coa_id' => 89,
-                                'nomor' => $jurhutNow,
-                                'tgl' => $tgl,
-                                'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
-                                'debit' => 0, // Menyimpan subtotal sebagai debit
-                                'kredit' => $subtotal, // Kredit diisi 0
-                                'invoice' => null,
-                                'invoice_external' => $invoice_external,
-                                'id_transaksi' => $result[0]->id_transaksi,
-                                'nopol' => $nopol,
-                                'container' => null,
-                                'tipe' => 'JNL',
-                                'no' =>  $no + 1
-                            ]);
+                             $supplierJournals = [];
+
+                             foreach ($result as $item) {
+                                 // Pastikan transaksi tersedia
+                                 if (!$item->transaksi || !$item->transaksi->suppliers) {
+                                     continue; // Lewati jika transaksi atau supplier tidak ada
+                                 }
+                             
+                                 // Ambil semua supplier dalam bentuk array/koleksi
+                                 $suppliers = is_iterable($item->transaksi->suppliers) ? $item->transaksi->suppliers : [$item->transaksi->suppliers];
+                             
+                                 foreach ($suppliers as $supplier) {
+                                     $supplierId = $supplier->id;
+                                     $supplierName = $supplier->nama;
+                                     $inv_x = $item->transaksi->invoice_external;
+                                     $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                             
+                                     // Jika supplier sudah ada, tambahkan jumlah kreditnya
+                                     if (isset($supplierJournals[$inv_x])) {
+                                         $supplierJournals[$inv_x]['kredit'] += $kredit;
+                                     } else {
+                                         // Simpan data jurnal sementara
+                                         $supplierJournals[$inv_x] = [
+                                             'coa_id' => 89,
+                                             'nomor' => $jurhut,
+                                             'tgl' => $tgl,
+                                             'keterangan' => 'Persediaan Jayapura ' . $supplierName,
+                                             'debit' => 0,
+                                             'kredit' => $kredit,
+                                             'invoice' => null,
+                                             'invoice_external' => $inv_x,
+                                             'id_transaksi' => $item->id_transaksi,
+                                             'nopol' => $nopol,
+                                             'container' => null,
+                                             'tipe' => 'JNL',
+                                             'no' => $maxArray + 2
+                                         ];
+                                     }
+                                 }
+                             }
+                             
+                             // Simpan jurnal setelah semua data dikumpulkan
+                             foreach ($supplierJournals as $jurnalData) {
+                                 Jurnal::create($jurnalData);
+                             }                                                           
                         } else {
                  //coa 6.2.1 = Biaya Operasional Trading Bulan Berjalan(Debit)
                  foreach ($result as $item) {
@@ -878,7 +1084,7 @@ class InvoiceController extends Controller
                         'debit' => round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual), // Debit diisi 0
                         'kredit' => 0, // Menggunakan total debit sebagai kredit
                         'invoice' => null,
-                        'invoice_external' => $invoice_external,
+                        'invoice_external' => $item->transaksi->invoice_external,
                         'id_transaksi' => $item->id_transaksi,
                         'nopol' => $nopol,
                         'container' => null,
@@ -887,21 +1093,51 @@ class InvoiceController extends Controller
                     ]);
                 }
                  //coa 1.6 = Persediaan Barang / Stock (Kredit)
-                 Jurnal::create([
-                    'coa_id' => 89,
-                    'nomor' => $jurhutNow,
-                    'tgl' => $tgl,
-                    'keterangan' => 'Persediaan Jayapura ' . $result[0]->transaksi->suppliers->nama,
-                    'debit' => 0, // Menyimpan subtotal sebagai debit
-                    'kredit' => $subtotal, // Kredit diisi 0
-                    'invoice' => null,
-                    'invoice_external' => $invoice_external,
-                    'id_transaksi' => $result[0]->id_transaksi,
-                    'nopol' => $nopol,
-                    'container' => null,
-                    'tipe' => 'JNL',
-                    'no' =>  $no + 1
-                ]);
+                 $supplierJournals = [];
+
+                 foreach ($result as $item) {
+                     // Pastikan transaksi tersedia
+                     if (!$item->transaksi || !$item->transaksi->suppliers) {
+                         continue; // Lewati jika transaksi atau supplier tidak ada
+                     }
+                 
+                     // Ambil semua supplier dalam bentuk array/koleksi
+                     $suppliers = is_iterable($item->transaksi->suppliers) ? $item->transaksi->suppliers : [$item->transaksi->suppliers];
+                 
+                     foreach ($suppliers as $supplier) {
+                         $supplierId = $supplier->id;
+                         $supplierName = $supplier->nama;
+                         $inv_x = $item->transaksi->invoice_external;
+                         $kredit = round($item->transaksi->harga_beli * $item->transaksi->jumlah_jual);
+                 
+                         // Jika supplier sudah ada, tambahkan jumlah kreditnya
+                         if (isset($supplierJournals[$inv_x])) {
+                             $supplierJournals[$inv_x]['kredit'] += $kredit;
+                         } else {
+                             // Simpan data jurnal sementara
+                             $supplierJournals[$inv_x] = [
+                                 'coa_id' => 89,
+                                 'nomor' => $jurhut,
+                                 'tgl' => $tgl,
+                                 'keterangan' => 'Persediaan Jayapura ' . $supplierName,
+                                 'debit' => 0,
+                                 'kredit' => $kredit,
+                                 'invoice' => null,
+                                 'invoice_external' => $inv_x,
+                                 'id_transaksi' => $item->id_transaksi,
+                                 'nopol' => $nopol,
+                                 'container' => null,
+                                 'tipe' => 'JNL',
+                                 'no' => $maxArray + 2
+                             ];
+                         }
+                     }
+                 }
+                 
+                 // Simpan jurnal setelah semua data dikumpulkan
+                 foreach ($supplierJournals as $jurnalData) {
+                     Jurnal::create($jurnalData);
+                 }                                   
                         }
                             //End Jurnal Hutang NO PPN
                 }

@@ -93,8 +93,8 @@
             { search: true, label: 'Kurang Bayar', name: 'kurang_bayar', width: 120, align: "right", formatter: 'currency', formatoptions: { thousandsSeparator: ',' }, sortable: true }
         ],
         pager: "#jqGridPager",
-        rowNum: 20,
-        rowList: [10, 20, 50],
+        rowNum: 100,
+        rowList: [150, 200],
         viewrecords: true,
         autowidth: true,
         loadonce: true,
@@ -107,34 +107,47 @@
             records: "records"
         },
         rowattr: function(rowData) {
-            if (!rowData.tempo) return {}; 
+    if (!rowData.tempo) return {}; // Jika tidak ada tempo, tidak ada warna
+    
+    let today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    let tempoDate = new Date(rowData.tempo).toISOString().split('T')[0];
 
-            let today = new Date();
-            let tempoDate = new Date(rowData.tempo);
-            let timeDiff = tempoDate - today;
-            let daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    let timeDiff = new Date(rowData.tempo) - new Date();
+    let daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
-            console.log(`Row Data: ${JSON.stringify(rowData)}`);
-            console.log(`Tanggal Hari Ini: ${today.toISOString().split('T')[0]}`);
-            console.log(`Jatuh Tempo: ${rowData.tempo}`);
-            console.log(`Selisih Hari: ${daysDiff}`);
+    console.log(`Row Data: ${JSON.stringify(rowData)}`);
+    console.log(`Tanggal Hari Ini: ${today}`);
+    console.log(`Jatuh Tempo: ${tempoDate}`);
+    console.log(`Selisih Hari: ${daysDiff}`);
+    console.log(`TOP: ${rowData.top}`);
+    console.log(`Kurang Bayar: ${rowData.kurang_bayar}`);
 
-            // Jika kurang bayar = 0, beri warna hijau
-            if (parseFloat(rowData.kurang_bayar) === 0) {
-                console.log(`Lunas: Kurang bayar 0!`);
-                return { "style": "background-color: #3fae43; color: white;" };
-            }
+    // Jika kurang bayar = 0, semua kondisi tetap hijau
+    if (parseFloat(rowData.kurang_bayar) === 0) {
+        console.log(`Lunas: Kurang bayar 0!`);
+        return { "style": "background-color: #3fae43; color: white;" };
+    }
 
-            if (daysDiff > 0 && daysDiff <= 3) {
-                console.log(`Warning: Jatuh tempo dalam ${daysDiff} hari!`);
-                return { "style": "background-color: yellow;" };
-            } else if (daysDiff < 0 || daysDiff == 0) {
-                console.log(`Overdue: Sudah lewat jatuh tempo ${Math.abs(daysDiff)} hari!`);
-                return { "style": "background-color: red; color: white;" };
-            }
+    // Jika TOP = 0 dan jatuh tempo hari ini, tidak diberi warna
+    if (parseInt(rowData.top) === 0 && tempoDate === today) {
+        console.log(`TOP 0 & Jatuh Tempo Hari Ini: Tidak diberi warna`);
+        return {};
+    }
 
-            return {};
-        },
+    // Warna oranye untuk jatuh tempo dalam 1-3 hari
+    if (daysDiff > 0 && daysDiff <= 2) {
+        console.log(`Warning: Jatuh tempo dalam ${daysDiff} hari!`);
+        return { "style": "background-color: orange;" };
+    } 
+    
+    // Warna merah jika sudah jatuh tempo atau jatuh tempo hari ini
+    if (daysDiff < 0) {
+        console.log(`Overdue: Sudah lewat jatuh tempo ${Math.abs(daysDiff)} hari!`);
+        return { "style": "background-color: red; color: white;" };
+    }
+
+    return {};
+},
         loadComplete: function(data) {
             console.log("Load complete: ", data);
             $("#table-lp").jqGrid('filterToolbar');
