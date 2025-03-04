@@ -252,7 +252,6 @@
                         </tr>
                     @endfor
                     @if ($page == $pages) 
-                    <tr>
                     {{-- <td colspan="5"  style="text-align: right;">
                         Subtotal
                         <br>
@@ -285,7 +284,7 @@
                     @php
                         $ppn = ($barang->value_ppn / 100) * $dpp
                     @endphp
-                </tr>
+              
                 {{-- <tr> --}}
                     {{-- <td colspan="5" class="border border-black" style="text-align: right;">
                         <b>TOTAL</b>
