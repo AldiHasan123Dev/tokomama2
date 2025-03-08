@@ -204,55 +204,15 @@ class StockController extends Controller
         // Ambil parameter pagination
         
         // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
-        $stocks = Transaction::leftJoin('jurnal', function ($join) {
-            $join->on('jurnal.id_transaksi', '=', 'transaksi.id')
-                 ->where('jurnal.tipe', 'JNL')
-                 ->where('jurnal.debit', '>', 0)
-                 ->where('jurnal.coa_id', 89);
-        })
-        ->select([
-            'id_barang',
-            'transaksi.*',
-            'jurnal.nomor AS nomor_jurnal',
-            'jurnal.tgl AS tgl_jurnal', // Menambahkan nomor jurnal ke hasil query
-        ])
-        ->whereNull('transaksi.id_surat_jalan')  // Pastikan id_surat_jalan bernilai null
-        ->where('transaksi.harga_beli', '>', 0)  // Pastikan harga_beli lebih dari 0
-        ->with('jurnals')  // Memuat relasi jurnals untuk akses lebih lanjut
-        ->orderByDesc('transaksi.created_at')  // Urutkan berdasarkan created_at secara descending
+        $stocks = Transaction::selectRaw(
+            'transaksi.*'
+        )
+        ->with('jurnals')
+        ->whereNull('id_surat_jalan')
+        ->where('harga_beli', '>', 0)
+        ->orderBy('no_bm', 'desc') // Pastikan harga_beli lebih dari 0 // Grup berdasarkan kondisi // Urutkan berdasarkan created_at
         ->get();
-
-    
-
-    
-    
-    
-    
-    //     // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
-    //     $stocks = Transaction::selectRaw("
-    //     transaksi.id, 
-    //     transaksi.*, 
-    //     id_barang, 
-    //     SUM(jumlah_beli) as total_beli, 
-    //     SUM(jumlah_jual) as total_jual, 
-    //     SUM(sisa) as sisa,
-    //     SUM(harga_beli) as total_harga_beli,
-    //     SUM(harga_jual) as total_harga_jual,
-    //     (SUM(harga_jual) - SUM(harga_beli)) as total_profit,
-    //    GROUP_CONCAT(barang.nama ORDER BY barang.nama ASC SEPARATOR '\n') as barang_list
-    // ")
-    // ->join('barang', 'barang.id', '=', 'transaksi.id_barang')
-    // ->whereNotNull('no_bm')
-    // ->groupByRaw("
-    //     CASE 
-    //         WHEN stts IS NOT NULL THEN no_bm 
-    //         ELSE COALESCE(invoice_external, transaksi.id) 
-    //     END
-    // ") // Grup berdasarkan status atau invoice_external/no_bm
-    // ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at
-    // ->get();
-
-
+        
         // Hitung total records
         $totalRecords = $stocks->count();
         $perPage = request('per_page', $totalRecords);
@@ -274,8 +234,8 @@ class StockController extends Controller
                 'jumlah_belis' => $stock->jumlah_belis,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
                 'status' => $stock->stts ?? '-',
-                'tgl_jurnal' =>  $stock->tgl_jurnal ?? '-',
-              'jurnal' =>  $stock->nomor_jurnal ?? '-',
+                'tgl_jurnal' =>  optional($stock->jurnals->firstWhere('coa_id', 89))->tgl ?? '-' ?? '-',
+                'jurnal' =>  optional($stock->jurnals->firstWhere('coa_id', 89))->nomor ?? '-' ?? '-',
                 'invoice_external' => $stock->invoice_external,
                 'no_bm' => $stock->no_bm,
                 'satuan_beli' => $stock->satuan_beli,
