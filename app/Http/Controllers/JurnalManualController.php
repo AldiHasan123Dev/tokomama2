@@ -58,6 +58,7 @@ class JurnalManualController extends Controller
 
         //Sortir otomatis jika invoice sudah ada BBM nya, maka tidak akan tampil
         $invoices = DB::table('jurnal as j1')
+        ->whereNull('deleted_at')
         ->where('j1.tipe', 'JNL') // Kondisi tipe JNL // Kondisi debit lebih besar dari 0
         ->where('j1.coa_id', 8) // Kondisi coa_id
         ->groupBy('j1.invoice')

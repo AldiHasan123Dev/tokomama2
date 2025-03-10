@@ -402,13 +402,23 @@ public function dataLapPiutang(Request $request)
       }
     // Ambil data dari tabel Jurnals dengan pagination, urutkan berdasarkan 'tgl' descending
     $jurnals = Jurnal::withTrashed()
-        ->where('tipe', 'BBM')
-        ->whereNull('deleted_at')
-        ->where('debit', '!=', 0)
-        ->where('tgl', '>', '2024-08-01')
-        ->select('debit', 'tgl', 'invoice')
-        ->orderBy('tgl', 'desc')
-        ->get();
+    ->where('tipe', 'BBM')
+    ->whereNull('deleted_at')
+    ->where('debit', '!=', 0)
+    ->where('tgl', '>', '2024-08-01')
+    ->select(
+        'invoice',
+        \DB::raw('SUM(debit) as total_debit'),
+        \DB::raw("GROUP_CONCAT(CONCAT('<div style=\"margin-bottom: 5px; margin-top:5px;\">', DATE_FORMAT(tgl, '%Y-%m-%d'), '</div>') ORDER BY tgl ASC SEPARATOR '') as daftar_tanggal",
+        "jurnal.*")
+    )
+    ->groupBy('invoice')
+    ->orderByDesc('invoice')
+    ->get();
+
+
+
+
 
     // Ambil data dari tabel Invoices, urutkan berdasarkan 'created_at' descending
     $invoices = Invoice::with([
@@ -467,11 +477,12 @@ public function dataLapPiutang(Request $request)
             }
 
             $totalHarga = round($subtotal + $ppn);
-            $total = $totalHarga - $jurnal->debit;
+            $total = $totalHarga - $jurnal->total_debit;
 
-            $currentData['dibayar_tgl'] = $jurnal->tgl;
-            $currentData['sebesar'] = $jurnal->debit;
-            $currentData['kurang_bayar'] = $totalHarga - $jurnal->debit;
+
+            $currentData['dibayar_tgl'] = $jurnal->daftar_tanggal;
+            $currentData['sebesar'] = $jurnal->total_debit;
+            $currentData['kurang_bayar'] = $totalHarga - $jurnal->total_debit;
             $data->put($jurnal->invoice, $currentData);
         } else {
             $invoicesForJurnal = $invoices->firstWhere('invoice', $jurnal->invoice);
@@ -499,9 +510,9 @@ public function dataLapPiutang(Request $request)
                     'ditagih_tgl' => $invoicesForJurnal->tgl_invoice,
                     'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top + 1),
                     'hitung_tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top),
-                    'dibayar_tgl' => $jurnal->tgl,
-                    'sebesar' => $jurnal->debit,
-                    'kurang_bayar' => $totalHarga,
+                    'dibayar_tgl' => $jurnal->daftar_tanggal,
+                    'sebesar' => $jurnal->total_debit,
+                    'kurang_bayar' => $total,
                 ]);
             }
         }
