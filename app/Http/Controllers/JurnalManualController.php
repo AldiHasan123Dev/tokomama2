@@ -79,6 +79,7 @@ class JurnalManualController extends Controller
         }
 
         $transaksi = DB::table('jurnal as j1')
+        ->whereNull('deleted_at')
         ->where('j1.kredit', '>', 0) // Kondisi debit lebih besar dari 0
         ->groupBy('j1.invoice_external')
         ->orderBy('j1.created_at', 'desc')
