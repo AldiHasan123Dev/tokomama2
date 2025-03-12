@@ -113,13 +113,7 @@
                 <button type="button" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">
                     Unduh CSV (Fully Compatible dengan Excel 2021)
                 </button>
-            </a>    
-            
-            <a href="{{ route('stock19.csv') }}">
-                <button type="button" class="btn font-semibold bg-orange-500 btn-sm text-white mt-4">
-                    Unduh CSV (Fully Compatible dengan Excel 2019)
-                </button>
-            </a>    
+            </a>     
                 <div class="overflow-x-auto mt-5">
                     <div class="table-responsive">
                         <!-- Checkbox "Select All" di luar tabel -->
