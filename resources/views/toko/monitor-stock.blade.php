@@ -115,9 +115,9 @@
                 </button>
             </a>     
             <p style="color: black; padding: 5px; display: inline-block;">
-                <span style="color: rgb(74, 144, 71); font-weight: bold;">(Compatible Excel 2021, Tetapi perlu  olahan lanjut</span>. 
-                Ini bersifat <span style="color: red; font-weight: bold;">darurat</span> sebelum release menu 
-                <span style="color: rgb(101, 101, 62); font-weight: bold;">Kartu Stock</span>)
+                <span style="color: rgb(74, 144, 71); font-weight: bold;">(Compatible Excel 2021, tetapi perlu  olahan lanjut. Ini bersifat</span>
+                <span style="color: red; font-weight: bold;">darurat</span> 
+                <span  style="color: rgb(74, 144, 71); font-weight: bold;">sebelum release menu Kartu Stock</span>)
             </p>            
                 <div class="overflow-x-auto mt-5">
                     <div class="table-responsive">
