@@ -65,6 +65,10 @@ class LaporanController extends Controller
                 'invoice_count' => $invoice->invoice_count,
                 'omzet' => $invoice->omzet / 1000
             ];
+            if (!isset($monthlyTotals[$invoice->year][$invoice->month])) {
+                $monthlyTotals[$invoice->year][$invoice->month] = 0;
+            }
+            $monthlyTotals[$invoice->year][$invoice->month] += $invoice->omzet / 1000;
         }
     
         $months = [
@@ -73,7 +77,7 @@ class LaporanController extends Controller
             'October', 'November', 'December'
         ];
     
-        return view('laporan.lap-omzet-customer', compact('mergedResults', 'months', 'years'));
+        return view('laporan.lap-omzet-customer', compact('mergedResults', 'months', 'years','monthlyTotals'));
     }
 
     public function dataLS() {
