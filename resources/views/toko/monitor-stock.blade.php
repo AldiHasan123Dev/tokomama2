@@ -111,7 +111,7 @@
         <div class="overflow-x-auto">
             <a href="{{ route('stock.csv') }}">
                 <button type="button" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">
-                    Unduh CSV
+                    Unduh CSV (Fully Compatible dengan Excel 2021)
                 </button>
             </a>            
                 <div class="overflow-x-auto mt-5">
