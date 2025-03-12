@@ -108,9 +108,10 @@ class LaporanController extends Controller
         ->orderBy('year', 'asc')
         ->orderByRaw('MONTH(i.tgl_invoice) ASC')
         ->get();
-
     
         $mergedResults = [];
+        $monthlyTotals = [];
+        
         foreach ($invoices as $invoice) {
             if (!isset($mergedResults[$invoice->customer_sales])) {
                 $mergedResults[$invoice->customer_sales] = [
@@ -129,15 +130,23 @@ class LaporanController extends Controller
                 'invoice_count' => $invoice->invoice_count,
                 'omzet' => $invoice->omzet / 1000
             ];
+    
+            // Menambahkan total omzet per bulan
+            if (!isset($monthlyTotals[$invoice->year][$invoice->month])) {
+                $monthlyTotals[$invoice->year][$invoice->month] = 0;
+            }
+            $monthlyTotals[$invoice->year][$invoice->month] += $invoice->omzet / 1000;
         }
+        
         $months = [
             'January', 'February', 'March', 'April', 'May', 
             'June', 'July', 'August', 'September', 
             'October', 'November', 'December'
         ];
     
-        return view('laporan.lap-sales', compact('mergedResults', 'months', 'years'));
+        return view('laporan.lap-sales', compact('mergedResults', 'months', 'years', 'monthlyTotals'));
     }
+    
     
     
 

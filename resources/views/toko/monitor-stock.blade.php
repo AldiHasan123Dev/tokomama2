@@ -109,6 +109,11 @@
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Monitoring Stock</x-slot:tittle>
         <div class="overflow-x-auto">
+            <a href="{{ route('stock.csv') }}">
+                <button type="button" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">
+                    Unduh CSV
+                </button>
+            </a>            
                 <div class="overflow-x-auto mt-5">
                     <div class="table-responsive">
                         <!-- Checkbox "Select All" di luar tabel -->
@@ -138,11 +143,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                
-        </div>
-    </x-keuangan.card-keuangan>
+                </div>         
+            </div>
+        </x-keuangan.card-keuangan>
 
     <x-slot:script>
         <script>
