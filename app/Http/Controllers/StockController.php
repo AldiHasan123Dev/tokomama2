@@ -170,6 +170,100 @@ class StockController extends Controller
         return response()->json($data);
     }
 
+
+public function stockCSV19()
+{
+    $filename = "STOCK" . date('Ymd_His') . ".csv";
+
+    $query = "
+        SELECT 
+            j.tgl AS tgl_bm,
+            b.nama AS nama_barang,  
+            s.nama AS nama_supplier,  
+            CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END AS jumlah_beli,
+            t.harga_beli,
+            CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END AS jumlah_jual,
+            i.tgl_invoice,  
+            i.invoice,
+            t.invoice_external,
+            COALESCE(j.tgl, i.tgl_invoice) AS tgl_semua,  
+            t.stts,
+            ((CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END) * t.harga_beli) 
+            - 
+            ((CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END) * t.harga_beli) 
+            AS nilai_persediaan
+        FROM transaksi t
+        JOIN barang b ON t.id_barang = b.id
+        JOIN suppliers s ON t.id_supplier = s.id
+        LEFT JOIN invoice i ON t.id = i.id_transaksi
+        LEFT JOIN jurnal j ON j.id_transaksi = t.id  
+            AND j.coa_id = 89  
+            AND j.debit > 0  
+        WHERE YEAR(COALESCE(j.tgl, i.tgl_invoice)) >= 2025  
+        AND t.stts IS NOT NULL  
+
+        UNION ALL
+
+        SELECT 
+            NULL AS tgl_bm,
+            CONCAT('ZZZStock_', b.nama) AS nama_barang,
+            s.nama AS nama_supplier,
+            SUM(CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END) AS jumlah_beli,
+            (SELECT t2.harga_beli FROM transaksi t2 WHERE t2.invoice_external = t.invoice_external AND t2.id_barang = t.id_barang LIMIT 1) AS harga_beli,
+            SUM(CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END) AS jumlah_jual,
+            DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m-01') AS tgl_invoice,
+            t.invoice_external AS invoice,
+            t.invoice_external,
+            DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m-01') AS tgl_semua,
+            NULL AS stts,
+            NULL AS nilai_persediaan
+        FROM transaksi t
+        JOIN barang b ON t.id_barang = b.id
+        JOIN suppliers s ON t.id_supplier = s.id  
+        LEFT JOIN invoice i ON t.id = i.id_transaksi
+        LEFT JOIN jurnal j ON j.id_transaksi = t.id  
+            AND j.coa_id = 89  
+            AND j.debit > 0  
+        WHERE YEAR(COALESCE(j.tgl, i.tgl_invoice)) >= 2025  
+        AND t.stts IS NOT NULL  
+        GROUP BY DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m'), t.invoice_external, b.nama, s.nama  
+        ORDER BY tgl_semua ASC, invoice_external, nama_barang, nama_supplier;
+    ";
+
+    $data = DB::select($query);
+
+    $response = new StreamedResponse(function () use ($data) {
+        $handle = fopen('php://output', 'w');
+
+        // Tambahkan BOM agar Excel membaca UTF-8 dengan benar
+        fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        // Tambahkan header kolom
+        fputcsv($handle, [
+            'Tanggal BM', 'Nama Barang', 'Nama Supplier', 'Jumlah Beli', 
+            'Harga Beli', 'Jumlah Jual', 'Tanggal Invoice', 'Invoice', 
+            'Invoice External', 'Tanggal Semua', 'Status', 'Nilai Persediaan'
+        ], ';'); // Gunakan titik koma sebagai pemisah
+
+        // Tambahkan data
+        foreach ($data as $row) {
+            fputcsv($handle, [
+                $row->tgl_bm, $row->nama_barang, $row->nama_supplier, $row->jumlah_beli, 
+                $row->harga_beli, $row->jumlah_jual, $row->tgl_invoice, $row->invoice, 
+                $row->invoice_external, $row->tgl_semua, $row->stts, $row->nilai_persediaan
+            ], ';'); // Gunakan titik koma sebagai pemisah
+        }
+
+        fclose($handle);
+    });
+
+    $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+    $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+    return $response;
+}
+
+
     public function stockCSV()
     {
         $filename = "STOCK" . date('Ymd_His') . ".csv";
