@@ -24,7 +24,7 @@ class JurnalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         if (isset($_GET['tipe']) && isset($_GET['month']) && isset($_GET['year'])) {
             $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->where('tipe', $_GET['tipe'])
@@ -41,7 +41,36 @@ class JurnalController extends Controller
             ->orderBy('created_at', 'desc')
             ->orderBy('tgl', 'desc')
             ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
-
+        } elseif ( $request->query('kas') == 'kas' && isset($_GET['year'])) {
+            $data = Jurnal::whereIn('tipe', ['BKM', 'BKK'])
+                ->whereYear('tgl', $_GET['year'])
+                ->orderBy('no', 'desc')
+                ->orderBy('id', 'asc')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('tgl', 'desc')
+                ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
+                ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+                ->get();
+        } elseif ( $request->query('bank') == 'bank' && isset($_GET['year'])) {
+            $data = Jurnal::whereIn('tipe', ['BBK', 'BBM'])
+                ->whereYear('tgl', $_GET['year'])
+                ->orderBy('no', 'desc')
+                ->orderBy('id', 'asc')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('tgl', 'desc')
+                ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
+                ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+                ->get();
+        } elseif ( $request->query('ocbc') == 'ocbc' && isset($_GET['year'])) {
+            $data = Jurnal::whereIn('tipe', ['BBKO', 'BBMO'])
+                ->whereYear('tgl', $_GET['year'])
+                ->orderBy('no', 'desc')
+                ->orderBy('id', 'asc')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('tgl', 'desc')
+                ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
+                ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+                ->get();
         } else {
             $data = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
             ->orderBy('no', 'desc')
