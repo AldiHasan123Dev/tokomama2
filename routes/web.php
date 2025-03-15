@@ -168,6 +168,8 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
 });
 
 Route::prefix('toko')->controller(StockController::class)->middleware('auth')->group(function () {
+    Route::get('/stock-csv', 'stockCSV')->name('stock.csv');
+    Route::get('/stock-csv19', 'stockCSV19')->name('stock19.csv');
     Route::get('/stock', 'stocks')->name('stock'); 
     Route::post('/stock-update', 'update_stock')->name('stock.update_stock');
     Route::get('/stock-{id}-edit', 'edit_stock')->name('stock.edit_stock');

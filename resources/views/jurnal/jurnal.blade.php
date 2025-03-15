@@ -256,14 +256,14 @@
                     <div class="flex flex-row mr-10">
                         <label for="month" class="font-bold mt-2">Tipe :</label>
                         @php
-                            $types = ['JNL', 'BKK', 'BKM', 'BBK', 'BBM', 'BBMO', 'BBKO']; // Daftar tipe
+                            $types = ['JNL']; // Daftar tipe
                         @endphp
 
                         @foreach ($types as $type)
                             <form action="" method="GET" class="inline-block">
                                 <input type="hidden" name="tipe" value="{{ $type }}">
-                                <input type="hidden" name="month" value="{{ request('month') }}">
-                                <input type="hidden" name="year" value="{{ request('year') }}" class="year-input">
+                                <input type="hidden" name="month" value="{{ request('month') ?? date('m') }}">
+                                <input type="hidden" name="year" value="{{ request('year') ?? date('Y') }}" class="year-input">
                                 <button type="submit"
                                     class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1
             {{ request('tipe') == $type ? 'bg-green-300 text-white' : '' }}">
@@ -271,6 +271,36 @@
                                 </button>
                             </form>
                         @endforeach
+                        <form action="" method="GET" class="inline-block">
+                            <input type="hidden" name="kas" value="kas">
+                            <input type="hidden" name="month" value="{{ request('month') ?? date('m') }}">
+                            <input type="hidden" name="year" value="{{ request('year') ?? date('Y') }}" class="year-input">
+                            <button type="submit"
+                                class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1
+        {{ request('kas') == 'kas' ? 'bg-green-300 text-white' : '' }}">
+                                Kas
+                            </button>
+                        </form>
+                        <form action="" method="GET" class="inline-block">
+                            <input type="hidden" name="bank" value="bank">
+                            <input type="hidden" name="month" value="{{ request('month') ?? date('m') }}">
+                            <input type="hidden" name="year" value="{{ request('year') ?? date('Y') }}" class="year-input">
+                            <button type="submit"
+                                class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1
+        {{ request('bank') == 'bank' ? 'bg-green-300 text-white' : '' }}">
+                                Bank
+                            </button>
+                        </form>
+                        <form action="" method="GET" class="inline-block">
+                            <input type="hidden" name="ocbc" value="ocbc">
+                            <input type="hidden" name="month" value="{{ request('month') ?? date('m') }}">
+                            <input type="hidden" name="year" value="{{ request('year') ?? date('Y') }}" class="year-input">
+                            <button type="submit"
+                                class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1
+        {{ request('ocbc') == 'ocbc' ? 'bg-green-300 text-white' : '' }}">
+                                OCBC
+                            </button>
+                        </form>
                     </div>
                 </div>
                 <div>

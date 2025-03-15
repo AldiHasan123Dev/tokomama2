@@ -698,22 +698,16 @@ class SuratJalanController extends Controller
     $searchTerm = $request->get('searchString', ''); // Untuk pencarian global
 
     // Ambil data dengan relasi yang diperlukan dan group by
-    $data = Transaction::with(['suratJalan', 'suppliers', 'barang'])
-    ->leftJoin('jurnal', function ($join) {
-        $join->on('jurnal.id_transaksi', '=', 'transaksi.id')
-             ->where('jurnal.tipe', 'JNL')
-             ->where('jurnal.coa_id', 35);
-    })
+    $data = Transaction::with(['suratJalan', 'suppliers', 'barang', 'jurnals'])
     ->select(
+        'transaksi.*',
         'transaksi.no_bm',
         'transaksi.id_supplier',
         'transaksi.invoice_external',
         'transaksi.id_barang',
         DB::raw('AVG(transaksi.harga_beli) AS avg_harga_beli'),
         DB::raw('SUM(transaksi.harga_beli) AS sum_harga_beli'),
-        DB::raw('SUM(transaksi.jumlah_beli) AS total_jumlah_beli'),
-        DB::raw('MIN(transaksi.id) AS first_id'),
-        DB::raw('GROUP_CONCAT(DISTINCT jurnal.nomor ORDER BY jurnal.id ASC SEPARATOR ", ") AS nomor_jurnal') // Ambil satu nomor jurnal
+        DB::raw('SUM(transaksi.jumlah_beli) AS total_jumlah_beli'), // Ambil satu nomor jurnal
     )
     ->where('transaksi.harga_beli', '>', 0)
     ->whereNull('transaksi.id_surat_jalan')
@@ -761,8 +755,7 @@ class SuratJalanController extends Controller
 
         return [
             'DT_RowIndex' => $index,
-            'jurnal' => $row->nomor_jurnal ?? '-', // Jika nomor_jurnal kosong, isi dengan '-'
-        ] + ($row->nomor_jurnal ? ['first_id' => $row->first_id] : []) + [ // Menambahkan first_id jika nomor_jurnal ditemukan
+            'jurnal' => optional($row->jurnals->where('tipe', 'JNL')->where('debit', '>', 0)->firstWhere('coa_id', 91))->nomor ?? '-',
             'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
             'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 2, ',', '.') : '-',
             'sum_harga_beli' => $row->sum_harga_beli ? number_format($row->sum_harga_beli, 4, ',', '.') : '-',

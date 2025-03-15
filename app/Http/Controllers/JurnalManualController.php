@@ -58,16 +58,9 @@ class JurnalManualController extends Controller
 
         //Sortir otomatis jika invoice sudah ada BBM nya, maka tidak akan tampil
         $invoices = DB::table('jurnal as j1')
-        ->where('j1.tipe', 'JNL') // Kondisi tipe JNL
-        ->where('j1.debit', '>', 0) // Kondisi debit lebih besar dari 0
+        ->whereNull('deleted_at')
+        ->where('j1.tipe', 'JNL') // Kondisi tipe JNL // Kondisi debit lebih besar dari 0
         ->where('j1.coa_id', 8) // Kondisi coa_id
-        ->whereNotExists(function ($query) {
-            $query->select(DB::raw(1))
-                ->from('jurnal as j2')
-                ->whereColumn('j1.invoice', 'j2.invoice')
-                ->where('j2.tipe', '!=', 'JNL') // Pastikan tidak ada tipe selain JNL
-                ->where('j2.nomor', '!=', 'SALDO AWAL');
-        })
         ->groupBy('j1.invoice')
         ->orderBy('j1.invoice', 'desc')
         ->get();
@@ -86,6 +79,7 @@ class JurnalManualController extends Controller
         }
 
         $transaksi = DB::table('jurnal as j1')
+        ->whereNull('deleted_at')
         ->where('j1.kredit', '>', 0) // Kondisi debit lebih besar dari 0
         ->groupBy('j1.invoice_external')
         ->orderBy('j1.created_at', 'desc')
@@ -170,7 +164,7 @@ class JurnalManualController extends Controller
         if ($nomorArray == []) {
             $nomorArray = [0];
         }
-        $maxNomor = end($nomorArray); // max nmor pada bulan yang diinputkan user
+        $maxNomor = max($nomorArray); // max nmor pada bulan yang diinputkan user
         // penggabungan nomor jurnal untuk kondisi jurnal yang diinputkan bulannya tidak sama dengan bulan sekarang
         $breakdown = explode('/', $nomor);
         $sec21 = $breakdown[1];

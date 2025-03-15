@@ -88,7 +88,7 @@
             { search: true, label: 'TGL Invoice', name: 'ditagih_tgl', width: 50, align: "center", formatter: 'date', formatoptions: { newformat: 'Y-m-d' }, sortable: true },
             { search: true, label: 'TOP', name: 'top', width: 30, align: "center", sortable: true },
             { search: true, label: 'Jatuh Tempo TGL', name: 'tempo', width: 50, align: "center", formatter: 'date', formatoptions: { newformat: 'Y-m-d' }, sortable: true },
-            { search: true, label: 'Dibayar TGL', name: 'dibayar_tgl', width: 50, align: "center", formatter: 'date', formatoptions: { newformat: 'Y-m-d' }, sortable: true },
+            { search: true, label: 'Dibayar TGL', name: 'dibayar_tgl', width: 50, align: "center", sortable: true },
             { search: true, label: 'Dibayar', name: 'sebesar', width: 120, align: "right", formatter: 'currency', formatoptions: { thousandsSeparator: ',' }, sortable: true },
             { search: true, label: 'Kurang Bayar', name: 'kurang_bayar', width: 120, align: "right", formatter: 'currency', formatoptions: { thousandsSeparator: ',' }, sortable: true }
         ],

@@ -109,6 +109,16 @@
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Monitoring Stock</x-slot:tittle>
         <div class="overflow-x-auto">
+            <a href="{{ route('stock.csv') }}">
+                <button type="button" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">
+                    Unduh CSV 
+                </button>
+            </a>     
+            <p style="color: black; padding: 5px; display: inline-block;">
+                <span style="color: rgb(74, 144, 71); font-weight: bold;">(Compatible Excel 2021, tetapi perlu  olahan lanjut. Ini bersifat</span>
+                <span style="color: red; font-weight: bold;">darurat</span> 
+                <span  style="color: rgb(74, 144, 71); font-weight: bold;">sebelum release menu Kartu Stock</span>)
+            </p>            
                 <div class="overflow-x-auto mt-5">
                     <div class="table-responsive">
                         <!-- Checkbox "Select All" di luar tabel -->
@@ -138,11 +148,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                
-        </div>
-    </x-keuangan.card-keuangan>
+                </div>         
+            </div>
+        </x-keuangan.card-keuangan>
 
     <x-slot:script>
         <script>

@@ -22,73 +22,64 @@
         
         
         <style type="text/css">
-        .form-container {  /* Memposisikan elemen secara absolut */           /* Menjauhkan dari atas halaman */
-    right: 90px;         /* Memposisikan form ke kanan */       /* Pastikan elemen berada di atas konten lainnya */
+        .table-container {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 500px; /* Sesuaikan tinggi maksimum agar tidak terlalu panjang */
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px; /* Pastikan tabel tidak terlalu sempit */
+            margin: 0 auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        th {
+            background-color: #7b7d80;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border: 1px solid #ddd;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .bg-thn { 
+            background-color: #6e791c; 
+            font-weight: bold; 
+            color: white; 
+        }
+        .sticky-footer {
+    position: sticky;
+    bottom: 0;
+    background-color: rgb(0, 0, 0); /* Sesuaikan warna agar tidak menutupi konten */
+    font-weight: bold;
+    z-index: 2;
 }
 
-.mb-3 {
-    margin-right: 10px;
-}
 
-.input-group {
-    display: flex; /* Membuat select dan tombol berada di dalam satu baris */
-}
-
-.form-select {
-    margin-right: 5px; /* Jarak antara select dan button */
-}
-
-.btn-primary {
-    white-space: nowrap; /* Menghindari tombol terpotong jika teks terlalu panjang */
-}
-
-            body {
-                background-color: #f9f9f9;
-            }
-
-            .table-container {
-                overflow-x: auto;
-                margin-top: 20px;
-            }
-
-            table {
-                border-collapse: collapse;
-                width: 100%;
-                margin: 0 auto;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                font-size: 12px;
-            }
-
-            th, td {
-                padding: 8px 10px;
-                border: 1px solid #ddd;
-                transition: background-color 0.3s ease;
-            }
-
-            th {
-                background-color: #7b7d80;
-                color: white;
-                position: sticky;
-                top: 0;
-                z-index: 1;
-                border: 1px solid #ddd;
-            }
-
-            td {
-                background-color: #f9f9f9;
-            }
-
-            tr:hover {
-                background-color: #f1f1f1;
-            }
-
-            .bg-thn { 
-                background-color: #6e791c; 
-                font-weight: bold; 
-                color: white; 
-            }
-            
-            .bg-total { background-color: #93685b; color: white; font-weight: bold;}
+        .bg-total1 { background-color: #473f39; color: white; font-weight: bold; text-align: right; }
+        .bg-total-thn { background-color: #0f2d44; color: white; font-weight: bold; }
+        .bg-total-monthly { background-color: #098e0c;  color: white; font-weight: bold; text-align: right;}
+        .bg-total { background-color: #93685b; color: white; font-weight: bold;}
         </style>
 
         <div class="table-container">
@@ -124,6 +115,18 @@
                         <td class="bg-total" style="text-align: right">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
+                <tr class="sticky-footer">
+                    <td class="bg-total-thn">{{ request('year') ?? 2025 }}</td>
+                    @php $totalYearlyOmzet = 0; @endphp
+                    @foreach ($months as $month)
+                        @php
+                            $monthlyOmzet = $monthlyTotals[request('year') ?? 2025][$month] ?? 0;
+                            $totalYearlyOmzet += $monthlyOmzet;
+                        @endphp
+                        <td class="bg-total-monthly">{{ number_format($monthlyOmzet, 0, ',', '.') }}</td>
+                    @endforeach
+                    <td class="bg-total1">{{ number_format($totalYearlyOmzet, 0, ',', '.') }}</td>
+                </tr>
                 </tbody>
             </table>
         </div>

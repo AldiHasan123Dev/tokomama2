@@ -24,88 +24,87 @@ class JurnalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        if (isset($_GET['tipe']) && isset($_GET['month']) && isset($_GET['year'])) {
-            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->where('tipe', $_GET['tipe'])
-            ->orderBy('no', 'desc')
-            ->orderBy('id', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->orderBy('tgl', 'desc')
-            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
-
-        } elseif (isset($_GET['month']) && isset($_GET['year'])) {
-            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])
-            ->orderBy('no', 'desc')
-            ->orderBy('id', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->orderBy('tgl', 'desc')
-            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
-
-        } else {
-            $data = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->orderBy('no', 'desc')
-            ->orderBy('id', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->orderBy('tgl', 'desc')->get();
+        $query = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
+            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+            ->orderBy('jurnal.no', 'desc')
+            ->orderBy('jurnal.id', 'asc')
+            ->orderBy('jurnal.created_at', 'desc')
+            ->orderBy('jurnal.tgl', 'desc');
+    
+        // Filter berdasarkan month dan year (jika tersedia)
+        if ($request->has(['month', 'year'])) {
+            $query->whereMonth('tgl', $request->input('month'))
+                ->whereYear('tgl', $request->input('year'));
         }
-
-        // bulan
-        if(isset($_GET['month']) && isset($_GET['year'])) {
-            $MonJNL = Jurnal::whereMonth('tgl', $_GET ['month'])
-            ->whereYear('tgl', $_GET['year'])
-            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->get();
-            
-            $balance = Jurnal::select('nomor', 
-                              DB::raw('SUM(debit) as total_debit'), 
-                              DB::raw('SUM(kredit) as total_kredit'))
-            ->whereYear('tgl', $_GET['year'])
-            ->groupBy('nomor')
-            ->get();
-            $LastJNL = Jurnal::whereMonth('tgl', $_GET['month'])
-            ->whereYear('tgl',  $_GET['year'])
-            ->where('tipe', 'JNL')->
-            join('coa', 'jurnal.coa_id', '=', 'coa.id')
-            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->get();
-
-            $notBalance = [];
-            for ($i = 0; $i < count($balance); $i++) {
-                if ($balance[$i]->total_debit != $balance[$i]->total_kredit) {
-                    $notBalance[] = $balance[$i]->nomor;
-                }
-            }
-            // tahun
-        } else {
-            $MonJNL = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
-            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->get();
-            $balance = Jurnal::select('nomor', 
-                              DB::raw('SUM(debit) as total_debit'), 
-                              DB::raw('SUM(kredit) as total_kredit'))
-            ->whereYear('tgl', date('Y'))
-            ->groupBy('nomor')
-            ->get();
-
+    
+        if ($request->has('tipe')) {
+            $query->where('tipe', $request->input('tipe'));
+        }
+    
+        // Filter untuk Kas, Bank, dan OCBC dengan year & month
+        if ($request->query('kas') == 'kas' && $request->has(['month', 'year'])) {
+            $query->whereIn('tipe', ['BKM', 'BKK']);
+        }
+    
+        if ($request->query('bank') == 'bank' && $request->has(['month', 'year'])) {
+            $query->whereIn('tipe', ['BBK', 'BBM']);
+        }
+    
+        if ($request->query('ocbc') == 'ocbc' && $request->has(['month', 'year'])) {
+            $query->whereIn('tipe', ['BBKO', 'BBMO']);
+        }
+    
+        // Eksekusi query utama
+        $data = $query->get();
+    
+        // Ambil data jurnal untuk bulan & tahun yang dipilih
+        $MonJNL = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
+            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun');
+    
+        if ($request->has(['month', 'year'])) {
+            $MonJNL->whereMonth('tgl', $request->input('month'))
+                ->whereYear('tgl', $request->input('year'));
+        }
+    
+        $MonJNL = $MonJNL->get();
+    
+        // Hitung saldo debit dan kredit
+        $balance = Jurnal::select(
+            'nomor',
+            DB::raw('SUM(debit) as total_debit'),
+            DB::raw('SUM(kredit) as total_kredit')
+        )
+        ->whereYear('tgl', $request->input('year', date('Y')))
+        ->groupBy('nomor')
+        ->get();
+    
+        // Ambil jurnal terakhir yang berjenis 'JNL' hanya jika ada filter bulan & tahun
+        $LastJNL = collect(); // Default kosong
+    
+        if ($request->has(['month', 'year'])) {
             $LastJNL = Jurnal::where('tipe', 'JNL')
-            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
-            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->get();
-
-            $notBalance = [];
-            
-            for($i = 0; $i < count($balance); $i++) {
-                if($balance[$i]->total_debit != $balance[$i]->total_kredit) {
-                    $notBalance[] = $balance[$i]->nomor;
-                }
-            }
-            
+                ->whereMonth('tgl', $request->input('month'))
+                ->whereYear('tgl', $request->input('year'))
+                ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
+                ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+                ->get();
         }
-
-        return view('jurnal.jurnal', compact('data', 'MonJNL',
-        'notBalance', 'LastJNL'));
+    
+        // Cek jurnal yang tidak balance
+        $notBalance = [];
+    
+        foreach ($balance as $b) {
+            if ($b->total_debit != $b->total_kredit) {
+                $notBalance[] = $b->nomor;
+            }
+        }
+    
+        // Return ke view
+        return view('jurnal.jurnal', compact('data', 'MonJNL', 'notBalance', 'LastJNL'));
     }
+    
 
 
 
@@ -161,16 +160,27 @@ class JurnalController extends Controller
         $invext = Transaction::whereNot('invoice_external', null)->get();
         $invExtProc = [];
         $transactionCounts = [];
+
         foreach ($invext as $transaction) {
             $invoiceNumber = $transaction->invoice_external;
+
             if (!isset($transactionCounts[$invoiceNumber])) {
                 $transactionCounts[$invoiceNumber] = 0;
             }
             $transactionCounts[$invoiceNumber]++;
 
             $procTransactionNumber = $invoiceNumber . '_' . $transactionCounts[$invoiceNumber];
+
+            // Cek apakah id_suratjalan null
+            if (is_null($transaction->id_surat_jalan)) {
+                $procTransactionNumber .= ' Mutasi '. $transaction->no_bm;
+            } else {
+                $procTransactionNumber .= ' Jualan '.$transaction->no_bm;
+            }
+
             $invExtProc[] = $procTransactionNumber;
         }
+
 
 
         session(['jurnal_edit_url' => url()->full()]);
@@ -292,12 +302,12 @@ class JurnalController extends Controller
                 }
             } else {
                 $invoice = $request->invoice;
-                $invoices = Invoice::where('invoice', $invoice)->with([
+                $id_transaksi1 = $request->id_transaksi;
+                $invoices = Invoice::where('invoice', $invoice)->where('id_transaksi',$id_transaksi1)->with([
                     'transaksi.suppliers',
                     'transaksi.barang',
                     'transaksi.suratJalan.customer',
                     ])->get();
-
                 
                 $barang = $invoices[0]->transaksi->barang->nama;
                 $supplier = $invoices[0]->transaksi->suppliers->nama;
@@ -338,7 +348,7 @@ class JurnalController extends Controller
                 }
 
                 $keteranganNow = $request->keterangan;
-                $id_transaksi = Invoice::where('invoice', $invoice)->where('harga', $hargajual)->pluck('id_transaksi')->first();
+                $id_transaksi = Invoice::where('invoice', $invoice)->where('harga', $hargajual)->where('id_transaksi',$id_transaksi1)->pluck('id_transaksi')->first();
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -349,7 +359,7 @@ class JurnalController extends Controller
                 }
                 $data = Jurnal::find($request->id);
                 if ($request->invoice === null && $request->invoice_external === null) {
-                    $data->id_transaksi = $data->id_transaksi;
+                    $data->id_transaksi = $request->id_transaksi;
                 } else {
                     $data->id_transaksi = $id_transaksi;
                 }
@@ -374,27 +384,29 @@ class JurnalController extends Controller
             }
         } else if ($request->invoice_external ) {
             if (str_contains($request->invoice_external, '_')) {
+                $part = explode(' ', $request->invoice_external);
                 $invext = explode('_', $request->invoice_external)[0];
-                $index = explode('_', $request->invoice_external)[1];
-                
+                $index1 = explode('_', $part[0]);
+                $index = (int) $index1[1];
                 
                 $invoice_external = Transaction::where('invoice_external', $invext)
-                ->with(['suratJalan.customer', 'barang', 'suppliers'])
-                ->get();
-                
-                
-                $barang = $invoice_external[$index - 1]->barang->nama;
-                $supplier = $invoice_external[$index - 1]->suppliers->nama;
-                $customer = $invoice_external[$index - 1]->suratJalan->customer->nama ??$invoice_external[$index - 1]->suratJalan->customer->nama ;
-                $quantity = $invoice_external[$index - 1]->jumlah_jual;
-                $satuan = $invoice_external[$index - 1]->satuan_jual;
-                $hargabeli = $invoice_external[$index - 1]->harga_beli;
-                $hargajual = $invoice_external[$index - 1]->harga_jual;
+                    ->with(['suratJalan.customer', 'barang', 'suppliers'])
+                    ->get();
+                    
+                    // Jika tidak ada data ditemukan, lakukan query kedua
+                    $barang = $invoice_external[$index - 1]->barang->nama;
+                    $supplier = $invoice_external[$index - 1]->suppliers->nama;
+                    $customer = $invoice_external[$index - 1]->suratJalan->customer->nama ?? null;
+                    $quantity = $invoice_external[$index - 1]->jumlah_jual;
+                    $satuan = $invoice_external[$index - 1]->satuan_jual;
+                    $hargabeli = $invoice_external[$index - 1]->harga_beli;
+                    $no_bm = $invoice_external[$index - 1]->no_bm;
+                    $hargajual = $invoice_external[$index - 1]->harga_jual;
                 $id = $invoice_external[$index - 1]->id;
                 $ket = $invoice_external[$index - 1]->keterangan;
                 $invoice_external= $request->invoice_external ?? '';
                 $keterangan = $request->keterangan;
-
+                
                 if (str_contains($request->keterangan, '[1]')) {
                     $keterangan = str_replace('[1]', $customer, $keterangan);
                 }
@@ -420,7 +432,7 @@ class JurnalController extends Controller
                     $keterangan = str_replace('[8]', $ket, $keterangan);
                 }
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                $id_transaksi =Transaction::where('invoice_external', $invext)->where('id_barang', $id_barang)->pluck('id')->first();
+                $id_transaksi =Transaction::where('invoice_external', $invext)->where('id_barang', $id_barang)->where('no_bm',$no_bm)->pluck('id')->first();
                 $keteranganNow = $keterangan;
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
@@ -456,8 +468,10 @@ class JurnalController extends Controller
                     return redirect($redirectUrl)->with('error', 'Data Jurnal Gagal diubah!');
                 }
             } else {
+                $id_transaksi1 = $request->id_transaksi;
                 $invoice_external = $request->invoice_external;
                 $invoiceExternal = Transaction::where('invoice_external', $request->invoice_external)
+                ->where('id',$id_transaksi1)
                 ->with(['suratJalan.customer', 'barang', 'suppliers'])
                 ->get();
                 $barang = $invoiceExternal[0]->barang->nama ?? null;
@@ -500,7 +514,7 @@ class JurnalController extends Controller
 
                 $keteranganNow = $keterangan;
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                $id_transaksi = Transaction::whereNull('id_surat_jalan')->where('id_barang', $id_barang)->pluck('id')->first();
+                $id_transaksi = Transaction::whereNull('id_surat_jalan')->where('id_barang', $id_barang)->where('id',$id_transaksi1)->pluck('id')->first();
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -518,7 +532,7 @@ class JurnalController extends Controller
                 if ($request->invoice === null && $request->invoice_external === null) {
                     $data->id_transaksi = $data->id_transaksi;
                 } else {
-                    $data->id_transaksi = $id_transaksi ?? $data->id_transaksi;
+                    $data->id_transaksi = $id_transaksi ?? $request->id_transaksi;
                 }
                 $data->nomor = $request->nomor;
                 $data->debit = $request->debit;
@@ -586,7 +600,9 @@ class JurnalController extends Controller
 
                 $keteranganNow = $keterangan;
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                $id_transaksi =Transaction::where('invoice_external', $invext)->where('id_barang', $id_barang)->pluck('id')->first();
+                $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)
+                        ->where('id_supplier', $supplier)->where('harga_jual', $hargajual)
+                        ->pluck('id')->first() ?? null;
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -641,7 +657,9 @@ class JurnalController extends Controller
                         $hargajual = optional($invoiceExternal[0])->harga_jual;                    
                         $ket = optional($invoiceExternal[0])->keterangan;
                         $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray() ?? null;
-                        $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first() ?? null;
+                        $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)
+                        ->where('id_supplier', $supplier)->where('harga_jual', $hargajual)
+                        ->pluck('id')->first() ?? null;
                     }                    
                     $keterangan = $request->keterangan;
 
@@ -765,6 +783,7 @@ class JurnalController extends Controller
 
     public function store(Request $request, Jurnal $jurnal)
     {
+        // dd($request->all());
         if ($request->invoice != null) {
             if (str_contains($request->invoice, '_')) {
                 $inv = explode('_', $request->invoice)[0];
@@ -827,8 +846,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
-
+                    'id_transaksi' => $id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -896,9 +914,10 @@ class JurnalController extends Controller
                 }
 
                 $keteranganNow = $request->keterangan;
-                $id_transaksi = Invoice::where('invoice', $invoice)->where('harga', $hargajual)->pluck('id_transaksi')->first();
+                $id_transaksi = Invoice::where('invoice', $invoice)->where('harga', $hargajual)->where('id_transaksi', $request->id_transaksi)->pluck('id_transaksi')->first();
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
+
                 $noCounter = explode('-', $nomor)[0];
                 $no = str_replace(' ', '', explode('/', $noCounter)[0]);
                 if ($tipe == 'JNL') {
@@ -909,7 +928,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
+                    'id_transaksi' => $id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -931,25 +950,28 @@ class JurnalController extends Controller
             }
         } else if ($request->invoice_external ) {
             if (str_contains($request->invoice_external, '_')) {
+                $part = explode(' ', $request->invoice_external);
                 $invext = explode('_', $request->invoice_external)[0];
-                $index = explode('_', $request->invoice_external)[1];
-                
+                $index1 = explode('_', $part[0]);
+                $index = (int) $index1[1];
                 
                 $invoice_external = Transaction::where('invoice_external', $invext)
-                ->with(['suratJalan.customer', 'barang', 'suppliers'])
-                ->get();
+                    ->with(['suratJalan.customer', 'barang', 'suppliers'])
+                    ->get();
                 
                 
-                $barang = $invoice_external[$index - 1]->barang->nama;
-                $supplier = $invoice_external[$index - 1]->suppliers->nama;
-                $customer = $invoice_external[$index - 1]->suratJalan->customer->nama;
-                $quantity = $invoice_external[$index - 1]->jumlah_jual;
-                $satuan = $invoice_external[$index - 1]->satuan_jual;
-                $hargabeli = $invoice_external[$index - 1]->harga_beli;
-                $hargajual = $invoice_external[$index - 1]->harga_jual;
-                $ket = $invoice_external[$index - 1]->keterangan;
-                $invoice_external= $request->invoice_external ?? '';
-                $keterangan = $request->keterangan;
+                    $barang = $invoice_external[$index - 1]->barang->nama;
+                    $supplier = $invoice_external[$index - 1]->suppliers->nama;
+                    $customer = $invoice_external[$index - 1]->suratJalan->customer->nama ?? null;
+                    $quantity = $invoice_external[$index - 1]->jumlah_jual;
+                    $satuan = $invoice_external[$index - 1]->satuan_jual;
+                    $hargabeli = $invoice_external[$index - 1]->harga_beli;
+                    $no_bm = $invoice_external[$index - 1]->no_bm;
+                    $hargajual = $invoice_external[$index - 1]->harga_jual;
+                    $id = $invoice_external[$index - 1]->id;
+                    $ket = $invoice_external[$index - 1]->keterangan;
+                    $invoice_external= $request->invoice_external ?? '';
+                    $keterangan = $request->keterangan;
 
                 if (str_contains($request->keterangan, '[1]')) {
                     $keterangan = str_replace('[1]', $customer, $keterangan);
@@ -976,7 +998,6 @@ class JurnalController extends Controller
                     $keterangan = str_replace('[8]', $ket, $keterangan);
                 }
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                $id_transaksi =Transaction::where('invoice_external', $invext)->where('id_barang', $id_barang)->pluck('id')->first();
                 $keteranganNow = $keterangan;
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
@@ -990,7 +1011,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                   'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
+                   'id_transaksi' => $id,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -1018,9 +1039,10 @@ class JurnalController extends Controller
                 
                 $barang = $invoiceExternal[0]->barang->nama;
                 $supplier = $invoiceExternal[0]->suppliers->nama;
-                $customer = $invoiceExternal[0]->suratJalan->customer->nama;
+                $customer = $invoiceExternal[0]->suratJalan->customer->nama ?? null;
                 $quantity = $invoiceExternal[0]->jumlah_jual;
                 $satuan = $invoiceExternal[0]->satuan_jual;
+                $id = $invoiceExternal[0]->id;
                 $hargabeli = $invoiceExternal[0]->harga_beli;
                 $hargajual = $invoiceExternal[0]->harga_jual;
                 $ket = $invoiceExternal[0]->keterangan;
@@ -1055,7 +1077,7 @@ class JurnalController extends Controller
 
                 $keteranganNow = $keterangan;
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->pluck('id')->first();
+                $id_transaksi =Transaction::where('invoice_external', $invoice_external)->where('id_barang', $id_barang)->where('id',$id)->pluck('id')->first();
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -1140,7 +1162,7 @@ class JurnalController extends Controller
 
                 $keteranganNow = $keterangan;
                 $id_barang = Barang::where('nama', $barang)->pluck('id')->toArray();
-                $id_transaksi =Transaction::where('invoice_external', $invext)->where('id_barang', $id_barang)->pluck('id')->first();
+                $id_transaksi = Transaction::where('invoice_external', $invext)->where('id_barang', $id_barang)->pluck('id')->first();
                 $nomor = $request->nomor;
                 $tipe = $request->tipe;
                 $noCounter = explode('-', $nomor)[0];
@@ -1158,7 +1180,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
+                    'id_transaksi' => $id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,
@@ -1244,7 +1266,7 @@ class JurnalController extends Controller
                     'id' => $request->id,
                     'no' => $request->no,
                     'tgl' => $request->tgl,
-                    'id_transaksi' => $id_transaksi ?? $request->id_transaksi,
+                    'id_transaksi' => $id_transaksi,
                     'nomor' => $request->nomor,
                     'debit' => $request->debit,
                     'kredit' => $request->kredit,

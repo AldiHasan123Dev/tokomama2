@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use PDF;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Barang;
 use App\Models\Transaction;
 
@@ -106,8 +107,6 @@ class StockController extends Controller
 
     public function dataStock1()
     {
-        // Ambil parameter pagination
-        
         // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
         $stocks = Transaction::selectRaw(
             'transaksi.*'
@@ -117,34 +116,6 @@ class StockController extends Controller
         ->where('harga_beli', '>', 0) // Pastikan harga_beli lebih dari 0 // Grup berdasarkan kondisi
         ->orderBy('no_bm', 'desc') // Urutkan berdasarkan created_at
         ->get();
-    
-    
-    
-    
-    //     // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
-    //     $stocks = Transaction::selectRaw("
-    //     transaksi.id, 
-    //     transaksi.*, 
-    //     id_barang, 
-    //     SUM(jumlah_beli) as total_beli, 
-    //     SUM(jumlah_jual) as total_jual, 
-    //     SUM(sisa) as sisa,
-    //     SUM(harga_beli) as total_harga_beli,
-    //     SUM(harga_jual) as total_harga_jual,
-    //     (SUM(harga_jual) - SUM(harga_beli)) as total_profit,
-    //    GROUP_CONCAT(barang.nama ORDER BY barang.nama ASC SEPARATOR '\n') as barang_list
-    // ")
-    // ->join('barang', 'barang.id', '=', 'transaksi.id_barang')
-    // ->whereNotNull('no_bm')
-    // ->groupByRaw("
-    //     CASE 
-    //         WHEN stts IS NOT NULL THEN no_bm 
-    //         ELSE COALESCE(invoice_external, transaksi.id) 
-    //     END
-    // ") // Grup berdasarkan status atau invoice_external/no_bm
-    // ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at
-    // ->get();
-
 
         // Hitung total records
         $totalRecords = $stocks->count();
@@ -199,60 +170,203 @@ class StockController extends Controller
         return response()->json($data);
     }
 
+
+public function stockCSV19()
+{
+    $filename = "STOCK" . date('Ymd_His') . ".csv";
+
+    $query = "
+        SELECT 
+            j.tgl AS tgl_bm,
+            b.nama AS nama_barang,  
+            s.nama AS nama_supplier,  
+            CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END AS jumlah_beli,
+            t.harga_beli,
+            CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END AS jumlah_jual,
+            i.tgl_invoice,  
+            i.invoice,
+            t.invoice_external,
+            COALESCE(j.tgl, i.tgl_invoice) AS tgl_semua,  
+            t.stts,
+            ((CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END) * t.harga_beli) 
+            - 
+            ((CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END) * t.harga_beli) 
+            AS nilai_persediaan
+        FROM transaksi t
+        JOIN barang b ON t.id_barang = b.id
+        JOIN suppliers s ON t.id_supplier = s.id
+        LEFT JOIN invoice i ON t.id = i.id_transaksi
+        LEFT JOIN jurnal j ON j.id_transaksi = t.id  
+            AND j.coa_id = 89  
+            AND j.debit > 0  
+        WHERE YEAR(COALESCE(j.tgl, i.tgl_invoice)) >= 2025  
+        AND t.stts IS NOT NULL  
+
+        UNION ALL
+
+        SELECT 
+            NULL AS tgl_bm,
+            CONCAT('ZZZStock_', b.nama) AS nama_barang,
+            s.nama AS nama_supplier,
+            SUM(CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END) AS jumlah_beli,
+            (SELECT t2.harga_beli FROM transaksi t2 WHERE t2.invoice_external = t.invoice_external AND t2.id_barang = t.id_barang LIMIT 1) AS harga_beli,
+            SUM(CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END) AS jumlah_jual,
+            DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m-01') AS tgl_invoice,
+            t.invoice_external AS invoice,
+            t.invoice_external,
+            DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m-01') AS tgl_semua,
+            NULL AS stts,
+            NULL AS nilai_persediaan
+        FROM transaksi t
+        JOIN barang b ON t.id_barang = b.id
+        JOIN suppliers s ON t.id_supplier = s.id  
+        LEFT JOIN invoice i ON t.id = i.id_transaksi
+        LEFT JOIN jurnal j ON j.id_transaksi = t.id  
+            AND j.coa_id = 89  
+            AND j.debit > 0  
+        WHERE YEAR(COALESCE(j.tgl, i.tgl_invoice)) >= 2025  
+        AND t.stts IS NOT NULL  
+        GROUP BY DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m'), t.invoice_external, b.nama, s.nama  
+        ORDER BY tgl_semua ASC, invoice_external, nama_barang, nama_supplier;
+    ";
+
+    $data = DB::select($query);
+
+    $response = new StreamedResponse(function () use ($data) {
+        $handle = fopen('php://output', 'w');
+
+        // Tambahkan BOM agar Excel membaca UTF-8 dengan benar
+        fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        // Tambahkan header kolom
+        fputcsv($handle, [
+            'Tanggal BM', 'Nama Barang', 'Nama Supplier', 'Jumlah Beli', 
+            'Harga Beli', 'Jumlah Jual', 'Tanggal Invoice', 'Invoice', 
+            'Invoice External', 'Tanggal Semua', 'Status', 'Nilai Persediaan'
+        ], ';'); // Gunakan titik koma sebagai pemisah
+
+        // Tambahkan data
+        foreach ($data as $row) {
+            fputcsv($handle, [
+                $row->tgl_bm, $row->nama_barang, $row->nama_supplier, $row->jumlah_beli, 
+                $row->harga_beli, $row->jumlah_jual, $row->tgl_invoice, $row->invoice, 
+                $row->invoice_external, $row->tgl_semua, $row->stts, $row->nilai_persediaan
+            ], ';'); // Gunakan titik koma sebagai pemisah
+        }
+
+        fclose($handle);
+    });
+
+    $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+    $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+    return $response;
+}
+
+
+    public function stockCSV()
+    {
+        $filename = "STOCK" . date('Ymd_His') . ".csv";
+
+        $query = "
+            SELECT 
+                j.tgl AS tgl_bm,
+                b.nama AS nama_barang,  
+                s.nama AS nama_supplier,  
+                CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END AS jumlah_beli,
+                t.harga_beli,
+                CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END AS jumlah_jual,
+                i.tgl_invoice,  
+                i.invoice,
+                t.invoice_external,
+                COALESCE(j.tgl, i.tgl_invoice) AS tgl_semua,  
+                t.stts,
+                ((CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END) * t.harga_beli) 
+                - 
+                ((CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END) * t.harga_beli) 
+                AS nilai_persediaan
+            FROM transaksi t
+            JOIN barang b ON t.id_barang = b.id
+            JOIN suppliers s ON t.id_supplier = s.id
+            LEFT JOIN invoice i ON t.id = i.id_transaksi
+            LEFT JOIN jurnal j ON j.id_transaksi = t.id  
+                AND j.coa_id = 89  
+                AND j.debit > 0  
+            WHERE YEAR(COALESCE(j.tgl, i.tgl_invoice)) >= 2025  
+            AND t.stts IS NOT NULL  
+
+            UNION ALL
+
+            SELECT 
+                NULL AS tgl_bm,
+                CONCAT('ZZZStock_', b.nama) AS nama_barang,
+                s.nama AS nama_supplier,
+                SUM(CASE WHEN j.tgl IS NULL THEN 0 ELSE t.jumlah_beli END) AS jumlah_beli,
+                (SELECT t2.harga_beli FROM transaksi t2 WHERE t2.invoice_external = t.invoice_external AND t2.id_barang = t.id_barang LIMIT 1) AS harga_beli,
+                SUM(CASE WHEN j.tgl IS NOT NULL THEN 0 ELSE t.jumlah_jual END) AS jumlah_jual,
+                DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m-01') AS tgl_invoice,
+                t.invoice_external AS invoice,
+                t.invoice_external,
+                DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m-01') AS tgl_semua,
+                NULL AS stts,
+                NULL AS nilai_persediaan
+            FROM transaksi t
+            JOIN barang b ON t.id_barang = b.id
+            JOIN suppliers s ON t.id_supplier = s.id  
+            LEFT JOIN invoice i ON t.id = i.id_transaksi
+            LEFT JOIN jurnal j ON j.id_transaksi = t.id  
+                AND j.coa_id = 89  
+                AND j.debit > 0  
+            WHERE YEAR(COALESCE(j.tgl, i.tgl_invoice)) >= 2025  
+            AND t.stts IS NOT NULL  
+            GROUP BY DATE_FORMAT(COALESCE(j.tgl, i.tgl_invoice), '%Y-%m'), t.invoice_external, b.nama, s.nama  
+            ORDER BY tgl_semua ASC, invoice_external, nama_barang, nama_supplier;
+        ";
+
+        $data = DB::select($query);
+
+        $response = new StreamedResponse(function () use ($data) {
+            $handle = fopen('php://output', 'w');
+
+            // Tambahkan header kolom
+            fputcsv($handle, [
+                'Tanggal BM', 'Nama Barang', 'Nama Supplier', 'Jumlah Beli', 
+                'Harga Beli', 'Jumlah Jual', 'Tanggal Invoice', 'Invoice', 
+                'Invoice External', 'Tanggal Semua', 'Status', 'Nilai Persediaan'
+            ]);
+
+            // Tambahkan data
+            foreach ($data as $row) {
+                fputcsv($handle, [
+                    $row->tgl_bm, $row->nama_barang, $row->nama_supplier, $row->jumlah_beli, 
+                    $row->harga_beli, $row->jumlah_jual, $row->tgl_invoice, $row->invoice, 
+                    $row->invoice_external, $row->tgl_semua, $row->stts, $row->nilai_persediaan
+                ]);
+            }
+
+            fclose($handle);
+        });
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        return $response;
+    }
+
     public function dataStock2()
     {
         // Ambil parameter pagination
         
         // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
-        $stocks = Transaction::leftJoin('jurnal', function ($join) {
-            $join->on('jurnal.id_transaksi', '=', 'transaksi.id')
-                 ->where('jurnal.tipe', 'JNL')
-                 ->where('jurnal.debit', '>', 0)
-                 ->where('jurnal.coa_id', 89);
-        })
-        ->select([
-            'id_barang',
-            'transaksi.*',
-            'jurnal.nomor AS nomor_jurnal',
-            'jurnal.tgl AS tgl_jurnal', // Menambahkan nomor jurnal ke hasil query
-        ])
-        ->whereNull('transaksi.id_surat_jalan')  // Pastikan id_surat_jalan bernilai null
-        ->where('transaksi.harga_beli', '>', 0)  // Pastikan harga_beli lebih dari 0
-        ->with('jurnals')  // Memuat relasi jurnals untuk akses lebih lanjut
-        ->orderByDesc('transaksi.created_at')  // Urutkan berdasarkan created_at secara descending
+        $stocks = Transaction::selectRaw(
+            'transaksi.*'
+        )
+        ->with('jurnals')
+        ->whereNull('id_surat_jalan')
+        ->where('harga_beli', '>', 0)
+        ->orderBy('no_bm', 'desc') // Pastikan harga_beli lebih dari 0 // Grup berdasarkan kondisi // Urutkan berdasarkan created_at
         ->get();
-
-    
-
-    
-    
-    
-    
-    //     // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
-    //     $stocks = Transaction::selectRaw("
-    //     transaksi.id, 
-    //     transaksi.*, 
-    //     id_barang, 
-    //     SUM(jumlah_beli) as total_beli, 
-    //     SUM(jumlah_jual) as total_jual, 
-    //     SUM(sisa) as sisa,
-    //     SUM(harga_beli) as total_harga_beli,
-    //     SUM(harga_jual) as total_harga_jual,
-    //     (SUM(harga_jual) - SUM(harga_beli)) as total_profit,
-    //    GROUP_CONCAT(barang.nama ORDER BY barang.nama ASC SEPARATOR '\n') as barang_list
-    // ")
-    // ->join('barang', 'barang.id', '=', 'transaksi.id_barang')
-    // ->whereNotNull('no_bm')
-    // ->groupByRaw("
-    //     CASE 
-    //         WHEN stts IS NOT NULL THEN no_bm 
-    //         ELSE COALESCE(invoice_external, transaksi.id) 
-    //     END
-    // ") // Grup berdasarkan status atau invoice_external/no_bm
-    // ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at
-    // ->get();
-
-
+        
         // Hitung total records
         $totalRecords = $stocks->count();
         $perPage = request('per_page', $totalRecords);
@@ -274,8 +388,8 @@ class StockController extends Controller
                 'jumlah_belis' => $stock->jumlah_belis,
                 'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
                 'status' => $stock->stts ?? '-',
-                'tgl_jurnal' =>  $stock->tgl_jurnal ?? '-',
-              'jurnal' =>  $stock->nomor_jurnal ?? '-',
+                'tgl_jurnal' =>  optional($stock->jurnals->firstWhere('coa_id', 89))->tgl ?? '-' ?? '-',
+                'jurnal' =>  optional($stock->jurnals->firstWhere('coa_id', 89))->nomor ?? '-' ?? '-',
                 'invoice_external' => $stock->invoice_external,
                 'no_bm' => $stock->no_bm,
                 'satuan_beli' => $stock->satuan_beli,
