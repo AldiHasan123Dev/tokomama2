@@ -273,6 +273,7 @@
                         @endforeach
                         <form action="" method="GET" class="inline-block">
                             <input type="hidden" name="kas" value="kas">
+                            <input type="hidden" name="month" value="{{ request('month') ?? date('m') }}">
                             <input type="hidden" name="year" value="{{ request('year') ?? date('Y') }}" class="year-input">
                             <button type="submit"
                                 class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1
@@ -282,6 +283,7 @@
                         </form>
                         <form action="" method="GET" class="inline-block">
                             <input type="hidden" name="bank" value="bank">
+                            <input type="hidden" name="month" value="{{ request('month') ?? date('m') }}">
                             <input type="hidden" name="year" value="{{ request('year') ?? date('Y') }}" class="year-input">
                             <button type="submit"
                                 class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1
@@ -291,6 +293,7 @@
                         </form>
                         <form action="" method="GET" class="inline-block">
                             <input type="hidden" name="ocbc" value="ocbc">
+                            <input type="hidden" name="month" value="{{ request('month') ?? date('m') }}">
                             <input type="hidden" name="year" value="{{ request('year') ?? date('Y') }}" class="year-input">
                             <button type="submit"
                                 class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1

@@ -26,115 +26,85 @@ class JurnalController extends Controller
      */
     public function index(Request $request)
     {
-        if (isset($_GET['tipe']) && isset($_GET['month']) && isset($_GET['year'])) {
-            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])->where('tipe', $_GET['tipe'])
-            ->orderBy('no', 'desc')
-            ->orderBy('id', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->orderBy('tgl', 'desc')
-            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
-
-        } elseif (isset($_GET['month']) && isset($_GET['year'])) {
-            $data = Jurnal::whereMonth('tgl', $_GET['month'])->whereYear('tgl', $_GET['year'])
-            ->orderBy('no', 'desc')
-            ->orderBy('id', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->orderBy('tgl', 'desc')
-            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')->get();
-        } elseif ( $request->query('kas') == 'kas' && isset($_GET['year'])) {
-            $data = Jurnal::whereIn('tipe', ['BKM', 'BKK'])
-                ->whereYear('tgl', $_GET['year'])
-                ->orderBy('no', 'desc')
-                ->orderBy('id', 'asc')
-                ->orderBy('created_at', 'desc')
-                ->orderBy('tgl', 'desc')
-                ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
-                ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-                ->get();
-        } elseif ( $request->query('bank') == 'bank' && isset($_GET['year'])) {
-            $data = Jurnal::whereIn('tipe', ['BBK', 'BBM'])
-                ->whereYear('tgl', $_GET['year'])
-                ->orderBy('no', 'desc')
-                ->orderBy('id', 'asc')
-                ->orderBy('created_at', 'desc')
-                ->orderBy('tgl', 'desc')
-                ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
-                ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-                ->get();
-        } elseif ( $request->query('ocbc') == 'ocbc' && isset($_GET['year'])) {
-            $data = Jurnal::whereIn('tipe', ['BBKO', 'BBMO'])
-                ->whereYear('tgl', $_GET['year'])
-                ->orderBy('no', 'desc')
-                ->orderBy('id', 'asc')
-                ->orderBy('created_at', 'desc')
-                ->orderBy('tgl', 'desc')
-                ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
-                ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-                ->get();
-        } else {
-            $data = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->orderBy('no', 'desc')
-            ->orderBy('id', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->orderBy('tgl', 'desc')->get();
+        $query = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
+            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+            ->orderBy('jurnal.no', 'desc')
+            ->orderBy('jurnal.id', 'asc')
+            ->orderBy('jurnal.created_at', 'desc')
+            ->orderBy('jurnal.tgl', 'desc');
+    
+        // Filter berdasarkan month dan year (jika tersedia)
+        if ($request->has(['month', 'year'])) {
+            $query->whereMonth('tgl', $request->input('month'))
+                ->whereYear('tgl', $request->input('year'));
         }
-
-        // bulan
-        if(isset($_GET['month']) && isset($_GET['year'])) {
-            $MonJNL = Jurnal::whereMonth('tgl', $_GET ['month'])
-            ->whereYear('tgl', $_GET['year'])
-            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->get();
-            
-            $balance = Jurnal::select('nomor', 
-                              DB::raw('SUM(debit) as total_debit'), 
-                              DB::raw('SUM(kredit) as total_kredit'))
-            ->whereYear('tgl', $_GET['year'])
-            ->groupBy('nomor')
-            ->get();
-            $LastJNL = Jurnal::whereMonth('tgl', $_GET['month'])
-            ->whereYear('tgl',  $_GET['year'])
-            ->where('tipe', 'JNL')->
-            join('coa', 'jurnal.coa_id', '=', 'coa.id')
-            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->get();
-
-            $notBalance = [];
-            for ($i = 0; $i < count($balance); $i++) {
-                if ($balance[$i]->total_debit != $balance[$i]->total_kredit) {
-                    $notBalance[] = $balance[$i]->nomor;
-                }
-            }
-            // tahun
-        } else {
-            $MonJNL = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
-            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->get();
-            $balance = Jurnal::select('nomor', 
-                              DB::raw('SUM(debit) as total_debit'), 
-                              DB::raw('SUM(kredit) as total_kredit'))
-            ->whereYear('tgl', date('Y'))
-            ->groupBy('nomor')
-            ->get();
-
+    
+        if ($request->has('tipe')) {
+            $query->where('tipe', $request->input('tipe'));
+        }
+    
+        // Filter untuk Kas, Bank, dan OCBC dengan year & month
+        if ($request->query('kas') == 'kas' && $request->has(['month', 'year'])) {
+            $query->whereIn('tipe', ['BKM', 'BKK']);
+        }
+    
+        if ($request->query('bank') == 'bank' && $request->has(['month', 'year'])) {
+            $query->whereIn('tipe', ['BBK', 'BBM']);
+        }
+    
+        if ($request->query('ocbc') == 'ocbc' && $request->has(['month', 'year'])) {
+            $query->whereIn('tipe', ['BBKO', 'BBMO']);
+        }
+    
+        // Eksekusi query utama
+        $data = $query->get();
+    
+        // Ambil data jurnal untuk bulan & tahun yang dipilih
+        $MonJNL = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
+            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun');
+    
+        if ($request->has(['month', 'year'])) {
+            $MonJNL->whereMonth('tgl', $request->input('month'))
+                ->whereYear('tgl', $request->input('year'));
+        }
+    
+        $MonJNL = $MonJNL->get();
+    
+        // Hitung saldo debit dan kredit
+        $balance = Jurnal::select(
+            'nomor',
+            DB::raw('SUM(debit) as total_debit'),
+            DB::raw('SUM(kredit) as total_kredit')
+        )
+        ->whereYear('tgl', $request->input('year', date('Y')))
+        ->groupBy('nomor')
+        ->get();
+    
+        // Ambil jurnal terakhir yang berjenis 'JNL' hanya jika ada filter bulan & tahun
+        $LastJNL = collect(); // Default kosong
+    
+        if ($request->has(['month', 'year'])) {
             $LastJNL = Jurnal::where('tipe', 'JNL')
-            ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
-            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->get();
-
-            $notBalance = [];
-            
-            for($i = 0; $i < count($balance); $i++) {
-                if($balance[$i]->total_debit != $balance[$i]->total_kredit) {
-                    $notBalance[] = $balance[$i]->nomor;
-                }
-            }
-            
+                ->whereMonth('tgl', $request->input('month'))
+                ->whereYear('tgl', $request->input('year'))
+                ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
+                ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+                ->get();
         }
-
-        return view('jurnal.jurnal', compact('data', 'MonJNL',
-        'notBalance', 'LastJNL'));
+    
+        // Cek jurnal yang tidak balance
+        $notBalance = [];
+    
+        foreach ($balance as $b) {
+            if ($b->total_debit != $b->total_kredit) {
+                $notBalance[] = $b->nomor;
+            }
+        }
+    
+        // Return ke view
+        return view('jurnal.jurnal', compact('data', 'MonJNL', 'notBalance', 'LastJNL'));
     }
+    
 
 
 
