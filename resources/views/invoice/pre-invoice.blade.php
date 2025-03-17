@@ -522,9 +522,20 @@
                     Kembali
                 </button>
                 <button class="btn bg-green-500 font-semibold justify-align-center text-white w-300 mt-3"
-                    onclick="return confirm('Apakah anda yakin menyimpan Invoice?')" type="submit">
-                    Submit Invoice
-                </button>
+                onclick="showAlerts(event)" type="button">
+                Submit Invoice
+            </button>
+            
+            <!-- Modal Custom -->
+            <div id="customModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
+                <div class="bg-white p-5 rounded-lg shadow-lg w-96">
+                    <p id="modalText" class="text-gray-800"></p>
+                    <div class="flex justify-end mt-4">
+                        <button id="cancelBtn" class="bg-red-500 text-white px-4 py-2 rounded mr-2">Batal</button>
+                        <button id="okBtn" class="bg-green-500 text-white px-4 py-2 rounded">OK</button>
+                    </div>
+                </div>
+            </div>
             </form>
 
         </main>
@@ -532,5 +543,80 @@
     </x-keuangan.card-keuangan>
 
     <x-slot:script>
+        <script>
+            function showCustomModal(message, okText, cancelText) {
+           return new Promise((resolve) => {
+               const modal = document.getElementById("customModal");
+               const modalText = document.getElementById("modalText");
+               const okBtn = document.getElementById("okBtn");
+               const cancelBtn = document.getElementById("cancelBtn");
+       
+               modalText.innerText = message;
+               okBtn.innerText = okText;
+               cancelBtn.innerText = cancelText;
+       
+               modal.classList.remove("hidden");
+       
+               // Pastikan semua event listener dihapus sebelum ditambahkan kembali
+               okBtn.replaceWith(okBtn.cloneNode(true));
+               cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+       
+               // Ambil ulang elemen tombol setelah cloning
+               const newOkBtn = document.getElementById("okBtn");
+               const newCancelBtn = document.getElementById("cancelBtn");
+       
+               // Klik OK → lanjutkan proses
+               newOkBtn.addEventListener("click", function (event) {
+                   event.preventDefault();
+                   event.stopPropagation();
+                   modal.classList.add("hidden");
+                   resolve(true);
+               }, { once: true });
+       
+               // Klik Batal → hentikan proses
+               newCancelBtn.addEventListener("click", function (event) {
+                   event.preventDefault();
+                   event.stopPropagation();
+                   modal.classList.add("hidden");
+                   resolve(false);
+               }, { once: true });
+           });
+       }
+       
+       async function showAlerts(event) {
+           event.preventDefault(); // Mencegah form submit langsung
+           event.stopPropagation(); // Pastikan event tidak bubbling
+       
+           let result = await showCustomModal(
+               "Peringatan 1: Kekeliruan akan berdampak di tabel transaksi, invoice, NFSP, dan jurnal.",
+               "OK",
+               "Batal"
+           );
+           if (!result) return false; // Stop jika batal
+       
+           result = await showCustomModal(
+               "Peringatan 2: Kesalahan yang ada di sini akan berdampak pada produktivitas Tim IT.",
+               "OK",
+               "Batal"
+           );
+           if (!result) return false; // Stop jika batal
+       
+           result = await showCustomModal(
+               "Peringatan 3: Diharapkan benar-benar dicek di preview invoice, karena kesalahan ini mengakibatkan beberapa tabel mengalami kerusakan.",
+               "Saya Mengerti, Lanjutkan",
+               "Batal"
+           );
+           if (!result) return false; // Stop jika batal
+       
+           // Jika semua peringatan disetujui, submit form
+           document.getElementById("form").method = "POST";
+           document.getElementById("form").submit();
+       
+       }
+       
+       // Pastikan event listener hanya ditambahkan satu kali
+       document.getElementById("submitBtn").addEventListener("click", showAlerts);
+       
+           </script>
     </x-slot:script>
 </x-Layout.layout>
