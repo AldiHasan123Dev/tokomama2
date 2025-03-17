@@ -93,7 +93,7 @@
             { search: true, label: 'Kurang Bayar', name: 'kurang_bayar', width: 120, align: "right", formatter: 'currency', formatoptions: { thousandsSeparator: ',' }, sortable: true }
         ],
         pager: "#jqGridPager",
-        rowNum: 100,
+        rowNum: 150,
         rowList: [150, 200],
         viewrecords: true,
         autowidth: true,
