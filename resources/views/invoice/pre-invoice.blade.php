@@ -522,7 +522,7 @@
                     Kembali
                 </button>
                 <button class="btn bg-green-500 font-semibold justify-align-center text-white w-300 mt-3"
-                    onclick="return confirm('Apakah anda yakin menyimpan Invoice?')" type="submit">
+                    onclick="return confirm('MOHON DICEK DENGAN CERMAT. KEKELIRUAN PADA PROSES INVOICING INI AKAN BERDAMPAK KOMPLEKS, MEMERLUKAN WAKTU PANJANG UNTUK PEMULIHAN. PENGECEKAN MELIPUTI QTY BARANG,HARGA JUAL, TANGGAL INVOICE DAN PENGECEKAN SATUAN.')" type="submit">
                     Submit Invoice
                 </button>
             </form>
