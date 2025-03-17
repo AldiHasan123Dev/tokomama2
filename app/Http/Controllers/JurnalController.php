@@ -309,17 +309,14 @@ class JurnalController extends Controller
                     'transaksi.suratJalan.customer',
                     ])->get();
                 
-                $barang = $invoices[0]->transaksi->barang->nama;
-                $supplier = $invoices[0]->transaksi->suppliers->nama;
-                $customer = $invoices[0]->transaksi->suratJalan->customer->nama;
-                $quantity = $invoices[0]->transaksi->jumlah_jual;
-                $satuan = $invoices[0]->transaksi->satuan_jual;
-                $hargabeli = $invoices[0]->transaksi->harga_beli;
-                $hargajual = $invoices[0]->transaksi->harga_jual;
-                $ket = $invoices[0]->transaksi->keterangan;
-                
-                
-
+                $barang = $invoices[0]->transaksi->barang->nama ?? null;
+                $supplier = $invoices[0]->transaksi->suppliers->nama ?? null;
+                $customer = $invoices[0]->transaksi->suratJalan->customer->nama ?? null;
+                $quantity = $invoices[0]->transaksi->jumlah_jual ?? null;
+                $satuan = $invoices[0]->transaksi->satuan_jual ?? null;
+                $hargabeli = $invoices[0]->transaksi->harga_beli ?? null;
+                $hargajual = $invoices[0]->transaksi->harga_jual ?? null;
+                $ket = $invoices[0]->transaksi->keterangan ?? null;
                 $keterangan = $request->keterangan;
 
                 if (str_contains($request->keterangan, '[1]')) {
@@ -359,7 +356,7 @@ class JurnalController extends Controller
                 }
                 $data = Jurnal::find($request->id);
                 if ($request->invoice === null && $request->invoice_external === null) {
-                    $data->id_transaksi = $request->id_transaksi;
+                    $data->id_transaksi = $request->id_transaksi ?? $data->id_transaksi;
                 } else {
                     $data->id_transaksi = $id_transaksi;
                 }
