@@ -215,6 +215,7 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         // Validasi data yang diterima
         $validatedData = $request->validate([
             'nsfp' => 'required',
