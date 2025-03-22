@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\Coa;
 use App\Models\Customer;
 use App\Models\Barang;
+use App\Models\Satuan;
 use Carbon\Carbon;
 class LaporanController extends Controller
 {
@@ -150,6 +151,80 @@ class LaporanController extends Controller
     
         return view('laporan.lap-sales', compact('mergedResults', 'months', 'years', 'monthlyTotals'));
     }
+
+    public function dataFLS() {
+        // Mengambil tahun yang unik dari data invoice
+        $years = Invoice::selectRaw('YEAR(tgl_invoice) as year')
+            ->groupBy('year')
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+    
+        // Query untuk mendapatkan data laporan omzet
+        $invoices = Invoice::selectRaw('
+            c.id as customer_id,
+            c.sales as customer_sales,
+            DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+            YEAR(i.tgl_invoice) as year, 
+            t.satuan_jual as satuan_barang,
+            COUNT(DISTINCT i.invoice) as invoice_count,  
+            SUM(
+                CASE 
+                    WHEN b.status_ppn = "ya" THEN t.harga_jual * t.jumlah_jual * 1.11
+                    ELSE t.harga_jual * t.jumlah_jual
+                END
+            ) as omzet
+        ')
+        ->from('invoice as i')
+        ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+        ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
+        ->join('customer as c', 'sj.id_customer', '=', 'c.id')
+        ->join('barang as b', 't.id_barang', '=', 'b.id')
+        ->whereYear('i.tgl_invoice', 2025) // Filter tahun default
+        ->groupBy('c.sales', 'year', 'month')
+        ->orderBy('omzet', 'desc') // Urutkan berdasarkan omzet terbesar
+        ->orderBy('year', 'asc')
+        ->orderByRaw('MONTH(i.tgl_invoice) ASC')
+        ->get();
+
+        $satuan = Satuan::pluck('nama_satuan');
+    
+        $mergedResults = [];
+        $monthlyTotals = [];
+        
+        foreach ($invoices as $invoice) {
+            if (!isset($mergedResults[$invoice->customer_sales])) {
+                $mergedResults[$invoice->customer_sales] = [
+                    'sales_name' => $invoice->customer_sales,
+                    'years' => []
+                ];
+            }
+    
+            if (!isset($mergedResults[$invoice->customer_sales]['years'][$invoice->year])) {
+                $mergedResults[$invoice->customer_sales]['years'][$invoice->year] = [];
+            }
+    
+            $mergedResults[$invoice->customer_sales]['years'][$invoice->year][$invoice->month] = [
+                'month' => $invoice->month,
+                'year' => $invoice->year,
+                'invoice_count' => $invoice->invoice_count,
+                'satuan_barang' => $invoice->satuan_barang
+            ];
+            // Menambahkan total omzet per bulan
+            if (!isset($monthlyTotals[$invoice->year][$invoice->month])) {
+                $monthlyTotals[$invoice->year][$invoice->month] = 0;
+            }
+            // $monthlyTotals[$invoice->year][$invoice->month] += $invoice->omzet / 1000;
+        }
+        
+        $months = [
+            'January', 'February', 'March', 'April', 'May', 
+            'June', 'July', 'August', 'September', 
+            'October', 'November', 'December'
+        ];
+    
+        return view('laporan.lap-fee-sales', compact('satuan','mergedResults', 'months', 'years', 'monthlyTotals'));
+    }
+    
     
     
     
