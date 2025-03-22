@@ -135,7 +135,7 @@
     }
 
     // Warna oranye untuk jatuh tempo dalam 1-3 hari
-    if (daysDiff > 0 && daysDiff <= 2) {
+    if (daysDiff > 0 && daysDiff <= 4) {
         console.log(`Warning: Jatuh tempo dalam ${daysDiff} hari!`);
         return { "style": "background-color: orange;" };
     } 
