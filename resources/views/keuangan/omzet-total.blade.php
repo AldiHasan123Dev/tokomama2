@@ -68,9 +68,9 @@
                                     default => '',
                                 };
                             @endphp
-                            <th class="{{ $bgClass }}" colspan="4">{{ $month }}</th>
+                            <th class="{{ $bgClass }}" colspan="5">{{ $month }}</th>
                         @endforeach
-                        <th class="bg-total" colspan="5">Total</th>
+                        <th class="bg-total" colspan="6">Total</th>
                     </tr>
                     <tr>
                         @foreach ($months as $index => $month)
@@ -84,13 +84,14 @@
                                 };
                             @endphp
                             <th class="{{ $bgClass }}">Q.Inv</th>
-                            <th class="{{ $bgClass }}">Beli</th>
-                            <th class="{{ $bgClass }}">Jual</th>
+                            <th class="{{ $bgClass }}">HPP</th>
+                            <th class="{{ $bgClass }}">Omzet</th>
                             <th class="{{ $bgClass }}">Profit</th>
+                            <th class="{{ $bgClass }}">%</th>
                         @endforeach
                         <th class="bg-total">Q.Inv</th>
-                        <th class="bg-total">Beli</th>
-                        <th class="bg-total">Jual</th>
+                        <th class="bg-total">HPP</th>
+                        <th class="bg-total">Omzet</th>
                         <th class="bg-total">Profit</th>
                         <th class="bg-total">%</th>
                     </tr>
@@ -117,6 +118,8 @@
                                     {{ number_format($data['total_harga_jual'] ?? 0, 0, ',', ',') }}</td>
                                 <td class="{{ $bgClass }}">
                                     {{ number_format($data['total_profit'] ?? 0, 0, ',', ',') }}</td>
+                                <td class="{{ $bgClass }}">
+                                    {{ number_format($data['total_profit_percentage'] ?? 0, 2) }}%</td>
 
                             @endforeach
                             <td class="bg-total">{{ $summaryData[$year]['total_invoice_count'] ?? 0 }}</td>

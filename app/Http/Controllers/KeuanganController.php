@@ -279,8 +279,8 @@ class KeuanganController extends Controller
         COUNT(DISTINCT i.invoice) as invoice_count, 
         SUM(
             CASE 
-                WHEN b.status_ppn = "ya" THEN t.harga_beli * t.jumlah_beli * 1.11  -- Menghitung PPN untuk harga beli
-                ELSE t.harga_beli * t.jumlah_beli
+                WHEN b.status_ppn = "ya" THEN t.harga_beli * t.jumlah_jual * 1.11  -- Menghitung PPN untuk harga beli
+                ELSE t.harga_beli * t.jumlah_jual
             END
         ) as total_harga_beli, 
         SUM(

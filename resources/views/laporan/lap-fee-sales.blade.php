@@ -20,61 +20,100 @@
         </form>
         
         <style>
-            /* Membuat kolom 'Sales' tetap terlihat saat digulir */
-th.bg-total-thn, td.bg-thn {
-    position: sticky;
-    left: 0;
-    background-color: #6e791c; /* Warna tetap agar terlihat */
-    z-index: 2; /* Pastikan tetap di atas elemen lain */
-}
-
-/* Untuk total tahunan tetap terlihat saat digeser */
-td.bg-total-thn {
-    position: sticky;
-    left: 0;
-    background-color: #44390f;
-    z-index: 2;
-}
-
-/* Membuat header "Sales" tetap terlihat */
-th.bg-total-thn {
-    background-color: #44390f;
-    z-index: 3;
-}
-
-/* Pastikan tabel memiliki overflow agar bisa digeser */
-.table-container {
-    overflow-x: auto;
-    white-space: nowrap;
-}
-
-            table { border-collapse: collapse; width: 100%; margin: 0 auto; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); font-size: 12px; }
-            th, td { padding: 8px 10px; border: 1px solid #ddd; transition: background-color 0.3s ease; text-align: right; }
-            th { background-color: #294774; color: white; position: sticky; top: 0; z-index: 1; }
-            td { background-color: #f9f9f9; }
-            tr:hover { background-color: #f1f1f1; }
-            
-            /* Warna khusus untuk elemen penting */
-            .bg-thn { background-color: #6e791c; font-weight: bold; color: white; text-align: center; }
-            .bg-total { background-color: #93685b; color: white; font-weight: bold; text-align: center; }
-            .bg-total1 { background-color: #474539; color: white; font-weight: bold; text-align: right; border: 2px solid rgb(255, 255, 255);}
-            .bg-total-thn { background-color: #44390f; color: white; font-weight: bold; text-align: center; border: 2px solid rgb(255, 255, 255); }
-            .bg-total-monthly { background-color: #f7c842; font-weight: bold; text-align: right; border: 2px solid rgb(218, 207, 207);} /* Warna khusus untuk total per bulan */
+            th.bg-total-thn, td.bg-thn {
+                position: sticky;
+                left: 0;
+                background-color: #6e791c;
+                z-index: 2;
+            }
+            td.bg-total-thn {
+                position: sticky;
+                left: 0;
+                background-color: #44390f;
+                z-index: 2;
+            }
+            th.bg-total-thn {
+                background-color: #44390f;
+                z-index: 3;
+            }
+            .table-container {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin: 0 auto;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                font-size: 12px;
+            }
+            th, td {
+                padding: 8px 10px;
+                border: 1px solid #ddd;
+                transition: background-color 0.3s ease;
+                text-align: right;
+            }
+            th {
+                background-color: #294774;
+                color: white;
+                position: sticky;
+                top: 0;
+                z-index: 1;
+            }
+            td {
+                background-color: #f9f9f9;
+            }
+            tr:hover {
+                background-color: #f1f1f1;
+            }
+            .bg-thn {
+                background-color: #6e791c;
+                font-weight: bold;
+                color: white;
+                text-align: center;
+            }
+            .bg-total-thn {
+                background-color: #44390f;
+                color: white;
+                font-weight: bold;
+                text-align: center;
+                border: 2px solid rgb(255, 255, 255);
+            }
+            .bg-total-monthly {
+                background-color: #f7c842;
+                font-weight: bold;
+                text-align: right;
+                border: 2px solid rgb(218, 207, 207);
+            }
+        
+            /* Warna berbeda untuk setiap bulan */
+            .month-1 { background-color: #9d8b60; }
+            .month-2 { background-color: #d9a571; }
+            .month-3 { background-color: #d2d23a; }
+            .month-4 { background-color: #78b33d; }
+            .month-5 { background-color: #708a70; }
+            .month-6 { background-color: #3d8e66; }
+            .month-7 { background-color: #348989; }
+            .month-8 { background-color: #75a0cb; }
+            .month-9 { background-color: #5656b8; }
+            .month-10 { background-color: #724d97; }
+            .month-11 { background-color: #a055a0; }
+            .month-12 { background-color: #8c4267; }
         </style>
-
+        
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
                         <th class="bg-total-thn" rowspan="2">Sales</th>
-                        @foreach ($months as $month)
-                            <th colspan="{{ count($satuan) }}" style="text-align: center;">{{ $month }}</th>
+                        @foreach ($months as $index => $month)
+                            <th colspan="{{ count($satuan) }}" class="month-{{ $index + 1 }}" style="text-align: center;">{{ $month }}</th>
                         @endforeach
                     </tr>
                     <tr>
-                        @foreach ($months as $month)
+                        @foreach ($months as $index => $month)
                             @foreach ($satuan as $s)
-                                <th style="text-align: center;">{{ $s}}</th>
+                                <th class="month-{{ $index + 1 }}" style="text-align: center;">{{ $s }}</th>
                             @endforeach
                         @endforeach
                     </tr>
@@ -82,37 +121,35 @@ th.bg-total-thn {
                 
                 <tbody>
                     @foreach ($mergedResults as $customer_sales => $customerData)
-                        @php $totalOmzet = 0; @endphp
                         <tr>
                             <td class="bg-thn">{{ $customerData['sales_name'] }}</td>
-                            @foreach ($months as $month)
-                            @foreach ($satuan as $s)
-                                @php
-                                    $data = $customerData['years'][request('year') ?? 2025][$month] ?? null;
-                                    $omzet = $data['omzet'] ?? 0;
-                                    $totalOmzet += $omzet;
-                                @endphp
-                                <td>{{ number_format($omzet, 0, ',', '.') }}</td>
-                            @endforeach
+                            @foreach ($months as $index => $month)
+                                @foreach ($satuan as $s)
+                                    @php
+                                        $data = $customerData['years'][request('year') ?? 2025][$month] ?? null;
+                                        $omzet = $data[$s] ?? 0;
+                                    @endphp
+                                    <td class="month-{{ $index + 1 }}">{{ $omzet ?? 0 }}</td>
+                                @endforeach
                             @endforeach
                         </tr>
                     @endforeach
-                    <tr>
-                        <td class="bg-total-thn">{{ request('year') ?? 2025 }}</td>
-                        @php $totalYearlyOmzet = 0; @endphp
+                    {{-- <tr>
+                        <td class="bg-total-thn">Total {{ request('year') ?? 2025 }}</td>
                         @foreach ($months as $month)
-                        @foreach ($satuan as $s)
-                            @php
-                                $monthlyOmzet = $monthlyTotals[request('year') ?? 2025][$month] ?? 0;
-                                $totalYearlyOmzet += $monthlyOmzet;
-                            @endphp
-                            <td class="bg-total-monthly">{{ number_format($monthlyOmzet, 0, ',', '.') }}</td>
+                            @foreach ($satuan as $satuanBarang)
+                                @php
+                                    // Ambil total omzet berdasarkan tahun, bulan, dan satuan barang
+                                    $monthlyOmzet = $monthlyTotals[request('year') ?? 2025][$month][$satuanBarang] ?? 0;
+                                @endphp
+                                <td class="bg-total-monthly">{{ $monthlyOmzet ?? 0 }}</td>
                             @endforeach
                         @endforeach
-                    </tr>
+                    </tr>                     --}}
                 </tbody>
+                
             </table>
-        </div>
+        </div>        
     </x-keuangan.card-keuangan>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

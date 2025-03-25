@@ -125,27 +125,34 @@ class SuratJalanController extends Controller
         }
         for ($i = 0; $i < count($request->barang); $i++) {
             if ($request->barang[$i] != null && $request->jumlah_jual[$i] != null) {
-                // Ambil stok barang dari database berdasarkan barang yang dipilih
-                $transactions = Transaction::whereIn('id', $request->barang)->pluck('sisa')->toArray();
+                // Ambil stok barang dari database dengan indeks ID transaksi
+                $transactions = Transaction::whereIn('id', $request->barang)->pluck('sisa', 'id')->toArray();
         
-                // Jika ada lebih dari satu transaksi, hitung total stok
-                $totalStok = count($transactions) > 1 ? $transactions : [$transactions[0] ?? 0];
+                // Ambil jumlah jual dengan indeks ID transaksi
+                $jumlahJual = array_combine($request->barang, $request->jumlah_jual);
         
-                // Ambil jumlah jual dan pastikan dalam bentuk array numerik
-                $totalJumlahJual = array_map('intval', array_filter($request->jumlah_jual));
+                // Pastikan jumlah jual dalam bentuk numerik dan hanya untuk barang yang ada dalam stok
+                $totalJumlahJual = [];
+                foreach ($jumlahJual as $id => $jual) {
+                    if (isset($transactions[$id])) {
+                        $totalJumlahJual[$id] = (int) $jual;
+                    }
+                }
         
-        
-                // Lakukan pengurangan stok
-                $cek = array_map(fn($stok, $jual) => $stok - $jual, $totalStok, $totalJumlahJual);
+                // Lakukan pengurangan stok dengan mempertahankan indeks ID transaksi
+                $cek = [];
+                foreach ($totalJumlahJual as $id => $jual) {
+                    $cek[$id] = $transactions[$id] - $jual;
+                }
         
                 // Debug output
         
-                // Jika stok kurang, redirect kembali dengan pesan error
+                // Jika ada stok yang kurang dari 0, tampilkan pesan error
                 if (min($cek) < 0) {
                     return redirect()->back()->with('error', "Stok barang tidak mencukupi!");
                 }
             }
-        }
+        }        
         
         
     
