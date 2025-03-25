@@ -85,20 +85,19 @@
                 text-align: right;
                 border: 2px solid rgb(218, 207, 207);
             }
-        
             /* Warna berbeda untuk setiap bulan */
-            .month-1 { background-color: #9d8b60; }
-            .month-2 { background-color: #d9a571; }
-            .month-3 { background-color: #d2d23a; }
-            .month-4 { background-color: #78b33d; }
-            .month-5 { background-color: #708a70; }
-            .month-6 { background-color: #3d8e66; }
-            .month-7 { background-color: #348989; }
-            .month-8 { background-color: #75a0cb; }
-            .month-9 { background-color: #5656b8; }
-            .month-10 { background-color: #724d97; }
-            .month-11 { background-color: #a055a0; }
-            .month-12 { background-color: #8c4267; }
+            .month-1 { background-color: #d9a571 }
+            .month-2 { background-color: #d2d23a; }
+            .month-3 { background-color: #d9a571 }
+            .month-4 { background-color: #d2d23a; }
+            .month-5 { background-color: #d9a571 }
+            .month-6 { background-color: #d2d23a; }
+            .month-7 { background-color: #d9a571 }
+            .month-8 { background-color: #d2d23a; }
+            .month-9 { background-color: #d9a571; }
+            .month-10 { background-color:#d2d23a; }
+            .month-11 { background-color:#d9a571 }
+            .month-12 { background-color:#d2d23a;; }
         </style>
         
         <div class="table-container">
@@ -127,9 +126,9 @@
                                 @foreach ($satuan as $s)
                                     @php
                                         $data = $customerData['years'][request('year') ?? 2025][$month] ?? null;
-                                        $omzet = $data[$s] ?? 0;
+                                        $omzet = $data[$s] ?? '-';
                                     @endphp
-                                    <td class="month-{{ $index + 1 }}">{{ $omzet ?? 0 }}</td>
+                                    <td class="month-{{ $index + 1 }}">{{ $omzet ?? '-' }}</td>
                                 @endforeach
                             @endforeach
                         </tr>

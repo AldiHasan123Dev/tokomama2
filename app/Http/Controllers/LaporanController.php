@@ -170,29 +170,28 @@ class LaporanController extends Controller
         ];
     
         // Query untuk laporan omzet
-        $invoices = Invoice::selectRaw('
+         $invoices = Invoice::selectRaw('
         c.id as customer_id,
         c.sales as customer_sales,
         DATE_FORMAT(i.tgl_invoice, "%M") as month, 
         YEAR(i.tgl_invoice) as year, 
         SUM(t.jumlah_jual) as jumlah_juals,
-        SUM(b.value) as barang_value, -- Perbaikan di sini
-        t.satuan_jual as satuan_barang
-            ')
-            ->from('invoice as i')
-            ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
-            ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
-            ->join('customer as c', 'sj.id_customer', '=', 'c.id')
-            ->join('barang as b', 't.id_barang', '=', 'b.id')
-            ->whereYear('i.tgl_invoice', $selectedYear)
-            ->whereNotNull('id_surat_jalan')
-            ->groupBy('c.sales', 'year', 'month', 'satuan_barang') // Pastikan di groupBy juga
-            ->orderBy('year', 'asc')
-            ->orderByRaw('MONTH(i.tgl_invoice) ASC')
-            ->get();
-
-    
-    
+        t.satuan_jual as satuan_barang,
+        SUM(CASE 
+            WHEN t.satuan_jual = "KG" THEN t.jumlah_jual * b.value 
+            ELSE t.jumlah_jual 
+        END) as jumlah_kg_to_value
+    ')
+    ->from('invoice as i')
+    ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+    ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
+    ->join('customer as c', 'sj.id_customer', '=', 'c.id')
+    ->join('barang as b', 't.id_barang', '=', 'b.id')
+    ->whereYear('i.tgl_invoice', $selectedYear)
+    ->groupBy('c.sales', 'year', 'month', 'satuan_barang')
+    ->orderBy('year', 'asc')
+    ->orderByRaw('MONTH(i.tgl_invoice) ASC')
+    ->get();
         // Ambil daftar satuan barang
         $satuan = Satuan::pluck('nama_satuan');
     
@@ -204,16 +203,12 @@ class LaporanController extends Controller
             $salesName = $invoice->customer_sales;
             $month = $invoice->month;
             $satuanName = $invoice->satuan_barang;
-            $totalValue = $invoice->jumlah_juals;
-            $value = $invoice->barang_value;
-
-                // Konversi KG ke ZAK
-            if (strtoupper($satuanName) === 'KG') {
-                $convertedValue = round($totalValue / $value); // Dibagi dengan dirinya sendiri
-                $formattedValue = $totalValue . ' (' . $convertedValue . ' bks)';
+            if (strtoupper($invoice->satuan_barang) === 'KG') {
+                $totalValue = $invoice->jumlah_juals . ' KG (' . $invoice->jumlah_kg_to_value . ' ZAK)';
             } else {
-                $formattedValue = $totalValue;
+                $totalValue = $invoice->jumlah_juals;
             }
+        
 
             // Inisialisasi jika belum ada data
             if (!isset($mergedResults[$salesName])) {
@@ -232,26 +227,7 @@ class LaporanController extends Controller
             }
 
             // Simpan data omzet berdasarkan bulan dan satuan
-            $mergedResults[$salesName]['years'][$selectedYear][$month][$satuanName] = $formattedValue;
-
-            // Hitung total omzet per bulan untuk bagian "Total Tahunan"
-            // Pastikan array sudah terinisialisasi sebelum dipakai
-            if (!isset($monthlyTotals[$selectedYear][$month][$satuanName])) {
-                $monthlyTotals[$selectedYear][$month][$satuanName] = 0;
-            }
-
-            if (strtoupper($satuanName) === 'KG') {
-                // Ambil nilai yang sudah ada di array, hilangkan '(ZAK)' sebelum dikonversi ke float
-                $existingValue = isset($monthlyTotals[$selectedYear][$month]['KG']) 
-                ? $this->cleanNumber($monthlyTotals[$selectedYear][$month]['KG']) 
-                : 0;
-            
-            $totalConverted = $existingValue + $convertedValue;
-            $monthlyTotals[$selectedYear][$month]['KG'] = number_format($totalConverted, 2, '.', '') . ' (ZAK)';             
-            } else {
-                // Untuk satuan lainnya, langsung jumlahkan
-                $monthlyTotals[$selectedYear][$month][$satuanName] += $totalValue;
-            }
+            $mergedResults[$salesName]['years'][$selectedYear][$month][$satuanName] = $totalValue;
         }
 
         return view('laporan.lap-fee-sales', compact('mergedResults', 'satuan', 'months', 'years', 'selectedYear', 'monthlyTotals'));
