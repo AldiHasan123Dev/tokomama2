@@ -321,7 +321,7 @@
             <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem"> 
                 Terbilang: 
                 @if($barang->status_ppn == 'ya')
-                    {{ ucwords(strtolower(terbilang(round($ppn + $total)))) }} Rupiah
+                    {{ ucwords(strtolower(terbilang(round($total * 1.11)))) }} Rupiah
                 @else
                     {{ ucwords(strtolower(terbilang(round($total)))) }} Rupiah
                 @endif
