@@ -1,6 +1,6 @@
 <x-Layout.layout>
 
-    <style>
+    <style type="text/css">
         /* CSS untuk memberikan jarak antar invoice */
         .nilai_invoice {
             line-height: 1.5;
@@ -21,6 +21,63 @@
                 display: inline-block;
                 box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             }
+            .table-container {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 500px; /* Sesuaikan tinggi maksimum agar tidak terlalu panjang */
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .table-cus {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px; /* Pastikan tabel tidak terlalu sempit */
+            margin: 0 auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+        }
+
+        .table-cus th, .table-cus td {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .table-cus th {
+            background-color: #7b7d80;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border: 1px solid #ddd;
+        }
+
+        .table-cus td {
+            background-color: #f9f9f9;
+        }
+
+        .table-cus tr:hover {
+            background-color: #f1f1f1;
+        }
+        .table-cus .bg-thn { 
+            background-color: #6e791c; 
+            font-weight: bold; 
+            color: white; 
+        }
+        .table-cus .sticky-footer {
+            position: sticky;
+            bottom: 0;
+            background-color: rgb(0, 0, 0); /* Sesuaikan warna agar tidak menutupi konten */
+            font-weight: bold;
+            z-index: 2;
+        }
+
+
+        .table-cus .bg-total1 { background-color: #473f39; color: white; font-weight: bold; text-align: right; }
+        .table-cus .bg-total-thn { background-color: #0f2d44; color: white; font-weight: bold; }
+        .table-cus .bg-total-monthly { background-color: #098e0c;  color: white; font-weight: bold; text-align: right;}
+        .table-cus .bg-total { background-color: #93685b; color: white; font-weight: bold;}
     </style>
     <!-- Link CSS untuk jqGrid dan jQuery UI -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
@@ -29,6 +86,75 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
 
     <!-- Card untuk tampilan laporan piutang -->
+    <x-keuangan.card-keuangan>
+        <x-slot:tittle>Report Omzet Cust</x-slot:tittle>
+
+        <!-- Dropdown untuk memilih tahun -->
+        <form action="{{ route('laporan.Piutang') }}" method="GET">
+            <div class="form-container">
+                <div class="mb-3 mt-3">
+                    <label for="year" class="form-label">Pilih Tahun</label>
+                    <div class="input-group">
+                        <select name="year" id="year" class="form-select">
+                            <option value="" disabled selected>Pilih Tahun</option>
+                            @foreach ($years as $year)
+                                <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="table-container">
+            <table class="table-cus">
+                <thead>
+                    <tr>
+                        <th class="bg-thn" rowspan="2">Customer</th>
+                        <th class="bg-thn" colspan="{{ count($months) }}">Bulan</th>
+                        <th class="bg-total">Total</th>
+                    </tr>
+                    <tr>
+                        @foreach ($months as $month)
+                            <th>{{ $month }}</th>
+                        @endforeach
+                        <th class="bg-total">Omzet Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($mergedResults as $customer_id => $customerData)
+                    @php
+                        $totalOmzet = 0;
+                    @endphp
+                    <tr>
+                        <td class="bg-thn">{{ $customerData['customer_name'] }}</td>
+                        @foreach ($months as $month)
+                            @php
+                                $data = $customerData['years'][request('year') ?? 2025][$month] ?? null;
+                                $omzet = $data['omzet'] ?? 0;
+                                $totalOmzet += $omzet;
+                            @endphp
+                            <td style="text-align: right">{{ number_format($omzet, 0, ',', '.') }}</td>
+                        @endforeach
+                        <td class="bg-total" style="text-align: right">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
+                    </tr>
+                @endforeach
+                <tr class="sticky-footer">
+                    <td class="bg-total-thn">{{ request('year') ?? 2025 }}</td>
+                    @php $totalYearlyOmzet = 0; @endphp
+                    @foreach ($months as $month)
+                        @php
+                            $monthlyOmzet = $monthlyTotals[request('year') ?? 2025][$month] ?? 0;
+                            $totalYearlyOmzet += $monthlyOmzet;
+                        @endphp
+                        <td class="bg-total-monthly">{{ number_format($monthlyOmzet, 0, ',', '.') }}</td>
+                    @endforeach
+                    <td class="bg-total1">{{ number_format($totalYearlyOmzet, 0, ',', '.') }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </x-keuangan.card-keuangan>
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Report Outstanding Piutang Cust</x-slot:tittle>
         <p class="server-time">
@@ -49,7 +175,6 @@
         <!-- Pager untuk navigasi halaman -->
         <div id="jqGridPagerTotal"></div>
     </x-keuangan.card-keuangan>
-
     <!-- Script untuk memuat jqGrid -->
     <x-slot:script>
         <script type="text/javascript" src="{{ asset('assets/js/grid.locale-en.js') }}"></script>
@@ -115,41 +240,29 @@
     let timeDiff = new Date(rowData.tempo) - new Date();
     let daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
-    console.log(`Row Data: ${JSON.stringify(rowData)}`);
-    console.log(`Tanggal Hari Ini: ${today}`);
-    console.log(`Jatuh Tempo: ${tempoDate}`);
-    console.log(`Selisih Hari: ${daysDiff}`);
-    console.log(`TOP: ${rowData.top}`);
-    console.log(`Kurang Bayar: ${rowData.kurang_bayar}`);
-
     // Jika kurang bayar = 0, semua kondisi tetap hijau
     if (parseFloat(rowData.kurang_bayar) === 0) {
-        console.log(`Lunas: Kurang bayar 0!`);
         return { "style": "background-color: #3fae43; color: white;" };
     }
 
     // Jika TOP = 0 dan jatuh tempo hari ini, tidak diberi warna
     if (parseInt(rowData.top) === 0 && tempoDate === today) {
-        console.log(`TOP 0 & Jatuh Tempo Hari Ini: Tidak diberi warna`);
         return {};
     }
 
     // Warna oranye untuk jatuh tempo dalam 1-3 hari
     if (daysDiff > 0 && daysDiff <= 4) {
-        console.log(`Warning: Jatuh tempo dalam ${daysDiff} hari!`);
         return { "style": "background-color: orange;" };
     } 
     
     // Warna merah jika sudah jatuh tempo atau jatuh tempo hari ini
     if (daysDiff < 0) {
-        console.log(`Overdue: Sudah lewat jatuh tempo ${Math.abs(daysDiff)} hari!`);
         return { "style": "background-color: red; color: white;" };
     }
 
     return {};
 },
         loadComplete: function(data) {
-            console.log("Load complete: ", data);
             $("#table-lp").jqGrid('filterToolbar');
         }
     });

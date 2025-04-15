@@ -308,7 +308,6 @@ class JurnalController extends Controller
                     'transaksi.barang',
                     'transaksi.suratJalan.customer',
                     ])->get();
-                
                 $barang = $invoices[0]->transaksi->barang->nama ?? null;
                 $supplier = $invoices[0]->transaksi->suppliers->nama ?? null;
                 $customer = $invoices[0]->transaksi->suratJalan->customer->nama ?? null;
@@ -363,7 +362,7 @@ class JurnalController extends Controller
                 $data->nomor = $request->nomor;
                 $data->debit = $request->debit;
                 $data->kredit = $request->kredit;
-                $data->keterangan = $keteranganNow;
+                $data->keterangan = $keterangan;
                 $data->keterangan_buku_besar_pembantu = $request->keterangan_buku_besar_pembantu;
                 $data->invoice = !empty($request->invoice) ? explode('_', $request->invoice)[0] : null;
                 $data->invoice_external = !empty($request->invoice_external) ? explode('_', $request->invoice_external)[0] : null;
@@ -567,7 +566,6 @@ class JurnalController extends Controller
                 $hargabeli = $invoice_external[$index - 1]->harga_beli;
                 $hargajual = $invoice_external[$index - 1]->harga_jual;
                 $ket = $invoice_external[$index - 1]->keterangan;
-
                 $keterangan = $request->keterangan;
 
                 if (str_contains($request->keterangan, '[1]')) {
