@@ -87,7 +87,28 @@
 
     <!-- Card untuk tampilan laporan piutang -->
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Report Omzet Cust</x-slot:tittle>
+        <x-slot:tittle>Report Outstanding Piutang Cust</x-slot:tittle>
+        <p class="server-time">
+            Tanggal dan Waktu Server : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
+        </p>
+        <!-- Tabel untuk menampilkan data menggunakan jqGrid -->
+        <table class="table" id="table-lp"></table>
+
+        <!-- Pager untuk navigasi halaman -->
+        <div id="jqGridPager"></div>
+    </x-keuangan.card-keuangan>
+    <x-keuangan.card-keuangan>
+        <x-slot:tittle>Summary Laporan Piutang</x-slot:tittle>
+
+        <!-- Tabel untuk menampilkan data menggunakan jqGrid -->
+        <table class="table" id="table-lp-total"></table>
+
+        <!-- Pager untuk navigasi halaman -->
+        <div id="jqGridPagerTotal"></div>
+    </x-keuangan.card-keuangan>
+
+    <x-keuangan.card-keuangan>
+        <x-slot:tittle>Monitoring Piutang Customer</x-slot:tittle>
 
         <!-- Dropdown untuk memilih tahun -->
         <form action="{{ route('laporan.Piutang') }}" method="GET">
@@ -154,26 +175,6 @@
                 </tbody>
             </table>
         </div>
-    </x-keuangan.card-keuangan>
-    <x-keuangan.card-keuangan>
-        <x-slot:tittle>Report Outstanding Piutang Cust</x-slot:tittle>
-        <p class="server-time">
-            Tanggal dan Waktu Server : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
-        </p>
-        <!-- Tabel untuk menampilkan data menggunakan jqGrid -->
-        <table class="table" id="table-lp"></table>
-
-        <!-- Pager untuk navigasi halaman -->
-        <div id="jqGridPager"></div>
-    </x-keuangan.card-keuangan>
-    <x-keuangan.card-keuangan>
-        <x-slot:tittle>Summary Laporan Piutang</x-slot:tittle>
-
-        <!-- Tabel untuk menampilkan data menggunakan jqGrid -->
-        <table class="table" id="table-lp-total"></table>
-
-        <!-- Pager untuk navigasi halaman -->
-        <div id="jqGridPagerTotal"></div>
     </x-keuangan.card-keuangan>
     <!-- Script untuk memuat jqGrid -->
     <x-slot:script>
