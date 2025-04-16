@@ -270,6 +270,7 @@
                                         $totalHarga = $item->harga * $item->jumlah;
                                         $konversi = $item->jumlah * $item->transaksi->barang->value;
                                     @endphp
+                                    X
                             
                                     @if ($item->transaksi->barang->status_ppn == 'ya')
                                         {{ number_format(($totalHarga * 1.11) / $konversi) }}
