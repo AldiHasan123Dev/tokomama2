@@ -79,6 +79,7 @@
         .table-cus .bg-total-monthly { background-color: #098e0c;  color: white; font-weight: bold; text-align: right;}
         .table-cus .bg-total-monthly1 { background-color: #546816;  color: white; font-weight: bold; text-align: right;}
         .table-cus .bg-total { background-color: #93685b; color: white; font-weight: bold;}
+        .table-cus .kurang-bayar { background-color: #f8f81f; color: rgb(0, 0, 0); font-weight: bold;}
     </style>
     <!-- Link CSS untuk jqGrid dan jQuery UI -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
@@ -154,20 +155,30 @@
                         @php $totalOmzet = 0; @endphp
                         <tr>
                             <td class="bg-thn">{{ $customerData['customer_name'] }}</td>
+                        
                             @foreach ($months as $month)
                                 @php
                                     $data = $customerData['years'][request('year') ?? 2025][$month] ?? null;
-                                    $inv = $data['selisih_invoice'] ?? '-';
-                                    $omzet = $data['omzet'] ?? 0;
+                        
+                                    $inv = isset($data['selisih_invoice']) ? (int) $data['selisih_invoice'] : 0;
+                                    $omzet = isset($data['omzet']) ? (int) $data['omzet'] : 0;
+                        
                                     $totalOmzet += $omzet;
+                        
+                                    // Tandai warna hanya jika selisih_invoice == 0 dan omzet > 0
+                                    $warningClass = ($inv === 0 && $omzet > 0) ? 'kurang-bayar' : '';
                                 @endphp
-                                <td class="text-center">
-                                    {{ $inv == 0 ? '-' : $inv }}
+                        
+                                <td class="text-center {{ $warningClass }}">
+                                    {{ $inv === 0 ? '-' : $inv }}
                                 </td>
-                                <td style="text-align: right">{{ number_format($omzet, 0, ',', '.') }}</td>
+                                <td class="text-end {{ $warningClass }}">
+                                    {{ number_format($omzet, 0, ',', '.') }}
+                                </td>
                             @endforeach
-                            <td class="bg-total" style="text-align: right">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
-                        </tr>
+                        
+                            <td class="bg-total text-end">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
+                        </tr>                                               
                     @endforeach
     
                     {{-- Footer Total Per Bulan --}}
