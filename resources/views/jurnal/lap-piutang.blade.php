@@ -77,6 +77,7 @@
         .table-cus .bg-total1 { background-color: #473f39; color: white; font-weight: bold; text-align: right; }
         .table-cus .bg-total-thn { background-color: #0f2d44; color: white; font-weight: bold; }
         .table-cus .bg-total-monthly { background-color: #098e0c;  color: white; font-weight: bold; text-align: right;}
+        .table-cus .bg-total-monthly1 { background-color: #546816;  color: white; font-weight: bold; text-align: right;}
         .table-cus .bg-total { background-color: #93685b; color: white; font-weight: bold;}
     </style>
     <!-- Link CSS untuk jqGrid dan jQuery UI -->
@@ -109,7 +110,7 @@
 
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Monitoring Piutang Customer</x-slot:tittle>
-
+    
         <!-- Dropdown untuk memilih tahun -->
         <form action="{{ route('laporan.Piutang') }}" method="GET">
             <div class="form-container">
@@ -127,55 +128,74 @@
                 </div>
             </div>
         </form>
+    
         <div class="table-container">
             <table class="table-cus">
                 <thead>
                     <tr>
-                        <th class="bg-thn" rowspan="2">Customer</th>
-                        <th class="bg-thn" colspan="{{ count($months) }}">Bulan</th>
-                        <th class="bg-total">Total</th>
+                        <th class="bg-thn" rowspan="3">Customer</th>
+                        <th class="bg-thn" colspan="{{ count($months) * 2 }}">Bulan</th>
+                        <th class="bg-total" rowspan="3">Total</th>
                     </tr>
                     <tr>
                         @foreach ($months as $month)
-                            <th>{{ $month }}</th>
+                            <th class="text-center" colspan="2">{{ $month }}</th>
                         @endforeach
-                        <th class="bg-total">Omzet Total</th>
+                    </tr>
+                    <tr>
+                        @foreach ($months as $month)
+                            <th>Inv</th>
+                            <th>Total</th>
+                        @endforeach
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($mergedResults as $customer_id => $customerData)
-                    @php
-                        $totalOmzet = 0;
-                    @endphp
-                    <tr>
-                        <td class="bg-thn">{{ $customerData['customer_name'] }}</td>
+                        @php $totalOmzet = 0; @endphp
+                        <tr>
+                            <td class="bg-thn">{{ $customerData['customer_name'] }}</td>
+                            @foreach ($months as $month)
+                                @php
+                                    $data = $customerData['years'][request('year') ?? 2025][$month] ?? null;
+                                    $inv = $data['selisih_invoice'] ?? '-';
+                                    $omzet = $data['omzet'] ?? 0;
+                                    $totalOmzet += $omzet;
+                                @endphp
+                                <td class="text-center">
+                                    {{ $inv == 0 ? '-' : $inv }}
+                                </td>
+                                <td style="text-align: right">{{ number_format($omzet, 0, ',', '.') }}</td>
+                            @endforeach
+                            <td class="bg-total" style="text-align: right">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+    
+                    {{-- Footer Total Per Bulan --}}
+                    <tr class="sticky-footer">
+                        <td class="bg-total-thn">{{ request('year') ?? 2025 }}</td>
+                        @php
+                            $totalYearlyOmzet = 0;
+                            $totalInvoiceCount = 0;
+                        @endphp
                         @foreach ($months as $month)
                             @php
-                                $data = $customerData['years'][request('year') ?? 2025][$month] ?? null;
-                                $omzet = $data['omzet'] ?? 0;
-                                $totalOmzet += $omzet;
+                                $monthlyOmzet = $monthlyTotals[request('year') ?? 2025][$month] ?? 0;
+                                $invoiceCount = $monthlySelisihInvoice[request('year') ?? 2025][$month] ?? 0;
+                                $totalYearlyOmzet += $monthlyOmzet;
+                                $totalInvoiceCount += $invoiceCount;
                             @endphp
-                            <td style="text-align: right">{{ number_format($omzet, 0, ',', '.') }}</td>
+                           <td class="bg-total-monthly1 text-end">
+                            {{ $invoiceCount == 0 ? '-' : $invoiceCount }}
+                        </td>                        
+                            <td class="bg-total-monthly text-end">{{ number_format($monthlyOmzet, 0, ',', '.') }}</td>
                         @endforeach
-                        <td class="bg-total" style="text-align: right">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
-                    </tr>
-                @endforeach
-                <tr class="sticky-footer">
-                    <td class="bg-total-thn">{{ request('year') ?? 2025 }}</td>
-                    @php $totalYearlyOmzet = 0; @endphp
-                    @foreach ($months as $month)
-                        @php
-                            $monthlyOmzet = $monthlyTotals[request('year') ?? 2025][$month] ?? 0;
-                            $totalYearlyOmzet += $monthlyOmzet;
-                        @endphp
-                        <td class="bg-total-monthly">{{ number_format($monthlyOmzet, 0, ',', '.') }}</td>
-                    @endforeach
-                    <td class="bg-total1">{{ number_format($totalYearlyOmzet, 0, ',', '.') }}</td>
-                </tr>
+                        <td class="bg-total1 text-end">{{ number_format($totalYearlyOmzet, 0, ',', '.') }}</td>
+                    </tr>                    
                 </tbody>
             </table>
         </div>
     </x-keuangan.card-keuangan>
+    
     <!-- Script untuk memuat jqGrid -->
     <x-slot:script>
         <script type="text/javascript" src="{{ asset('assets/js/grid.locale-en.js') }}"></script>
