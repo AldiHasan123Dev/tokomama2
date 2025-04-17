@@ -208,7 +208,6 @@
                     @for ($i = $start_item; $i < $end_item; $i++)
                     @php
                         $item = $data[$i];
-                        $total += $item->harga * $item->jumlah;
                     @endphp
                     @endfor
                     <tr>
@@ -302,17 +301,11 @@
                             <td colspan="5" class="border border-black" style="text-align: right;">
                                 <b>TOTAL</b>
                             </td>
-                            <td class="border border-black" style="text-align: right;">
-                                @if ($barang->status_ppn == 'ya')
-                                    <b>{{ number_format($total * 1.11, 0, ',', '.') }}</b>
-                                @else
-                                    <b>{{ number_format($total, 0, ',', '.') }}</b>
-                                @endif
-                            </td>
                             @else
                             <td colspan="4" class="border border-black" style="text-align: right;">
                                 <b>TOTAL</b>
                             </td>
+                            @endif
                             <td class="border border-black" style="text-align: right;">
                                 @if ($barang->status_ppn == 'ya')
                                     <b>{{ number_format($total * 1.11, 0, ',', '.') }}</b>
@@ -320,7 +313,6 @@
                                     <b>{{ number_format($total, 0, ',', '.') }}</b>
                                 @endif
                             </td>
-                            @endif
                             {{-- <td colspan="5"  style="text-align: right;">
                         Subtotal
                         <br>
