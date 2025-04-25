@@ -94,6 +94,58 @@
             font-size: 12px;
             color: red;
         }
+
+        .table-custom {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }
+
+                .table-custom thead th {
+                    background-color: #f1f1f1;
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: left;
+                }
+
+                .table-custom tbody td,
+                .table-custom tbody th {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                }
+
+                .table-custom tbody tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+
+                .table-custom tbody tr:hover {
+                    background-color: #f1f1f1;
+                }
+
+                .table-custom th,
+                .table-custom td {
+                    text-align: right;
+                }
+
+                #table-buku-besar {
+                    width: 100%;
+                    /* Pastikan tabel mengambil lebar penuh dari kontainer */
+                    border-collapse: collapse;
+                    /* Menghilangkan jarak antara border sel */
+                }
+
+                #table-buku-besar th,
+                #table-buku-besar td {
+                    padding: 5px;
+                    /* Menambah padding untuk sel */
+                    border: 1px solid #ddd;
+                    /* Menambah border pada sel */
+                }
+
+                #table-buku-besar th {
+                    background-color: #f2f2f2;
+                    /* Warna latar belakang header */
+                }
     </style>
 
     {{-- <x-keuangan.card-keuangan>
@@ -109,7 +161,7 @@
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Monitoring Stock</x-slot:tittle>
         <div class="overflow-x-auto">
-            <a href="{{ route('stock.csv') }}">
+            {{-- <a href="{{ route('stock.csv') }}">
                 <button type="button" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">
                     Unduh CSV 
                 </button>
@@ -118,7 +170,7 @@
                 <span style="color: rgb(74, 144, 71); font-weight: bold;">(Compatible Excel 2021, tetapi perlu  olahan lanjut. Ini bersifat</span>
                 <span style="color: red; font-weight: bold;">darurat</span> 
                 <span  style="color: rgb(74, 144, 71); font-weight: bold;">sebelum release menu Kartu Stock</span>)
-            </p>            
+            </p>             --}}
                 <div class="overflow-x-auto mt-5">
                     <div class="table-responsive">
                         <!-- Checkbox "Select All" di luar tabel -->
@@ -151,9 +203,193 @@
                 </div>         
             </div>
         </x-keuangan.card-keuangan>
+        <x-keuangan.card-keuangan>
+            <x-slot:tittle>Kartu Stock</x-slot:tittle>
+        <div class="card bg-white shadow-sm">
+            <div class="card-body">
+                <div class="grid grid-cols-4">
+                    <div class="font-bold">Nama Barang : </div>
+                    <form method="GET" action="{{ route('monitor-stock') }}" id="formBarang">
+                        <div>
+                            <select class="js-example-basic-single w-1/2" name="barang" id="barang">
+                                <option value="" selected>Pilih Barang</option>
+                                @foreach ($barang as $b)
+                                <option value="{{ $b->id }}" {{ request('barang') == $b->id ? 'selected' : '' }}>
+                                    {{ $b->nama ?? '-' }} - {{ $b->satuan->nama_satuan ?? '-' }}
+                                </option>                                
+                                @endforeach
+                            </select>
+                        </div>
+                    </form>                                 
+                    <div class="font-bold">Tahun : </div>
+                    <div>
+                        <select class="js-example-basic-single w-1/2" name="akun" id="thn">
+                            <option selected value="{{ date('Y') }}">{{ date('Y') }}</option>
+                            @for ($year = date('Y'); $year >= 2025; $year--)
+                                <option value="{{ $year }}">{{ $year }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
+                @php
+                $months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+            
+                // Inisialisasi array kosong per bulan
+                $masuk = $keluar = $sisa = $harga_jual = $harga_beli = $stock_sisa = array_fill(0, 12, 0);
+            
+                // Loop hasil dan akumulasi per bulan
+                foreach ($hasil as $barang) {
+                    foreach ($barang['detail'] as $row) {
+                        $index = $row['index_bulan'] ?? null;
+            
+                        if (is_numeric($index) && $index >= 0 && $index < 12) {
+                            $masuk[$index]      += $row['jumlah_beli'] ?? 0;
+                            $stock_sisa[$index]      += $row['stock_awal'] ?? 0;
+                            $keluar[$index]     += $row['jumlah_jual'] ?? 0;
+                            $sisa[$index]       += $row['sisa_stock'] ?? 0;
+                            $harga_jual[$index] += $row['harga_jual'] ?? 0;
+                            $harga_beli[$index] += $row['harga_beli'] ?? 0;
+                        }
+                    }
+                }
+            @endphp
+            
+            <table class="table-custom table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        @foreach ($months as $month)
+                            <th>{{ $month }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Stock Awal</th>
+                        @foreach ($stock_sisa as $value)
+                            <td>{{ number_format($value) }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>Barang Masuk</th>
+                        @foreach ($masuk as $value)
+                            <td>{{ number_format($value) }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>Barang Keluar</th>
+                        @foreach ($keluar as $value)
+                            <td>{{ number_format($value) }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>Stock Sisa</th>
+                        @foreach ($sisa as $value)
+                            <td>{{ number_format($value) }}</td>
+                        @endforeach
+                    </tr>
+                    {{-- Uncomment jika mau tampil harga beli & jual
+                    <tr>
+                        <th>Harga Beli</th>
+                        @foreach ($harga_beli as $value)
+                            <td>{{ number_format($value) }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>Harga Jual</th>
+                        @foreach ($harga_jual as $value)
+                            <td>{{ number_format($value) }}</td>
+                        @endforeach
+                    </tr>
+                    --}}
+                </tbody>
+            </table>
+            
+            </div>
+        </div>
+        @php
+        $barang = request()->get('barang');
+        $selectedMonth = request()->get('month');
+        $year = request()->get('year', date('Y'));
+        $months = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+            5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
+            9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+        ];
+    @endphp
+    
+    <form method="GET" action="{{ route('monitor-stock') }}" id="filterForm" class="flex gap-2 mt-4 mb-6">
+        @foreach ($months as $num => $name)
+            <button type="submit" name="month" value="{{ $num }}"
+                class="px-4 py-3 border-2 border-green-600 hover:bg-green-600 hover:text-white duration-300 rounded-xl
+                {{ $selectedMonth == $num ? 'bg-green-500 text-white' : '' }}">
+                {{ $name }}
+            </button>
+        @endforeach
+        <input type="hidden" name="year" value="{{ $year }}">
+        <input type="hidden" name="barang" id="hiddenBarang" value="{{ $barang }}">
+    </form>
+
+    <div class="table-responsive">
+        <table id="table-buku-besar" class="cell-border hover display nowrap compact">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tanggal</th>
+                    <th>No. BM</th>
+                    <th>No. SJ</th>
+                    <th>Tgl SJ</th>
+                    <th>Invoice</th>
+                    <th>Customer</th>
+                    <th>Barang</th>
+                    <th>Jumlah Beli</th>
+                    <th>Jumlah Jual</th>
+                    <th>Sisa</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $no = 1; @endphp
+                @foreach ($hasil1 as $barang)
+                    @foreach ($barang['detail'] as $detail)
+                        <tr>
+                            <td>{{ $no++ }}</td>
+                            <td>{{ $detail['tgl'] }}</td>
+                            <td>{{ $detail['no'] }}</td>
+                            <td>{{ $detail['surat_jalan'] }}</td>
+                            <td>{{ $detail['tgl_sj'] }}</td>
+                            <td>{{ $detail['invoice'] }}</td>
+                            <td>{{ $detail['customer'] }}</td>
+                            <td>{{ $barang['barang'] }}</td>
+                            <td>{{ $detail['tipe'] === 'beli' ? number_format($detail['jumlah']) : '-' }}</td>
+                            <td>{{ $detail['tipe'] === 'jual' ?number_format($detail['jumlah']) : '-' }}</td>
+                            <td>{{ number_format($detail['sisa_stock']) }}</td>
+                        </tr>
+                    @endforeach
+                @endforeach
+            </tbody>                   
+        </table>
+    </div>    
+    
+
+    </x-keuangan.card-keuangan>
 
     <x-slot:script>
+        <script src="https://cdn.datatables.net/2.1.0/js/dataTables.tailwindcss.js"></script>
         <script>
+             
+    $(document).ready(function() {
+        $('.js-example-basic-single').select2();
+
+        $('#barang').on('change', function () {
+            $('#formBarang').submit();
+        });
+        var table = $('#table-buku-besar').DataTable({
+                pageLength: 10,
+                scrollX: true, 
+            });
+    });
+
+
 $(function () {
     const table1 = $("#jqGrid1").jqGrid({
         url: "{{ route('stock.data2') }}", // URL untuk data JSON dari controller
