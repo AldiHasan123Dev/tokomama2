@@ -330,6 +330,22 @@
         <input type="hidden" name="barang" id="hiddenBarang" value="{{ $barang }}">
     </form>
 
+    <div class="row">
+        @foreach ($hasil1 as $barang)
+            <div class="col-md-2 mb-1">
+                <div class="card shadow-sm border-teal" style="background: #11926b !important; border-radius: 5px;">
+                    <div class="card-body">
+                        <h5 class="card-title" style="color: #ffffff; font-size: 14px; font-weight: bold;">
+                            Rincian Stock Barang : <span style="color: #FFD700; font-weight: bold;">{{ $barang['barang'] }}</span> <!-- Menambahkan warna mencolok -->
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+    
+    
+
     <div class="table-responsive">
         <table id="table-buku-besar" class="cell-border hover display nowrap compact">
             <thead>
@@ -341,7 +357,6 @@
                     <th>Tgl SJ</th>
                     <th>Invoice</th>
                     <th>Customer</th>
-                    <th>Barang</th>
                     <th>Jumlah Beli</th>
                     <th>Jumlah Jual</th>
                     <th>Sisa</th>
@@ -359,7 +374,6 @@
                             <td>{{ $detail['tgl_sj'] }}</td>
                             <td>{{ $detail['invoice'] }}</td>
                             <td>{{ $detail['customer'] }}</td>
-                            <td>{{ $barang['barang'] }}</td>
                             <td>{{ $detail['tipe'] === 'beli' ? number_format($detail['jumlah']) : '-' }}</td>
                             <td>{{ $detail['tipe'] === 'jual' ?number_format($detail['jumlah']) : '-' }}</td>
                             <td>{{ number_format($detail['sisa_stock']) }}</td>
@@ -384,7 +398,7 @@
             $('#formBarang').submit();
         });
         var table = $('#table-buku-besar').DataTable({
-                pageLength: 10,
+                pageLength: 25,
                 scrollX: true, 
             });
     });
