@@ -652,7 +652,7 @@ class SuratJalanController extends Controller
     public function dataTable()
     {
         $data = SuratJalan::query()
-        ->with('transactions.suppliers') // Pastikan relasi transactions dipanggil untuk efisiensi
+        ->with('transactions.suppliers','customer') // Pastikan relasi transactions dipanggil untuk efisiensi
         ->orderBy('created_at', 'desc');
     
         return DataTables::of($data)
@@ -663,6 +663,9 @@ class SuratJalanController extends Controller
         ->addColumn('suppliers', function ($row) {
             $transaction = $row->transactions->first();
             return optional($transaction?->suppliers)->nama; // Menghindari error jika tidak ada transaksi
+        })
+        ->addColumn('customer', function ($row) {
+            return optional($row->customer)->nama; // langsung ambil dari relasi customer di SuratJalan
         })
     
             ->addColumn('profit', function ($row) {

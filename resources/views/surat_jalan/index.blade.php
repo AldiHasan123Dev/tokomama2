@@ -127,8 +127,8 @@
                         name: 'Tanggal SJ'
                     },
                     {
-                        data: 'kepada',
-                        name: 'kepada'
+                        data: 'customer',
+                        name: 'customer'
                     },
                     {
                         data: 'no_bm',

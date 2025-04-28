@@ -102,7 +102,7 @@
                     <td style="font-weight: bold">Jl. Baru (Ruko Depan PLN) 
                         <br> Abepura, Jayapura </td>
                     <td></td>
-                    <td style="font-weight: bold">{{ $surat_jalan->customer->nama_npwp }}</td>
+                    <td style="font-weight: bold">{{ $surat_jalan->customer->nama }}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold">HP: 08112692861 / 08112692859</td>
