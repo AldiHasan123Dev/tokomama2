@@ -90,7 +90,7 @@
                                                 @foreach ($barang as $item)
                                                     <option value="{{ $item->id }}">{{ $item->nama }} ||
                                                         {{ $item->nama_satuan }} || Stock : {{ $item->sisa }} ||
-                                                        {{ $item->kode_objek }} || {{ $item->no_bm }} -> {{ $item->gudang }}</option>
+                                                        {{ $item->kode_objek }} || {{ $item->no_bm }} -> {{ $item->gudang ?? 'AB' }}</option>
                                                 @endforeach
                                             </select>
                                     </td>
