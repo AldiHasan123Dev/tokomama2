@@ -290,10 +290,10 @@
                                         Bank Masuk - {{ $no_BBM }}/{{ 'BBM' }}-TM/{{ date('y') }}
                                     </option>
                                     <option value="{{ $no_BBMO }}/{{ 'BBMO' }}-TM/{{ date('y') }}">
-                                        Bank Masuk OCBC - {{ $no_BBMO }}/{{ 'BBMO' }}-SB/{{ date('y') }}
+                                        Bank Masuk OCBC - {{ $no_BBMO }}/{{ 'BBMO' }}-TM/{{ date('y') }}
                                     </option>
                                     <option value="{{ $no_BBKO }}/{{ 'BBKO' }}-TM/{{ date('y') }}">
-                                        Bank Keluar OCBC - {{ $no_BBKO }}/{{ 'BBKO' }}-SB/{{ date('y') }}
+                                        Bank Keluar OCBC - {{ $no_BBKO }}/{{ 'BBKO' }}-TM/{{ date('y') }}
                                     </option>
                                 </select>
                             </label>
