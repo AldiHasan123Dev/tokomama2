@@ -10,6 +10,8 @@ use App\Models\Invoice;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Barang;
+use App\Models\Satuan;
+use Illuminate\Support\Collection;
 use App\Models\Transaction;
 
 use App\Models\Jurnal;
@@ -424,7 +426,7 @@ public function stockCSV19()
     public function cetak_nota(){
         return view('toko.list-barang');
     }
-    public function monitor_stock(){
+    public function monitor_stock(Request $request){
         $jayapura = Transaction::whereNotNull('stts')
         ->whereNull('id_surat_jalan')
     ->get()
@@ -451,7 +453,272 @@ public function stockCSV19()
     ->sum(function ($transaction) {
         return $transaction->harga_beli * $transaction->sisa;
     });
-    return view('toko.monitor-stock', compact('jayapura', 'perjalanan','perjalanan1','perjalanan2'));
+
+    $barang = Barang::with('satuan')->where('status', 'aktif')->orderBy('nama', 'asc')->get();
+
+    // Ambil parameter dari request
+    $barang_id = $request->get('barang') ?? null;
+    $month = $request->get('month') ?? null; // Default ke bulan Maret
+    $year = $request->get('year', 2025);
+
+    $months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+    if($barang_id === null) {
+        $data = Transaction::with('barang', 'suratJalan')
+        ->whereNull('id_surat_jalan')
+        ->whereNotNull('no_bm')
+        ->orderBy('created_at', 'asc')
+        ->orderBy('no_bm', 'asc')
+        ->get();
+
+        $data2 = Transaction::with('barang', 'suratJalan')
+        ->whereNull('id_surat_jalan')
+        ->whereNotNull('no_bm')
+        ->orderBy('created_at', 'asc')
+        ->orderBy('no_bm', 'asc')
+        ->get();
+        
+        $data1 = Transaction::with('barang', 'suratJalan')
+        ->whereNotNull('no_bm')
+        ->orderBy('created_at', 'asc')
+        ->orderBy('no_bm', 'asc')
+        ->get();
+
+        $data3 = Transaction::with('barang', 'suratJalan')
+        ->whereNotNull('no_bm')
+        ->orderBy('created_at', 'asc')
+        ->orderBy('no_bm', 'asc')
+        ->get();
+    } else{
+
+        $data = Transaction::with('barang', 'suratJalan')
+        ->whereNull('id_surat_jalan')
+        ->whereBetween('tgl_bm', [
+           '2025-01-01',
+            \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth(),
+        ])
+        ->whereNotNull('no_bm')
+        ->when($barang_id, function ($q) use ($barang_id) {
+            $q->where('id_barang', $barang_id);
+        })
+        ->orderBy('created_at', 'asc')
+        ->orderBy('no_bm', 'asc')
+        ->get();
+
+        $data2 = Transaction::with('barang', 'suratJalan', 'invoices')
+    ->whereNull('id_surat_jalan')
+    ->whereYear('tgl_bm', $year)
+    ->whereMonth('tgl_bm', $month)
+    ->whereNotNull('no_bm')
+    ->when($barang_id, function ($q) use ($barang_id) {
+        $q->where('id_barang', $barang_id);
+    })
+    ->orderBy('created_at', 'asc')
+    ->orderBy('no_bm', 'asc')
+    ->get();
+    
+        // Query transaksi barang keluar (ada surat jalan di bulan & tahun tertentu)
+        $data1 = Transaction::with('barang', 'suratJalan')
+        ->whereHas('suratJalan', function ($q) use ($month, $year) {
+            $q->whereBetween('tgl_sj', [
+               '2025-01-01',
+                \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth(),
+            ]);
+        })
+        ->whereNotNull('no_bm')
+        ->when($barang_id, function ($q) use ($barang_id) {
+            $q->where('id_barang', $barang_id);
+        })
+        ->orderBy('created_at', 'asc')
+        ->orderBy('no_bm', 'asc')
+        ->get();
+
+        $data3 = Transaction::with('barang', 'suratJalan', 'invoices')
+        ->whereHas('suratJalan', function ($q) use ($year, $month) {
+            $q->whereYear('tgl_sj', $year)
+              ->whereMonth('tgl_sj', $month);
+        })
+        ->whereNotNull('no_bm')
+        ->when($barang_id, function ($q) use ($barang_id) {
+            $q->where('id_barang', $barang_id);
+        })
+        ->orderBy('created_at', 'asc')
+        ->orderBy('no_bm', 'asc')
+        ->get();
+    }
+    $hasil = [];
+
+// Barang masuk (data)
+foreach ($data as $item) {
+    if (!$item->tgl_bm) continue;
+
+    $id = $item->id_barang;
+    $tgl = $item->tgl_bm;
+    $bulanIndex = (int) date('n', strtotime($tgl)) - 1;
+
+    if (!isset($hasil[$id])) {
+        $hasil[$id] = [
+            'barang' => $item->barang->nama ?? '-',
+            'detail' => []
+        ];
+    }
+
+    if (!isset($hasil[$id]['detail'][$bulanIndex])) {
+        $hasil[$id]['detail'][$bulanIndex] = [
+            'jumlah_beli' => 0,
+            'jumlah_jual' => 0,
+            'sisa_stock' => 0,
+            'stock_awal' => 0,
+            'tgl' => $tgl,
+            'bulan' => $months[$bulanIndex] ?? '-',
+            'index_bulan' => $bulanIndex
+        ];
+    }
+
+    $hasil[$id]['detail'][$bulanIndex]['jumlah_beli'] += $item->jumlah_beli;
+
+    // Update stock_awal dari bulan sebelumnya jika ada
+    if ($bulanIndex > 0 && isset($hasil[$id]['detail'][$bulanIndex - 1])) {
+        $hasil[$id]['detail'][$bulanIndex]['stock_awal'] = $hasil[$id]['detail'][$bulanIndex - 1]['sisa_stock'];
+    }
+
+    $hasil[$id]['detail'][$bulanIndex]['sisa_stock'] =
+        $hasil[$id]['detail'][$bulanIndex]['stock_awal'] +
+        $hasil[$id]['detail'][$bulanIndex]['jumlah_beli'];
+}
+
+// Barang keluar (data1)
+foreach ($data1 as $item) {
+    if (!$item->suratJalan || !$item->suratJalan->tgl_sj) continue;
+
+    $id = $item->id_barang;
+    $tgl = $item->suratJalan->tgl_sj;
+    $bulanIndex = (int) date('n', strtotime($tgl)) - 1;
+
+    if (!isset($hasil[$id])) {
+        $hasil[$id] = [
+            'barang' => $item->barang->nama ?? '-',
+            'detail' => []
+        ];
+    }
+
+    if (!isset($hasil[$id]['detail'][$bulanIndex])) {
+        $hasil[$id]['detail'][$bulanIndex] = [
+            'jumlah_beli' => 0,
+            'jumlah_jual' => 0,
+            'sisa_stock' => 0,
+            'stock_awal' => 0,
+            'tgl' => $tgl,
+            'bulan' => $months[$bulanIndex] ?? '-',
+            'index_bulan' => $bulanIndex
+        ];
+    }
+
+    $hasil[$id]['detail'][$bulanIndex]['jumlah_jual'] += $item->jumlah_jual;
+
+    // Update stock_awal dari bulan sebelumnya jika ada
+    if ($bulanIndex > 0 && isset($hasil[$id]['detail'][$bulanIndex - 1])) {
+        $hasil[$id]['detail'][$bulanIndex]['stock_awal'] =
+            $hasil[$id]['detail'][$bulanIndex - 1]['sisa_stock'];
+    }
+
+    // Perbarui sisa_stock setelah pengurangan
+    $hasil[$id]['detail'][$bulanIndex]['sisa_stock'] =
+        $hasil[$id]['detail'][$bulanIndex]['stock_awal'] +
+        $hasil[$id]['detail'][$bulanIndex]['jumlah_beli'] -
+        $hasil[$id]['detail'][$bulanIndex]['jumlah_jual'];
+}
+
+$hasil1 = [];
+$gabungan = [];
+
+// Gabung data beli
+foreach ($data2 as $item) {
+    if (!$item->tgl_bm) continue;
+
+    $gabungan[] = [
+        'tipe' => 'beli',
+        'id_barang' => $item->id_barang,
+        'barang' => $item->barang->nama ?? '-',
+        'no' => $item->no_bm,
+        'tgl' => $item->tgl_bm,
+        'jumlah' => $item->jumlah_beli,
+        'stock_awal' => $hasil[$item->id_barang]['detail'][$bulanIndex]['stock_awal'] ?? 0,
+        'harga' => $item->harga_beli
+    ];
+}
+
+// Gabung data jual
+foreach ($data3 as $item) {
+    if (!$item->suratJalan || !$item->suratJalan->tgl_sj) continue;
+
+    $gabungan[] = [
+        'tipe' => 'jual',
+        'id_barang' => $item->id_barang,
+        'customer' => $item->suratJalan->customer->nama ?? '-',
+        'invoice' => $item->invoices->first()->invoice ?? '-', // pastikan ambil invoice pertama
+        'barang' => $item->barang->nama ?? '-',
+        'no' => $item->no_bm,
+        'tgl' => $item->suratJalan->tgl_sj,
+        'tgl_sj' => $item->suratJalan->tgl_sj,
+        'surat_jalan' => $item->suratJalan->nomor_surat ?? '-',
+        'jumlah' => $item->jumlah_jual,
+        'stock_awal' => $hasil[$item->id_barang]['detail'][$bulanIndex]['stock_awal'] ?? 0,
+        'harga' => $item->harga_jual
+    ];
+}
+
+// Urutkan berdasarkan tanggal
+usort($gabungan, function ($a, $b) {
+    return strtotime($a['tgl']) <=> strtotime($b['tgl']);
+});
+
+// Hitung stok berjalan
+$stok_berjalan = [];
+
+foreach ($gabungan as $item) {
+    $id = $item['id_barang'];
+    $tgl = $item['tgl'];
+    $bulanIndex = (int) date('n', strtotime($tgl)) - 1;
+    $jumlah = $item['jumlah'];
+
+    // Inisialisasi jika belum ada
+    if (!isset($hasil1[$id])) {
+        $hasil1[$id] = [
+            'barang' => $item['barang'],
+            'detail' => []
+        ];
+
+        // Ambil stok awal dari transaksi pertama
+        $stok_berjalan[$id] = $item['stock_awal'];
+    }
+
+    // Proses stok berjalan
+    if ($item['tipe'] === 'beli') {
+        $stok_berjalan[$id] += $jumlah;
+    } else {
+        $stok_berjalan[$id] -= $jumlah;
+    }
+
+    // Simpan hasilnya
+    $hasil1[$id]['detail'][] = [
+        'tipe' => $item['tipe'],
+        'no' => $item['no'],
+        'tgl' => $tgl,
+        'tgl_sj' => $item['tgl_sj'] ?? '-',
+        'surat_jalan' => $item['surat_jalan'] ?? '-',
+        'invoice' => $item['invoice'] ?? '-',
+        'customer' => $item['customer'] ?? '-',
+        'bulan' => $months[$bulanIndex] ?? '-',
+        'index_bulan' => $bulanIndex,
+        'jumlah' => $jumlah,
+        'harga' => $item['harga'],
+        'sisa_stock' => $stok_berjalan[$id]
+    ];
+
+}
+
+    return view('toko.monitor-stock', compact('data', 'hasil1','data1','hasil', 'barang_id','jayapura','barang', 'month', 'year', 'perjalanan','perjalanan1','perjalanan2'));
     }
 
     public function stocks(){

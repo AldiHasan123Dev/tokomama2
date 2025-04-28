@@ -279,8 +279,8 @@ class KeuanganController extends Controller
         COUNT(DISTINCT i.invoice) as invoice_count, 
         SUM(
             CASE 
-                WHEN b.status_ppn = "ya" THEN t.harga_beli * t.jumlah_beli * 1.11  -- Menghitung PPN untuk harga beli
-                ELSE t.harga_beli * t.jumlah_beli
+                WHEN b.status_ppn = "ya" THEN t.harga_beli * t.jumlah_jual * 1.11  -- Menghitung PPN untuk harga beli
+                ELSE t.harga_beli * t.jumlah_jual
             END
         ) as total_harga_beli, 
         SUM(
@@ -345,7 +345,7 @@ class KeuanganController extends Controller
             // Hitung persentase total profit
             if ($summaryData[$year]['total_harga_beli'] > 0) {
                 $summaryData[$year]['total_profit_percentage'] = 
-                    ($summaryData[$year]['total_profit'] / $summaryData[$year]['total_harga_jual']) * 100;
+                    ($summaryData[$year]['total_profit'] / $summaryData[$year]['total_harga_beli']) * 100;
             }
         }
     

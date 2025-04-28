@@ -123,27 +123,34 @@ class SuratJalanController extends Controller
         }
         for ($i = 0; $i < count($request->barang); $i++) {
             if ($request->barang[$i] != null && $request->jumlah_jual[$i] != null) {
-                // Ambil stok barang dari database berdasarkan barang yang dipilih
-                $transactions = Transaction::whereIn('id', $request->barang)->pluck('sisa')->toArray();
+                // Ambil stok barang dari database dengan indeks ID transaksi
+                $transactions = Transaction::whereIn('id', $request->barang)->pluck('sisa', 'id')->toArray();
         
-                // Jika ada lebih dari satu transaksi, hitung total stok
-                $totalStok = count($transactions) > 1 ? $transactions : [$transactions[0] ?? 0];
+                // Ambil jumlah jual dengan indeks ID transaksi
+                $jumlahJual = array_combine($request->barang, $request->jumlah_jual);
         
-                // Ambil jumlah jual dan pastikan dalam bentuk array numerik
-                $totalJumlahJual = array_map('intval', array_filter($request->jumlah_jual));
+                // Pastikan jumlah jual dalam bentuk numerik dan hanya untuk barang yang ada dalam stok
+                $totalJumlahJual = [];
+                foreach ($jumlahJual as $id => $jual) {
+                    if (isset($transactions[$id])) {
+                        $totalJumlahJual[$id] = (int) $jual;
+                    }
+                }
         
-        
-                // Lakukan pengurangan stok
-                $cek = array_map(fn($stok, $jual) => $stok - $jual, $totalStok, $totalJumlahJual);
+                // Lakukan pengurangan stok dengan mempertahankan indeks ID transaksi
+                $cek = [];
+                foreach ($totalJumlahJual as $id => $jual) {
+                    $cek[$id] = $transactions[$id] - $jual;
+                }
         
                 // Debug output
         
-                // Jika stok kurang, redirect kembali dengan pesan error
+                // Jika ada stok yang kurang dari 0, tampilkan pesan error
                 if (min($cek) < 0) {
                     return redirect()->back()->with('error', "Stok barang tidak mencukupi!");
                 }
             }
-        }
+        }        
         
         
     
@@ -304,38 +311,45 @@ class SuratJalanController extends Controller
      */
     public function update(Request $request)
     {
-        if($request->tgl_sj === null){
-            return redirect()->back()->withErrors(['error' => 'Tgl SJ jangan dibiarkan kosong!!! silahkan isi form kembali']);
+        try {
+            if ($request->tgl_sj === null) {
+                return redirect()->back()->withErrors(['error' => 'Tgl SJ jangan dibiarkan kosong!!! silahkan isi form kembali']);
+            }
+    
+            $data = SuratJalan::find($request->id);
+            if (!$data) {
+                return redirect()->back()->withErrors(['error' => 'Data Surat Jalan tidak ditemukan!']);
+            }
+    
+            $customer = Customer::find($request->kepada);
+            if (!$customer) {
+                return redirect()->back()->withErrors(['error' => 'Customer tidak ditemukan!']);
+            }
+    
+            $data->update([
+                'invoice' => $request->invoice,
+                'nomor_surat' => $request->nomor_surat,
+                'id_customer' => $customer->id,
+                'kepada' => $customer->nama,
+                'jumlah' => $request->jumlah,
+                'satuan' => $request->satuan,
+                'nama_kapal' => $request->nama_kapal,
+                'no_cont' => $request->no_cont,
+                'no_seal' => $request->no_seal,
+                'no_pol' => $request->no_pol,
+                'no_job' => $request->no_job,
+                'no_po' => $request->no_po,
+                'tgl_sj' => $request->tgl_sj,
+            ]);
+    
+            return redirect()->route('surat-jalan.index')->with('success', 'Data surat jalan berhasil di update');
+    
+        } catch (\Exception $e) {
+            \Log::error('Update Surat Jalan Error: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan saat memperbarui data! ' . $e->getMessage()]);
         }
-        if($request->nopol === null){
-            return redirect()->back()->withErrors(['error' => 'Nopol SJ jangan dibiarkan kosong!!! silahkan isi form kembali']);
-        }
-
-        if($request->kepada === null){
-            return redirect()->back()->withErrors(['error' => 'Kepada SJ jangan dibiarkan kosong!!! silahkan isi form kembali']);
-        }
-        
-        // id, invoice, nomor_surat, kepada, jumlah, satuan, jenis_barang, nama_kapal, no_cont, no_seal, no_pol, no_job
-        $data = SuratJalan::find($request->id);
-        $customer = Customer::find($request->kepada);
-        $data->invoice = $request->invoice;
-        $data->nomor_surat = $request->nomor_surat;
-        $data->id_customer = $customer->id;
-        $data->kepada = $customer->nama;
-        $data->jumlah = $request->jumlah;
-        $data->satuan = $request->satuan;
-        // $data->jenis_barang = $request->jenis_barang;
-        $data->nama_kapal = $request->nama_kapal;
-        $data->no_cont = $request->no_cont;
-        $data->no_seal = $request->no_seal;
-        $data->no_pol = $request->no_pol;
-        $data->no_job = $request->no_job;
-        $data->no_po = $request->no_po;
-
-        $data->tgl_sj = $request->tgl_sj;
-        $data->save();
-        return redirect()->route('surat-jalan.index')->with('success', 'Data surat jalan berhasil di update');
     }
+    
 
     public function checkBarangCount(Request $request)
 {
@@ -636,7 +650,7 @@ class SuratJalanController extends Controller
     public function dataTable()
     {
         $data = SuratJalan::query()
-        ->with('transactions.suppliers') // Pastikan relasi transactions dipanggil untuk efisiensi
+        ->with('transactions.suppliers','customer') // Pastikan relasi transactions dipanggil untuk efisiensi
         ->orderBy('created_at', 'desc');
     
         return DataTables::of($data)
@@ -647,6 +661,9 @@ class SuratJalanController extends Controller
         ->addColumn('suppliers', function ($row) {
             $transaction = $row->transactions->first();
             return optional($transaction?->suppliers)->nama; // Menghindari error jika tidak ada transaksi
+        })
+        ->addColumn('customer', function ($row) {
+            return optional($row->customer)->nama; // langsung ambil dari relasi customer di SuratJalan
         })
     
             ->addColumn('profit', function ($row) {
@@ -674,13 +691,14 @@ class SuratJalanController extends Controller
                     $action = '<button onclick="getData(' . $row->id . ', \''
                     . addslashes($row->invoice) . '\', \''
                     . addslashes($row->nomor_surat) . '\', \''
+                    . addslashes($row->kepada) . '\', \''
                     . addslashes($row->customer->nama) . '\', \''
                     . addslashes($row->no_pol) . '\', \''
-                    . date('Y-m-d', strtotime($row->tgl_sj)) . '\', \'' // Format tgl_sj ke YYYY-MM-DD
+                    . date('Y-m-d', strtotime($row->tgl_sj)) . '\', \''
                     . addslashes($row->no_po) . '\')" 
                     id="edit" class="text-yellow-400 font-semibold mb-3 self-end">
                     <i class="fa-solid fa-pencil"></i>
-                </button>';
+                </button>';                
                                 // <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
                 }
                 return '<div class="flex gap-3 mt-2">

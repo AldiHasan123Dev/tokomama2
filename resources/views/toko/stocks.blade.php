@@ -143,7 +143,7 @@
                             <span class="form-label">Status</span>
                         </div>
                         <input type="text" class="input-field" id="status" required />
-                    </label>
+                    </label>      
                     <button type="button" class="submit-button" onclick="updateTransaksi1()">Diterima</button>
                 </div>
             </dialog>
@@ -390,11 +390,6 @@
                 // Hapus duplikasi dan cek jumlah unique supplier
                 var uniqueno_bms = [...new Set(no_bm)];
 
-                console.log("Supplier:", supplier);
-                console.log("Unique Suppliers:", uniqueSuppliers);
-                console.log("No BM:", no_bm);
-                console.log("Unique No BMs:", uniqueno_bms);
-
                 if (uniqueSuppliers.length > 1) {
                     alert("Item data yang anda pilih dari supplier yang berbeda,Silahkan pilih Supplier yang sama!");
                     return;
@@ -444,6 +439,15 @@
                 <input type="hidden" id="ids_transaksi_${i}" value="${ids_transaksi[i]}" class="input-field" />
                 <label for="jumlah_beli_${i}">${nama_barang[i]} (${satuan_beli[i]}) :</label>
                 <input type="text" id="jumlah_beli_${i}" value="${jumlah[i]}" class="input-field" />
+                 <label class="form-control w-full max-w">
+                        <div class="form-label">
+                            <span class="form-label">Pilih Gudang ${nama_barang[i]} (${satuan_beli[i]})</span>
+                        </div>
+                        <select id="gudang_${i}" class="input-field" required>
+                            <option value="AB">AB</option>
+                            <option value="KY">KY</option>
+                        </select>
+                    </label>              
             </div>
         `);
                 }
@@ -455,11 +459,15 @@
             function updateTransaksi1() {
                 let jumlahBeli = [];
                 let id = [];
+                let gudang = [];
                 let status = $('#status').val();
 
                 // Ambil nilai jumlah beli dari semua input yang telah ditampilkan
                 $('input[id^="jumlah_beli_"]').each(function(index) {
                     jumlahBeli.push($(this).val()); // Mengambil value dari setiap input
+                });
+                $('select[id^="gudang_"]').each(function(index) {
+                    gudang.push($(this).val()); // Mengambil value dari setiap select
                 });
                 $('input[id^="ids_transaksi_"]').each(function() {
                     let val = $(this).val();
@@ -473,9 +481,6 @@
                 id = id.filter(val => val !== "undefined" && val !== "");
 
                 // Log data ke console untuk debugging
-                console.log("Jumlah Beli:", jumlahBeli);
-                console.log("ID Transaksi:", id);
-                console.log("Status:", status);
 
                 // Validasi apakah jumlah beli dan status sudah diisi
                 if (jumlahBeli.some(jumlah => !jumlah) || status === "") {
@@ -486,7 +491,8 @@
                 if (confirm('Apakah Anda yakin?')) {
                     let dataKirim = {
                         id: id, // Array ID transaksi
-                        jumlah_beli: jumlahBeli, // Array jumlah beli
+                        jumlah_beli: jumlahBeli,
+                        gudang: gudang, // Array jumlah beli
                         stts: status, // Status transaksi
                         _token: "{{ csrf_token() }}"
                     };

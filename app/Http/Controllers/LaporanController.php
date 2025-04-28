@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\Coa;
 use App\Models\Customer;
 use App\Models\Barang;
+use App\Models\Satuan;
 use Carbon\Carbon;
 class LaporanController extends Controller
 {
@@ -150,10 +151,91 @@ class LaporanController extends Controller
     
         return view('laporan.lap-sales', compact('mergedResults', 'months', 'years', 'monthlyTotals'));
     }
-    
-    
-    
 
+    public function dataFLS(Request $request) {
+        // Mengambil tahun unik dari data invoice
+        $years = Invoice::selectRaw('YEAR(tgl_invoice) as year')
+            ->groupBy('year')
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+    
+        // Mengambil tahun dari request atau gunakan tahun berjalan
+        $selectedYear = $request->input('year', date('Y'));
+    
+        // Daftar bulan
+        $months = [
+            'January', 'February', 'March', 'April', 'May', 
+            'June', 'July', 'August', 'September', 
+            'October', 'November', 'December'
+        ];
+    
+        // Query untuk laporan omzet
+         $invoices = Invoice::selectRaw('
+        c.id as customer_id,
+        c.sales as customer_sales,
+        DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+        YEAR(i.tgl_invoice) as year, 
+        SUM(t.jumlah_jual) as jumlah_juals,
+        t.satuan_jual as satuan_barang,
+        SUM(CASE 
+            WHEN t.satuan_jual = "KG" THEN t.jumlah_jual * b.value 
+            ELSE t.jumlah_jual 
+        END) as jumlah_kg_to_value
+    ')
+    ->from('invoice as i')
+    ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+    ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
+    ->join('customer as c', 'sj.id_customer', '=', 'c.id')
+    ->join('barang as b', 't.id_barang', '=', 'b.id')
+    ->whereYear('i.tgl_invoice', $selectedYear)
+    ->groupBy('c.sales', 'year', 'month', 'satuan_barang')
+    ->orderBy('year', 'asc')
+    ->orderByRaw('MONTH(i.tgl_invoice) ASC')
+    ->get();
+        // Ambil daftar satuan barang
+        $satuan = Satuan::pluck('nama_satuan');
+    
+        // Struktur data untuk tampilan Blade
+        $mergedResults = [];
+        $monthlyTotals = [];
+    
+        foreach ($invoices as $invoice) {
+            $salesName = $invoice->customer_sales;
+            $month = $invoice->month;
+            $satuanName = $invoice->satuan_barang;
+            if (strtoupper($invoice->satuan_barang) === 'KG') {
+                $totalValue = $invoice->jumlah_juals . ' KG (' . $invoice->jumlah_kg_to_value . ' ZAK)';
+            } else {
+                $totalValue = $invoice->jumlah_juals;
+            }
+        
+
+            // Inisialisasi jika belum ada data
+            if (!isset($mergedResults[$salesName])) {
+                $mergedResults[$salesName] = [
+                    'sales_name' => $salesName,
+                    'years' => []
+                ];
+            }
+
+            if (!isset($mergedResults[$salesName]['years'][$selectedYear])) {
+                $mergedResults[$salesName]['years'][$selectedYear] = [];
+            }
+
+            if (!isset($mergedResults[$salesName]['years'][$selectedYear][$month])) {
+                $mergedResults[$salesName]['years'][$selectedYear][$month] = [];
+            }
+
+            // Simpan data omzet berdasarkan bulan dan satuan
+            $mergedResults[$salesName]['years'][$selectedYear][$month][$satuanName] = $totalValue;
+        }
+
+        return view('laporan.lap-fee-sales', compact('mergedResults', 'satuan', 'months', 'years', 'selectedYear', 'monthlyTotals'));
+    }
+    private function cleanNumber($value) {
+        return (float) preg_replace('/[^0-9.]/', '', $value);
+    } 
+    
     public function dataLHV(){
         $jurnals = Jurnal::where('coa_id', 5)
         ->whereNotNull('invoice_external')
@@ -696,10 +778,130 @@ public function dataLapPiutangTotal(Request $request)
 }
 
 
-    public function lapPiutang()
-    {
-        return view('jurnal.lap-piutang');
+public function lapPiutang()
+{
+    // Ambil tahun unik dari invoice
+    $years = Invoice::selectRaw('YEAR(tgl_invoice) as year')
+        ->groupBy('year')
+        ->orderBy('year', 'desc')
+        ->pluck('year');
+
+    // Ambil data invoice tahun tertentu
+    $invoiceData = Invoice::selectRaw('
+            i.invoice,
+            c.id as customer_id,
+            c.nama as customer_nama,
+            DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+            YEAR(i.tgl_invoice) as year, 
+            COUNT(DISTINCT i.invoice) as invoice_count,  
+            SUM(
+                CASE 
+                    WHEN b.status_ppn = "ya" THEN i.subtotal * 1.11
+                    ELSE i.subtotal
+                END
+            ) as total_omzet
+        ')
+        ->from('invoice as i')
+        ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+        ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
+        ->join('customer as c', 'sj.id_customer', '=', 'c.id')
+        ->join('barang as b', 't.id_barang', '=', 'b.id')
+        ->whereYear('i.tgl_invoice', request('year') ?? 2025)
+        ->groupBy('i.invoice', 'c.id', 'c.nama', 'year', 'month')
+        ->get();
+
+    // Ambil jurnal BBM (untuk pengurangan omzet)
+    $jurnals = Jurnal::withTrashed()
+        ->where('tipe', 'BBM')
+        ->whereNull('deleted_at')
+        ->where('debit', '!=', 0)
+        ->where('tgl', '>', (request('year') ?? 2025) . '-01-01')
+        ->whereNotNull('invoice')
+        ->orderBy('tgl', 'desc')
+        ->get()
+        ->groupBy('invoice'); // berdasarkan nomor invoice
+
+    $mergedResults = [];
+    $monthlyTotals = [];
+    $monthlyInvoiceCounts = [];
+    $monthlySelisihInvoice = [];
+
+    foreach ($invoiceData as $invoice) {
+        $invoiceNumber = $invoice->invoice;
+        $omzet = $invoice->total_omzet;
+
+        // Jumlah jurnal yang cocok
+        $jurnalInvoiceCount = $jurnals->has($invoiceNumber) ? 1 : 0;
+        $selisihInvoice = $invoice->invoice_count - $jurnalInvoiceCount;
+
+        $debitValue = $jurnals->has($invoiceNumber) ? $jurnals[$invoiceNumber]->sum('debit') : 0;
+        $netOmzet = ($omzet - $debitValue) / 1000;
+
+        // Buat struktur data
+        $custId = $invoice->customer_id;
+        $year = $invoice->year;
+        $month = $invoice->month;
+
+        if (!isset($mergedResults[$custId])) {
+            $mergedResults[$custId] = [
+                'customer_name' => $invoice->customer_nama,
+                'years' => []
+            ];
+        }
+
+        if (!isset($mergedResults[$custId]['years'][$year])) {
+            $mergedResults[$custId]['years'][$year] = [];
+        }
+
+        if (!isset($mergedResults[$custId]['years'][$year][$month])) {
+            $mergedResults[$custId]['years'][$year][$month] = [
+                'month' => $month,
+                'year' => $year,
+                'invoice_count' => 0,
+                'omzet' => 0,
+                'selisih_invoice' => 0,
+            ];
+        }
+
+        // Tambahkan data per customer
+        $mergedResults[$custId]['years'][$year][$month]['omzet'] += $netOmzet;
+        $mergedResults[$custId]['years'][$year][$month]['invoice_count'] += $invoice->invoice_count;
+        $mergedResults[$custId]['years'][$year][$month]['selisih_invoice'] += $selisihInvoice;
+
+        // Akumulasi total per bulan
+        if (!isset($monthlyTotals[$year][$month])) {
+            $monthlyTotals[$year][$month] = 0;
+        }
+        $monthlyTotals[$year][$month] += $netOmzet;
+
+        if (!isset($monthlyInvoiceCounts[$year][$month])) {
+            $monthlyInvoiceCounts[$year][$month] = 0;
+        }
+        $monthlyInvoiceCounts[$year][$month] += $invoice->invoice_count;
+
+        if (!isset($monthlySelisihInvoice[$year][$month])) {
+            $monthlySelisihInvoice[$year][$month] = 0;
+        }
+        $monthlySelisihInvoice[$year][$month] += $selisihInvoice;
     }
+
+    $months = [
+        'January', 'February', 'March', 'April', 'May',
+        'June', 'July', 'August', 'September',
+        'October', 'November', 'December'
+    ];
+
+    return view('jurnal.lap-piutang', compact(
+        'mergedResults',
+        'monthlyInvoiceCounts',
+        'monthlySelisihInvoice',
+        'monthlyTotals',
+        'months',
+        'years'
+    ));
+}
+
+
 
     public function lapPenjualan()
     {

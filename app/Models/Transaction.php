@@ -20,6 +20,7 @@ class Transaction extends Model
         'harga_jual',
         'jumlah_jual',
         'sisa',
+        'gudang',
         'stts',
         'satuan_jual',
         'margin',

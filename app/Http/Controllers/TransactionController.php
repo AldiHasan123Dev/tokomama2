@@ -88,7 +88,6 @@ class TransactionController extends Controller
             $newInvoiceExternal = "InvSupp/" . mt_rand(100, 999) . "/BM";
             foreach ($request->id as $key => $id) {
                 $transaksi = Transaction::find($id);
-
                 if (!$transaksi) continue; // Pastikan transaksi ditemukan
 
                 // Jika transaksi sudah punya invoice_external, gunakan yang ada
@@ -98,6 +97,7 @@ class TransactionController extends Controller
                 $transaksi->jumlah_beli = $request->jumlah_beli[$key] ?? 0;
                 $transaksi->sisa = $request->jumlah_beli[$key] ?? 0;
                 $transaksi->stts = $request->stts;
+                $transaksi->gudang = $request->gudang[$key] ?? 'AB';
                 // $transaksi->invoice_external = $invoice_external;
                 $transaksi->save();
     

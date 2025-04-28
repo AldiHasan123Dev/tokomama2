@@ -242,6 +242,7 @@ Route::prefix('master')->controller(SupplierController::class)->middleware('auth
 
 Route::prefix('laporan')->controller(LaporanController::class)->middleware('auth')->group(function () {
     Route::get('hutang-vendor', 'dataLHV')->name('laporan.LHV');
+    Route::get('lap-fee-sales', 'dataFLS')->name('laporan.FLS');
     Route::get('lap-sales', 'dataLS')->name('laporan.LS');
     Route::get('lap-omzet-cust', 'dataLOC')->name('laporan.LOC');
     Route::get('piutang-customer', 'dataLPC')->name('laporan.LPC');
