@@ -584,8 +584,7 @@
 
                         let mergedData = {};
                         response.details.forEach(detail => {
-                            let invoice = state === 'customer' ? detail.invoice : detail
-                                .invoice_external;
+                            let invoice = state === 'customer' ? detail.invoice : detail.invoice_external;
 
                             if (!mergedData[invoice]) {
                                 mergedData[invoice] = {
@@ -593,7 +592,8 @@
                                     tgl: [],
                                     debit: 0,
                                     kredit: 0,
-                                    keterangan: []
+                                    keterangan: [],
+                                    coaId: coaId// ✅ Cek dua kemungkinan
                                 };
                             }
                             mergedData[invoice].nomor.push(detail.nomor);
@@ -603,10 +603,17 @@
                             mergedData[invoice].keterangan.push(detail.keterangan || '-');
                         });
 
+                        console.log( mergedData);
+
+
                         let rows = '';
                         for (let invoice in mergedData) {
                             rows += `<tr>
-                                <td class="border border-gray-300 px-4 py-2">${mergedData[invoice].tgl[0]}</td>
+                               <td class="border border-gray-300 px-4 py-2">
+                                ${coaId === 91 
+                                    ? [...new Set(mergedData[invoice].tgl)].join('<br>') 
+                                    : mergedData[invoice].tgl[0]}
+                                </td>
                                 <td class="border border-gray-300 px-4 py-2">${mergedData[invoice].nomor[0]}</td>
                                 <td class="border border-gray-300 px-4 py-2">${mergedData[invoice].tgl[1] ? mergedData[invoice].tgl[1] : '-'}</td>
                                 <td class="border border-gray-300 px-4 py-2">${mergedData[invoice].nomor[1] ? mergedData[invoice].nomor[1] : '-'}</td>
