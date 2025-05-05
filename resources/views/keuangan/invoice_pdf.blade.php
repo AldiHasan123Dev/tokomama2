@@ -277,6 +277,23 @@
                                     @else
                                         {{ number_format($totalHarga / $konversi) }}
                                     @endif
+                                    @elseif ($item->transaksi->satuan_jual == 'KWT' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
+                                      {{-- Tampilkan jumlah dalam satuan --}}
+                                      {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                      {{ $item->transaksi->barang->satuan->nama_satuan }}
+                              
+                                      {{-- Tampilkan konversi harga per KG --}}
+                                      @php
+                                          $totalHarga = $item->harga * $item->jumlah;
+                                          $konversi = $item->jumlah * $item->transaksi->barang->value;
+                                      @endphp
+                                      X
+                              
+                                      @if ($item->transaksi->barang->status_ppn == 'ya')
+                                          {{ number_format(($totalHarga * 1.11) / $konversi) }}
+                                      @else
+                                          {{ number_format($totalHarga / $konversi) }}
+                                      @endif
                                     @else
 
                                 @endif
