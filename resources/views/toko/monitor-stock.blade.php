@@ -514,6 +514,13 @@
                         },
                         {
                             search: true,
+                            label: 'Gdg',
+                            name: 'gudang',
+                            width: 50,
+                            align: "right"
+                        },
+                        {
+                            search: true,
                             label: 'Harga Beli',
                             name: 'total_harga_beli',
                             width: 80,

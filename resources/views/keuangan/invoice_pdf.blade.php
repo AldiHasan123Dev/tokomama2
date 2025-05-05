@@ -184,7 +184,7 @@
                     $hasil_bagi = (int) ($angka / 1000000);
                     $hasil_mod = $angka % 1000000;
                     return trim(sprintf('%s juta %s', terbilang($hasil_bagi), terbilang($hasil_mod)));
-                } elseif ($angka < 1000000000000) {
+                } elseif ($angka < 100000000000000) {
                     $hasil_bagi = (int) ($angka / 1000000000);
                     $hasil_mod = fmod($angka, 1000000000);
                     return trim(sprintf('%s miliar %s', terbilang($hasil_bagi), terbilang($hasil_mod)));
@@ -371,6 +371,9 @@
                 @else
                     {{ ucwords(strtolower(terbilang(round($total)))) }} Rupiah
                 @endif
+            </p>
+            <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem">
+                Penagihan oleh : Bpk. Immanuel (Kolektor)
             </p>
             <table style="font-size: 0.8rem;">
                 <tr>
