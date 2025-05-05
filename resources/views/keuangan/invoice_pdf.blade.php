@@ -257,7 +257,6 @@
                                     {{ number_format($item->harga, 0, ',', '.') }}
                                 @endif
                             </td>
-                            @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan )
                             <td class="border border-black text-center">
                                 @if ($item->transaksi->satuan_jual == 'KG' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
                                     {{-- Tampilkan jumlah dalam satuan --}}
@@ -276,12 +275,28 @@
                                     @else
                                         {{ number_format($totalHarga / $konversi) }}
                                     @endif
+                                    @elseif ($item->transaksi->satuan_jual == 'KWT' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
+                                      {{-- Tampilkan jumlah dalam satuan --}}
+                                      {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                      {{ $item->transaksi->barang->satuan->nama_satuan }}
+                              
+                                      {{-- Tampilkan konversi harga per KG --}}
+                                      @php
+                                          $totalHarga = $item->harga * $item->jumlah;
+                                          $konversi = $item->jumlah * $item->transaksi->barang->value;
+                                      @endphp
+                                      X
+                              
+                                      @if ($item->transaksi->barang->status_ppn == 'ya')
+                                          {{ number_format(($totalHarga * 1.11) / $konversi) }}
+                                      @else
+                                          {{ number_format($totalHarga / $konversi) }}
+                                      @endif
                                     @else
 
                                 @endif
                             </td>
                             @endif
-                            
                             <td class="border border-black" style="text-align: right;">
                                 @if ($barang->status_ppn == 'ya')
                                     {{ number_format($item->harga * 1.11 * $item->jumlah, 0, ',', '.') }}
