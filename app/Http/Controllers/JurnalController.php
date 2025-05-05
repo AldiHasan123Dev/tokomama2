@@ -26,35 +26,19 @@ class JurnalController extends Controller
      */
     public function index(Request $request)
     {
+        $month = $request->input('month', date('n'));
+        $year = $request->input('year', date('Y'));
+    
         $query = Jurnal::join('coa', 'jurnal.coa_id', '=', 'coa.id')
-            ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
-            ->orderBy('jurnal.no', 'desc')
-            ->orderBy('jurnal.id', 'asc')
-            ->orderBy('jurnal.created_at', 'desc')
-            ->orderBy('jurnal.tgl', 'desc');
+        ->select('jurnal.*', 'coa.no_akun', 'coa.nama_akun')
+        ->whereMonth('tgl', $month)
+        ->whereYear('tgl', $year)
+        ->when($request->filled('tipe'), fn($q) => $q->where('tipe', $request->tipe))
+        ->when($request->query('kas') === 'kas', fn($q) => $q->whereIn('tipe', ['BKM', 'BKK']))
+        ->when($request->query('bank') === 'bank', fn($q) => $q->whereIn('tipe', ['BBK', 'BBM']))
+        ->when($request->query('ocbc') === 'ocbc', fn($q) => $q->whereIn('tipe', ['BBKO', 'BBMO']))
+        ->orderByRaw("jurnal.no DESC, jurnal.id ASC, jurnal.created_at DESC, jurnal.tgl DESC");
     
-        // Filter berdasarkan month dan year (jika tersedia)
-        if ($request->has(['month', 'year'])) {
-            $query->whereMonth('tgl', $request->input('month'))
-                ->whereYear('tgl', $request->input('year'));
-        }
-    
-        if ($request->has('tipe')) {
-            $query->where('tipe', $request->input('tipe'));
-        }
-    
-        // Filter untuk Kas, Bank, dan OCBC dengan year & month
-        if ($request->query('kas') == 'kas' && $request->has(['month', 'year'])) {
-            $query->whereIn('tipe', ['BKM', 'BKK']);
-        }
-    
-        if ($request->query('bank') == 'bank' && $request->has(['month', 'year'])) {
-            $query->whereIn('tipe', ['BBK', 'BBM']);
-        }
-    
-        if ($request->query('ocbc') == 'ocbc' && $request->has(['month', 'year'])) {
-            $query->whereIn('tipe', ['BBKO', 'BBMO']);
-        }
     
         // Eksekusi query utama
         $data = $query->get();

@@ -231,7 +231,7 @@
                         <input type="hidden" name="year" value="{{ date('Y') }}"class="year-input">
                         <button
                             class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1 
-                                {{ request('month') == $i ? 'bg-green-300 text-white' : '' }}">
+                                {{ request('month', date('n')) == $i ? 'bg-green-300 text-white' : '' }}">
                             {{ $monthName }}
                         </button>
                     </form>
