@@ -257,6 +257,7 @@
                                     {{ number_format($item->harga, 0, ',', '.') }}
                                 @endif
                             </td>
+                            @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan )
                             <td class="border border-black text-center">
                                 @if ($item->transaksi->satuan_jual == 'KG' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
                                     {{-- Tampilkan jumlah dalam satuan --}}
