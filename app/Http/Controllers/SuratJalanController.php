@@ -775,7 +775,7 @@ class SuratJalanController extends Controller
 
         return [
             'DT_RowIndex' => $index,
-            'jurnal' => optional($row->jurnals->where('tipe', 'JNL')->where('debit', '>', 0)->firstWhere('coa_id', 91))->nomor ?? '-',
+            'jurnal' => optional($row->jurnals->where('tipe', 'JNL')->where('kredit', '>', 0)->firstWhere('coa_id', 35))->nomor ?? '-',
             'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
             'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 2, ',', '.') : '-',
             'sum_harga_beli' => $row->sum_harga_beli ? number_format($row->sum_harga_beli, 4, ',', '.') : '-',
