@@ -289,7 +289,7 @@
     </x-keuangan.card-keuangan>
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>List Riwayat Pembayaran Invoice</x-slot:tittle>
+        <x-slot:tittle>Riwayat Rekap Harian</x-slot:tittle>
         {{-- <div class="grid grid-cols-2 gap-4 justify-items-start mt-5 mb-5">
             <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
@@ -335,7 +335,7 @@
     </x-keuangan.card-keuangan>
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Monitoring Invoice</x-slot:tittle>
+        <x-slot:tittle>Detail Rekap Harian</x-slot:tittle>
         <div class="grid grid-cols-2 gap-4 justify-items-start mt-5 mb-5">
             <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
