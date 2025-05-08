@@ -371,7 +371,7 @@ foreach ($mergedResults as $year => $dataPerYear) {
             ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id') // Join surat_jalan
             ->join('customer as c', 'sj.id_customer', '=', 'c.id')       // Join customer
             ->where('i.tgl_invoice', '>', '2025-01-01')
-            ->groupBy('i.invoice', 'i.id') // jangan lupa group kolom yg dipilih
+            ->groupBy('i.invoice') // jangan lupa group kolom yg dipilih
             ->selectRaw('
                 i.id,
                 i.invoice,
