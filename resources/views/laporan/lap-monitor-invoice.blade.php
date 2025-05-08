@@ -588,7 +588,7 @@
         row.id = `row-${rowIndex}`;
 
         const selectOptions = invoices.map(inv =>
-            `<option value="${inv.id}" data-subtotal="${parseInt(inv.total_subtotal)}">${inv.invoice} || ${parseInt(inv.total_subtotal).toLocaleString()}</option>`
+            `<option value="${inv.id}" data-subtotal="${parseInt(inv.total_subtotal)}">${inv.invoice} || ${parseInt(inv.total_subtotal).toLocaleString()} || ${inv.customer.toLocaleString()}</option>`
         ).join('');
 
         row.innerHTML = `
