@@ -260,7 +260,7 @@
                                     <option value="" selected></option>
                                     @foreach ($invoices as $item)
                                         <option value="{{ $item->id }}" data-subtotal="{{ $item->total_subtotal }}">
-                                            {{ $item->invoice }} || {{ number_format($item->total_subtotal) }}
+                                            {{ $item->invoice }} || {{ number_format($item->total_subtotal) }} || {{ $item->customer }}
                                         </option>
                                     @endforeach
                                 </select>

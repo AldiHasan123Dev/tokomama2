@@ -366,21 +366,24 @@ foreach ($mergedResults as $year => $dataPerYear) {
 }
         public function monitoring_invoice(){
             $invoices = Invoice::from('invoice as i')
-    ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
-    ->join('barang as b', 't.id_barang', '=', 'b.id')
-    ->where('i.tgl_invoice', '>', '2025-01-01')
-    ->groupBy('i.invoice')
-    ->selectRaw('
-        i.id,
-        i.invoice,
-        SUM(i.subtotal + 
-            CASE 
-                WHEN b.status_ppn = "ya" THEN i.subtotal * (b.value_ppn / 100)
-                ELSE 0
-            END
-        ) as total_subtotal
-    ')
-    ->get();
+            ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+            ->join('barang as b', 't.id_barang', '=', 'b.id')
+            ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id') // Join surat_jalan
+            ->join('customer as c', 'sj.id_customer', '=', 'c.id')       // Join customer
+            ->where('i.tgl_invoice', '>', '2025-01-01')
+            ->groupBy('i.invoice', 'i.id') // jangan lupa group kolom yg dipilih
+            ->selectRaw('
+                i.id,
+                i.invoice,
+                c.nama as customer,
+                SUM(i.subtotal + 
+                    CASE 
+                        WHEN b.status_ppn = "ya" THEN i.subtotal * (b.value_ppn / 100)
+                        ELSE 0
+                    END
+                ) as total_subtotal
+            ')
+            ->get();
 
 $invoiceIDs = $invoices->pluck('id');
 $biayaInvAll = BiayaInv::whereIn('id_inv', $invoiceIDs)->get()->groupBy('id_inv');
