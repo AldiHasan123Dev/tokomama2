@@ -407,75 +407,83 @@ foreach ($invoices as $inv) {
         
             return view('laporan.lap-monitor-invoice',compact('invoices','invoiceLebihBayar'));
         }
-       public function listInv(Request $request)
-{
-    $searchTerm = $request->get('searchString', '');
-    $currentPage = (int) $request->get('page', 1);
-    $perPage = (int) $request->get('rows', 10);
-
-    // Ambil semua invoice yang memiliki biaya_inv
-    $query = Invoice::with(['biaya_inv', 'transaksi.suratJalan.customer'])
-    ->where('invoice.tgl_invoice', '>', '2025-01-01')
-        ->orderBy('invoice', 'desc');
-
-        if (request('customer')) {
-            $query->whereHas('transaksi.suratJalan.customer', function ($q) {
-                $q->where('nama', 'LIKE', '%' . request('customer') . '%');
+        public function listInv(Request $request)
+        {
+            $searchTerm   = $request->get('searchString', '');
+            $currentPage  = (int) $request->get('page', 1);
+            $perPage      = (int) $request->get('rows', 10);
+        
+            // Ambil semua invoice dengan relasi
+            $query = Invoice::with(['biaya_inv', 'transaksi.suratJalan.customer'])
+                ->where('invoice.tgl_invoice', '>', '2025-01-01')
+                ->orderBy('invoice', 'desc');
+        
+            // Filter customer
+            if ($request->filled('customer')) {
+                $query->whereHas('transaksi.suratJalan.customer', function ($q) use ($request) {
+                    $q->where('nama', 'LIKE', '%' . $request->customer . '%');
+                });
+            }
+        
+            // Filter invoice
+            if ($request->filled('invoice')) {
+                $query->where('invoice', 'LIKE', '%' . $request->invoice . '%');
+            }
+        
+            // Filter tgl_invoice
+            if ($request->filled('tgl_inv')) {
+                $query->where('tgl_invoice', 'LIKE', '%' . $request->tgl_inv . '%');
+            }
+        
+            // Filter tgl_pembayar (dari relasi biaya_inv)
+            if ($request->filled('tgl_pembayar')) {
+                $query->whereHas('biaya_inv', function ($q) use ($request) {
+                    $q->where('tgl_pembayar', 'LIKE', '%' . $request->tgl_pembayar . '%');
+                });
+            }
+        
+            // Ambil semua data (belum dipaginasi)
+            $invoices = $query->get();
+        
+            // Kelompokkan berdasarkan kode invoice
+            $grouped = $invoices->groupBy('invoice');
+        
+            // Ambil hanya grup dengan total nominal biaya_inv > 0
+            $filtered = $grouped->filter(function ($groupItems) {
+                return $groupItems->flatMap->biaya_inv->sum('nominal') > 0;
             });
-        }
-    
-        // Filter invoice
-        if (request('invoice')) {
-            $query->where('invoice', 'LIKE', '%' . request('invoice') . '%');
-        }
-    
-        // Filter tgl_invoice
-        if (request('tgl_inv')) {
-            $query->where('tgl_invoice', 'LIKE', '%' . request('tgl_inv') . '%');
-        }
-    
-        // Filter tgl_pembayar
-        if (request('tgl_pembayar')) {
-            $query->whereHas('biaya_inv', function ($q) {
-                $q->where('tgl_pembayar', 'LIKE', '%' . request('tgl_pembayar') . '%');
+        
+            $totalRecords = $filtered->count();
+        
+            // Pagination manual
+            $paginated = $filtered->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        
+            $result = $paginated->map(function ($groupItems, $idx) use ($currentPage, $perPage) {
+                $first = $groupItems->first();
+        
+                $biayaInv = $groupItems->flatMap->biaya_inv;
+                $totalNominal = $biayaInv->sum('nominal');
+        
+                return [
+                    'DT_RowIndex'  => ($currentPage - 1) * $perPage + $idx + 1,
+                    'customer'     => optional(optional($first->transaksi)->suratJalan)->customer->nama ?? '-',
+                    'tgl_inv'      => $first->tgl_invoice ?? '-',
+                    'tgl_pembayar' => $biayaInv->pluck('tgl_pembayar')->implode(', ') ?: '-',
+                    'invoice'      => $first->invoice ?? '-',
+                    'nominal'      => number_format($totalNominal, 0, ',', '.'),
+                    'total'        => $this->calculatePPN1($groupItems),
+                    'sisa'         => $this->calculateTotal($groupItems),
+                ];
             });
-        }        
-
-    $invoices = $query->get();
-
-    // Group berdasarkan kode invoice (string)
-    $grouped = $invoices->groupBy('invoice');
-    $totalRecords = $grouped->count();
-
-    // Pagination manual
-    $paginated = $grouped->slice(($currentPage - 1) * $perPage, $perPage)->values();
-
-    $result = $paginated->map(function ($groupItems, $idx) use ($currentPage, $perPage) {
-        $first = $groupItems->first();
-        $totalNominal = $groupItems->flatMap->biaya_inv->sum('nominal');
-
-
-        return [
-            'DT_RowIndex'  => ($currentPage - 1) * $perPage + $idx + 1,
-            'customer'     => optional(optional($first->transaksi)->suratJalan)->customer->nama ?? '-',
-            'tgl_inv'      => $first->tgl_invoice ?? '-',
-            'tgl_pembayar' => $groupItems->flatMap->biaya_inv
-            ->pluck('tgl_pembayar')
-            ->implode(', ') ?: '-',
-            'invoice'      => $first->invoice ?? '-',
-            'nominal'      => number_format($totalNominal, 0, ',', '.'),
-            'total'        => $this->calculatePPN1($groupItems),
-            'sisa'         => $this->calculateTotal($groupItems),
-        ];
-    });
-
-    return response()->json([
-        'page'    => $currentPage,
-        'total'   => ceil($totalRecords / $perPage),
-        'records' => $totalRecords,
-        'rows'    => $result,
-    ]);
-}
+        
+            return response()->json([
+                'page'    => $currentPage,
+                'total'   => ceil($totalRecords / $perPage),
+                'records' => $totalRecords,
+                'rows'    => $result,
+            ]);
+        }
+        
 
 private function calculatePPN1($row)
 {
