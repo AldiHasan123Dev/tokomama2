@@ -225,7 +225,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}">
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Form Pembayaran Invoice</x-slot:tittle>
+        <x-slot:tittle>Rekap Pembayaran Harian</x-slot:tittle>
 
         <div class="centered-container">
             <form action=
@@ -235,7 +235,7 @@
                     <button id="addRow" type="button" class="btn bg-blue-400 text-white ">Tambah Baris</button>
                     <label class="form-control w-full max-w-xs mb-1">
                         <div class="label">
-                            <span class="label-text">Tanggal Bayar</span>
+                            <span class="label-text text-red-600 font-bold">Tanggal Bayar!!!</span>
                         </div>
                         <input type="date"
                             class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
