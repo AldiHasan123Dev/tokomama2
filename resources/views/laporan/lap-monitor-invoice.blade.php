@@ -235,7 +235,7 @@
                     <button id="addRow" type="button" class="btn bg-blue-400 text-white ">Tambah Baris</button>
                     <label class="form-control w-full max-w-xs mb-1">
                         <div class="label">
-                            <span class="label-text text-red-600 font-bold">Tanggal Bayar!!!</span>
+                            <span class="label-text text-red-600 font-bold">Pilih Tanggal Bayar! (Jangan salah pilih)</span>
                         </div>
                         <input type="date"
                             class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
