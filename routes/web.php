@@ -251,6 +251,11 @@ Route::prefix('laporan')->controller(LaporanController::class)->middleware('auth
     Route::get('data-lap-penjualan-harian', 'dataPenjualanHarian')->name('laporan.DataPenjualanHarian');
     Route::get('data-total-lap-piutang', 'dataLapPiutangTotal')->name('laporan.TotalDataPiutang');
     Route::get('lap-piutang', 'LapPiutang')->name('laporan.Piutang');
+    Route::get('rekap-pembayaran-harian', 'monitoring_invoice')->name('monitor.Invoice');
+    Route::post('monitor-invoice-simpan', 'monitorSave')->name('monitorInv.store');
+    Route::get('data-monitor-invoice', 'jqgrid1')->name('biaya.monitoring.data');
+    Route::get('data-list-inv', 'listInv')->name('list.inv.data');
+    Route::delete('biaya-inv/{id}', 'destroy')->name('biaya-inv.destroy');
 });
 
 // Route::prefix('jurnal')->controller(CoaController::class)->middleware('auth')->group(function () {

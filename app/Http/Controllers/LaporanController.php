@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Jurnal;
 use App\Models\Invoice;
+use App\Models\BiayaInv;
 use App\Models\Transaction;
 use App\Models\Coa;
 use App\Models\Customer;
+use App\Http\Resources\BiayaInvResource;
+use Illuminate\Support\Facades\DB;
 use App\Models\Barang;
 use App\Models\Satuan;
 use Carbon\Carbon;
@@ -361,6 +364,276 @@ foreach ($mergedResults as $year => $dataPerYear) {
     ];
         return view('laporan.lap-hutang-vendor',compact('mergedResults', 'data' ,'months', 'summaryData'));
 }
+        public function monitoring_invoice(){
+            $invoices = Invoice::from('invoice as i')
+    ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+    ->join('barang as b', 't.id_barang', '=', 'b.id')
+    ->where('i.tgl_invoice', '>', '2025-01-01')
+    ->groupBy('i.invoice')
+    ->selectRaw('
+        i.id,
+        i.invoice,
+        SUM(i.subtotal + 
+            CASE 
+                WHEN b.status_ppn = "ya" THEN i.subtotal * (b.value_ppn / 100)
+                ELSE 0
+            END
+        ) as total_subtotal
+    ')
+    ->get();
+
+$invoiceIDs = $invoices->pluck('id');
+$biayaInvAll = BiayaInv::whereIn('id_inv', $invoiceIDs)->get()->groupBy('id_inv');
+
+$invoiceLebihBayar = [];
+
+foreach ($invoices as $inv) {
+    $biayaInvList = $biayaInvAll->get($inv->id, collect());
+
+    $totalBayar = $biayaInvList->sum('nominal');
+    $tglPembayar = $biayaInvList->pluck('tgl_pembayar');
+
+    if ($totalBayar > $inv->total_subtotal) {
+        $invoiceLebihBayar[] = [
+            'invoice'       => $inv->invoice,
+            'tgl_pembayar' => $tglPembayar,
+            'total_tagihan' => number_format($inv->total_subtotal, 0, ',', '.'),
+            'total_bayar'   => number_format($totalBayar, 0, ',', '.'),
+            'selisih'       => number_format($totalBayar - $inv->total_subtotal, 0, ',', '.'),
+        ];
+    }
+}
+
+        
+            return view('laporan.lap-monitor-invoice',compact('invoices','invoiceLebihBayar'));
+        }
+       public function listInv(Request $request)
+{
+    $searchTerm = $request->get('searchString', '');
+    $currentPage = (int) $request->get('page', 1);
+    $perPage = (int) $request->get('rows', 10);
+
+    // Ambil semua invoice yang memiliki biaya_inv
+    $query = Invoice::with(['biaya_inv', 'transaksi.suratJalan.customer'])
+    ->where('invoice.tgl_invoice', '>', '2025-01-01')
+        ->orderBy('invoice', 'desc');
+
+        if (request('customer')) {
+            $query->whereHas('transaksi.suratJalan.customer', function ($q) {
+                $q->where('nama', 'LIKE', '%' . request('customer') . '%');
+            });
+        }
+    
+        // Filter invoice
+        if (request('invoice')) {
+            $query->where('invoice', 'LIKE', '%' . request('invoice') . '%');
+        }
+    
+        // Filter tgl_invoice
+        if (request('tgl_inv')) {
+            $query->where('tgl_invoice', 'LIKE', '%' . request('tgl_inv') . '%');
+        }
+    
+        // Filter tgl_pembayar
+        if (request('tgl_pembayar')) {
+            $query->whereHas('biaya_inv', function ($q) {
+                $q->where('tgl_pembayar', 'LIKE', '%' . request('tgl_pembayar') . '%');
+            });
+        }        
+
+    $invoices = $query->get();
+
+    // Group berdasarkan kode invoice (string)
+    $grouped = $invoices->groupBy('invoice');
+    $totalRecords = $grouped->count();
+
+    // Pagination manual
+    $paginated = $grouped->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+    $result = $paginated->map(function ($groupItems, $idx) use ($currentPage, $perPage) {
+        $first = $groupItems->first();
+        $totalNominal = $groupItems->flatMap->biaya_inv->sum('nominal');
+
+
+        return [
+            'DT_RowIndex'  => ($currentPage - 1) * $perPage + $idx + 1,
+            'customer'     => optional(optional($first->transaksi)->suratJalan)->customer->nama ?? '-',
+            'tgl_inv'      => $first->tgl_invoice ?? '-',
+            'tgl_pembayar' => $groupItems->flatMap->biaya_inv
+            ->pluck('tgl_pembayar')
+            ->implode(', ') ?: '-',
+            'invoice'      => $first->invoice ?? '-',
+            'nominal'      => number_format($totalNominal, 0, ',', '.'),
+            'total'        => $this->calculatePPN1($groupItems),
+            'sisa'         => $this->calculateTotal($groupItems),
+        ];
+    });
+
+    return response()->json([
+        'page'    => $currentPage,
+        'total'   => ceil($totalRecords / $perPage),
+        'records' => $totalRecords,
+        'rows'    => $result,
+    ]);
+}
+
+private function calculatePPN1($row)
+{
+    $subtotal = $row->sum('subtotal');
+    $barang = optional(optional($row->first()->transaksi)->barang);
+
+    if ($barang->status_ppn === 'ya') {
+        $ppnRate = (float) $barang->value_ppn;
+        $ppn = $subtotal * ($ppnRate / 100);
+        $total = $subtotal + $ppn;
+    } else {
+        $total = $subtotal;
+    }
+
+    return number_format($total, 0, ',', '.');
+}
+
+
+private function calculateTotal($row)
+{
+    $subtotal = $row->sum('subtotal');
+    $barang = optional(optional($row->first()->transaksi)->barang);
+
+    if ($barang->status_ppn === 'ya') {
+        $ppnRate = (float) $barang->value_ppn;
+        $ppn = $subtotal * ($ppnRate / 100);
+        $total = $subtotal + $ppn;
+    } else {
+        $total = $subtotal;
+    }
+
+    $dibayar = $row->flatMap->biaya_inv->sum('nominal');
+
+    return number_format($total - $dibayar, 0, ',', '.');
+}
+
+
+    
+        
+        public function monitorSave(Request $request)
+        {
+            DB::beginTransaction();
+            try {
+                foreach ($request->invoice as $key => $invoiceId) {
+                    if (!$invoiceId) continue;
+
+                    // Ambil invoice terkait
+                    $invoice = Invoice::with('transaksi')->find($invoiceId);
+                    if (!$invoice || !$invoice->id_transaksi) {
+                        throw new \Exception("Invoice ID $invoiceId tidak memiliki transaksi terkait.");
+                    }
+
+                    $nominal = preg_replace('/[^0-9]/', '', $request->nominal[$key]);
+
+                    BiayaInv::create([
+                        'id_inv'       => $invoiceId,
+                        'id_trans'     => $invoice->id_transaksi, // ✅ pastikan field ini dikirim
+                        'tgl_pembayar' => $request->tanggal_bayar,
+                        'nominal'      => $nominal,
+                    ]);
+                }
+
+                DB::commit();
+                return redirect()->back()->with('success', 'Data pembayaran berhasil disimpan.');
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $th->getMessage());
+            }
+        }
+        public function jqgrid1()
+        {
+            $page    = request('page', 1);
+            $limit   = request('rows', 10);
+            $sidx    = request('sidx', 'biaya_inv.id');
+            $sord    = request('sord', 'asc');
+            $search  = request('_search') === 'true';
+        
+            $query = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
+                ->where('nominal', '>' ,0)
+                ->select('biaya_inv.*')
+                ->join('invoice', 'biaya_inv.id_inv', '=', 'invoice.id');
+        
+            // Filter
+            if (request('customer')) {
+                $query->whereHas('transaksi.suratJalan.customer', function ($q) {
+                    $q->where('nama', 'LIKE', '%' . request('customer') . '%');
+                });
+            }
+        
+            if (request('invoice')) {
+                $query->where('invoice.invoice', 'LIKE', '%' . request('invoice') . '%');
+            }
+        
+            if (request('tgl_inv')) {
+                $query->whereDate('invoice.tgl_invoice', request('tgl_inv'));
+            }
+        
+            if (request('tgl_pembayar')) {
+                $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar'));
+            }
+        
+            // Ambil semua data terlebih dahulu
+            $invoices = $query->get();
+        
+            // Group berdasarkan tgl_pembayar
+            $grouped = $invoices->groupBy(function ($item) {
+                return $item->tgl_pembayar . '||' . $item->invoice->invoice;
+            });
+            
+        
+            $totalRecords = $grouped->count();
+            $totalPages = $totalRecords > 0 ? ceil($totalRecords / $limit) : 0;
+            if ($page > $totalPages) $page = $totalPages;
+        
+            $paginated = $grouped->slice(($page - 1) * $limit, $limit);
+        
+            // Format data baris
+            $rows = $paginated->map(function ($items, $key) {
+                [$tgl_pembayar, $invoice] = explode('||', $key);
+                $first = $items->first();
+                $totalNominal = $items->sum('nominal');
+                $ids = $items->pluck('id')->implode(',');
+            
+                return [
+                    'id'           => $ids,
+                    'tgl_pembayar' => $tgl_pembayar,
+                    'customer'     => optional(optional($first->transaksi)->suratJalan)->customer->nama ?? '-',
+                    'invoice'      => $invoice,
+                    'bayar'        => $totalNominal,
+                ];
+            })->values();
+            
+        
+            // Total semua nominal (dari semua grup, bukan hanya paginasi)
+            $grandTotalNominal = $invoices->sum('nominal');
+        
+            // Return ke jqGrid
+            return response()->json([
+                'page'    => $page,
+                'total'   => $totalPages,
+                'records' => $totalRecords,
+                'rows'    => $rows,
+                'userdata' => [
+                    'bayar'        => $grandTotalNominal,
+                ]
+            ]);
+        }
+        
+        
+
+public function destroy($id)
+{
+    $biaya = BiayaInv::findOrFail($id);
+    $biaya->delete();
+
+    return response()->json(['message' => 'Data berhasil dihapus.']);
+}
+
 
         public function dataLPC(){;
 
@@ -510,10 +783,6 @@ public function dataLapPiutang(Request $request)
     ->groupBy('invoice')
     ->orderByDesc('invoice')
     ->get();
-
-
-
-
 
     // Ambil data dari tabel Invoices, urutkan berdasarkan 'created_at' descending
     $invoices = Invoice::with([
