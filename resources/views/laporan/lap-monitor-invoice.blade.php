@@ -343,7 +343,7 @@
                 </div>
                 <input type="date"
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                    id="tanggal_bayar1" name="tanggal_bayar1" autocomplete="off" />
+                    id="tanggal_bayar1" name="tanggal_bayar1" autocomplete="off" value="{{ date('Y-m-d') }}"/>
             </label>
         </div>
         <table id="biayaGrid"></table>
