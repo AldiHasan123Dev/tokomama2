@@ -156,6 +156,7 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::post('surat-jalan', 'suratJalanStore')->name('keuangan.surat-jalan');
     Route::get('invoice', 'invoice')->name('keuangan.invoice');
     Route::get('pre-invoice', 'preInvoice')->name('keuangan.pre-invoice');
+    Route::get('jurnal-bayar', 'jurnalBayar')->name('keuangan.jurnal-bayar');
     Route::post('draf-invoice/{surat_jalan}', 'submitInvoice')->name('keuangan.invoice.submit');
     Route::get('draf-invoice/{surat_jalan}', 'invoiceDraf')->name('keuangan.invoice.draf');
     Route::get('cetak-invoice', 'cetakInvoice')->name('keuangan.invoice.cetak');
@@ -165,6 +166,8 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::get('data-omzet-total', 'dataOmzeTotal')->name('keuangan.data-omzet-total');
     Route::get('omzet-list', 'dataTableOmzet')->name('keuangan.omzet.datatable');
     Route::post('omzet-export', 'OmzetExportExcel')->name('keuangan.omzet.exportexcel');
+    Route::post('cari-transaksi-by-tanggal', 'cari')->name('keuangan.cari'); 
+    Route::post('jurnal-simpan', 'jurnal')->name('keuangan.jurnal-inv'); 
 });
 
 Route::prefix('toko')->controller(StockController::class)->middleware('auth')->group(function () {

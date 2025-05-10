@@ -6,11 +6,12 @@ use App\Exports\OmzetExport;
 use App\Http\Resources\OmzetResurce;
 use App\Http\Resources\TransactionResource;
 use App\Models\Barang;
+use App\Models\BiayaInv;
 use App\Models\Invoice;
 use App\Models\Jurnal;
 use App\Models\NSFP;
 use App\Models\Satuan;
-
+use Carbon\Carbon;
 use App\Models\SuratJalan;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -139,6 +140,123 @@ class KeuanganController extends Controller
         $surat_jalan = SuratJalan::where('id', $id)->get();
         $pdf = Pdf::loadView('keuangan/invoice_pdf', compact('surat_jalan'))->setPaper('a4', 'potrait');
         return $pdf->stream('invoice_pdf.pdf');
+    }
+    public function jurnalBayar(){
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+        $noBBM = Jurnal::where('tipe', 'BBM')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBM = $noBBM ? $noBBM->no + 1 : 1;
+        return view('keuangan.jurnal-bayar-inv', compact('noBBM','no_BBM'));
+    }
+
+    public function cari(Request $request)
+    {
+        $tanggal = $request->tanggal_bayar;
+    
+        // Ambil transaksi dengan filter tanggal bayar
+        $biayaInvs = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
+            ->whereDate('tgl_pembayar', $tanggal)
+            ->whereNull('jurnal')
+            ->where('nominal', '>', 0)
+            ->get();
+    
+        // Jika kosong, kirim respon dengan pesan error
+        if ($biayaInvs->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pembayaran tanggal tersebut sudah terjurnal.',
+            ], 404);
+        }
+    
+        // Jika ada data, siapkan response data
+        $result = [
+            'id'       => $biayaInvs->pluck('id'),
+            'id_transaksi' => $biayaInvs->pluck('invoice.id_transaksi'),
+            'invoice'  => $biayaInvs->pluck('invoice.invoice'),
+            'nominal'  => $biayaInvs->pluck('nominal'),
+            'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
+        ];
+    
+        return response()->json([
+            'status' => 'success',
+            'data' => $result,
+        ]);
+    }
+    public function jurnal(Request $request)
+    {
+        $data = $request->all();
+    
+        // Bersihkan array dari nilai null
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = array_values(array_filter($value, function ($v) {
+                    return !is_null($v);
+                }));
+            }
+        }
+    
+        // Pastikan array numerik dikonversi dengan benar
+        foreach (['id', 'id_transaksi'] as $key) {
+            if (isset($data[$key])) {
+                $array = is_array($data[$key]) ? $data[$key] : [$data[$key]];
+                $data[$key] = array_map('intval', $array);
+            } else {
+                $data[$key] = [];
+            }
+        }
+    
+        // Ambil data utama
+        $biaya_ids = $data['id'];
+        $nominal_b = BiayaInv::whereIn('id', $biaya_ids)->sum('nominal');
+        $nominal = BiayaInv::whereIn('id', $biaya_ids)->pluck('nominal')->values(); // Pluck hasilnya Collection
+        $id_trans = $data['id_transaksi'];
+        $invoice = $data['invoice'];
+        $customer = $data['customer'];
+        $nomor = $data['nomor'];
+        $tgl_jurnal = Carbon::parse($data['tanggal'])->format('Y-m-d');
+        $no = (int) $data['no'];
+    
+        // Header Jurnal (Debit)
+        
+        // Detail Jurnal (Kredit) - loop berdasarkan jumlah item biaya
+        $count = count($biaya_ids);
+        for ($i = 0; $i < $count; $i++) {
+            Jurnal::create([
+                'coa_id' => 5,
+                'nomor' => $nomor,
+                'tgl' => $tgl_jurnal,
+                'keterangan' => 'Pelunasan Piutang ' . ($customer[$i] ?? '-'),
+                'keterangan_buku_besar_pembantu' => $nomor,
+                'debit' => $nominal[$i] ?? 0,
+                'kredit' => 0,
+                'invoice' => $invoice[$i] ?? null,
+                'invoice_external' => null,
+                'id_transaksi' => $id_trans[$i] ?? null,
+                'nopol' => null,
+                'tipe' => 'BBM',
+                'no' => $no,
+            ]);
+            Jurnal::create([
+                'coa_id' => 8,
+                'nomor' => $nomor,
+                'tgl' => $tgl_jurnal,
+                'keterangan' => 'Pelunasan Piutang ' . ($customer[$i] ?? '-'),
+                'keterangan_buku_besar_pembantu' => $nomor,
+                'debit' => 0,
+                'kredit' => $nominal[$i] ?? 0,
+                'invoice' => $invoice[$i] ?? null,
+                'invoice_external' => null,
+                'id_transaksi' => $id_trans[$i] ?? null,
+                'nopol' => null,
+                'tipe' => 'BBM',
+                'no' => $no,
+            ]);
+        }
+    
+        // Update kolom 'jurnal' pada BiayaInv
+        BiayaInv::whereIn('id', $biaya_ids)->update(['jurnal' => $nomor]);
+    
+        return redirect()->back()->with('success', 'Jurnal ' . $nomor . ' berhasil dibuat');
     }
 
     public function dataTable(Request $request)

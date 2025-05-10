@@ -219,6 +219,9 @@
                 <a href="/invoice-external">
                     <button class="btn bg-blue-500 text-white font-bold hover:bg-gray-700">Penerimaan Tagihan</button>
                 </a>
+                <a href="{{ route('keuangan.jurnal-bayar') }}">
+                    <button class="btn bg-orange-500 text-white font-bold hover:bg-gray-700">Verifikasi BBM</button>
+                </a>
 
             <div class="flex flex-row mb-16 mt-8">
                 <label for="month" class="font-bold mt-2">Bulan:</label>

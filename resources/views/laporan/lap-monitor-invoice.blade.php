@@ -407,14 +407,18 @@
                 },
                 summaryType: 'sum'
             },
-            {
+           {
                 label: 'Aksi',
                 name: 'aksi',
                 width: 100,
                 align: 'center',
                 sortable: false,
-                formatter: function (cellValue, options, rowObject) {
-                    return `<button class="bg-red-500 hover:bg-red-300 text-white font-semibold py-1 px-2 rounded btn-delete" data-id="${rowObject.id}">Hapus</button>`;
+                formatter: function(cellValue, options, rowObject) {
+                    if (rowObject.jurnal === 'Belum Terjurnal') {
+                        return `<button class="bg-red-500 hover:bg-red-300 text-white font-semibold py-1 px-2 rounded btn-delete" data-id="${rowObject.id}">Hapus</button>`;
+                    } else {
+                        return ''; // atau return '—';
+                    }
                 }
             }
         ],
