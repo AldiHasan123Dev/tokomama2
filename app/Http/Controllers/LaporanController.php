@@ -395,8 +395,10 @@ foreach ($invoices as $inv) {
 
     $totalBayar = $biayaInvList->sum('nominal');
     $tglPembayar = $biayaInvList->pluck('tgl_pembayar');
+   $num1 = number_format((float) $totalBayar, 2, '.', '');
+$num2 = number_format((float) $inv->total_subtotal, 2, '.', '');
 
-    if ($totalBayar > $inv->total_subtotal) {
+  if (bccomp($num1, $num2, 2) === 1) {
         $invoiceLebihBayar[] = [
             'invoice'       => $inv->invoice,
             'tgl_pembayar' => $tglPembayar,
@@ -406,7 +408,6 @@ foreach ($invoices as $inv) {
         ];
     }
 }
-
         
             return view('laporan.lap-monitor-invoice',compact('invoices','invoiceLebihBayar'));
         }
@@ -474,8 +475,8 @@ foreach ($invoices as $inv) {
                     'tgl_pembayar' => $biayaInv->pluck('tgl_pembayar')->implode(', ') ?: '-',
                     'invoice'      => $first->invoice ?? '-',
                     'nominal'      => number_format($totalNominal, 0, ',', '.'),
-                    'total'        => $this->calculatePPN1($groupItems),
-                    'sisa'         => $this->calculateTotal($groupItems),
+                    'total'        => $this->calculateTOTAL($groupItems),
+                    'sisa'         => $this->calculateSisa($groupItems),
                 ];
             });
         
@@ -488,7 +489,7 @@ foreach ($invoices as $inv) {
         }
         
 
-private function calculatePPN1($row)
+private function calculateTOTAL($row)
 {
     $subtotal = $row->sum('subtotal');
     $barang = optional(optional($row->first()->transaksi)->barang);
@@ -505,7 +506,7 @@ private function calculatePPN1($row)
 }
 
 
-private function calculateTotal($row)
+private function calculateSisa($row)
 {
     $subtotal = $row->sum('subtotal');
     $barang = optional(optional($row->first()->transaksi)->barang);
@@ -609,13 +610,16 @@ private function calculateTotal($row)
                 $first = $items->first();
                 $totalNominal = $items->sum('nominal');
                 $ids = $items->pluck('id')->implode(',');
+                $nominal = $items->pluck('nominal')->implode(',');
             
                 return [
                     'id'           => $ids,
+                    'jurnal'       => $first->jurnal ?? 'Belum Terjurnal',
                     'tgl_pembayar' => $tgl_pembayar,
                     'customer'     => optional(optional($first->transaksi)->suratJalan)->customer->nama ?? '-',
                     'invoice'      => $invoice,
                     'bayar'        => $totalNominal,
+                    'list_nominal' => $nominal,
                 ];
             })->values();
             

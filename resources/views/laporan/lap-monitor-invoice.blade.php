@@ -301,7 +301,7 @@
             </label>
         </div> --}}
         @if (count($invoiceLebihBayar) > 0)
-            <h3 style="margin-top: 20px; color: #c0392b;">Invoice dengan Biaya Melebihi Tagihan</h3>
+            <h3 style="margin-top: 20px; color: #c0392b;">Kelebihan Bayar</h3>
 
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
                 <thead>
