@@ -235,7 +235,7 @@
                     <button id="addRow" type="button" class="btn bg-blue-400 text-white ">Tambah Baris</button>
                     <label class="form-control w-full max-w-xs mb-1">
                         <div class="label">
-                            <span class="label-text text-red-600 font-bold">Pilih Tanggal Bayar! (Jangan salah pilih)</span>
+                            <span class="label-text text-red-600 font-bold">Pilih Tanggal Masuk Rekening</span>
                         </div>
                         <input type="date"
                             class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
@@ -339,7 +339,7 @@
         <div class="grid grid-cols-2 gap-4 justify-items-start mt-5 mb-5">
             <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
-                    <span class="label-text">Cari Tanggal Bayar</span>
+                    <span class="label-text">Cari Tanggal Masuk Rekening</span>
                 </div>
                 <input type="date"
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
@@ -385,7 +385,7 @@
         },
         colModel: [
             {
-                label: 'Tanggal Pembayar',
+                label: 'Tanggal Masuk Rekening',
                 name: 'tgl_pembayar',
                 align: 'center',
                 width: 100,
@@ -484,7 +484,7 @@
             { label: 'Customer', name: 'customer', align: 'center', width: 150, search: true },
             { label: 'Tgl Invoice', name: 'tgl_inv', align: 'center', width: 150, search: true },
             { label: 'Nilai Inv', name: 'total', width: 150, align: 'right', search: true },
-            { label: 'Tgl Pembayaran', name: 'tgl_pembayar', align: 'center', width: 150, search: true },
+            { label: 'Tgl Masuk Rekening', name: 'tgl_pembayar', align: 'center', width: 150, search: true },
             { label: '(Rp) Bayar', name: 'nominal', align: 'right', width: 150, search: true },
             { label: 'Sisa', name: 'sisa', width: 150, align: 'right', search: true }
         ],
