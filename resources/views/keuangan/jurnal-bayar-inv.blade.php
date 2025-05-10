@@ -91,7 +91,7 @@
                 color: red;
             }
         </style>
-        <x-slot:tittle>Verifikasi Invoice BBM</x-slot:tittle>
+        <x-slot:tittle>Verifikasi dan Penjurnalan</x-slot:tittle>
 
         <div class="grid grid-cols-2 gap-2 justify-items-start mt-4 mb-4">
             <label class="form-control w-full max-w-xs mb-1">
@@ -276,7 +276,7 @@
                         width: 150
                     },
                     {
-                        label: 'Tanggal Pembayar',
+                        label: 'Tanggal Masuk Rekening',
                         name: 'tgl_pembayar',
                         align: 'center',
                         width: 100,
@@ -296,7 +296,7 @@
                         width: 120
                     },
                     {
-                        label: 'Terbayar',
+                        label: 'Nominal',
                         name: 'bayar',
                         width: 120,
                         align: 'right',
