@@ -104,7 +104,7 @@
             </label>
               <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
-                    <span class="label-text">Cek invoice tgl tersebut</span>
+                    <span class="label-text">Cek invoice di tgl tersebut</span>
                 </div>
                 <input type="text"
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
@@ -295,14 +295,14 @@
             }
                 },
                 colModel: [{
-                    search: true,
+                   
                         label: 'No Jurnal',
                         name: 'jurnal',
                         align: 'center',
                         width: 150
                     },
                     {
-                        search: true,
+                       
                         label: 'Tanggal Masuk Rekening',
                         name: 'tgl_pembayar',
                         align: 'center',
@@ -313,18 +313,18 @@
                         }
                     },
                     {
-                        search: true,
+                      
                         label: 'Customer',
                         name: 'customer',
                         width: 150
                     },
                     {
-                        search: true,
+                        
                         label: 'Invoice',
                         name: 'invoice',
                         width: 120
                     },
-                    { search: true,
+                    { 
                         label: 'Nominal',
                         name: 'bayar',
                         width: 120,
@@ -380,11 +380,11 @@
                 caption: "Data Pembayaran Invoice",
                 loadComplete: resizeGrid
             });
-              $("#biayaGrid").jqGrid('filterToolbar', {
-        searchOperators: false,
-        searchOnEnter: false,
-        defaultSearch: "cn"
-    });
+    //           $("#biayaGrid").jqGrid('filterToolbar', {
+    //     searchOperators: false,
+    //     searchOnEnter: false,
+    //     defaultSearch: "cn"
+    // });
 
             $(window).on('resize', resizeGrid);
         });

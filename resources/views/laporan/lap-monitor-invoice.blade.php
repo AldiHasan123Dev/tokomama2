@@ -347,7 +347,7 @@
             </label>
                         <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
-                    <span class="label-text">Cek invoice tgl tersebut</span>
+                    <span class="label-text">Cek invoice di tgl tersebut</span>
                 </div>
                 <input type="text"
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
@@ -410,7 +410,7 @@
         },
         colModel: [
             {
-                search: true,
+               
                 label: 'Tanggal Masuk Rekening',
                 name: 'tgl_pembayar',
                 align: 'center',
@@ -418,10 +418,10 @@
                 formatter: 'date',
                 formatoptions: { newformat: 'd/m/Y' }
             },
-            { label: 'Customer', name: 'customer', width: 150, search: true },
-            { label: 'Invoice', name: 'invoice', width: 120, search: true },
+            { label: 'Customer', name: 'customer', width: 150,  },
+            { label: 'Invoice', name: 'invoice', width: 120,  },
             {
-                search: true,
+                
                 label: 'Terbayar',
                 name: 'bayar',
                 width: 120,
@@ -435,7 +435,7 @@
                 summaryType: 'sum'
             },
            {
-            search: true,
+            
                 label: 'Aksi',
                 name: 'aksi',
                 width: 100,
@@ -478,11 +478,11 @@
         resizeGrid();
     });
 
-      $("#biayaGrid").jqGrid('filterToolbar', {
-        searchOperators: false,
-        searchOnEnter: false,
-        defaultSearch: "cn"
-    });
+    //   $("#biayaGrid").jqGrid('filterToolbar', {
+    //     searchOperators: false,
+    //     searchOnEnter: false,
+    //     defaultSearch: "cn"
+    // });
 });
 
 
