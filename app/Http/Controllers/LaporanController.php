@@ -565,35 +565,37 @@ private function calculateSisa($row)
             $sord    = request('sord', 'asc');
             $search  = request('_search') === 'true';
         
-            $query = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
-                ->where('nominal', '>' ,0)
-                ->select('biaya_inv.*')
-                ->join('invoice', 'biaya_inv.id_inv', '=', 'invoice.id');
-        
-            // Filter
-           // Filter by tgl_pembayar jika ada
-            if (request()->filled('tgl_pembayar')) {
-                $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar'));
-            }
+$query = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
+    ->join('invoice', 'biaya_inv.id_inv', '=', 'invoice.id')
+    ->select('biaya_inv.*')
+    ->where('biaya_inv.nominal', '>', 0);
 
-            // Filter by customer
-            if (request()->filled('customer')) {
-                $query->where('transaksi.suratJalan.customer', 'LIKE', '%' . request('customer') . '%');
-            }
+// Filter tgl_pembayar (wajib / selalu ada)
+if (request()->filled('tgl_pembayar') || request()->filled('tgl_pembayar') && request()->filled('inv')) {
+    $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar'))->where('invoice.invoice', 'LIKE', '%' . request('inv') . '%');
+}
 
-            // Filter by invoice
-            if (request()->filled('invoice')) {
-                $query->where('invoice.invoice', 'LIKE', '%' . request('invoice') . '%');
-            }
 
-            // Filter by tgl_inv
-            if (request()->filled('tgl_inv')) {
-                $query->whereDate('invoice.tgl_invoice', request('tgl_inv'));
-            }
+// Filter invoice
+if (request()->filled('invoice')) {
+    $query->where('invoice.invoice', 'LIKE', '%' . request('invoice') . '%');
+}
 
-        
-            // Ambil semua data terlebih dahulu
-            $invoices = $query->get();
+// Filter customer
+if (request()->filled('customer')) {
+    $query->whereHas('transaksi.suratJalan.customer', function ($q) {
+        $q->where('nama', 'LIKE', '%' . request('customer') . '%');
+    });
+}
+
+// Filter tanggal invoice
+if (request()->filled('tgl_inv')) {
+    $query->whereDate('invoice.tgl_invoice', request('tgl_inv'));
+}
+
+// Ambil semua data
+$invoices = $query->get();
+
         
             // Group berdasarkan tgl_pembayar
             $grouped = $invoices->groupBy(function ($item) {

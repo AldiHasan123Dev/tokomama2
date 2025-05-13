@@ -345,6 +345,14 @@
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
                     id="tanggal_bayar1" name="tanggal_bayar1" autocomplete="off" value="{{ date('Y-m-d') }}"/>
             </label>
+                        <label class="form-control w-full max-w-xs mb-1">
+                <div class="label">
+                    <span class="label-text">Cek invoice tgl tersebut</span>
+                </div>
+                <input type="text"
+                    class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
+                    id="inv" name="inv" autocomplete="off" />
+            </label>
         </div>
         <table id="biayaGrid"></table>
         <div id="biayaPager"></div>
@@ -369,6 +377,20 @@
 </script>
 
 <script>
+    $(document).ready(function() {
+        // Trigger filter saat tanggal bayar diubah
+        $('#inv').on('change', function() {
+            $("#biayaGrid").jqGrid('setGridParam', {
+                datatype: 'json',
+                postData: {
+                    inv: $(this).val()
+                },
+                page: 1
+            }).trigger('reloadGrid');
+        });
+    });
+</script>
+<script>
   $(function () {
     function resizeGrid() {
         $("#biayaGrid").setGridWidth($('#biayaGrid').closest(".ui-jqgrid").parent().width(), true);
@@ -381,6 +403,9 @@
         postData: {
             tgl_pembayar: function () {
                 return $('#tanggal_bayar1').val();
+            },
+            inv: function () {
+                return $('#inv').val();
             }
         },
         colModel: [
