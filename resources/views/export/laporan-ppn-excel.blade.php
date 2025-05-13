@@ -54,10 +54,10 @@
                 <th>{{ $item->transaksi->suratJalan->customer->nama }}</th>
                 <th>{{ $item->transaksi->barang->nama }}</th>
                 <th>{{ $item->nsfp->nomor }}</th>
-                <th>{{ number_format($subtotal, 2, ',', '.') }}</th> <!-- Format angka -->
+                <th>{{ $subtotal }}</th> <!-- Format angka -->
                 <th>{{ $ppnDisplay }}</th>
-                <th>{{ number_format($ppnAmount, 2, ',', '.') }}</th> <!-- Nominal PPN -->
-                <th>{{ number_format($total, 2, ',', '.') }}</th> <!-- Total -->
+                <th>{{ $ppnAmount }}</th> <!-- Nominal PPN -->
+                <th>{{ $total }}</th> <!-- Total -->
             </tr>
         @endforeach
     </tbody>
