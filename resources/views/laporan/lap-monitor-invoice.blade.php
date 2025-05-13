@@ -385,6 +385,7 @@
         },
         colModel: [
             {
+                search: true,
                 label: 'Tanggal Masuk Rekening',
                 name: 'tgl_pembayar',
                 align: 'center',
@@ -392,9 +393,10 @@
                 formatter: 'date',
                 formatoptions: { newformat: 'd/m/Y' }
             },
-            { label: 'Customer', name: 'customer', width: 150 },
-            { label: 'Invoice', name: 'invoice', width: 120 },
+            { label: 'Customer', name: 'customer', width: 150, search: true },
+            { label: 'Invoice', name: 'invoice', width: 120, search: true },
             {
+                search: true,
                 label: 'Terbayar',
                 name: 'bayar',
                 width: 120,
@@ -408,6 +410,7 @@
                 summaryType: 'sum'
             },
            {
+            search: true,
                 label: 'Aksi',
                 name: 'aksi',
                 width: 100,
@@ -448,6 +451,12 @@
 
     $(window).on('resize', function () {
         resizeGrid();
+    });
+
+      $("#biayaGrid").jqGrid('filterToolbar', {
+        searchOperators: false,
+        searchOnEnter: false,
+        defaultSearch: "cn"
     });
 });
 

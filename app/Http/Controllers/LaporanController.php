@@ -571,23 +571,26 @@ private function calculateSisa($row)
                 ->join('invoice', 'biaya_inv.id_inv', '=', 'invoice.id');
         
             // Filter
-            if (request('customer')) {
-                $query->whereHas('transaksi.suratJalan.customer', function ($q) {
-                    $q->where('nama', 'LIKE', '%' . request('customer') . '%');
-                });
-            }
-        
-            if (request('invoice')) {
-                $query->where('invoice.invoice', 'LIKE', '%' . request('invoice') . '%');
-            }
-        
-            if (request('tgl_inv')) {
-                $query->whereDate('invoice.tgl_invoice', request('tgl_inv'));
-            }
-        
-            if (request('tgl_pembayar')) {
+           // Filter by tgl_pembayar jika ada
+            if (request()->filled('tgl_pembayar')) {
                 $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar'));
             }
+
+            // Filter by customer
+            if (request()->filled('customer')) {
+                $query->where('transaksi.suratJalan.customer', 'LIKE', '%' . request('customer') . '%');
+            }
+
+            // Filter by invoice
+            if (request()->filled('invoice')) {
+                $query->where('invoice.invoice', 'LIKE', '%' . request('invoice') . '%');
+            }
+
+            // Filter by tgl_inv
+            if (request()->filled('tgl_inv')) {
+                $query->whereDate('invoice.tgl_invoice', request('tgl_inv'));
+            }
+
         
             // Ambil semua data terlebih dahulu
             $invoices = $query->get();

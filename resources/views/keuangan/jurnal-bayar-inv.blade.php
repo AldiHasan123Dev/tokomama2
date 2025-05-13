@@ -270,12 +270,14 @@
                     }
                 },
                 colModel: [{
+                    search: true,
                         label: 'No Jurnal',
                         name: 'jurnal',
                         align: 'center',
                         width: 150
                     },
                     {
+                        search: true,
                         label: 'Tanggal Masuk Rekening',
                         name: 'tgl_pembayar',
                         align: 'center',
@@ -286,16 +288,18 @@
                         }
                     },
                     {
+                        search: true,
                         label: 'Customer',
                         name: 'customer',
                         width: 150
                     },
                     {
+                        search: true,
                         label: 'Invoice',
                         name: 'invoice',
                         width: 120
                     },
-                    {
+                    { search: true,
                         label: 'Nominal',
                         name: 'bayar',
                         width: 120,
@@ -351,6 +355,11 @@
                 caption: "Data Pembayaran Invoice",
                 loadComplete: resizeGrid
             });
+              $("#biayaGrid").jqGrid('filterToolbar', {
+        searchOperators: false,
+        searchOnEnter: false,
+        defaultSearch: "cn"
+    });
 
             $(window).on('resize', resizeGrid);
         });
