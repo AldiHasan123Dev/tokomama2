@@ -805,15 +805,19 @@ public function dataLapPiutang(Request $request)
     ->get();
 
     // Ambil data dari tabel Invoices, urutkan berdasarkan 'created_at' descending
-    $invoices = Invoice::with([
-        'transaksi.suratJalan.customer' => function($query) {
-            $query->select('id', 'nama');
-        },
-        'transaksi.barang' // Menambahkan relasi transaksi.barang
-    ])
-    ->where('tgl_invoice', '>', '2025-01-01')
-    ->orderBy('created_at', 'desc')
-    ->get();
+   $invoices = Invoice::with([
+    'transaksi.suratJalan.customer' => function($query) {
+        $query->select('id', 'nama');
+    },
+    'transaksi.barang' // Menambahkan relasi transaksi.barang
+]);
+
+// Memeriksa apakah parameter 'invoice' ada dalam request dan menambahkan kondisi where
+if (request()->filled('tgl_inv') || request()->filled('tgl_inv') && request()->filled('inv')) {
+    $invoices->where('tgl_invoice', 'LIKE', '%' . request('tgl_inv') . '%')->where('invoice.invoice', 'LIKE', '%' . request('inv') . '%');
+}
+
+$invoices = $invoices->orderBy('created_at', 'desc')->get();
 
     // Mengelompokkan dan menghitung subtotal untuk setiap invoice
     $data = $invoices->groupBy('invoice')->map(function($group) {
@@ -909,14 +913,26 @@ public function dataLapPiutang(Request $request)
         $item['no'] = $index++;
         $result[] = $item;
     }
-    
+    $ditagihTglFilter = $request->input('ditagih_tgl');
+
+// Filter berdasarkan tanggal ditagih jika ada
+$ditagihTglFilter = $request->input('ditagih_tgl');
+
+$filteredResult = collect($result)->filter(function ($row) use ($ditagihTglFilter) {
+    if ($ditagihTglFilter) {
+        return Str::contains($row['ditagih_tgl'], $ditagihTglFilter);
+    }
+    return true;
+})->values();
+
+
     // Pagination
     $currentPage = $request->input('page', 1); // Halaman saat ini, default 1
     $perPage = $request->input('rows', 20); // Jumlah baris per halaman, default 10
     $totalRecords = count($result);
     $totalPages = ceil($totalRecords / $perPage);
     $indexStart = ($currentPage - 1) * $perPage;
-    $paginatedData = collect($result)->slice($indexStart)->values();
+    $paginatedData = $filteredResult->slice($indexStart, $perPage)->values();
     $data = $paginatedData->map(function($row) use (&$indexStart) {
         $indexStart++;
         return [

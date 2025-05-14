@@ -93,6 +93,27 @@
         <p class="server-time">
             Tanggal dan Waktu Server : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
         </p>
+<div class="flex flex-row gap-4 mb-16 mt-8">
+    <label class="form-control w-full max-w-xs mb-1">
+        <div class="label">
+            <span class="label-text">Cari Bulan Inv</span>
+        </div>
+        <input type="month"
+            class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
+            id="tgl_inv" name="tgl_inv" autocomplete="off" value="{{ date('Y-m') }}" />
+    </label>
+
+    <label class="form-control w-full max-w-xs mb-1">
+        <div class="label">
+            <span class="label-text">Cari Invoice di bulan tersebut</span>
+        </div>
+        <input type="text"
+            class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
+            id="inv" name="inv" autocomplete="off" />
+    </label>
+</div>
+
+
         <!-- Tabel untuk menampilkan data menggunakan jqGrid -->
         <table class="table" id="table-lp"></table>
 
@@ -230,14 +251,52 @@
              setInterval(updateServerTime, 1000);
          });
          </script>
+          <script>
+    $(document).ready(function() {
+        // Trigger filter saat tanggal bayar diubah
+        $('#tgl_inv').on('change', function() {
+            $("#table-lp").jqGrid('setGridParam', {
+                datatype: 'json',
+                postData: {
+                    tgl_inv: $(this).val()
+                },
+                page: 1
+            }).trigger('reloadGrid');
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Trigger filter saat tanggal bayar diubah
+        $('#inv').on('change', function() {
+            $("#table-lp").jqGrid('setGridParam', {
+                datatype: 'json',
+                postData: {
+                    inv: $(this).val()
+                },
+                page: 1
+            }).trigger('reloadGrid');
+        });
+    });
+</script>
+
         <script>
            $(document).ready(function() {
     $("#table-lp").jqGrid({
         url: "{{ route('laporan.DataPiutang') }}", 
         datatype: "json",
+        postData: {
+                    tgl_inv: function() {
+                        return $('#tgl_inv').val();
+                    },
+                    
+            inv: function () {
+                return $('#inv').val();
+            }
+                },
         mtype: "GET",
         colModel: [
-            { search: true, label: 'No', name: 'no', width: 30, align: "center", sortable: false },
             { search: true, label: 'Invoice', name: 'invoice', width: 100, align: "center", sortable: true },
             { search: true, label: 'Nama Customer', name: 'customer', width: 120, align: "left", sortable: true },
             { search: true, label: 'Harga (INC.PPN)', name: 'jumlah_harga', width: 120, align: "right", formatter: 'currency', formatoptions: { thousandsSeparator: ',' }, sortable: true },
@@ -254,7 +313,7 @@
         rowList: [150, 200],
         viewrecords: true,
         autowidth: true,
-        loadonce: true,
+        loadonce: false,
         height: 'auto',
         jsonReader: {
             repeatitems: false,
@@ -294,9 +353,7 @@
 
     return {};
 },
-        loadComplete: function(data) {
-            $("#table-lp").jqGrid('filterToolbar');
-        }
+       
     });
 
     $("#table-lp").jqGrid('navGrid', '#jqGridPager', {
@@ -307,7 +364,6 @@
         refresh: true
     });
 
-    $("#table-lp").jqGrid('filterToolbar');
 });
 
 
