@@ -838,7 +838,7 @@ public function dataLapPiutang(Request $request)
             'top' => $top,
             'ditagih_tgl' => $group->first()->tgl_invoice,
             'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays((int)$top)->format('Y-m-d') ,
-            'hitung_tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top),
+            'hitung_tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays((int)$top),
             'dibayar_tgl' => null,
             'sebesar' => 0,
             'kurang_bayar' => $jumlah_harga,
