@@ -96,7 +96,7 @@
 <div class="flex flex-row gap-4 mb-16 mt-8">
     <label class="form-control w-full max-w-xs mb-1">
         <div class="label">
-            <span class="label-text">Cari Bulan Inv</span>
+            <span class="label-text">Bulan Inv</span>
         </div>
         <input type="month"
             class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
