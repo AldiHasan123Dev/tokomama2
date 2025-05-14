@@ -837,7 +837,7 @@ public function dataLapPiutang(Request $request)
             'jumlah_harga' => $jumlah_harga,
             'top' => $top,
             'ditagih_tgl' => $group->first()->tgl_invoice,
-            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top)->format('Y-m-d') ,
+            'tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays((int)$top)->format('Y-m-d') ,
             'hitung_tempo' => Carbon::parse($group->first()->tgl_invoice)->addDays($top),
             'dibayar_tgl' => null,
             'sebesar' => 0,
@@ -892,8 +892,8 @@ public function dataLapPiutang(Request $request)
                     'jumlah_harga' => $totalHarga,
                     'top' => $top,
                     'ditagih_tgl' => $invoicesForJurnal->tgl_invoice,
-                    'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top + 1),
-                    'hitung_tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays($top),
+                    'tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays((int)$top + 1),
+                    'hitung_tempo' => Carbon::parse($invoicesForJurnal->tgl_invoice)->addDays((int)$top),
                     'dibayar_tgl' => $jurnal->daftar_tanggal,
                     'sebesar' => $jurnal->total_debit,
                     'kurang_bayar' => $total,
@@ -912,28 +912,38 @@ public function dataLapPiutang(Request $request)
     
     // Pagination
     $currentPage = $request->input('page', 1); // Halaman saat ini, default 1
-    $perPage = $request->input('rows', 20); // Jumlah baris per halaman, default 10
-    $totalRecords = count($result);
-    $totalPages = ceil($totalRecords / $perPage);
-    $indexStart = ($currentPage - 1) * $perPage;
-    $paginatedData = collect($result)->slice($indexStart)->values();
-    $data = $paginatedData->map(function($row) use (&$indexStart) {
-        $indexStart++;
-        return [
-            'tanggal' => date('Y-m-d'),
-            'invoice' => $row['invoice'], // Mengakses dengan notasi array
-            'customer' => $row['customer'],
-            'jumlah_harga' => $row['jumlah_harga'],
-            'ditagih_tgl' => $row['ditagih_tgl'],
-            'top' => $row['top'],
-            'tempo' => $row['tempo'],
-            'hitung_tempo' => $row['hitung_tempo'],
-            'dibayar_tgl' => $row['dibayar_tgl'],
-            'sebesar' => $row['sebesar'],
-            'kurang_bayar' =>$row['kurang_bayar'],
-            'no' => $indexStart, // Menggunakan nomor urut
-        ];
-    });
+$perPage = $request->input('rows', 20);    // Jumlah baris per halaman, default 20
+
+// Filter hanya yang kurang_bayar > 0
+$filtered = collect($result)->filter(function ($row) {
+    return (float)$row['kurang_bayar'] > 0;
+})->values(); // reset index agar slice bekerja dengan benar
+
+$totalRecords = $filtered->count();
+$totalPages = ceil($totalRecords / $perPage);
+$indexStart = ($currentPage - 1) * $perPage;
+
+// Ambil data sesuai halaman
+$paginatedData = $filtered->slice($indexStart, $perPage)->values();
+
+// Buat data yang ditampilkan
+$data = $paginatedData->map(function ($row) use (&$indexStart) {
+    $indexStart++;
+    return [
+        'tanggal' => date('Y-m-d'),
+        'invoice' => $row['invoice'],
+        'customer' => $row['customer'],
+        'jumlah_harga' => $row['jumlah_harga'],
+        'ditagih_tgl' => $row['ditagih_tgl'],
+        'top' => $row['top'],
+        'tempo' => $row['tempo'],
+        'hitung_tempo' => $row['hitung_tempo'],
+        'dibayar_tgl' => $row['dibayar_tgl'],
+        'sebesar' => $row['sebesar'],
+        'kurang_bayar' => $row['kurang_bayar'],
+        'no' => $indexStart,
+    ];
+});
     
 
 
