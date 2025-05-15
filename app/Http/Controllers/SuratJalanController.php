@@ -726,6 +726,7 @@ class SuratJalanController extends Controller
         DB::raw('AVG(transaksi.harga_beli) AS avg_harga_beli'),
         DB::raw('SUM(transaksi.harga_beli) AS sum_harga_beli'),
         DB::raw('SUM(transaksi.jumlah_beli) AS total_jumlah_beli'), // Ambil satu nomor jurnal
+        DB::raw('GROUP_CONCAT(transaksi.id) AS list_id_transaksi')
     )
     ->where('transaksi.harga_beli', '>', 0)
     ->whereNull('transaksi.id_surat_jalan')
@@ -745,7 +746,7 @@ class SuratJalanController extends Controller
     }
 
     // Hitung total record sebelum pagination (setelah pencarian diterapkan)
-    $data1 = $data->get();
+    $data1 = $data->get('list_id_transaksi');
     
     $totalRecords = $data1->count();
     $currentPage = $request->page; 
@@ -758,12 +759,19 @@ class SuratJalanController extends Controller
         $index++;
         $ppn = 0;
         $subtotal = $row->avg_harga_beli * $row->total_jumlah_beli;
-        $journal = Jurnal::where('invoice_external', $row->invoice_external)->get();
-        $tgl_jurnal_array = $journal->pluck('tgl')->toArray();
+       // Ambil array ID dari hasil GROUP_CONCAT
+$list_id = explode(',', $row->list_id_transaksi);
+
+// Ambil jurnal berdasarkan id_transaksi (bukan invoice_external)
+$journal = Jurnal::whereIn('id_transaksi', $list_id)
+    ->where('tipe', 'JNL')
+    ->whereNull('deleted_at')
+    ->where('kredit', '>', 0)
+    ->where('coa_id', 35)
+    ->first();
+
+
         // Tentukan tanggal, gunakan yang pertama jika ada, atau tanggal default (hari ini) jika tidak ada
-        $tgl_jurnal = !empty($tgl_jurnal_array) && $tgl_jurnal_array[0] !== '2023-12-31'
-            ? Carbon::parse($tgl_jurnal_array[0])->format('Y-m-d')
-            : Carbon::now()->format('Y-m-d');
         $barang = Barang::where('id', $row->id_barang)->first();
         
         if ($barang && $barang->status_ppn === 'ya') {
@@ -773,7 +781,7 @@ class SuratJalanController extends Controller
 
         return [
             'DT_RowIndex' => $index,
-            'jurnal' => optional($row->jurnals->where('tipe', 'JNL')->where('debit', '>', 0)->firstWhere('coa_id', 91))->nomor ?? '-',
+            'jurnal' => optional($journal)->nomor ?? '-',
             'nomor_surat' => $row->suratJalan->nomor_surat ?? '-',
             'harga_beli' => $row->avg_harga_beli ? number_format($row->avg_harga_beli, 2, ',', '.') : '-',
             'sum_harga_beli' => $row->sum_harga_beli ? number_format($row->sum_harga_beli, 4, ',', '.') : '-',

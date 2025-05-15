@@ -394,7 +394,7 @@ public function stockCSV19()
                 'jurnal' =>  optional($stock->jurnals->firstWhere('coa_id', 89))->nomor ?? '-' ?? '-',
                 'invoice_external' => $stock->invoice_external,
                 'no_bm' => $stock->no_bm,
-                'gudang' => $stock->stts === null ? '-' : $stock->gudang,
+                'gudang' => $stock->gudang,
                 'satuan_beli' => $stock->satuan_beli,
                 'satuan_jual' => $stock->satuan_jual,
                 'supplier' => $stock->suppliers->nama ?? '-',

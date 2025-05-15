@@ -283,8 +283,8 @@
                                     <td class="px-2 py-1">{{ number_format($bersih = $usaha - $totalE - $totalF , 2, ',', '.') }}</td>
                                 </tr>
                                 <tr class="border-t">
-                                    <td class="px-2 py-1">TOTAL BIAYA KEUANGAN I</td>
-                                    <td class="px-2 py-1">{{ number_format($totalD , 2, ',', '.') }}</td>
+                                    <td class="px-2 py-1">TOTAL BIAYA KEUANGAN II</td>
+                                    <td class="px-2 py-1">{{ number_format($totalG , 2, ',', '.') }}</td>
                                 </tr>
                                 <tr class="border-t bg-gray-50">
                                     <td class="px-2 py-1">LABA/RUGI BERSIH SESUDAH PAJAK</td>

@@ -22,6 +22,8 @@ class Neraca extends Controller
 
     // Define the start date as January 2023
     $startDate = '2023-01-01';
+    $tahunCo = $tahun;
+    $dateCo = now()->create($tahunCo . '-' . '01' . '-01')->startOfMonth()->toDateString();
     // Define the end date based on the selected month and year
     $endDate = now()->create($tahun . '-' . $bulan . '-01')->endOfMonth()->toDateString();
 
@@ -71,18 +73,19 @@ class Neraca extends Controller
     // Calculate Laba Rugi (LR)
     $kel5 = Jurnal::join('coa', 'coa.id', '=', 'jurnal.coa_id')
         ->where('coa.no_akun', 'like', '5.%')
-        ->whereBetween('jurnal.tgl', [$startDate, $endDate])
+        ->whereBetween('jurnal.tgl', [$dateCo, $endDate])
         ->get();
 
     $kel6 = Jurnal::join('coa', 'coa.id', '=', 'jurnal.coa_id')
         ->where('coa.no_akun', 'like', '6.%')
-        ->whereBetween('jurnal.tgl', [$startDate, $endDate])
+        ->whereBetween('jurnal.tgl', [$dateCo, $endDate])
         ->get();
 
     $kel7 = Jurnal::join('coa', 'coa.id', '=', 'jurnal.coa_id')
         ->where('coa.no_akun', 'like', '7.%')
-        ->whereBetween('jurnal.tgl', [$startDate, $endDate])
+        ->whereBetween('jurnal.tgl', [$dateCo, $endDate])
         ->get();
+        
 
     $lr = ($kel5->sum('kredit') - $kel5->sum('debit')) - 
         (($kel6->sum('debit') - $kel6->sum('kredit')) + 
@@ -91,9 +94,8 @@ class Neraca extends Controller
     // Add Laba Rugi (LR) to account 3.3
     $coa33 = Coa::where('no_akun', '3.3')->first();
     $coaId33 = $coa33->id;
-
     if (isset($totals[$coaId33])) {
-        $totals[$coaId33]['selisih'] += $lr;
+        $totals[$coaId33]['selisih'] = $lr;
     } else {
         $totals[$coaId33] = [
             'debit' => 0, 

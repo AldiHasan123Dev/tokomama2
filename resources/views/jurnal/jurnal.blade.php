@@ -219,6 +219,9 @@
                 <a href="/invoice-external">
                     <button class="btn bg-blue-500 text-white font-bold hover:bg-gray-700">Penerimaan Tagihan</button>
                 </a>
+                <a href="{{ route('keuangan.jurnal-bayar') }}">
+                    <button class="btn bg-orange-500 text-white font-bold hover:bg-gray-700">Verifikasi Rekap Bayar</button>
+                </a>
 
             <div class="flex flex-row mb-16 mt-8">
                 <label for="month" class="font-bold mt-2">Bulan:</label>
@@ -231,7 +234,7 @@
                         <input type="hidden" name="year" value="{{ date('Y') }}"class="year-input">
                         <button
                             class="px-3 py-2 border-2 border-green-300 hover:bg-green-300 hover:text-white duration-300 rounded-xl mx-1 
-                                {{ request('month') == $i ? 'bg-green-300 text-white' : '' }}">
+                                {{ request('month', date('n')) == $i ? 'bg-green-300 text-white' : '' }}">
                             {{ $monthName }}
                         </button>
                     </form>
