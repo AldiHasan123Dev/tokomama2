@@ -377,8 +377,8 @@
                         <th>Tgl SJ</th>
                         <th>Invoice</th>
                         <th>Customer</th>
-                        <th>Jumlah Beli</th>
-                        <th>Jumlah Jual</th>
+                        <th>Masuk</th>
+                        <th>Keluar</th>
                         <th>Sisa</th>
                     </tr>
                 </thead>
