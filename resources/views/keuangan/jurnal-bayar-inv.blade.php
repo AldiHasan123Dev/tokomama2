@@ -138,12 +138,12 @@
                 </h3> --}}
 
                 <h3 class="text-xl font-bold mb-4">
-                    No Jurnal: <span class="font-semibold text-blue-600">{{ $no_BBM }}/BBM-TM/{{ date('y') }}</span>
+                    No Jurnal: <span class="font-semibold text-blue-600">{{ $no_BBM }}/BBM-TMR1/{{ date('y') }}</span>
                 </h3>
 
                 <!-- Hidden Inputs -->
                 <input type="hidden" name="id[]" id="id-biaya">
-                <input type="hidden" name="nomor" value="{{ $no_BBM }}/BBM-TM/{{ date('y') }}">
+                <input type="hidden" name="nomor" value="{{ $no_BBM }}/BBM-TMR1/{{ date('y') }}">
                 <input type="hidden" name="no" value="{{ $no_BBM }}">
                 <input type="hidden" name="id_transaksi[]" id="id-trans">
                 <input type="hidden" name="invoice[]" id="invoice">
