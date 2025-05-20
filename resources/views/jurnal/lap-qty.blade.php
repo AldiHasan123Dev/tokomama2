@@ -25,14 +25,14 @@
                     id="periode" name="periode"
                     autocomplete="off" value="{{ date('Y-m') }}" />
             </label>
-            <label class="form-control w-full max-w-xs mb-1">
+            {{-- <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
                     <span class="label-text">Cek invoice external</span>
                 </div>
                 <input type="text"
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
                     id="invx" name="invx" autocomplete="off" />
-            </label>
+            </label> --}}
         </div>
 
         <!-- jqGrid -->
@@ -64,16 +64,28 @@
                     },
                     colModel: [
                         { label: 'Tanggal Terjurnal', name: 'tgl', align: 'center', width: 100 },
-                        { label: 'No BM', name: 'no_bm', width: 100 },
-                        { label: 'Inv Supplier', name: 'invoice_external', width: 150 },
                         { label: 'Barang', name: 'barang.nama', width: 150 },
                         { label: 'Supplier', name: 'supplier', width: 150 },
-                        { label: 'Jumlah Beli', name: 'total_beli', align: 'right', width: 100 },
-                        { label: 'Jumlah Jual', name: 'total_jual', align: 'right', width: 100 },
-                        // { label: 'Sisa', name: 'sisa', align: 'right', width: 80 },
+                        // { label: 'No BM', name: 'no_bm', width: 100 },
+                        { label: 'Inv Supplier', name: 'invoice_external', width: 150 },
+                        { label: 'Jumlah Beli', name: 'total_beli', align: 'right', width: 50 },
+                        { label: 'Jumlah Jual', name: 'total_jual', align: 'right', width: 50 },
+                        { label: 'Sisa', name: 'sisa', align: 'right', width: 80 },
                         {
                             label: 'Harga Beli',
                             name: 'total_harga_beli',
+                            align: 'right',
+                            width: 120,
+                            formatter: 'currency',
+                            formatoptions: {
+                                thousandsSeparator: ".",
+                                decimalPlaces: 0
+                            },
+                            summaryType: 'sum'
+                        },
+                        {
+                            label: 'Value Barang',
+                            name: 'total_nilai',
                             align: 'right',
                             width: 120,
                             formatter: 'currency',
@@ -94,8 +106,8 @@
                         userdata: "userdata"
                     },
                     pager: "#jqGridPager1",
-                    rowNum: 30,
-                    rowList: [30, 100, 200],
+                    rowNum: 50,
+                    rowList: [50, 100, 200],
                     height: '100%',
                     userDataOnFooter: true,
                     autowidth: true,

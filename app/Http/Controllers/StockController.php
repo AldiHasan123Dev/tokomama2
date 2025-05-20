@@ -832,14 +832,15 @@ foreach ($combined as $key => $items) {
 // Hitung ulang sisa1 dan total_nilai
 foreach ($byInvoice as &$data) {
     $data['sisa'] = $data['jumlah_beli'] - $data['jumlah_jual'];
-    $data['sisa1'] = $data['jumlah_beli'] - $data['jumlah_jual'];
-    $data['total_nilai'] = $data['sisa1'] * $data['harga_beli'];
+    $data['total_nilai'] = $data['sisa'] * $data['harga_beli'];
     $data['total_harga_beli'] = $data['jumlah_beli'] * $data['harga_beli'];
 }
 unset($data);
 
 // Convert ke collection
 $byInvoiceCollection = collect($byInvoice);
+$byInvoiceCollection = $byInvoiceCollection->sortBy('nama_barang')->values();
+
 
 // Ambil request
 $periode = request('periode');
@@ -881,6 +882,8 @@ if (($periode !== null && $periode !== '') || ($invx !== null && $invx !== '')) 
 $totalNilai = $byInvoiceCollection->sum('total_nilai');
 $totalNilaiJB = $byInvoiceCollection->sum('jumlah_beli');
 $totalNilaiJJ = $byInvoiceCollection->sum('jumlah_jual');
+$totalNilaiSisa = $byInvoiceCollection->sum('sisa');
+$totalNilaiHB = $byInvoiceCollection->sum('harga_beli');
 
 
 
@@ -919,10 +922,11 @@ return response()->json([
     'records' => $totalRecords,
     'rows'    => $rows,
     'userdata' => [
-        'total_harga_beli' => $totalNilai,
+        'total_nilai' => $totalNilai,
         'total_beli' => $totalNilaiJB,
         'total_jual' => $totalNilaiJJ,
-        'sisa' => 'Total Nilai :'
+        'sisa' => $totalNilaiSisa,
+        'total_harga_beli' => $totalNilaiHB
     ]
 ]);
 
