@@ -14,6 +14,7 @@ use App\Models\Jurnal;
 use App\Models\Satuan;
 use Illuminate\Support\Collection;
 use App\Models\Transaction;
+use Carbon\Carbon;
 
 class StockController extends Controller
 {
@@ -750,9 +751,12 @@ public function qty()
         $periode = request('periode'); // format: Y-m
         $tahun = substr($periode, 0, 4);
         $bulan = substr($periode, 5, 2);
-        $tglAwal =   $tahun . '-01-01';
-        $tglAkhir =  $tahun . '-' . $bulan . '-31'; // akhir bulan secara dinamis
-         $q->whereBetween('created_at',[$tglAwal,$tglAkhir]);
+       $tglAwal = Carbon::createFromDate($tahun, 1, 1)->startOfDay();
+$tglAkhir = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->endOfDay();
+       $q->whereHas('jurnal', function ($query) use ($tglAwal, $tglAkhir) {
+    $query->whereBetween('tgl', [$tglAwal, $tglAkhir]);
+});
+
     });
 
     $query->when(request('invx') !== null && request('invx') !== '', function ($q) {
@@ -794,10 +798,11 @@ foreach ($combined as $key => $items) {
     foreach ($items as $item) {
         $invx = $item->invoice_external ?? null;
         $idBarang = $item->barang->id ?? null;
+        $no_bm = $item->no_bm?? null;
 
         if ($invx === null || $idBarang === null) continue;
 
-        $groupKey = $invx . '||' . $idBarang;
+        $groupKey = $invx . '||' . $idBarang . '||' . $no_bm;
 
         if (!isset($byInvoice[$groupKey])) {
             $byInvoice[$groupKey] = [
@@ -815,28 +820,67 @@ foreach ($combined as $key => $items) {
                 'no_bm'            => $item->no_bm,
                 'satuan'           => $item->barang->satuan->nama_satuan ?? '-',
                 'total_nilai'      => 0,
+                'tgl_jurnal'       => optional($item->jurnals->firstWhere('coa_id', 89))->tgl ?? '-', // ⬅️ tambahkan ini
             ];
         }
 
         $byInvoice[$groupKey]['jumlah_beli'] += $item->jumlah_beli ?? 0;
         $byInvoice[$groupKey]['jumlah_jual'] += $item->jumlah_jual ?? 0;
-        $byInvoice[$groupKey]['total_harga_beli'] += $item->harga_beli ?? 0;
-        $byInvoice[$groupKey]['sisa'] += $item->sisa ?? 0;
     }
 }
 
 // Hitung ulang sisa1 dan total_nilai
 foreach ($byInvoice as &$data) {
-    $data['sisa1'] = ($data['jumlah_jual'] == 0) ? 0 : $data['jumlah_beli'] - $data['jumlah_jual'];
+    $data['sisa'] = $data['jumlah_beli'] - $data['jumlah_jual'];
+    $data['sisa1'] = $data['jumlah_beli'] - $data['jumlah_jual'];
     $data['total_nilai'] = $data['sisa1'] * $data['harga_beli'];
+    $data['total_harga_beli'] = $data['jumlah_beli'] * $data['harga_beli'];
 }
 unset($data);
 
 // Convert ke collection
 $byInvoiceCollection = collect($byInvoice);
 
+// Ambil request
+$periode = request('periode');
+$invx    = request('invx');
+
+if (($periode !== null && $periode !== '') || ($invx !== null && $invx !== '')) {
+    $byInvoiceCollection = $byInvoiceCollection->filter(function ($item) use ($periode, $invx) {
+
+        $filterPeriode = true;
+        $filterInvx = true;
+
+        // Filter berdasarkan periode (filter pada tgl_jurnal)
+        if ($periode !== null && $periode !== '') {
+            $tahun = substr($periode, 0, 4);
+            $bulan = substr($periode, 5, 2);
+
+            $tglAwal = Carbon::createFromDate($tahun, 1, 1)->startOfDay();
+            $tglAkhir = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->endOfDay();
+
+            if ($item['tgl_jurnal'] && $item['tgl_jurnal'] !== '-') {
+                $tglJurnal = Carbon::parse($item['tgl_jurnal']);
+                $filterPeriode = $tglJurnal->between($tglAwal, $tglAkhir);
+            } else {
+                $filterPeriode = false;
+            }
+        }
+
+        // Filter berdasarkan invoice_external (filter like)
+        if ($invx !== null && $invx !== '') {
+            $filterInvx = str_contains($item['invoice_external'], $invx);
+        }
+
+        return $filterPeriode && $filterInvx;
+    });
+}
+
+
 // Total keseluruhan nilai
 $totalNilai = $byInvoiceCollection->sum('total_nilai');
+$totalNilaiJB = $byInvoiceCollection->sum('jumlah_beli');
+$totalNilaiJJ = $byInvoiceCollection->sum('jumlah_jual');
 
 
 
@@ -852,8 +896,9 @@ $rows = $paginated->map(function ($item) use (&$index) {
     return [
         'index' => $index++,
         'invoice_external' => $item['invoice_external'],
-        'total_harga_beli' => $item['total_harga_beli'],
+        'total_harga_beli' => $item['harga_beli'],
         'barang.nama' => $item['nama_barang'],
+        'tgl' => $item['tgl_jurnal'],
         'supplier' => $item['supplier'],
         'id_barang' => $item['id_barang'],
         'satuan' => $item['satuan'],
@@ -875,6 +920,8 @@ return response()->json([
     'rows'    => $rows,
     'userdata' => [
         'total_harga_beli' => $totalNilai,
+        'total_beli' => $totalNilaiJB,
+        'total_jual' => $totalNilaiJJ,
         'sisa' => 'Total Nilai :'
     ]
 ]);

@@ -18,7 +18,7 @@
         <div class="grid grid-cols-2 gap-2 justify-items-start mt-4 mb-4">
             <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
-                    <span class="label-text">Pilih Periode Bulan</span>
+                    <span class="label-text">Pilih Periode Bulan Barang Masuk</span>
                 </div>
                 <input type="month"
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
@@ -63,16 +63,16 @@
                         }
                     },
                     colModel: [
-                        { label: 'Tanggal BM', name: 'tgl_bm', align: 'center', width: 100 },
+                        { label: 'Tanggal Terjurnal', name: 'tgl', align: 'center', width: 100 },
                         { label: 'No BM', name: 'no_bm', width: 100 },
                         { label: 'Inv Supplier', name: 'invoice_external', width: 150 },
                         { label: 'Barang', name: 'barang.nama', width: 150 },
                         { label: 'Supplier', name: 'supplier', width: 150 },
                         { label: 'Jumlah Beli', name: 'total_beli', align: 'right', width: 100 },
                         { label: 'Jumlah Jual', name: 'total_jual', align: 'right', width: 100 },
-                        { label: 'Sisa', name: 'sisa', align: 'right', width: 80 },
+                        // { label: 'Sisa', name: 'sisa', align: 'right', width: 80 },
                         {
-                            label: 'Total Harga Beli',
+                            label: 'Harga Beli',
                             name: 'total_harga_beli',
                             align: 'right',
                             width: 120,
@@ -82,8 +82,7 @@
                                 decimalPlaces: 0
                             },
                             summaryType: 'sum'
-                        },
-                        { label: 'Status', name: 'status', align: 'center', width: 80 }
+                        }
                     ],
                     jsonReader: {
                         root: "rows",
