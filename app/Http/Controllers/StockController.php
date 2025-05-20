@@ -10,11 +10,10 @@ use App\Models\Invoice;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Barang;
+use App\Models\Jurnal;
 use App\Models\Satuan;
 use Illuminate\Support\Collection;
 use App\Models\Transaction;
-
-use App\Models\Jurnal;
 
 class StockController extends Controller
 {
@@ -727,6 +726,161 @@ foreach ($gabungan as $item) {
         $suppliers = Supplier::all();
         return view('toko.stocks', compact('barangs','suppliers'));
     }
+
+     public function lapQty(){
+        return view('jurnal.lap-qty');
+    }
+
+public function qty()
+{
+    $page   = request('page', 1);
+    $limit  = request('rows', 10);
+    $sidx   = request('sidx', 'transaksi.id');
+    $sord   = request('sord', 'asc');
+    $search = request('_search') === 'true';
+
+    // Query utama
+    $query = Transaction::with(['jurnals', 'barang.satuan', 'suppliers']) // Pastikan relasi ini ada di model
+        ->whereNotNull('stts')
+        ->orderBy('no_bm', 'desc');
+
+    // Filter tambahan berdasarkan tgl_pembayar dan invoice (jika Anda punya relasi atau join)
+    if ((request('periode') !== null && request('periode') !== '') || request('invx') !== null && request('invx') !== '') {
+    $query->when(request('periode') !== null && request('periode') !== '', function ($q) {
+        $periode = request('periode'); // format: Y-m
+        $tahun = substr($periode, 0, 4);
+        $bulan = substr($periode, 5, 2);
+        $tglAwal =   $tahun . '-01-01';
+        $tglAkhir =  $tahun . '-' . $bulan . '-31'; // akhir bulan secara dinamis
+         $q->whereBetween('created_at',[$tglAwal,$tglAkhir]);
+    });
+
+    $query->when(request('invx') !== null && request('invx') !== '', function ($q) {
+        $q->where('invoice_external', 'like', '%' . request('invx') . '%');
+    });
+}
+
+
+$transaksis = $query->get();
+
+$keluar = [];
+$grouped = [];
+
+foreach ($transaksis as $item) {
+    $cloned = clone $item;
+
+    if (empty($cloned->tgl_bm)) {
+        $cloned->jumlah_beli = 0;
+        $key = $cloned->invoice_external;
+        $keluar[$key][] = $cloned; // Note: array of items untuk konsistensi
+    } else {
+        $cloned->jumlah_jual = 0;
+        $key = $cloned->no_bm . '||' . $cloned->invoice_external;
+        $grouped[$key][] = $cloned;
+    }
+}
+
+// Gabungkan grouped dan keluar
+$combined = collect(array_merge($grouped, $keluar));
+
+// $keluar dan $grouped tetap seperti yang kamu punya
+
+// Gabungkan $keluar dan $grouped ke dalam satu array besar
+
+// Kumpulkan data per id_barang
+$byInvoice = [];
+
+foreach ($combined as $key => $items) {
+    foreach ($items as $item) {
+        $invx = $item->invoice_external ?? null;
+        $idBarang = $item->barang->id ?? null;
+
+        if ($invx === null || $idBarang === null) continue;
+
+        $groupKey = $invx . '||' . $idBarang;
+
+        if (!isset($byInvoice[$groupKey])) {
+            $byInvoice[$groupKey] = [
+                'invoice_external' => $invx,
+                'id_barang'        => $idBarang,
+                'nama_barang'      => $item->barang->nama ?? '-',
+                'supplier'         => $item->suppliers->nama ?? '-',
+                'jumlah_beli'      => 0,
+                'jumlah_jual'      => 0,
+                'harga_beli'       => $item->harga_beli ?? 0,
+                'total_harga_beli' => 0,
+                'sisa'             => 0,
+                'sisa1'            => 0,
+                'status'           => $item->stts ?? '-',
+                'no_bm'            => $item->no_bm,
+                'satuan'           => $item->barang->satuan->nama_satuan ?? '-',
+                'total_nilai'      => 0,
+            ];
+        }
+
+        $byInvoice[$groupKey]['jumlah_beli'] += $item->jumlah_beli ?? 0;
+        $byInvoice[$groupKey]['jumlah_jual'] += $item->jumlah_jual ?? 0;
+        $byInvoice[$groupKey]['total_harga_beli'] += $item->harga_beli ?? 0;
+        $byInvoice[$groupKey]['sisa'] += $item->sisa ?? 0;
+    }
+}
+
+// Hitung ulang sisa1 dan total_nilai
+foreach ($byInvoice as &$data) {
+    $data['sisa1'] = ($data['jumlah_jual'] == 0) ? 0 : $data['jumlah_beli'] - $data['jumlah_jual'];
+    $data['total_nilai'] = $data['sisa1'] * $data['harga_beli'];
+}
+unset($data);
+
+// Convert ke collection
+$byInvoiceCollection = collect($byInvoice);
+
+// Total keseluruhan nilai
+$totalNilai = $byInvoiceCollection->sum('total_nilai');
+
+
+
+// Hitung total & paginasi
+$totalRecords = $byInvoiceCollection->count();
+$totalPages = $totalRecords > 0 ? ceil($totalRecords / $limit) : 0;
+if ($page > $totalPages) $page = $totalPages;
+
+$paginated = $byInvoiceCollection->slice(($page - 1) * $limit, $limit);
+
+$index = 1;
+$rows = $paginated->map(function ($item) use (&$index) {
+    return [
+        'index' => $index++,
+        'invoice_external' => $item['invoice_external'],
+        'total_harga_beli' => $item['total_harga_beli'],
+        'barang.nama' => $item['nama_barang'],
+        'supplier' => $item['supplier'],
+        'id_barang' => $item['id_barang'],
+        'satuan' => $item['satuan'],
+        'status' => $item['status'],
+        'no_bm' => $item['no_bm'],
+        'total_beli' => $item['jumlah_beli'],
+        'total_jual' => $item['jumlah_jual'],
+        'sisa' => $item['sisa'],
+        'total_nilai' => $item['total_nilai'],
+    ];
+})->values();
+
+
+// Response
+return response()->json([
+    'page'    => $page,
+    'total'   => $totalPages,
+    'records' => $totalRecords,
+    'rows'    => $rows,
+    'userdata' => [
+        'total_harga_beli' => $totalNilai,
+        'sisa' => 'Total Nilai :'
+    ]
+]);
+
+}
+
     public function update_stock(Request $request)
 {
     $data = $request->validate([

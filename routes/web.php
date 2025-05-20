@@ -99,6 +99,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/jurnal-tgl-update', [JurnalController::class, 'tglUpdate'])->name('jurnal.edit.tglupdate');
     Route::get('/jurnal-edit-list', [JurnalController::class, 'datatableEdit'])->name('jurnal.edit.list');
     Route::get('/jurnal-transaksi', [JurnalManualController::class, 'transaksi'])->name('jurnal-manual-transaksi');
+    Route::get('/lap-qty', [StockController::class, 'lapQty'])->name('lap.qty');
+    Route::get('/data-lap-qty', [StockController::class, 'qty'])->name('data.qty');
     Route::resource('jurnal-manual', JurnalManualController::class);
     Route::post('jurnal-hutang', [JurnalManualController::class, 'Jurnalhutang'])->name('jurnal.hutang');
     Route::post('/jurnal-manual-template', [JurnalManualController::class, 'terapanTemplateJurnal'])->name('jurnal.template.terapan');
