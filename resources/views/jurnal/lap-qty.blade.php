@@ -63,11 +63,11 @@
                         }
                     },
                     colModel: [
-                        { label: 'Tanggal Terjurnal', name: 'tgl', align: 'center', width: 100 },
+                        { label: 'Tanggal Konf', name: 'tgl', align: 'center', width: 100 },
                         { label: 'Barang', name: 'barang.nama', width: 150 },
                         { label: 'Supplier', name: 'supplier', width: 150 },
-                        // { label: 'No BM', name: 'no_bm', width: 100 },
                         { label: 'Inv Supplier', name: 'invoice_external', width: 150 },
+                        { label: 'No BM', name: 'no_bm', width: 100 },
                         { label: 'Jumlah Beli', name: 'total_beli', align: 'right', width: 50 },
                         { label: 'Jumlah Jual', name: 'total_jual', align: 'right', width: 50 },
                         { label: 'Sisa', name: 'sisa', align: 'right', width: 80 },
