@@ -459,93 +459,84 @@ public function stockCSV19()
 
     // Ambil parameter dari request
     $barang_id = $request->get('barang') ?? null;
-    $month = $request->get('month') ?? null; // Default ke bulan Maret
-    $year = $request->get('year', 2025);
+    $month = $request->get('month') ?? date('m'); // Default ke bulan sekarang jika null
+    $year = $request->get('year', date('Y'));
 
     $months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
-    if($barang_id === null) {
-        $data = Transaction::with('barang', 'suratJalan')
-        ->whereNull('id_surat_jalan')
-        ->whereNotNull('no_bm')
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+    $tglAwal = Carbon::createFromDate($year, 1, 1)->startOfDay();
+    $tglAkhir = Carbon::createFromDate($year, $month, 1)->endOfMonth()->endOfDay();
 
-        $data2 = Transaction::with('barang', 'suratJalan')
-        ->whereNull('id_surat_jalan')
-        ->whereNotNull('no_bm')
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
-        
-        $data1 = Transaction::with('barang', 'suratJalan')
-        ->whereNotNull('no_bm')
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+    if ($barang_id === null) {
+        $data = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNull('id_surat_jalan')
+            ->whereNotNull('no_bm')
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
 
-        $data3 = Transaction::with('barang', 'suratJalan')
-        ->whereNotNull('no_bm')
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
-    } else{
+        $data2 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNull('id_surat_jalan')
+            ->whereNotNull('no_bm')
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
 
-        $data = Transaction::with('barang', 'suratJalan')
-        ->whereNull('id_surat_jalan')
-        ->whereBetween('tgl_bm', [
-           '2025-01-01',
-            \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth(),
-        ])
-        ->whereNotNull('no_bm')
-        ->when($barang_id, function ($q) use ($barang_id) {
-            $q->where('id_barang', $barang_id);
-        })
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+        $data1 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNotNull('no_bm')
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
 
-        $data2 = Transaction::with('barang', 'suratJalan', 'invoices')
-    ->whereNull('id_surat_jalan')
-    ->whereYear('tgl_bm', $year)
-    ->whereMonth('tgl_bm', $month)
-    ->whereNotNull('no_bm')
-    ->when($barang_id, function ($q) use ($barang_id) {
-        $q->where('id_barang', $barang_id);
-    })
-    ->orderBy('created_at', 'asc')
-    ->orderBy('no_bm', 'asc')
-    ->get();
-    
-        // Query transaksi barang keluar (ada surat jalan di bulan & tahun tertentu)
-        $data1 = Transaction::with('barang', 'suratJalan')
-        ->whereHas('suratJalan', function ($q) use ($month, $year) {
-            $q->whereBetween('tgl_sj', [
-               '2025-01-01',
-                \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth(),
-            ]);
-        })
-        ->whereNotNull('no_bm')
-        ->when($barang_id, function ($q) use ($barang_id) {
-            $q->where('id_barang', $barang_id);
-        })
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+        $data3 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNotNull('no_bm')
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
+    } else {
+        $data = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNull('id_surat_jalan')
+            ->whereNotNull('stts')
+            ->whereBetween('tgl_bm', [$tglAwal, $tglAkhir])
+            ->whereNotNull('no_bm')
+            ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
 
-        $data3 = Transaction::with('barang', 'suratJalan', 'invoices')
-        ->whereHas('suratJalan', function ($q) use ($year, $month) {
-            $q->whereYear('tgl_sj', $year)
-              ->whereMonth('tgl_sj', $month);
-        })
-        ->whereNotNull('no_bm')
-        ->when($barang_id, function ($q) use ($barang_id) {
-            $q->where('id_barang', $barang_id);
-        })
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+        $data2 = Transaction::with(['barang', 'suratJalan', 'invoices', 'jurnals'])
+            ->whereNull('id_surat_jalan')
+            ->whereNotNull('stts')
+            ->whereYear('tgl_bm', $year)
+            ->whereMonth('tgl_bm', $month)
+            ->whereNotNull('no_bm')
+            ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
+
+        $data1 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereHas('suratJalan', function ($q) use ($tglAwal, $tglAkhir) {
+                $q->whereBetween('tgl_sj', [$tglAwal, $tglAkhir]);
+            })
+            ->whereNotNull('no_bm')
+            ->whereNotNull('stts')
+            ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
+
+        $data3 = Transaction::with(['barang', 'suratJalan', 'invoices', 'jurnals'])
+            ->whereHas('suratJalan', function ($q) use ($year, $month) {
+                $q->whereYear('tgl_sj', $year)
+                ->whereMonth('tgl_sj', $month);
+            })
+            ->whereNotNull('no_bm')
+            ->whereNotNull('stts')
+            ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
     }
     $hasil = [];
 
@@ -635,14 +626,14 @@ $gabungan = [];
 
 // Gabung data beli
 foreach ($data2 as $item) {
-    if (!$item->tgl_bm) continue;
+    if (!optional($item->jurnals->firstWhere('coa_id', 89))->tgl) continue;
 
     $gabungan[] = [
         'tipe' => 'beli',
         'id_barang' => $item->id_barang,
         'barang' => $item->barang->nama ?? '-',
         'no' => $item->no_bm,
-        'tgl' => $item->tgl_bm,
+        'tgl' => optional($item->jurnals->firstWhere('coa_id', 89))->tgl,
         'jumlah' => $item->jumlah_beli,
         'stock_awal' => $hasil[$item->id_barang]['detail'][$bulanIndex]['stock_awal'] ?? 0,
         'harga' => $item->harga_beli
