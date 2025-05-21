@@ -497,7 +497,9 @@ public function stockCSV19()
         $data = Transaction::with(['barang', 'suratJalan', 'jurnals'])
             ->whereNull('id_surat_jalan')
             ->whereNotNull('stts')
-            ->whereBetween('tgl_bm', [$tglAwal, $tglAkhir])
+            ->whereHas('jurnals', function ($q) use ($tglAwal, $tglAkhir) {
+                $q->whereBetween('tgl', [$tglAwal, $tglAkhir]);
+            })
             ->whereNotNull('no_bm')
             ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
             ->orderBy('created_at')
@@ -507,8 +509,10 @@ public function stockCSV19()
         $data2 = Transaction::with(['barang', 'suratJalan', 'invoices', 'jurnals'])
             ->whereNull('id_surat_jalan')
             ->whereNotNull('stts')
-            ->whereYear('tgl_bm', $year)
-            ->whereMonth('tgl_bm', $month)
+            ->whereHas('jurnals', function ($q) use ($year, $month) {
+                $q->whereYear('tgl', $year)
+                  ->whereMonth('tgl', $month);
+            })
             ->whereNotNull('no_bm')
             ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
             ->orderBy('created_at')
