@@ -209,7 +209,7 @@
         </div>
     </x-keuangan.card-keuangan>
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Kartu Stock</x-slot:tittle>
+        <x-slot:tittle>Kartu Stock Jayapura</x-slot:tittle>
         <div class="card bg-white shadow-sm">
             <div class="card-body">
                 <div class="grid grid-cols-4">
