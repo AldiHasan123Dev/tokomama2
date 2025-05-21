@@ -546,10 +546,10 @@ public function stockCSV19()
 
 // Barang masuk (data)
 foreach ($data as $item) {
-    if (!$item->tgl_bm) continue;
+    if (!optional($item->jurnals->firstWhere('coa_id', 89))->tgl) continue;
 
     $id = $item->id_barang;
-    $tgl = $item->tgl_bm;
+    $tgl = optional($item->jurnals->firstWhere('coa_id', 89))->tgl;
     $bulanIndex = (int) date('n', strtotime($tgl)) - 1;
 
     if (!isset($hasil[$id])) {
