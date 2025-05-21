@@ -506,18 +506,28 @@ public function stockCSV19()
             ->orderBy('no_bm')
             ->get();
 
-        $data2 = Transaction::with(['barang', 'suratJalan', 'invoices', 'jurnals'])
-            ->whereNull('id_surat_jalan')
-            ->whereNotNull('stts')
-            ->whereHas('jurnals', function ($q) use ($year, $month) {
-                $q->whereYear('tgl', $year)
-                  ->whereMonth('tgl', $month);
-            })
-            ->whereNotNull('no_bm')
-            ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
-            ->orderBy('created_at')
-            ->orderBy('no_bm')
-            ->get();
+       $data2 = Transaction::with([
+    'barang', 
+    'suratJalan', 
+    'invoices', 
+    'jurnals' => function ($q) use ($year, $month) {
+        $q->whereYear('tgl', $year)
+          ->whereMonth('tgl', $month);
+    }
+])
+->whereNull('id_surat_jalan')
+->whereNotNull('stts')
+->whereNotNull('no_bm')
+->whereHas('jurnals', function ($q) use ($year, $month) {
+    $q->whereYear('tgl', $year)
+      ->whereMonth('tgl', $month);
+})
+->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+->orderBy('created_at')
+->orderBy('no_bm')
+->get();
+
+
 
         $data1 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
             ->whereHas('suratJalan', function ($q) use ($tglAwal, $tglAkhir) {
