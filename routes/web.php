@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceExternalController;
+use App\Http\Controllers\HargaController;
 use App\Http\Controllers\JurnalController;
 use App\Http\Controllers\JurnalManualController;
 use App\Http\Controllers\NSFPController as nsfp;
@@ -83,7 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/barang-masuk/store', [SuratJalanController::class, 'store_bm'])->name('barang_masuk.store');
     Route::resource('surat-jalan', SuratJalanController::class);
     Route::resource('invoice-transaksi', InvoiceController::class);
-    Route::post('/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
+    Route::match(['get', 'post'], '/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
     Route::resource('jurnal', JurnalController::class);
     Route::get('/stock/cetak/{id}', [StockController::class, 'cetak'])->name('stock.cetak');
     Route::post('/update-lock/{id}', [StockController::class, 'updateLock']);
@@ -220,6 +221,12 @@ Route::prefix('master')->controller(NopolController::class)->middleware('auth')-
     Route::post('nopol_edit', 'update')->name('master.nopol.edit');
     Route::post('nopol_delete', 'destroy')->name('master.nopol.delete');
     Route::post('set_status', 'setStatus')->name('master.nopol.editstatus');
+});
+
+Route::prefix('master')->controller(HargaController::class)->middleware('auth')->group(function () {
+    Route::get('harga', 'index')->name('master.harga');
+    Route::post('harga-tambah', 'store')->name('master.harga.tambah');
+    Route::get('harga-data-nonaktif', 'Hargajqgrid')->name('harga.nonaktif.data');
 });
 
 Route::prefix('master')->controller(UserController::class)->middleware('auth')->group(function () {

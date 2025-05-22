@@ -235,7 +235,7 @@
                             <td class="border border-black">
                                 {{ $item->transaksi->barang->nama }} <br>
                                 @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
-                                    (Total {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                    (Total {{ $item->jumlah * $item->transaksi->barang->value }}
                                     {{ $item->transaksi->barang->satuan->nama_satuan }}
                                     {{ $item->transaksi->keterangan != '' || !is_null($item->transaksi->keterangan) ? '= ' . $item->transaksi->keterangan : '' }})
                                 @else
@@ -250,7 +250,7 @@
                                     -
                                 @endif
                             </td>
-                            <td class="text-center border border-black">{{ number_format($item->jumlah, 0, ',', '.') }}
+                            <td class="text-center border border-black">{{ $item->jumlah }}
                                 {{ $item->transaksi->satuan_jual }} X
                                 @if ($barang->status_ppn == 'ya')
                                     {{ number_format($item->harga * 1.11, 0, ',', '.') }}
@@ -262,7 +262,7 @@
                             <td class="border border-black text-center">
                                 @if ($item->transaksi->satuan_jual == 'KG' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
                                     {{-- Tampilkan jumlah dalam satuan --}}
-                                    {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                    {{ $item->jumlah * $item->transaksi->barang->value }}
                                     {{ $item->transaksi->barang->satuan->nama_satuan }}
                             
                                     {{-- Tampilkan konversi harga per KG --}}
@@ -279,7 +279,7 @@
                                     @endif
                                     @elseif ($item->transaksi->satuan_jual == 'KWT' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
                                       {{-- Tampilkan jumlah dalam satuan --}}
-                                      {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                      {{ $item->jumlah * $item->transaksi->barang->value }}
                                       {{ $item->transaksi->barang->satuan->nama_satuan }}
                               
                                       {{-- Tampilkan konversi harga per KG --}}
@@ -302,9 +302,9 @@
                             
                             <td class="border border-black" style="text-align: right;">
                                 @if ($barang->status_ppn == 'ya')
-                                    {{ number_format($item->harga * 1.11 * $item->jumlah, 0, ',', '.') }}
+                                    {{ $item->harga * 1.11 * $item->jumlah }}
                                 @else
-                                    {{ number_format($item->harga * $item->jumlah, 0, ',', '.') }}
+                                    {{ $item->harga * $item->jumlah }}
                                 @endif
                             </td>
                         </tr>

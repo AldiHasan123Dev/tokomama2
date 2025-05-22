@@ -238,13 +238,14 @@
                                                 {{ $items['satuan_jual'][$idx] }})
                                                 @if (str_contains($items['satuan_jual'][$idx], $items['nama_satuan'][$idx]))
                                                     @php
-                                                        $t = (int) $items['jumlah_jual'][$idx];
-                                                    @endphp
+                                                        $t = $items['jumlah_jual'][$idx];
+                                                        @endphp
                                                 @else
-                                                    @php
+                                                @php
+                                                
                                                         $t =
-                                                            (float) $items['value'][$idx] *
-                                                            (int) $items['jumlah_jual'][$idx];
+                                                             $items['value'][$idx] *
+                                                             $items['jumlah_jual'][$idx];
                                                     @endphp
                                                 @endif
 
@@ -264,7 +265,7 @@
                                              }
                                         @endphp
                                             <td style=" border:solid; text-align: center; padding: 8px;">
-                                                {{ number_format($items['jumlah'][$idx], 0, ',', '.') }}</td>
+                                                {{ $items['jumlah'][$idx] }}</td>
                                             <td style=" border:solid; text-align: center; padding: 8px;">
                                                 {{ $items['satuan_jual'][$idx] }}</td>
                                             <td style=" border:solid; text-align: right; padding: 8px;">
