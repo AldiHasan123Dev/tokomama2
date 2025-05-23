@@ -302,9 +302,9 @@
                             
                             <td class="border border-black" style="text-align: right;">
                                 @if ($barang->status_ppn == 'ya')
-                                    {{ $item->harga * 1.11 * $item->jumlah }}
+                                    {{ number_format($item->harga * 1.11 * $item->jumlah, 0, ',', '.') }}
                                 @else
-                                    {{ $item->harga * $item->jumlah }}
+                                    {{ number_format($item->harga * $item->jumlah, 0, ',', '.') }}
                                 @endif
                             </td>
                         </tr>
