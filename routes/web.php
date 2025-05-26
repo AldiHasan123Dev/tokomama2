@@ -124,6 +124,9 @@ Route::middleware('auth')->group(function () {
     Route::put('coa/{coa}', [CoaController::class,'update'])->name('jurnal.coa.update');
     Route::delete('coa/{coa}', [CoaController::class,'destroy'])->name('jurnal.coa.destroy');
     Route::get('coa/data', [CoaController::class, 'dataTable'])->name('jurnal.coa.data');
+    Route::post('/data/update-aktif', [HargaController::class, 'updateAktif'])->name('data.updateAktif');
+    Route::post('/data/update-non-aktif', [HargaController::class, 'updateNonAktif'])->name('data.updateNonAktif');
+
     
     Route::post('/jurnal/coa/store', [CoaController::class, 'store'])->name('jurnal.coa.store');
     Route::post('coa-delete', [CoaController::class,'hapusCoa'])->name('jurnal.coa.delete');
@@ -145,11 +148,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('neraca', Neraca::class);
     Route::resource('laba-rugi', LabaRugi::class);
     Route::resource('buku-besar-pembantu', BukuBesarPembantuController::class);
+    Route::get('lr-akumulatif', [LabaRugi::class, 'LRberjalan'])->name('lr.berjalan');
     Route::get('buku-besar-pembantu/{id}/detail', [BukuBesarPembantuController::class, 'showDetail'])->name('buku-besar-pembantu.showDetail');
     Route::get('/export-ncs', [BukuBesarPembantuController::class, 'exportNcs'])->name('export.ncs');
     Route::get('/export-customers', [BukuBesarPembantuController::class, 'exportCustomer'])->name('export.customers');
     Route::get('/export-supplier', [BukuBesarPembantuController::class, 'exportSupplier'])->name('export.supplier');
-
     Route::resource('invoice-external', InvoiceExternalController::class);
 });
 
