@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Barang;
+use App\Models\Transaction;
 use App\Models\Satuan;
 use App\Models\Harga;
 
@@ -11,7 +12,7 @@ class HargaController extends Controller
 {
     public function index()
     {
-        $barang = Barang::with('satuan')->where('status','AKTIF')->get();
+        $barang = Barang::with('satuan')->where('status', 'AKTIF')->get();
         return view('masters.harga', compact('barang'));
     }
 
@@ -54,33 +55,47 @@ class HargaController extends Controller
      return redirect()->route('master.harga')->with('success', 'Data Master Harga berhasil ditambahkan!');
     }
 
-    public function Hargajqgrid()
+    public function Hargajqgrid(Request $request)
     {
-            $page    = request('page', 1);
-            $limit   = request('rows', 10);
-            $sidx    = request('sidx', 'harga.id');
-            $sord    = request('sord', 'asc');
-            $search  = request('_search') === 'true';
+             $searchTerm   = $request->get('searchString', '');
+            $currentPage  = (int) $request->get('page', 1);
+            $perPage      = (int) $request->get('rows', 10);
                     
-            $query = Harga::with(['barang', 'barang.satuan']);
+            $query = Harga::with(['barang', 'barang.satuan'])
+            ->orderBy('created_at','desc');
 
-            // Filter tgl_pembayar (wajib / selalu ada)
-            if (request()->filled('non_aktif')) {
-                $query->where('is_status',0);
-            }
-            if (request()->filled('aktif')) {
-                $query->where('is_status',1);
-            }
+                    if ($request->filled('barang')) {
+                        $query->whereHas('barang', function ($q) use ($request) {
+                            $q->where('nama', 'LIKE', '%' . $request->barang . '%');
+                        });
+                    }
+
+                    if ($request->filled('satuan')) {
+                        $satuan = $request->satuan;
+
+                        $query->whereHas('barang.satuan', function ($q) use ($satuan) {
+                            $q->where('nama_satuan', 'LIKE', '%' . $satuan . '%');
+                        });
+                    }
+
+
+                    
+                    if ($request->filled('tgl')) {
+                        $query->where('tgl', 'LIKE', '%' . $request->tgl . '%');
+                    }
+
+                    if ($request->filled('harga')) {
+                        $query->where('harga', 'LIKE', '%' . $request->harga . '%');
+                    }
+                    
+
             // Ambil semua data
             $harga = $query->get();
             // Group berdasarkan tgl_pembayar
             
         
             $totalRecords = $harga->count();
-            $totalPages = $totalRecords > 0 ? ceil($totalRecords / $limit) : 0;
-            if ($page > $totalPages) $page = $totalPages;
-        
-            $paginated = $harga->slice(($page - 1) * $limit, $limit);
+             $paginated = $harga->slice(($currentPage - 1) * $perPage, $perPage)->values();
         
             // Format data baris
             $rows = $paginated->map(function ($items, $key) {
@@ -92,8 +107,9 @@ class HargaController extends Controller
                     'id'         => $items->id,
                     'tgl'        => $items->tgl,
                     'harga'      => $harga,
-                    'barang'     => $items->barang->nama . ' || ' . $items->barang->satuan->nama_satuan,
-                    'status_ppn' => $items->barang->status_ppn,
+                    'satuan'     => $items->barang->satuan->nama_satuan,
+                    'barang'     => $items->barang->nama,
+                    'status_ppn' => $items->barang->status_ppn === 'ya' ? 'PPN' : 'NON-PPN',
                     'aktif'      => $items->is_status,
                 ];
             })->values();
@@ -104,10 +120,47 @@ class HargaController extends Controller
         
             // Return ke jqGrid
             return response()->json([
-                'page'    => $page,
-                'total'   => $totalPages,
+                'page'    => $currentPage,
+                'total'   => ceil($totalRecords / $perPage),
                 'records' => $totalRecords,
                 'rows'    => $rows
             ]);
         }
+
+        public function updateAktif(Request $request)
+        {
+            $idTerpilih = $request->input('id');
+            // Aktifkan hanya yang dipilih
+            $harga= Harga::find($idTerpilih);
+            $cek = $harga->is_status;
+            if ($cek == 1){
+                 $harga->update(['is_status' => 0]);
+            } else{
+                 $harga->update(['is_status' => 1]);
+            }
+            $hargaValue = number_format($harga->harga, 2, ',', '.');;
+            if ($harga->barang->status_ppn == 'ya'){
+                $hargaValue = number_format($harga->harga * 1.11, 2, ',', '.');
+            }
+             if ($harga->is_status == 1){
+            return response()->json(['success' => true, 'message' => 'Harga Untuk ' . $harga->barang->nama . ' senilai ' . $hargaValue . ' sudah di aktifkan']);
+             } else {
+                 return response()->json(['success' => true, 'message' => 'Harga Untuk ' . $harga->barang->nama . ' senilai ' . $hargaValue . ' sudah di non-aktifkan']);
+             }
+        }
+
+        public function updateNonAktif(Request $request)
+        {
+            $idTerpilih = $request->input('id');
+            // Aktifkan hanya yang dipilih
+            $harga= Harga::find($idTerpilih);
+            $harga->update(['is_status' => 0]);
+            $hargaValue = number_format($harga->harga, 2, ',', '.');;
+            if ($harga->barang->status_ppn == 'ya'){
+                $hargaValue = number_format($harga->harga * 1.11, 2, ',', '.');
+            }
+
+            return response()->json(['success' => true, 'message' => 'Harga Untuk ' . $harga->barang->nama . ' senilai ' . $hargaValue . ' sudah non-aktif']);
+        }
+
 }

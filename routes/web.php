@@ -28,6 +28,7 @@ use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SuratJalanController;
 use App\Http\Controllers\TemplateJurnalController;
+use App\Http\Controllers\DirectSaleController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Resources\DatatableResource;
@@ -61,6 +62,7 @@ Route::get('/surat-jalan/checkBarangCount', [SuratJalanController::class, 'check
 
 Route::middleware('auth')->group(function () {
     Route::get('/get-stock/{id}', [SuratJalanController::class, 'getStock'])->name('sj.getStock');
+    Route::get('/get-harga', [DirectSaleController::class, 'getHarga']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/barang-masuk/monitor-stock', [StockController::class, 'monitor_stock'])->name('monitor-stock');
@@ -226,10 +228,18 @@ Route::prefix('master')->controller(NopolController::class)->middleware('auth')-
     Route::post('set_status', 'setStatus')->name('master.nopol.editstatus');
 });
 
+Route::prefix('direct_sale')->controller(DirectSaleController::class)->middleware('auth')->group(function () {
+    Route::get('ppn', 'ds_ppn')->name('ds.ppn');
+    Route::get('non_ppn', 'ds_nonppn')->name('ds.non-ppn');
+    Route::post('ppn-tambah', 'ppn_store')->name('ds.ppn-store');
+    Route::post('ds-invoice', 'dsInv_store')->name('invoice-ds.store');
+});
+
 Route::prefix('master')->controller(HargaController::class)->middleware('auth')->group(function () {
     Route::get('harga', 'index')->name('master.harga');
     Route::post('harga-tambah', 'store')->name('master.harga.tambah');
     Route::get('harga-data-nonaktif', 'Hargajqgrid')->name('harga.nonaktif.data');
+    Route::get('harga-data-aktif', 'Hargajqgrid1')->name('harga.aktif.data');
 });
 
 Route::prefix('master')->controller(UserController::class)->middleware('auth')->group(function () {

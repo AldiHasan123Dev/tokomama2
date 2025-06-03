@@ -94,6 +94,42 @@
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 40px !important;
         }
+
+        .jqgrid-compact td {
+            padding: 2px 4px !important;
+            vertical-align: middle;
+        }
+
+        .jqgrid-compact .form-radio,
+        .jqgrid-compact input[type="radio"],
+        .jqgrid-compact input[type="checkbox"],
+        .jqgrid-compact button {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 16px;
+            width: auto;
+            font-size: 10px;
+            line-height: 1;
+        }
+
+        .jqgrid-compact label {
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 10px;
+            line-height: 1;
+        }
+
+        .jqgrid-compact .form-radio {
+            padding: 0px 0px !important;
+            font-size: 10px;
+            line-height: 1;
+            min-height: auto;
+        }
+
+        .radio-aktif {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
     </style>
 
     <!-- Link CSS untuk jqGrid dan jQuery UI -->
@@ -141,7 +177,7 @@
     <x-master.card-master>
         <x-slot:tittle>Buat Harga</x-slot:tittle>
 
-        <form action="{{ route('master.harga.tambah') }}" method="POST" class="grid grid-cols-3 gap-4 mt-3">
+        <form action="{{ route('master.harga.tambah') }}" method="POST" class="grid grid-cols-2 gap-4 mt-3">
             @csrf
 
             {{-- Harga --}}
@@ -153,27 +189,30 @@
                     class="input input-bordered w-full rounded-md" required oninput="formatRibuan(this)">
             </div>
 
-            {{-- Tanggal Harga --}}
             <div class="col-span-1">
                 <label class="label">
-                    <span class="label-text">Tanggal Harga <span class="text-red-500">*</span></span>
-                </label>
-                <input type="date" name="tgl" class="input input-bordered w-full rounded-md" required>
-            </div>
-
-            {{-- Nama Barang --}}
-            <div class="col-span-1">
-                <label class="label">
-                    <span class="label-text">Nama Barang <span class="text-red-500">*</span></span>
+                    <span class="label-text">Barang<span class="text-red-500">*</span></span>
                 </label>
                 <select id="id_barang" name="id_barang" class="select select-bordered w-full rounded-md" required>
                     <option disabled selected>Pilih Barang</option>
                     @foreach ($barang as $item)
-                        <option value="{{ $item->id }}">{{ $item->nama }} || {{ $item->satuan->nama_satuan }}
+                        <option value="{{ $item->id }}">
+                            {{ $item->nama }} (
+                            {{ $item->satuan->nama_satuan }})
                         </option>
                     @endforeach
                 </select>
             </div>
+            {{-- Tanggal Harga --}}
+            {{-- <div class="col-span-1">
+                <label class="label">
+                    <span class="label-text">Tanggal Harga <span class="text-red-500">*</span></span>
+                </label> --}}
+            <input type="date" hidden name="tgl" class="input input-bordered w-full rounded-md"
+                value="{{ date('Y-m-d') }}" required>
+            {{-- </div> --}}
+
+            {{-- Nama Barang --}}
 
             {{-- Tombol --}}
             <div class="col-span-3 mb-4 text-center">
@@ -185,16 +224,9 @@
 
 
     <x-master.card-master>
-        <x-slot:tittle>List Harga Belum Aktif</x-slot:tittle>
+        <x-slot:tittle>List Harga</x-slot:tittle>
         <table id="hargaNonAktif"></table>
         <div id="hargaNonAktifPager"></div>
-    </x-master.card-master>
-
-
-    <x-master.card-master>
-        <x-slot:tittle>List Harga Sudah Aktif</x-slot:tittle>
-         <table id="hargaAktif"></table>
-        <div id="hargaAktifPager"></div>
     </x-master.card-master>
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -217,73 +249,150 @@
             }
 
             function resizeGrid() {
-    $("#hargaNonAktif").setGridWidth($("#hargaNonAktif").closest(".grid-container").width());
-}
-            $("#hargaNonAktif").jqGrid({
-        url: '{{ route('harga.nonaktif.data') }}',
-        datatype: "json",
-        mtype: "GET",
-        postData: {
-            non_aktif : true
-        },
-        colModel: [
-            {
-               
-                label: 'Tanggal',
-                name: 'tgl',
-                align: 'center',
-                width: 100,
-                formatter: 'date',
-                formatoptions: { newformat: 'd/m/Y' }
-            },
-            { label: 'Barang', name: 'barang', width: 150,  },
-            // { label: 'Status PPN', name: 'status_ppn', width: 120,  },
-            {
-                
-                label: 'Nominal Harga',
-                name: 'harga',
-                width: 120,
-                align: 'right'
-            },
-           {
-            
-                label: 'Aksi',
-                name: 'aksi',
-                width: 100,
-                align: 'center',
-                sortable: false,
-                formatter: function(cellValue, options, rowObject) {
-                    if (rowObject.aktif === 0) {
-                        return `<button class="bg-red-500 hover:bg-yellow-300 text-white font-semibold py-1 px-2 rounded btn-delete" data-id="${rowObject.id}">Edit</button>`;
-                    } else {
-                        return ''; // atau return '—';
-                    }
-                }
+                $("#hargaNonAktif").setGridWidth($("#hargaNonAktif").closest(".grid-container").width());
             }
-        ],
-        jsonReader: {
-            root: "rows",
-            page: "page",
-            total: "total",
-            records: "records",
-            repeatitems: false
-        },
-        pager: "#hargaNonAktifPager",
-        rowNum: 10,
-        rowList: [10, 20, 50],
-        height: '100%',
-        autowidth: true,
-        shrinkToFit: true,
-        viewrecords: true,
-        caption: "Data Harga Belum Aktif",
-        loadComplete: function () {
-            resizeGrid();
-        }
-    });
+            $("#hargaNonAktif").jqGrid({
+                url: '{{ route('harga.nonaktif.data') }}',
+                datatype: "json",
+                mtype: "GET",
+                colModel: [{
+                        search: true,
+                        label: 'Tanggal',
+                        name: 'tgl',
+                        align: 'center',
+                        width: 100,
+                        formatter: 'date',
+                        formatoptions: {
+                            newformat: 'd/m/Y'
+                        }
+                    },
+                    {
+                        search: true,
+                        label: 'Barang',
+                        name: 'barang',
+                        width: 150,
+                    },
+                    {
+                        search: true,
+                        label: 'Satuan Barang',
+                        name: 'satuan',
+                        width: 150,
+                        align: 'center'
+                    },
+                    {
+                        label: 'Status PPN',
+                        name: 'status_ppn',
+                        width: 120,
+                        align: 'center'
+                    },
+                    {
+                        search: true,
+                        label: 'Nominal Harga yang dijual',
+                        name: 'harga',
+                        width: 120,
+                        align: 'right'
+                    },
+                    {
+                        label: 'Aksi',
+                        name: 'aksi',
+                        width: 120,
+                        align: 'center',
+                        sortable: false,
+                        formatter: function(cellValue, options, rowObject) {
+                            const isChecked = rowObject.aktif === 1;
+                            return `
+         <div class="flex justify-center items-center space-x-1 text-xs font-semibold select-none">
+  <span class="${isChecked ? 'text-green-600' : 'text-gray-400'}">Aktif</span>
+  
+  <label class="relative inline-flex items-center cursor-pointer">
+    <input type="checkbox" value="" class="sr-only peer radio-aktif" data-id="${rowObject.id}" ${isChecked ? 'checked' : ''}>
+    <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
+    <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transform peer-checked:translate-x-5 transition-transform"></div>
+  </label>
+  
+  <span class="${!isChecked ? 'text-red-600' : 'text-gray-400'}">Nonaktif</span>
+</div>
 
-    $(window).on('resize', function () {
-        resizeGrid();
-    });
+    `;
+                        }
+
+                    }
+                ],
+                jsonReader: {
+                    root: "rows",
+                    page: "page",
+                    total: "total",
+                    records: "records",
+                    repeatitems: false
+                },
+                pager: "#hargaNonAktifPager",
+                rowNum: 10,
+                rowList: [10, 20, 50],
+                height: '100%',
+                autowidth: true,
+                shrinkToFit: true,
+                viewrecords: true,
+                caption: "Data Harga",
+                loadComplete: function() {
+                    resizeGrid();
+                },
+                gridComplete: function() {
+                    $('#hargaAktif').closest('.ui-jqgrid-bdiv').addClass('jqgrid-compact');
+                }
+            });
+            $("#hargaNonAktif").jqGrid('filterToolbar', {
+                searchOperators: false,
+                searchOnEnter: false,
+                defaultSearch: "cn"
+            });
+            $(window).on('resize', function() {
+                resizeGrid();
+            });
+        </script>
+        <script>
+            $(document).on('click', '.radio-aktif', function() {
+                const id = $(this).data('id');
+
+                $.ajax({
+                    url: '/data/update-aktif',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        alert(response.message);
+                        $('#hargaNonAktif').trigger('reloadGrid');
+                        $('#hargaAktif').trigger('reloadGrid'); // refresh jqGrid
+                    },
+                    error: function(xhr) {
+                        alert('Gagal mengaktifkan data.');
+                    }
+                });
+            });
+        </script>
+
+        <script>
+            $(document).on('click', '.radio-nonaktif', function() {
+                const id = $(this).data('id');
+
+                $.ajax({
+                    url: '/data/update-non-aktif',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        alert(response.message);
+                        $('#hargaNonAktif').trigger('reloadGrid');
+                        $('#hargaAktif').trigger('reloadGrid'); // refresh jqGrid
+                    },
+                    error: function(xhr) {
+                        alert('Gagal mengaktifkan data.');
+                    }
+                });
+            });
         </script>
     </x-slot:script>
 </x-Layout.layout>

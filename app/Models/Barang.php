@@ -14,4 +14,9 @@ class Barang extends Model
     public function satuan() {
         return $this->belongsTo(Satuan::class, 'id_satuan');
     }
+    public function hargaAktif()
+{
+    return $this->hasMany(Harga::class, 'id_barang')->where('is_status', 1);
+}
+
 }

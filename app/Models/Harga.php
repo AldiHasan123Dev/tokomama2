@@ -28,6 +28,12 @@ class Harga extends Model
         return $this->belongsTo(Barang::class, 'id_barang');
     }
 
+     // Relasi ke barang
+    public function transaksi()
+    {
+        return $this->belongsTo(Transaction::class, 'id_transaksi');
+    }
+
     // (Opsional) relasi ke user pembuat dan pengubah data
     public function creator()
     {
