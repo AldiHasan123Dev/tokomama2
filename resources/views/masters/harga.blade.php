@@ -183,14 +183,6 @@
             {{-- Harga --}}
             <div class="col-span-1">
                 <label class="label">
-                    <span class="label-text">Harga <span class="text-red-500">*</span></span>
-                </label>
-                <input type="text" name="harga" placeholder="Masukkan harga"
-                    class="input input-bordered w-full rounded-md" required oninput="formatRibuan(this)">
-            </div>
-
-            <div class="col-span-1">
-                <label class="label">
                     <span class="label-text">Barang<span class="text-red-500">*</span></span>
                 </label>
                 <select id="id_barang" name="id_barang" class="select select-bordered w-full rounded-md" required>
@@ -203,6 +195,14 @@
                     @endforeach
                 </select>
             </div>
+            <div class="col-span-1">
+                <label class="label">
+                    <span class="label-text">Harga <span class="text-red-500">*</span></span>
+                </label>
+                <input type="text" name="harga" placeholder="Masukkan harga"
+                    class="input input-bordered w-full rounded-md" required oninput="formatRibuan(this)">
+            </div>
+
             {{-- Tanggal Harga --}}
             {{-- <div class="col-span-1">
                 <label class="label">
