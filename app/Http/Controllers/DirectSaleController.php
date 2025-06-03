@@ -130,7 +130,7 @@ class DirectSaleController extends Controller
         $tgl_m = date('m', strtotime($tgl));
         $tgl_y = date('y', strtotime($tgl));
 
-        $customer = Customer::where('id', 126)->first();
+        $customer = Customer::where('id', 149)->first();
         $no = SuratJalan::whereYear('created_at', date('Y'))->max('no') + 1;
         $nama_cust = $customer->nama;
         $roman_numerals = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
