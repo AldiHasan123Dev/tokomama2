@@ -137,14 +137,14 @@
                     Nilai Inv <span id="id-bayar" class="font-semibold text-blue-600"></span>
                 </h3> --}}
 
-                <h3 class="text-xl font-bold mb-4">
-                    No Jurnal: <span class="font-semibold text-blue-600">{{ $no_BBM }}/BBM-TM/{{ date('y') }}</span>
-                </h3>
+              <h3 class="text-xl font-bold mb-4">
+    No Jurnal: <span id="no-jurnal-text" class="font-semibold text-blue-600"></span>
+</h3>
 
                 <!-- Hidden Inputs -->
                 <input type="hidden" name="id[]" id="id-biaya">
-                <input type="hidden" name="nomor" value="{{ $no_BBM }}/BBM-TM/{{ date('y') }}">
-                <input type="hidden" name="no" value="{{ $no_BBM }}">
+               <input type="hidden" name="nomor" id="input-nomor">
+<input type="hidden" name="no" id="input-no">
                 <input type="hidden" name="id_transaksi[]" id="id-trans">
                 <input type="hidden" name="invoice[]" id="invoice">
                 <input type="hidden" name="customer[]" id="customer">
@@ -217,6 +217,9 @@
                     // Clear existing list in modal
                     $('#nominal-id').empty();
                     $('#customer-id').empty();
+                    $('#no-jurnal-text').text(data.nomor); // untuk ditampilkan
+                    $('#input-nomor').val(data.nomor);     // untuk dikirim ke backend
+                    $('#input-no').val(data.no);           // untuk dikirim ke backend
 
                     // Loop through the data and append to modal
                     data.id.forEach(function(item, index) {

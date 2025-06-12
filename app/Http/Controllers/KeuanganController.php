@@ -152,6 +152,8 @@ class KeuanganController extends Controller
     public function cari(Request $request)
     {
         $tanggal = $request->tanggal_bayar;
+         $tahun = date('y');
+         $year = date('Y');
     
         // Ambil transaksi dengan filter tanggal bayar
         $biayaInvs = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
@@ -159,6 +161,9 @@ class KeuanganController extends Controller
             ->whereNull('jurnal')
             ->where('nominal', '>', 0)
             ->get();
+        
+         $last = Jurnal::where('tipe', 'BBM')->whereYear('tgl', $year)->orderBy('no', 'desc')->first() ?? 0;
+         $nextNo = $last ? $last->no + 1 : 1;
     
         // Jika kosong, kirim respon dengan pesan error
         if ($biayaInvs->isEmpty()) {
@@ -175,6 +180,8 @@ class KeuanganController extends Controller
             'invoice'  => $biayaInvs->pluck('invoice.invoice'),
             'nominal'  => $biayaInvs->pluck('nominal'),
             'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
+            'no' => $nextNo,
+           'nomor' => "{$nextNo}/BBM-TM/{$tahun}"
         ];
     
         return response()->json([
