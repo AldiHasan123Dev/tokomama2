@@ -317,6 +317,7 @@
                                 @endif
                             </td>
                             @else
+                            <td>-</td>
                             @endif
                             
                             <td class="border border-black" style="text-align: right;">
