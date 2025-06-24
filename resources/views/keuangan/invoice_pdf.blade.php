@@ -401,7 +401,7 @@
                 <tr>
                     <th style="text-align: left; padding-right: 50px; font-style: italic;"></th>
                     <td style="padding-left: 40px;"></td>
-                    <td style="align-items:left ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
+                    <td style="align-items:left ;text-align: center;">Jayapura, {{ $formattedDate }}</td>
                 </tr>
                 <tr>
                     <th style="text-align: left; padding-right: 50px; font-style: italic;"></th>

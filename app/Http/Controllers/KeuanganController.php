@@ -181,7 +181,7 @@ class KeuanganController extends Controller
             'nominal'  => $biayaInvs->pluck('nominal'),
             'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
             'no' => $nextNo,
-           'nomor' => "{$nextNo}/BBM-TM/{$tahun}"
+           'nomor' => "{$nextNo}/BBM-TMR1/{$tahun}"
         ];
     
         return response()->json([
