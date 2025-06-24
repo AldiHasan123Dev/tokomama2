@@ -385,7 +385,7 @@
                         <th style="text-align: left; padding-right: 50px; font-style: italic;">Pembayaran ke rekening:
                         </th>
                         <td style="padding-left: 40px;">Penerima</td>
-                        <td style="align-items:left ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
+                        <td style="align-items:left ;text-align: center;">Jayapura, {{ $formattedDate }}</td>
                     </tr>
                     <tr>
                         <th style="text-align: left; padding-right: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
