@@ -68,10 +68,96 @@
         .table-cus .sticky-footer {
             position: sticky;
             bottom: 0;
-            background-color: rgb(0, 0, 0); /* Sesuaikan warna agar tidak menutupi konten */
+            background-color: #625a5a; /* Sesuaikan warna agar tidak menutupi konten */
             font-weight: bold;
             z-index: 2;
         }
+
+        .sticky-footer {
+    position: sticky;
+    top: 35px; /* sesuaikan ini dengan tinggi header di atasnya */
+    background-color: #625a5a; /* pastikan background tidak transparan */
+    z-index: 5; /* lebih tinggi dari body */
+}
+
+thead tr:nth-child(1) th {
+    position: sticky;
+    top: 2px;
+    z-index: 7;
+    background: #625a5a;
+}
+
+thead tr:nth-child(2) th {
+    position: sticky;
+    top: 35px;
+    z-index: 6;
+    background: #625a5a;
+}
+
+thead tr:nth-child(3) th {
+    position: sticky;
+    top: 70px;
+    z-index: 5;
+    background: #625a5a;
+}
+.form-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    flex: 1 1 30%; /* tiga kolom */
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+
+.form-group input,
+.form-group select{
+    padding: 0.1rem;
+    font-size: 1rem;
+}
+
+.form-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1.5rem;
+}
+
+.form-filter .form-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 200px; /* fleksibel tapi min lebar */
+}
+
+.form-filter .form-group label {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.form-filter .form-group select,
+.form-filter .form-group input {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+}
+
+.form-filter .btn-filter {
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    height: auto;
+    align-self: flex-start;
+}
+
+
 
 
         .table-cus .bg-total1 { background-color: #473f39; color: white; font-weight: bold; text-align: right; }
@@ -86,6 +172,10 @@
         integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
+    <!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
 
     <!-- Card untuk tampilan laporan piutang -->
     <x-keuangan.card-keuangan>
@@ -134,22 +224,42 @@
         <x-slot:tittle>Monitoring Piutang Customer</x-slot:tittle>
     
         <!-- Dropdown untuk memilih tahun -->
-        <form action="{{ route('laporan.Piutang') }}" method="GET">
-            <div class="form-container">
-                <div class="mb-3 mt-3">
-                    <label for="year" class="form-label">Pilih Tahun</label>
-                    <div class="input-group">
-                        <select name="year" id="year" class="form-select">
-                            <option value="" disabled selected>Pilih Tahun</option>
-                            @foreach ($years as $year)
-                                <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="btn btn-primary">Filter</button>
-                    </div>
-                </div>
-            </div>
-        </form>
+<form action="{{ route('laporan.Piutang') }}" method="GET">
+    <div class="form-filter">
+        {{-- Pilih Tahun --}}
+        <div class="form-group">
+            <label for="year">Pilih Tahun</label>
+            <select name="year" id="year">
+                <option value="" disabled {{ request('year') ? '' : 'selected' }}>Pilih Tahun</option>
+                @foreach ($years as $year)
+                    <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Pilih Customer --}}
+        <div class="form-group">
+            <label for="customers">Cari Berdasarkan Customer</label>
+            <select name="customers" id="customers" class="select2">
+                <option></option>
+                @foreach ($customers as $c)
+                    <option value="{{ $c->id }}" {{ request('customers') == $c->id ? 'selected' : '' }}>
+                        {{ $c->nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Tombol Filter --}}
+        <div class="form-group">
+            <label class="invisible">Filter</label>
+            <button type="submit" class="btn btn-primary btn-filter">Filter</button>
+        </div>
+    </div>
+</form>
+
+
+
     
         <div class="table-container">
             <table class="table-cus">
@@ -161,7 +271,7 @@
                     </tr>
                     <tr>
                         @foreach ($months as $month)
-                            <th class="text-center" colspan="2">{{ $month }}</th>
+                            <th class="text-center sticky-footer" colspan="2">{{ $month }}</th>
                         @endforeach
                     </tr>
                     <tr>
@@ -232,6 +342,17 @@
     <x-slot:script>
         <script type="text/javascript" src="{{ asset('assets/js/grid.locale-en.js') }}"></script>
         <script type="text/javascript" src="{{ asset('assets/js/jquery.jqGrid.min.js') }}"></script>
+        <!-- Select2 JS (letakkan sebelum </body>) -->
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+    $(document).ready(function() {
+        $('#customers').select2({
+            placeholder: 'Pilih Customer',
+            allowClear: true
+        });
+    });
+</script>
+
         <script>
             document.addEventListener("DOMContentLoaded", function () {
              // Fungsi untuk memperbarui waktu

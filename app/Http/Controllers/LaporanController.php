@@ -1105,45 +1105,54 @@ public function dataLapPiutangTotal(Request $request)
 public function lapPiutang()
 {
     // Ambil tahun unik dari invoice
+    $customers = Customer::all();
     $years = Invoice::selectRaw('YEAR(tgl_invoice) as year')
         ->groupBy('year')
         ->orderBy('year', 'desc')
         ->pluck('year');
 
     // Ambil data invoice tahun tertentu
-    $invoiceData = Invoice::selectRaw('
-            i.invoice,
-            c.id as customer_id,
-            c.nama as customer_nama,
-            DATE_FORMAT(i.tgl_invoice, "%M") as month, 
-            YEAR(i.tgl_invoice) as year, 
-            COUNT(DISTINCT i.invoice) as invoice_count,  
-            SUM(
-                CASE 
-                    WHEN b.status_ppn = "ya" THEN i.subtotal * 1.11
-                    ELSE i.subtotal
-                END
-            ) as total_omzet
-        ')
-        ->from('invoice as i')
-        ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
-        ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
-        ->join('customer as c', 'sj.id_customer', '=', 'c.id')
-        ->join('barang as b', 't.id_barang', '=', 'b.id')
-        ->whereYear('i.tgl_invoice', request('year') ?? 2025)
-        ->groupBy('i.invoice', 'c.id', 'c.nama', 'year', 'month')
-        ->get();
+   $invoiceData = Invoice::selectRaw('
+        i.invoice,
+        c.id as customer_id,
+        c.nama as customer_nama,
+        DATE_FORMAT(i.tgl_invoice, "%M") as month, 
+        YEAR(i.tgl_invoice) as year, 
+        COUNT(DISTINCT i.invoice) as invoice_count,  
+        SUM(
+            CASE 
+                WHEN b.status_ppn = "ya" THEN i.subtotal * 1.11
+                ELSE i.subtotal
+            END
+        ) as total_omzet
+    ')
+    ->from('invoice as i')
+    ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
+    ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
+    ->join('customer as c', 'sj.id_customer', '=', 'c.id')
+    ->join('barang as b', 't.id_barang', '=', 'b.id')
+    ->whereYear('i.tgl_invoice', request('year') ?? 2025)
+    ->when(request('customers'), function ($query) {
+        $query->where('c.id', request('customers'));
+    })
+    ->groupBy('i.invoice', 'c.id', 'c.nama', 'year', 'month')
+    ->get();
 
-    // Ambil jurnal BBM (untuk pengurangan omzet)
-    $jurnals = Jurnal::withTrashed()
-        ->where('tipe', 'BBM')
-        ->whereNull('deleted_at')
-        ->where('debit', '!=', 0)
-        ->where('tgl', '>', (request('year') ?? 2025) . '-01-01')
-        ->whereNotNull('invoice')
-        ->orderBy('tgl', 'desc')
-        ->get()
-        ->groupBy('invoice'); // berdasarkan nomor invoice
+$jurnals = Jurnal::withTrashed()
+    ->where('tipe', 'BBM')
+    ->whereNull('deleted_at')
+    ->where('debit', '!=', 0)
+    ->where('tgl', '>', (request('year') ?? 2025) . '-01-01')
+    ->whereNotNull('invoice')
+    ->when(request('customers'), function ($query) {
+        $query->whereHas('transaksi.suratJalan.customer', function ($q) {
+            $q->where('id', request('customers'));
+        });
+    })
+    ->orderBy('tgl', 'desc')
+    ->get()
+    ->groupBy('invoice');
+
 
     $mergedResults = [];
     $monthlyTotals = [];
@@ -1216,6 +1225,7 @@ public function lapPiutang()
     ];
 
     return view('jurnal.lap-piutang', compact(
+        'customers',
         'mergedResults',
         'monthlyInvoiceCounts',
         'monthlySelisihInvoice',
