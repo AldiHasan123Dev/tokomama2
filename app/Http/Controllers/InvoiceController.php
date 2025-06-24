@@ -48,6 +48,12 @@ class InvoiceController extends Controller
 
     public function preview(Request $request)
     {
+       if ($request->isMethod('get')) {
+    return redirect()
+        ->route('keuangan.pre-invoice')
+        ->with('error',);
+}
+
         foreach ($request->harga_jual as $id_transaksi => $harga_jual) {
             foreach ($harga_jual as $idx => $item) {
                 $data[$id_transaksi]['harga_jual'][$idx] = $item; 
@@ -110,7 +116,6 @@ class InvoiceController extends Controller
         foreach ($request->jumlah as $id_transaksi => $jumlah) {
             foreach ($jumlah as $idx => $item) {
                 $data[$id_transaksi]['jumlah'][$idx] = $item;
-               
     
                 // Ambil transaksi berdasarkan id_transaksi
                 $trx = Transaction::find($id_transaksi);
@@ -160,11 +165,12 @@ class InvoiceController extends Controller
         foreach ($request->invoice as $id_transaksi => $invoice) {
             array_push($idtsk, $id_transaksi);
         }
-    
+        $modified = null;
+        
         // Menggabungkan data NSFP ke dalam data transaksi
         foreach ($data as $id_transaksi => &$array_data) {
             for ($i = 0; $i < count($array_data['invoice']); $i++) {
-                if ((int)$array_data['jumlah'][$i] > 0) {
+                if ((int)$array_data['jumlah'][$i] > 0 || $array_data['jumlah'][$i]) {
                     $trx = Transaction::find($id_transaksi);
                     if ($trx) {
                         $barang = Barang::find($trx->id_barang);
@@ -177,7 +183,7 @@ class InvoiceController extends Controller
                     
                         // Update nomor NSFP jika diperlukan
                         $nsfp = NSFP::find($id_nsfp);
-                        
+                         $modified = null;
                         if ($nsfp) {
                             $nomor_nsfp = $nsfp->nomor;
                             if ($barang->status_ppn == 'ya') {
@@ -217,7 +223,7 @@ class InvoiceController extends Controller
     {
         // Validasi data yang diterima
          
-        $validatedData = $request->validate([
+$validatedData = $request->validate([
             'nsfp' => 'required',
             'invoice' => 'required',
             'tgl_invoice' => 'required|date',
@@ -238,6 +244,7 @@ class InvoiceController extends Controller
             'data.*.id_nsfp' => 'required|string',
             'data.*.no' => 'required|string',
         ]);
+
         
         // Mengambil data yang divalidasi
         $nsfp = $validatedData['nsfp'];
@@ -386,7 +393,7 @@ class InvoiceController extends Controller
                                 'coa_id' => 52, // COA untuk Pendapatan
                                 'nomor' => $newNoJNL,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Pendapatan ' . $item->transaksi->barang->nama . ' (' . number_format($item->jumlah, 0, ',', '.') . ' ' . $item->transaksi->satuan_jual . ' Harsat ' . number_format($item->transaksi->harga_jual, 2, ',', '.') . ')',
+                                'keterangan' => 'Pendapatan ' . $item->transaksi->barang->nama . ' (' . $item->jumlah . ' ' . $item->transaksi->satuan_jual . ' Harsat ' . number_format($item->transaksi->harga_jual, 2, ',', '.') . ')',
                                 'debit' => 0, // Debit diisi 0
                                 'kredit' => round($item->subtotal), // Hanya subtotal di kredit
                                 'invoice' => $item->invoice,
@@ -428,7 +435,7 @@ class InvoiceController extends Controller
                                     'nomor' => $jurhut,
                                     'tgl' => $tgl,
                                     'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
-                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                ' (' . $item->transaksi->jumlah_jual . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
                                 ' untuk ' . $item->transaksi->suratJalan->customer->nama,
@@ -523,7 +530,7 @@ class InvoiceController extends Controller
                                 'coa_id' => 52,
                                 'nomor' => $newNoJNL,
                                 'tgl' => $tgl,
-                                'keterangan' => 'Pendapatan ' . $item->transaksi->barang->nama . ' (' . number_format($item->jumlah, 0, ',', '.') . ' ' . $item->transaksi->satuan_jual . ' Harsat ' . number_format($item->transaksi->harga_jual, 2, ',', '.') . ')',
+                                'keterangan' => 'Pendapatan ' . $item->transaksi->barang->nama . ' (' . $item->jumlah . ' ' . $item->transaksi->satuan_jual . ' Harsat ' . number_format($item->transaksi->harga_jual, 2, ',', '.') . ')',
                                 'debit' => 0, // Menyimpan subtotal sebagai debit
                                 'kredit' => round($item->subtotal), // Kredit diisi 0
                                 'invoice' => $item->invoice,
@@ -549,7 +556,7 @@ class InvoiceController extends Controller
                                     'nomor' => $jurhut,
                                     'tgl' => $tgl,
                                     'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
-                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                ' (' . $item->transaksi->jumlah_jual . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
                                 ' untuk ' . $item->transaksi->suratJalan->customer->nama,
@@ -656,7 +663,7 @@ class InvoiceController extends Controller
                         'coa_id' => 52, // COA untuk Pendapatan
                         'nomor' => $tipe1,
                         'tgl' => $tgl,
-                        'keterangan' => 'Pendapatan ' . $item->transaksi->barang->nama . ' (' . number_format($item->jumlah, 0, ',', '.') . ' ' . $item->transaksi->satuan_jual . ' Harsat ' . number_format($item->transaksi->harga_jual, 2, ',', '.') . ')',
+                        'keterangan' => 'Pendapatan ' . $item->transaksi->barang->nama . ' (' . $item->jumlah . ' ' . $item->transaksi->satuan_jual . ' Harsat ' . number_format($item->transaksi->harga_jual, 2, ',', '.') . ')',
                         'debit' => 0, // Debit diisi 0
                         'kredit' => round($item->subtotal), // Hanya subtotal di kredit
                         'invoice' => $item->invoice,
@@ -692,7 +699,7 @@ class InvoiceController extends Controller
                                     'nomor' => $jurhutNow,
                                     'tgl' => $tgl,
                                     'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
-                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                ' (' . $item->transaksi->jumlah_jual . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
                                 ' untuk ' . $item->transaksi->suratJalan->customer->nama,
@@ -793,7 +800,7 @@ class InvoiceController extends Controller
                             'coa_id' => 52,
                             'nomor' => $tipe1,
                             'tgl' => $tgl,
-                            'keterangan' => 'Pendapatan ' . $item->transaksi->barang->nama . ' (' . number_format($item->jumlah, 0, ',', '.') . ' ' . $item->transaksi->satuan_jual . ' Harsat ' . number_format($item->transaksi->harga_jual, 2, ',', '.') . ')',
+                            'keterangan' => 'Pendapatan ' . $item->transaksi->barang->nama . ' (' . $item->jumlah . ' ' . $item->transaksi->satuan_jual . ' Harsat ' . number_format($item->transaksi->harga_jual, 2, ',', '.') . ')',
                             'debit' => 0, // Menyimpan subtotal sebagai debit
                             'kredit' => round($item->subtotal), // Kredit diisi 0
                             'invoice' => $item->invoice,
@@ -815,7 +822,7 @@ class InvoiceController extends Controller
                                     'nomor' => $jurhutNow,
                                     'tgl' => $tgl,
                                     'keterangan' => 'HPP ' . $item->transaksi->barang->nama . 
-                                ' (' . number_format($item->transaksi->jumlah_jual, 0, ',', '.') . ' ' . 
+                                ' (' . $item->transaksi->jumlah_jual . ' ' . 
                                 $item->transaksi->satuan_jual . ' Harsat ' . 
                                 number_format($item->transaksi->harga_beli, 2, ',', '.') . ') ' . 
                                 ' untuk ' . $item->transaksi->suratJalan->customer->nama,

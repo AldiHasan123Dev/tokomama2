@@ -95,7 +95,7 @@
                                             </select>
                                     </td>
                                     <td>
-                                        <input type="number" style="width:120px" onchange="inputBarang()" name="jumlah_jual[]" id="jumlah_jual-{{ $i }}"
+                                        <input type="number" step="any" style="width:120px" onchange="inputBarang()" name="jumlah_jual[]" id="jumlah_jual-{{ $i }}"
                                             class="form-control">
                                     </td>
                                     <td>

@@ -82,25 +82,19 @@
             <thead>
                 <tr>
                     <th rowspan="4" style="width: 15%; margin-bottom:40px;">
-                        {{-- <img src="{{ public_path('tokomama.svg') }}" class="logo" style="width: 60%; height: 50%;"> --}}
+                        <img src="{{ public_path('tokomama.svg') }}" class="logo" style="width: 60%; height: 50%;">
                     </th>
-                    <td style="font-weight: bold; font-size: 1rem;">
-                        {{-- MAMA BAHAGIA 2 --}}
-                    </td>
+                    <td style="font-weight: bold; font-size: 1rem;">MAMA BAHAGIA</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem; font-weight: bold;">
-                        {{-- Jl. Baru - Melati (Ruko depan PLN) --}}
-                        <br> 
-                        {{-- Abepura, Jayapura --}}
+                    <td style="font-size: 0.8rem; font-weight: bold;">Jl. Baru - Melati (Ruko depan PLN)
+                        <br> Abepura, Jayapura
                     </td>
                     <td style="font-weight: bold; font-size: 1rem; text-align: center;"><u>INVOICE</u></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem; font-weight: bold;">
-                        {{-- HP: 08112692861 / 08112692859 --}}
-                    </td>
+                    <td style="font-size: 0.8rem; font-weight: bold;">HP: 08112692861 / 08112692859</td>
                     <td style="text-align: center; font-size: 0.8rem">NO : {{ $invoice ?? '-' }}</td>
                 </tr>
                 <tr>
@@ -190,11 +184,12 @@
                     $hasil_bagi = (int) ($angka / 1000000);
                     $hasil_mod = $angka % 1000000;
                     return trim(sprintf('%s juta %s', terbilang($hasil_bagi), terbilang($hasil_mod)));
-                } elseif ($angka < 100000000000000) {
+                } elseif ($angka < 1000000000000) {
                     $hasil_bagi = (int) ($angka / 1000000000);
                     $hasil_mod = fmod($angka, 1000000000);
                     return trim(sprintf('%s miliar %s', terbilang($hasil_bagi), terbilang($hasil_mod)));
-                } else {
+                }
+                else {
                     return 'Angka terlalu besar';
                 }
             }
@@ -240,7 +235,7 @@
                             <td class="border border-black">
                                 {{ $item->transaksi->barang->nama }} <br>
                                 @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
-                                    (Total {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                    (Total {{ $item->jumlah * $item->transaksi->barang->value }}
                                     {{ $item->transaksi->barang->satuan->nama_satuan }}
                                     {{ $item->transaksi->keterangan != '' || !is_null($item->transaksi->keterangan) ? '= ' . $item->transaksi->keterangan : '' }})
                                 @else
@@ -255,7 +250,7 @@
                                     -
                                 @endif
                             </td>
-                            <td class="text-center border border-black">{{ number_format($item->jumlah, 0, ',', '.') }}
+                            <td class="text-center border border-black">{{ $item->jumlah }}
                                 {{ $item->transaksi->satuan_jual }} X
                                 @if ($barang->status_ppn == 'ya')
                                     {{ number_format($item->harga * 1.11, 0, ',', '.') }}
@@ -267,7 +262,7 @@
                             <td class="border border-black text-center">
                                 @if ($item->transaksi->satuan_jual == 'KG' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
                                     {{-- Tampilkan jumlah dalam satuan --}}
-                                    {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                    {{ $item->jumlah * $item->transaksi->barang->value }}
                                     {{ $item->transaksi->barang->satuan->nama_satuan }}
                             
                                     {{-- Tampilkan konversi harga per KG --}}
@@ -284,7 +279,7 @@
                                     @endif
                                     @elseif ($item->transaksi->satuan_jual == 'KWT' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
                                       {{-- Tampilkan jumlah dalam satuan --}}
-                                      {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                      {{ $item->jumlah * $item->transaksi->barang->value }}
                                       {{ $item->transaksi->barang->satuan->nama_satuan }}
                               
                                       {{-- Tampilkan konversi harga per KG --}}
@@ -304,6 +299,7 @@
                                 @endif
                             </td>
                             @endif
+                            
                             <td class="border border-black" style="text-align: right;">
                                 @if ($barang->status_ppn == 'ya')
                                     {{ number_format($item->harga * 1.11 * $item->jumlah, 0, ',', '.') }}
@@ -313,29 +309,29 @@
                             </td>
                         </tr>
                     @endfor
-                    @if ($page == $pages) 
-                    <tr>
-                        @php
-                        $dpp = $total * 11/12;
-                        $ppn = ($barang->value_ppn / 100) * $dpp;
-                    @endphp
-                       @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
-                       <td colspan="5" class="border border-black" style="text-align: right;">
-                           <b>TOTAL</b>
-                       </td>
-                       @else
-                       <td colspan="4" class="border border-black" style="text-align: right;">
-                           <b>TOTAL</b>
-                       </td>
-                       @endif
-                        <td class="border border-black" style="text-align: right;" >
-                        @if($barang->status_ppn == 'ya')
-                            <b>{{ number_format($total * 1.11, 0, ',', '.') }}</b>
-                        @else
-                            <b>{{ number_format($total, 0, ',', '.') }}</b>
-                        @endif
-                        </td>
-                    {{-- <td colspan="5"  style="text-align: right;">
+                    @if ($page == $pages)
+                        <tr>
+                            @php
+                                $dpp = ($total * 11) / 12;
+                                $ppn = ($barang->value_ppn / 100) * $dpp;
+                            @endphp
+                            @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
+                            <td colspan="5" class="border border-black" style="text-align: right;">
+                                <b>TOTAL</b>
+                            </td>
+                            @else
+                            <td colspan="4" class="border border-black" style="text-align: right;">
+                                <b>TOTAL</b>
+                            </td>
+                            @endif
+                            <td class="border border-black" style="text-align: right;">
+                                @if ($barang->status_ppn == 'ya')
+                                    <b>{{ number_format($total * 1.11, 0, ',', '.') }}</b>
+                                @else
+                                    <b>{{ number_format($total, 0, ',', '.') }}</b>
+                                @endif
+                            </td>
+                            {{-- <td colspan="5"  style="text-align: right;">
                         Subtotal
                         <br>
                         DPP 11/12
@@ -345,11 +341,11 @@
                         @else
                         PPN 12% (DIBEBASKAN)
                         @endif
-                    </td> --}}
+                    </td>
+                    <td class="border border-black" style="text-align: right;" >
                         @php
                             $dpp = $total * 11/12;
                         @endphp
-                    {{-- <td class="border border-black" style="text-align: right;" >
                     {{ number_format($total, 0, ',', '.') }}
                     <br>
                         @if ($barang->status_ppn == 'ya')
@@ -358,7 +354,7 @@
                         -
                     @endif
                     <br>
-                    @if($barang->status_ppn == 'ya')
+                    @if ($barang->status_ppn == 'ya')
                     @php
                         $ppn = ($barang->value_ppn / 100) * $dpp
                     @endphp
@@ -367,74 +363,72 @@
                         -
                     @endif
                     </td> --}}
-                </tr>
-                {{-- <tr> --}}
-                    {{-- <td colspan="5" class="border border-black" style="text-align: right;">
+                        </tr>
+                        {{-- <tr> --}}
+                        {{-- <td colspan="5" class="border border-black" style="text-align: right;">
                         <b>TOTAL</b>
                     </td>
                     <td class="border border-black" style="text-align: right;" >
-                    @if($barang->status_ppn == 'ya')
+                    @if ($barang->status_ppn == 'ya')
                         <b>{{ number_format($ppn + $total, 0, ',', '.') }}</b>
                     @else
                         <b>{{ number_format($total, 0, ',', '.') }}</b>
                     @endif
                     </td> --}}
-                {{-- </tr> --}}
+                        {{-- </tr> --}}
                 </tbody>
-                @endif
-            </table>
-
-    <div class="footer">
-        @if ($page == $pages)
-            <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem"> 
-                Terbilang: 
-                @if($barang->status_ppn == 'ya')
-                    {{ ucwords(strtolower(terbilang(round($ppn + $total)))) }} Rupiah
-                @else
-                    {{ ucwords(strtolower(terbilang(round($total)))) }} Rupiah
-                @endif
-            </p>
-            <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem">
-                Penagihan oleh : Bpk. Immanuel (Kolektor)
-            </p>
-            <table style="font-size: 0.8rem;">
-                <tr>
-                    <th style="text-align: left; padding-right: 50px; font-style: italic;"></th>
-                    <td style="padding-left: 40px;"></td>
-                    <td style="align-items:left ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding-right: 50px; font-style: italic;"></th>
-                    <td></td>
-                    <td style="text-align: center;">Hormat Kami</td>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding-right: 50px; font-style: italic;"></th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding-left: 50px;"></th>
-                    <td style="padding-top:30px;">_____________________</td>
-                    <th style="padding-top:50px">(MAMA BAHAGIA)</th>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>TD. Tgn & Nama Terang</td>
-                    <td></td>
-                </tr>
-            </table>
         @endif
-    
-    </div>
-    <p class="page-number" style=" position: fixed; align-items:bottom ; left: 10px; bottom: -20px; margin: 0; font-size: 0.8rem;">Hal: {{ $page }} dari {{ $pages }}</p>
-
-
-            
-
-            @if ($page < $pages)
-                <div class="page-break"></div>
-                
+        </table>
+        <div class="footer">
+            @if ($page == $pages)
+                <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem">
+                    Terbilang:
+                    @if ($barang->status_ppn == 'ya')
+                        {{ ucwords(strtolower(terbilang(round($total * 1.11)))) }} Rupiah
+                    @else
+                        {{ ucwords(strtolower(terbilang(round($total)))) }} Rupiah
+                    @endif
+                </p>
+                <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem">
+                    Penagihan oleh : Bpk. Immanuel (Kolektor)
+                </p>
+                <table style="font-size: 0.8rem;">
+                    <tr>
+                        <th style="text-align: left; padding-right: 50px; font-style: italic;">Pembayaran ke rekening:
+                        </th>
+                        <td style="padding-left: 40px;">Penerima</td>
+                        <td style="align-items:left ;text-align: center;">Surabaya, {{ $formattedDate }}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
+                        <td></td>
+                        <td style="text-align: center;">Hormat Kami</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 50px; font-style: italic;"> Bank Mandiri <br>
+                            14.000.45006.005</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-left: 50px;"></th>
+                        <td style="padding-top:30px;">_____________________</td>
+                        <th style="padding-top:30px">(MAMA BAHAGIA)</th>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>TD. Tgn & Nama Terang</td>
+                        <td></td>
+                    </tr>
+                </table>
             @endif
+
+        </div>
+        <p class="page-number"
+            style=" position: fixed; align-items:bottom ; left: 10px; bottom: -20px; margin: 0; font-size: 0.8rem;">Hal:
+            {{ $page }} dari {{ $pages }}</p>
+        @if ($page < $pages)
+            <div class="page-break"></div>
+        @endif
         @endfor
     </main>
 </body>

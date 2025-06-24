@@ -1,42 +1,20 @@
 <x-Layout.layout>
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Preview Invoice</x-slot:tittle <div class="header">
+        <x-slot:tittle>Preview Direct Sale</x-slot:tittle <div class="header">
         <div style=" display: flex; border: solid; justify-content: space-between; padding: 5px; margin-top: 30px;">
-            <table style="width: 50%; border-collapse: collapse;" border="1">
+            <table style="width: 20%; border-collapse: collapse;" border="1">
                 <thead>
                     <tr>
                         <td style="font-weight: bold; padding: 0; text-align: center;">
                             <img src="{{ asset('tokomama.svg') }}" alt="Logo"
-                                style="height: 100px; margin-bottom: 1px; margin-left: 60px">
-                            MAMA BAHAGIA 2 <br>
-                            Jl. Baru - Melati (Ruko depan PLN) Abepura, Jayapura <br>
+                                style="height: 100px; margin-bottom: 1px; margin-left: 40px">
+                            MAMA BAHAGIA <br>
+                            Jl. Baru (Ruko depan PLN) Abepura, Jayapura <br>
                         </td>
                     </tr>
                 </thead>
             </table>
-            <div style="margin-right: 100px; width: 48%;">
-                <table style="width: 120%; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
-                    <thead>
-                        <tr>
-                            <td style="font-weight: bold;">Bill To :</td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight: bold; margin:2px">{{ $transaksi->suratJalan->customer->nama }}</td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight: bold;">{{ $transaksi->suratJalan->customer->no_telp }}</td>
-                        </tr>
-                    </thead>
-                </table>
-                <table style="width: 120%; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
-                    <thead>
-                        <tr>
-                            <td style="font-weight: bold;">{{ $transaksi->suratJalan->customer->alamat_npwp }}</td>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-            <div style="margin-right: 50px; width: 108%; margin-top: 20px;">
+            <div style="margin-right: 50px; width: 108%; margin-top: 25px;">
                 <table style="width: 100%; border: solid; border-collapse: collapse; margin-top: 10px;" border="1">
                     <thead>
                         <tr>
@@ -46,14 +24,14 @@
                 </table>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <!-- Baris Pertama: NO INVOICE dan TGL INVOICE -->
-                    <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
                         <!-- Tabel NO INVOICE -->
                         <table style="width: 48%; border-collapse: collapse;" border="1">
                             <thead>
                                 <tr>
                                     <th
-                                        style="font-weight: bold; border: solid; padding: 8px; min-width: 150px; text-align: left; white-space: nowrap;">
-                                        Tgl Invoice : {{ $tgl_inv2 }}
+                                        style="font-weight: bold; border: solid; padding: 8px; min-width: 150px; text-align: center; white-space: nowrap;">
+                                      Bill : {{ $nama_cust }}
                                     </th>
                                 </tr>
                             </thead>
@@ -71,35 +49,6 @@
                             </thead>
                         </table>
                     </div>
-
-                    <!-- Baris Kedua: KETERANGAN dan TOTAL -->
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px">
-                        <!-- Tabel KETERANGAN -->
-                        <table style="width: 48%; border-collapse: collapse;" border="1">
-                            <thead>
-                                <tr>
-                                    <th
-                                        style="font-weight: bold; border: solid; padding: 8px; min-width: 150px; text-align: left; white-space: nowrap;">
-                                        Terms : {{ $transaksi->suratJalan->customer->top }}
-                                    </th>
-                                </tr>
-                            </thead>
-                        </table>
-
-                        <!-- Tabel TOTAL -->
-                        <table style="width: 48%; border-collapse: collapse;" border="1">
-                            <thead>
-                                <tr>
-                                    <th
-                                        style="font-weight: bold; border: solid; padding: 8px; min-width: 150px; text-align: center; white-space: nowrap;">
-                                        Tgl SJ : {{ $transaksi->suratJalan->created_at->format('Y-m-d') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-
             </div>
 
         </div>
@@ -195,7 +144,7 @@
                 @endphp
 
                 <table
-                    style="width: 100%; margin-top: 25px; margin: 5px; border: solid; border-collapse: collapse; margin-top: 5px;"
+                    style="width: 80%; margin-top: 25px; margin: 5px; border: solid; border-collapse: collapse; margin-top: 5px;"
                     border="1">
                     @php
                         $end_date = min($start_date + $dates_per_page, $total_dates);
@@ -211,7 +160,6 @@
                                 <th style="text-align: center;  border:solid; padding: 8px;">QTY</th>
                                 <th style="text-align: center;  border:solid; padding: 8px;">Unit</th>
                                 <th style="text-align: center;  border:solid; padding: 8px;">Harga Satuan(Rp)</th>
-                                <th style="text-align: center;  border:solid; padding: 8px;">PO</th>
                                 <th style="text-align: center;  border:solid; padding: 8px;">Total</th>
                             </tr>
                         </thead>
@@ -225,7 +173,7 @@
                                     @foreach ($items['invoice'] as $idx => $invoice)
                                         @php
                                             $jumlah = $items['jumlah'][$idx] ?? 0; // Cegah error jika jumlah tidak ada
-                                            $harga = $invoice['harga'] ?? 0; // Cegah error jika harga tidak ada
+                                            $harga = $invoice['harga_jual'] ?? 0; // Cegah error jika harga tidak ada
                                             $total += $items['harga_jual'][$idx] * $items['jumlah'][$idx];
                                             $total_all += $total;
                                         @endphp
@@ -234,7 +182,7 @@
                                                 {{ $index++ }}</td>
                                             <td style=" border:solid; padding-left: 10px;">
                                                 {{ $items['nama_barang'][$idx] }}
-                                                ({{ $items['jumlah_jual'][$idx] }}
+                                                ({{ $items['jumlah'][$idx] }}
                                                 {{ $items['satuan_jual'][$idx] }})
                                                 @if (str_contains($items['satuan_jual'][$idx], $items['nama_satuan'][$idx]))
                                                     @php
@@ -259,7 +207,7 @@
                                             </td>
                                             @php
                                              if ($items['status_ppn'][$idx] == 'ya') {
-                                                 $harga_jual = $items['harga_jual'][$idx] * 1.11;
+                                                 $harga_jual = $items['harga_jual'][$idx];
                                              } else {
                                                 $harga_jual = $items['harga_jual'][$idx];
                                              }
@@ -270,8 +218,6 @@
                                                 {{ $items['satuan_jual'][$idx] }}</td>
                                             <td style=" border:solid; text-align: right; padding: 8px;">
                                                 {{ number_format($harga_jual, 0, ',', '.') }}</td>
-                                            <td style=" border:solid; text-align: center; padding: 8px;">
-                                                {{ $items['no_po'][$idx] }}</td>
                                             <td style=" border:solid; text-align: right; padding: 8px;">
                                                 {{ number_format($harga_jual * $items['jumlah'][$idx], 0, ',', '.') }}
                                             </td>
@@ -282,7 +228,7 @@
                             @endforeach
             @endfor
             <tr>
-                <td colspan="5">
+                <td colspan="4">
                     <p style="font-weight: bold; padding-left: 30px; font-size: 0.8rem">
                         Terbilang:
                         @php
@@ -324,7 +270,7 @@
                             }
 
                             // Hitung total PPN jika ada
-                            $total_with_ppn = $has_ppn ? $dpp + $total + $total_ppn : $total;
+                            $total_with_ppn = $has_ppn ? $total : $total;
                         @endphp
                         @if ($barang->status_ppn == 'ya')
                             {{ ucwords(strtolower(terbilang(round($total_with_ppn)))) }}
@@ -333,24 +279,6 @@
                             {{ ucwords(strtolower(terbilang(round($total_with_ppn)))) }} Rupiah
                         @endif
                     </p>
-                    <table style="font-size: 0.8rem;">
-                        <tr>
-                            <th style="text-align: left; padding-left: 50px; font-style: italic;">Pembayaran ke
-                                rekening:</th>
-                        </tr>
-                        <tr>
-                            <th style="text-align: left; padding-left: 50px; font-style: italic;">CV. Sarana Bahagia
-                            </th>
-                        </tr>
-                        <tr>
-                            <th style="text-align: left; padding-left: 50px; font-style: italic;"> Bank Mandiri
-                                : 14.000.45006.005</th>
-                            <th></th>
-                        </tr>
-                        <tr>
-                            <th style="text-align: left; padding-left: 50px;"></th>
-                        </tr>
-                    </table>
                 </td>
                 {{-- <td colspan="1" style=" border:solid; text-align: right; padding: 10px;">
                     Subtotal
@@ -424,7 +352,7 @@
                 </td>
             </tr> --}}
             <tr>
-                <td colspan="6" style=" border:solid; text-align: right; padding: 8px;">
+                <td colspan="5" style=" border:solid; text-align: right; padding: 8px;">
                     <b>TOTAL</b>
                 </td>
                 <td style=" border:solid; text-align: right; padding: 8px;">
@@ -446,7 +374,7 @@
                         }
 
                         // Hitung total PPN jika ada
-                        $total_with_ppn = $has_ppn ? $dpp + $total + $total_ppn : $total;
+                        $total_with_ppn = $has_ppn ? $total : $total;
                     @endphp
 
                     {{-- Menampilkan total --}}
@@ -461,7 +389,7 @@
                 <table style="font-size: 0.8rem; margin-left: 870px; margin-top: 20px">
                     <tr>
                         <th style="text-align: left; padding-left: 50px; font-style: italic;"></th>
-                        <td style="align-items:right ;text-align: center;">Jayapura, {{ $tgl_inv1 }}</td>
+                        <td style="align-items:right ;text-align: center;">Jayapura, {{ $tgl_inv }}</td>
                     </tr>
                     <tr>
                         <th style="text-align: left; padding-left: 50px; font-style: italic;"></th>
@@ -478,22 +406,26 @@
                 </table>
 
             </div>
-            <form action="{{ route('invoice-transaksi.store') }}" method="post" id="form">
+            <form action="{{ route('invoice-ds.store') }}" method="post" id="form" target="_blank">
                 @csrf
                 @foreach ($data as $id_transaksi => $items)
                     @if (isset($items['invoice']))
                         @foreach ($items['invoice'] as $idx => $invoice)
-                            <input type="hidden" name="tgl_invoice" value="{{ $tgl_inv2 }}">
-                            <input type="hidden" name="tipe" value="{{ $tipe }}">
+                            <input type="hidden" name="tgl_invoice" value="{{ $tgl }}">
+                            <input type="hidden" name="tipe" value="{{ $tipeJurnal }}">
                             <input type="hidden" name="invoice" value="{{ $inv }}">
                             <input type="hidden" name="nsfp" value="{{ $modified }}">
-                            <input type="hidden" name="invoice_count" value="{{ $invoice_count }}">
+                            <input type="hidden" name="invoice_count" value="{{ $jumlahBarang }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][jumlah][]"
                                 value="{{ $items['jumlah'][$idx] ?? 0 }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][satuan_jual][]"
                                 value="{{ $items['satuan_jual'][$idx] ?? '' }}">
+                             <input type="hidden" name="data[{{ $id_transaksi }}][satuan_beli][]"
+                                value="{{ $items['satuan_beli'][$idx] ?? '' }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][harga_jual][]"
                                 value="{{ $items['harga_jual'][$idx] ?? 0 }}">
+                            <input type="hidden" name="data[{{ $id_transaksi }}][jumlah][]"
+                                value="{{ $items['jumlah'][$idx] ?? 0 }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][jumlah_jual][]"
                                 value="{{ $items['jumlah_jual'][$idx] ?? 0 }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][keterangan][]"
@@ -502,6 +434,22 @@
                                 value="{{ $items['nama_satuan'][$idx] ?? '' }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][nama_barang][]"
                                 value="{{ $items['nama_barang'][$idx] ?? '' }}">
+                            <input type="hidden" name="data[{{ $id_transaksi }}][id_barang][]"
+                                value="{{ $items['id_barang'][$idx] ?? '' }}">
+                                <input type="hidden" name="data[{{ $id_transaksi }}][id_supplier][]"
+                                value="{{ $items['id_supplier'][$idx] ?? '' }}">
+                                <input type="hidden" name="data[{{ $id_transaksi }}][harga_beli][]"
+                                value="{{ $items['harga_beli'][$idx] ?? '' }}">
+                                <input type="hidden" name="data[{{ $id_transaksi }}][jumlah_beli][]"
+                                value="{{ $items['jumlah_beli'][$idx] ?? '' }}">
+                                <input type="hidden" name="data[{{ $id_transaksi }}][sisa][]"
+                                value="{{ $items['sisa'][$idx] ?? '' }}">
+                                 <input type="hidden" name="data[{{ $id_transaksi }}][no_bm][]"
+                                value="{{ $items['no_bm'][$idx] ?? '' }}">
+                                 <input type="hidden" name="data[{{ $id_transaksi }}][invoice_external][]"
+                                value="{{ $items['invoice_external'][$idx] ?? '' }}">
+                                <input type="hidden" name="data[{{ $id_transaksi }}][stts][]"
+                                value="{{ $items['stts'][$idx] ?? '' }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][status_ppn][]"
                                 value="{{ $items['status_ppn'][$idx] ?? '' }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][value_ppn][]"
@@ -517,6 +465,10 @@
                         @endforeach
                     @endif
                 @endforeach
+               @foreach ($surat_jalan as $key => $value)
+    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+@endforeach
+
 
                 <button class="btn bg-red-500 font-semibold justify-align-center text-white w-300 mt-3" type="button"
                     onclick="window.history.back();">
@@ -524,7 +476,7 @@
                 </button>
                 <button class="btn bg-green-500 font-semibold justify-align-center text-white w-300 mt-3"
                     onclick="return confirm('MOHON DICEK DENGAN CERMAT. KEKELIRUAN PADA PROSES INVOICING INI AKAN BERDAMPAK KOMPLEKS, MEMERLUKAN WAKTU PANJANG UNTUK PEMULIHAN. PENGECEKAN MELIPUTI QTY BARANG,HARGA JUAL, TANGGAL INVOICE DAN PENGECEKAN SATUAN.')" type="submit">
-                    Submit Invoice
+                    Submit Pembayaran
                 </button>
             </form>
 

@@ -209,7 +209,7 @@
         </div>
     </x-keuangan.card-keuangan>
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Kartu Stock</x-slot:tittle>
+        <x-slot:tittle>Kartu Stock Jayapura</x-slot:tittle>
         <div class="card bg-white shadow-sm">
             <div class="card-body">
                 <div class="grid grid-cols-4">
@@ -377,8 +377,8 @@
                         <th>Tgl SJ</th>
                         <th>Invoice</th>
                         <th>Customer</th>
-                        <th>Jumlah Beli</th>
-                        <th>Jumlah Jual</th>
+                        <th>Masuk</th>
+                        <th>Keluar</th>
                         <th>Sisa</th>
                     </tr>
                 </thead>

@@ -171,7 +171,7 @@
                             <span>{{ $i + 1 }}</span><br>
                         </td>
                         <td class="text-center" style="vertical-align: top; border-right: 1px solid black">
-                            <span>{{ number_format($item->jumlah_jual) }}</span>
+                            <span>{{ $item->jumlah_jual }}</span>
                         </td>
                         <td class="text-center" style="vertical-align: top; border-right: 1px solid black">
                             <span>{{ $item->satuan_jual }}</span><br>
@@ -179,14 +179,14 @@
                         <td class="px-2" style="padding: 0px 2px">
                             
                                 <span>{{ $item->barang->nama_singkat }}</span>
-                                <span>({{ number_format($item->jumlah_jual) }} {{ $item->satuan_jual }})</span>
+                                <span>({{ $item->jumlah_jual }} {{ $item->satuan_jual }})</span>
                             @if (str_contains($item->satuan_jual, $item->barang->satuan->nama_satuan))
                                 @php
-                                    $t = (int)$item->jumlah_jual;
+                                    $t = $item->jumlah_jual;
                                 @endphp
                             @else
                                 @php
-                                    $t = (double)$item->barang->value * (int)$item->jumlah_jual;
+                                    $t = (double)$item->barang->value * $item->jumlah_jual;
                                 @endphp
                             @endif
                             @if($item->satuan_jual != $item->barang->satuan->nama_satuan )

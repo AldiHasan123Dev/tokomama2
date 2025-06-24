@@ -10,11 +10,11 @@ use App\Models\Invoice;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Barang;
+use App\Models\Jurnal;
 use App\Models\Satuan;
 use Illuminate\Support\Collection;
 use App\Models\Transaction;
-
-use App\Models\Jurnal;
+use Carbon\Carbon;
 
 class StockController extends Controller
 {
@@ -459,102 +459,107 @@ public function stockCSV19()
 
     // Ambil parameter dari request
     $barang_id = $request->get('barang') ?? null;
-    $month = $request->get('month') ?? null; // Default ke bulan Maret
-    $year = $request->get('year', 2025);
+    $month = $request->get('month') ?? date('m'); // Default ke bulan sekarang jika null
+    $year = $request->get('year', date('Y'));
 
     $months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
-    if($barang_id === null) {
-        $data = Transaction::with('barang', 'suratJalan')
-        ->whereNull('id_surat_jalan')
-        ->whereNotNull('no_bm')
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+    $tglAwal = Carbon::createFromDate($year, 1, 1)->startOfDay();
+    $tglAkhir = Carbon::createFromDate($year, $month, 1)->endOfMonth()->endOfDay();
 
-        $data2 = Transaction::with('barang', 'suratJalan')
-        ->whereNull('id_surat_jalan')
-        ->whereNotNull('no_bm')
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
-        
-        $data1 = Transaction::with('barang', 'suratJalan')
-        ->whereNotNull('no_bm')
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+    if ($barang_id === null) {
+        $data = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNull('id_surat_jalan')
+            ->whereNotNull('no_bm')
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
 
-        $data3 = Transaction::with('barang', 'suratJalan')
-        ->whereNotNull('no_bm')
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
-    } else{
+        $data2 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNull('id_surat_jalan')
+            ->whereNotNull('no_bm')
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
 
-        $data = Transaction::with('barang', 'suratJalan')
-        ->whereNull('id_surat_jalan')
-        ->whereBetween('tgl_bm', [
-           '2025-01-01',
-            \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth(),
-        ])
-        ->whereNotNull('no_bm')
-        ->when($barang_id, function ($q) use ($barang_id) {
-            $q->where('id_barang', $barang_id);
-        })
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+        $data1 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNotNull('no_bm')
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
 
-        $data2 = Transaction::with('barang', 'suratJalan', 'invoices')
-    ->whereNull('id_surat_jalan')
-    ->whereYear('tgl_bm', $year)
-    ->whereMonth('tgl_bm', $month)
-    ->whereNotNull('no_bm')
-    ->when($barang_id, function ($q) use ($barang_id) {
-        $q->where('id_barang', $barang_id);
-    })
-    ->orderBy('created_at', 'asc')
-    ->orderBy('no_bm', 'asc')
-    ->get();
-    
-        // Query transaksi barang keluar (ada surat jalan di bulan & tahun tertentu)
-        $data1 = Transaction::with('barang', 'suratJalan')
-        ->whereHas('suratJalan', function ($q) use ($month, $year) {
-            $q->whereBetween('tgl_sj', [
-               '2025-01-01',
-                \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth(),
-            ]);
-        })
-        ->whereNotNull('no_bm')
-        ->when($barang_id, function ($q) use ($barang_id) {
-            $q->where('id_barang', $barang_id);
-        })
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+        $data3 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNotNull('no_bm')
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
+    } else {
+        $data = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereNull('id_surat_jalan')
+            ->whereNotNull('stts')
+            ->whereHas('jurnals', function ($q) use ($tglAwal, $tglAkhir) {
+                $q->whereBetween('tgl', [$tglAwal, $tglAkhir]);
+            })
+            ->whereNotNull('no_bm')
+            ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
 
-        $data3 = Transaction::with('barang', 'suratJalan', 'invoices')
-        ->whereHas('suratJalan', function ($q) use ($year, $month) {
-            $q->whereYear('tgl_sj', $year)
-              ->whereMonth('tgl_sj', $month);
-        })
-        ->whereNotNull('no_bm')
-        ->when($barang_id, function ($q) use ($barang_id) {
-            $q->where('id_barang', $barang_id);
-        })
-        ->orderBy('created_at', 'asc')
-        ->orderBy('no_bm', 'asc')
-        ->get();
+       $data2 = Transaction::with([
+    'barang', 
+    'suratJalan', 
+    'invoices', 
+    'jurnals' => function ($q) use ($year, $month) {
+        $q->whereYear('tgl', $year)
+          ->whereMonth('tgl', $month);
+    }
+])
+->whereNull('id_surat_jalan')
+->whereNotNull('stts')
+->whereNotNull('no_bm')
+->whereHas('jurnals', function ($q) use ($year, $month) {
+    $q->whereYear('tgl', $year)
+      ->whereMonth('tgl', $month);
+})
+->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+->orderBy('created_at')
+->orderBy('no_bm')
+->get();
+
+
+
+        $data1 = Transaction::with(['barang', 'suratJalan', 'jurnals'])
+            ->whereHas('suratJalan', function ($q) use ($tglAwal, $tglAkhir) {
+                $q->whereBetween('tgl_sj', [$tglAwal, $tglAkhir]);
+            })
+            ->whereNotNull('no_bm')
+            ->whereNotNull('stts')
+            ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
+
+        $data3 = Transaction::with(['barang', 'suratJalan', 'invoices', 'jurnals'])
+            ->whereHas('suratJalan', function ($q) use ($year, $month) {
+                $q->whereYear('tgl_sj', $year)
+                ->whereMonth('tgl_sj', $month);
+            })
+            ->whereNotNull('no_bm')
+            ->whereNotNull('stts')
+            ->when($barang_id, fn($q) => $q->where('id_barang', $barang_id))
+            ->orderBy('created_at')
+            ->orderBy('no_bm')
+            ->get();
     }
     $hasil = [];
 
 // Barang masuk (data)
 foreach ($data as $item) {
-    if (!$item->tgl_bm) continue;
+    if (!optional($item->jurnals->firstWhere('coa_id', 89))->tgl) continue;
 
     $id = $item->id_barang;
-    $tgl = $item->tgl_bm;
+    $tgl = optional($item->jurnals->firstWhere('coa_id', 89))->tgl;
     $bulanIndex = (int) date('n', strtotime($tgl)) - 1;
 
     if (!isset($hasil[$id])) {
@@ -635,14 +640,14 @@ $gabungan = [];
 
 // Gabung data beli
 foreach ($data2 as $item) {
-    if (!$item->tgl_bm) continue;
+    if (!optional($item->jurnals->firstWhere('coa_id', 89))->tgl) continue;
 
     $gabungan[] = [
         'tipe' => 'beli',
         'id_barang' => $item->id_barang,
         'barang' => $item->barang->nama ?? '-',
         'no' => $item->no_bm,
-        'tgl' => $item->tgl_bm,
+        'tgl' => optional($item->jurnals->firstWhere('coa_id', 89))->tgl,
         'jumlah' => $item->jumlah_beli,
         'stock_awal' => $hasil[$item->id_barang]['detail'][$bulanIndex]['stock_awal'] ?? 0,
         'harga' => $item->harga_beli
@@ -727,6 +732,211 @@ foreach ($gabungan as $item) {
         $suppliers = Supplier::all();
         return view('toko.stocks', compact('barangs','suppliers'));
     }
+
+     public function lapQty(){
+        return view('jurnal.lap-qty');
+    }
+
+public function qty()
+{
+    $page   = request('page', 1);
+    $limit  = request('rows', 10);
+    $sidx   = request('sidx', 'transaksi.id');
+    $sord   = request('sord', 'asc');
+    $search = request('_search') === 'true';
+
+    // Query utama
+    $query = Transaction::with(['jurnals', 'barang.satuan', 'suppliers']) // Pastikan relasi ini ada di model
+        ->whereNotNull('stts')
+        ->orderBy('no_bm', 'desc');
+
+    // Filter tambahan berdasarkan tgl_pembayar dan invoice (jika Anda punya relasi atau join)
+    if ((request('periode') !== null && request('periode') !== '') || request('invx') !== null && request('invx') !== '') {
+    $query->when(request('periode') !== null && request('periode') !== '', function ($q) {
+        $periode = request('periode'); // format: Y-m
+        $tahun = substr($periode, 0, 4);
+        $bulan = substr($periode, 5, 2);
+       $tglAwal = Carbon::createFromDate($tahun, 1, 1)->startOfDay();
+$tglAkhir = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->endOfDay();
+       $q->whereHas('jurnal', function ($query) use ($tglAwal, $tglAkhir) {
+    $query->whereBetween('tgl', [$tglAwal, $tglAkhir]);
+});
+
+    });
+
+    $query->when(request('invx') !== null && request('invx') !== '', function ($q) {
+        $q->where('invoice_external', 'like', '%' . request('invx') . '%');
+    });
+}
+
+
+$transaksis = $query->get();
+
+$keluar = [];
+$grouped = [];
+
+foreach ($transaksis as $item) {
+    $cloned = clone $item;
+
+    if (empty($cloned->tgl_bm)) {
+        $cloned->jumlah_beli = 0;
+        $key = $cloned->invoice_external;
+        $keluar[$key][] = $cloned; // Note: array of items untuk konsistensi
+    } else {
+        $cloned->jumlah_jual = 0;
+        $key = $cloned->no_bm . '||' . $cloned->invoice_external;
+        $grouped[$key][] = $cloned;
+    }
+}
+
+// Gabungkan grouped dan keluar
+$combined = collect(array_merge($grouped, $keluar));
+
+// $keluar dan $grouped tetap seperti yang kamu punya
+
+// Gabungkan $keluar dan $grouped ke dalam satu array besar
+
+// Kumpulkan data per id_barang
+$byInvoice = [];
+
+foreach ($combined as $key => $items) {
+    foreach ($items as $item) {
+        $invx = $item->invoice_external ?? null;
+        $idBarang = $item->barang->id ?? null;
+        $no_bm = $item->no_bm?? null;
+
+        if ($invx === null || $idBarang === null) continue;
+
+        $groupKey = $invx . '||' . $idBarang . '||' . $no_bm;
+
+        if (!isset($byInvoice[$groupKey])) {
+            $byInvoice[$groupKey] = [
+                'invoice_external' => $invx,
+                'id_barang'        => $idBarang,
+                'nama_barang'      => $item->barang->nama ?? '-',
+                'supplier'         => $item->suppliers->nama ?? '-',
+                'jumlah_beli'      => 0,
+                'jumlah_jual'      => 0,
+                'harga_beli'       => $item->harga_beli ?? 0,
+                'total_harga_beli' => 0,
+                'sisa'             => 0,
+                'sisa1'            => 0,
+                'status'           => $item->stts ?? '-',
+                'no_bm'            => $item->no_bm,
+                'satuan'           => $item->barang->satuan->nama_satuan ?? '-',
+                'total_nilai'      => 0,
+                'tgl_jurnal'       => optional($item->jurnals->firstWhere('coa_id', 89))->tgl ?? '-', // ⬅️ tambahkan ini
+            ];
+        }
+
+        $byInvoice[$groupKey]['jumlah_beli'] += $item->jumlah_beli ?? 0;
+        $byInvoice[$groupKey]['jumlah_jual'] += $item->jumlah_jual ?? 0;
+    }
+}
+
+// Hitung ulang sisa1 dan total_nilai
+foreach ($byInvoice as &$data) {
+    $data['sisa'] = $data['jumlah_beli'] - $data['jumlah_jual'];
+    $data['total_nilai'] = $data['sisa'] * $data['harga_beli'];
+    $data['total_harga_beli'] = $data['jumlah_beli'] * $data['harga_beli'];
+}
+unset($data);
+
+// Convert ke collection
+$byInvoiceCollection = collect($byInvoice);
+$byInvoiceCollection = $byInvoiceCollection->sortBy('nama_barang')->values();
+
+
+// Ambil request
+$periode = request('periode');
+$invx    = request('invx');
+
+if (($periode !== null && $periode !== '') || ($invx !== null && $invx !== '')) {
+    $byInvoiceCollection = $byInvoiceCollection->filter(function ($item) use ($periode, $invx) {
+
+        $filterPeriode = true;
+        $filterInvx = true;
+
+        // Filter berdasarkan periode (filter pada tgl_jurnal)
+        if ($periode !== null && $periode !== '') {
+            $tahun = substr($periode, 0, 4);
+            $bulan = substr($periode, 5, 2);
+
+            $tglAwal = Carbon::createFromDate($tahun, 1, 1)->startOfDay();
+            $tglAkhir = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->endOfDay();
+
+            if ($item['tgl_jurnal'] && $item['tgl_jurnal'] !== '-') {
+                $tglJurnal = Carbon::parse($item['tgl_jurnal']);
+                $filterPeriode = $tglJurnal->between($tglAwal, $tglAkhir);
+            } else {
+                $filterPeriode = false;
+            }
+        }
+
+        // Filter berdasarkan invoice_external (filter like)
+        if ($invx !== null && $invx !== '') {
+            $filterInvx = str_contains($item['invoice_external'], $invx);
+        }
+
+        return $filterPeriode && $filterInvx;
+    });
+}
+
+
+// Total keseluruhan nilai
+$totalNilai = $byInvoiceCollection->sum('total_nilai');
+$totalNilaiJB = $byInvoiceCollection->sum('jumlah_beli');
+$totalNilaiJJ = $byInvoiceCollection->sum('jumlah_jual');
+$totalNilaiSisa = $byInvoiceCollection->sum('sisa');
+$totalNilaiHB = $byInvoiceCollection->sum('harga_beli');
+
+
+
+// Hitung total & paginasi
+$totalRecords = $byInvoiceCollection->count();
+$totalPages = $totalRecords > 0 ? ceil($totalRecords / $limit) : 0;
+if ($page > $totalPages) $page = $totalPages;
+
+$paginated = $byInvoiceCollection->slice(($page - 1) * $limit, $limit);
+
+$index = 1;
+$rows = $paginated->map(function ($item) use (&$index) {
+    return [
+        'index' => $index++,
+        'invoice_external' => $item['invoice_external'],
+        'total_harga_beli' => $item['harga_beli'],
+        'barang.nama' => $item['nama_barang'],
+        'tgl' => $item['tgl_jurnal'],
+        'supplier' => $item['supplier'],
+        'id_barang' => $item['id_barang'],
+        'satuan' => $item['satuan'],
+        'status' => $item['status'],
+        'no_bm' => $item['no_bm'],
+        'total_beli' => $item['jumlah_beli'],
+        'total_jual' => $item['jumlah_jual'],
+        'sisa' => $item['sisa'],
+        'total_nilai' => $item['total_nilai'],
+    ];
+})->values();
+
+
+// Response
+return response()->json([
+    'page'    => $page,
+    'total'   => $totalPages,
+    'records' => $totalRecords,
+    'rows'    => $rows,
+    'userdata' => [
+        'total_nilai' => $totalNilai,
+        'total_beli' => $totalNilaiJB,
+        'total_jual' => $totalNilaiJJ,
+        'sisa' => $totalNilaiSisa,
+        'total_harga_beli' => $totalNilaiHB
+    ]
+]);
+
+}
+
     public function update_stock(Request $request)
 {
     $data = $request->validate([

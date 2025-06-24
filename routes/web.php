@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceExternalController;
+use App\Http\Controllers\HargaController;
 use App\Http\Controllers\JurnalController;
 use App\Http\Controllers\JurnalManualController;
 use App\Http\Controllers\NSFPController as nsfp;
@@ -27,6 +28,7 @@ use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SuratJalanController;
 use App\Http\Controllers\TemplateJurnalController;
+use App\Http\Controllers\DirectSaleController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Resources\DatatableResource;
@@ -60,6 +62,7 @@ Route::get('/surat-jalan/checkBarangCount', [SuratJalanController::class, 'check
 
 Route::middleware('auth')->group(function () {
     Route::get('/get-stock/{id}', [SuratJalanController::class, 'getStock'])->name('sj.getStock');
+    Route::get('/get-harga', [DirectSaleController::class, 'getHarga']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/barang-masuk/monitor-stock', [StockController::class, 'monitor_stock'])->name('monitor-stock');
@@ -83,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/barang-masuk/store', [SuratJalanController::class, 'store_bm'])->name('barang_masuk.store');
     Route::resource('surat-jalan', SuratJalanController::class);
     Route::resource('invoice-transaksi', InvoiceController::class);
-    Route::post('/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
+    Route::match(['get', 'post'], '/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
     Route::resource('jurnal', JurnalController::class);
     Route::get('/stock/cetak/{id}', [StockController::class, 'cetak'])->name('stock.cetak');
     Route::post('/update-lock/{id}', [StockController::class, 'updateLock']);
@@ -99,6 +102,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/jurnal-tgl-update', [JurnalController::class, 'tglUpdate'])->name('jurnal.edit.tglupdate');
     Route::get('/jurnal-edit-list', [JurnalController::class, 'datatableEdit'])->name('jurnal.edit.list');
     Route::get('/jurnal-transaksi', [JurnalManualController::class, 'transaksi'])->name('jurnal-manual-transaksi');
+    Route::get('/lap-qty', [StockController::class, 'lapQty'])->name('lap.qty');
+    Route::get('/data-lap-qty', [StockController::class, 'qty'])->name('data.qty');
     Route::resource('jurnal-manual', JurnalManualController::class);
     Route::post('jurnal-hutang', [JurnalManualController::class, 'Jurnalhutang'])->name('jurnal.hutang');
     Route::post('/jurnal-manual-template', [JurnalManualController::class, 'terapanTemplateJurnal'])->name('jurnal.template.terapan');
@@ -121,6 +126,9 @@ Route::middleware('auth')->group(function () {
     Route::put('coa/{coa}', [CoaController::class,'update'])->name('jurnal.coa.update');
     Route::delete('coa/{coa}', [CoaController::class,'destroy'])->name('jurnal.coa.destroy');
     Route::get('coa/data', [CoaController::class, 'dataTable'])->name('jurnal.coa.data');
+    Route::post('/data/update-aktif', [HargaController::class, 'updateAktif'])->name('data.updateAktif');
+    Route::post('/data/update-non-aktif', [HargaController::class, 'updateNonAktif'])->name('data.updateNonAktif');
+
     
     Route::post('/jurnal/coa/store', [CoaController::class, 'store'])->name('jurnal.coa.store');
     Route::post('coa-delete', [CoaController::class,'hapusCoa'])->name('jurnal.coa.delete');
@@ -142,11 +150,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('neraca', Neraca::class);
     Route::resource('laba-rugi', LabaRugi::class);
     Route::resource('buku-besar-pembantu', BukuBesarPembantuController::class);
+    Route::get('lr-akumulatif', [LabaRugi::class, 'LRberjalan'])->name('lr.berjalan');
     Route::get('buku-besar-pembantu/{id}/detail', [BukuBesarPembantuController::class, 'showDetail'])->name('buku-besar-pembantu.showDetail');
     Route::get('/export-ncs', [BukuBesarPembantuController::class, 'exportNcs'])->name('export.ncs');
     Route::get('/export-customers', [BukuBesarPembantuController::class, 'exportCustomer'])->name('export.customers');
     Route::get('/export-supplier', [BukuBesarPembantuController::class, 'exportSupplier'])->name('export.supplier');
-
     Route::resource('invoice-external', InvoiceExternalController::class);
 });
 
@@ -218,6 +226,20 @@ Route::prefix('master')->controller(NopolController::class)->middleware('auth')-
     Route::post('nopol_edit', 'update')->name('master.nopol.edit');
     Route::post('nopol_delete', 'destroy')->name('master.nopol.delete');
     Route::post('set_status', 'setStatus')->name('master.nopol.editstatus');
+});
+
+Route::prefix('direct_sale')->controller(DirectSaleController::class)->middleware('auth')->group(function () {
+    Route::get('ppn', 'ds_ppn')->name('ds.ppn');
+    Route::get('non_ppn', 'ds_nonppn')->name('ds.non-ppn');
+    Route::post('ppn-tambah', 'ppn_store')->name('ds.ppn-store');
+    Route::post('ds-invoice', 'dsInv_store')->name('invoice-ds.store');
+});
+
+Route::prefix('master')->controller(HargaController::class)->middleware('auth')->group(function () {
+    Route::get('harga', 'index')->name('master.harga');
+    Route::post('harga-tambah', 'store')->name('master.harga.tambah');
+    Route::get('harga-data-nonaktif', 'Hargajqgrid')->name('harga.nonaktif.data');
+    Route::get('harga-data-aktif', 'Hargajqgrid1')->name('harga.aktif.data');
 });
 
 Route::prefix('master')->controller(UserController::class)->middleware('auth')->group(function () {
