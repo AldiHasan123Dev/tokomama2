@@ -195,12 +195,22 @@ thead tr:nth-child(3) th {
     background-color: #218838;
 }
 
+
 .btn-gray {
     background-color: #6c757d;
 }
 .btn-gray:hover {
     background-color: #5a6268;
 }
+
+.btn-gray-filter {
+    width: 80px;
+    background-color: #6c757d;
+}
+.btn-gray-filter:hover {
+    background-color: #5a6268;
+}
+
 
 
 
@@ -330,8 +340,7 @@ thead tr:nth-child(3) th {
 
         {{-- Tombol Filter --}}
         <div class="form-group">
-            <label class="invisible">Filter</label>
-            <button type="submit" class="btn btn-primary btn-filter">Filter</button>
+             <button type="submit" class="btn btn-gray-filter">Filter</button>
         </div>
     </div>
 </form>
