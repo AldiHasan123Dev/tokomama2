@@ -192,7 +192,6 @@ class KeuanganController extends Controller
     public function jurnal(Request $request)
     {
         $data = $request->all();
-    
         // Bersihkan array dari nilai null
         foreach ($data as $key => $value) {
             if (is_array($value)) {
@@ -201,7 +200,7 @@ class KeuanganController extends Controller
                 }));
             }
         }
-    
+
         // Pastikan array numerik dikonversi dengan benar
         foreach (['id', 'id_transaksi'] as $key) {
             if (isset($data[$key])) {
@@ -211,7 +210,7 @@ class KeuanganController extends Controller
                 $data[$key] = [];
             }
         }
-    
+        
         // Ambil data utama
         $biaya_ids = $data['id'];
         $nominal_b = BiayaInv::whereIn('id', $biaya_ids)->sum('nominal');
@@ -227,14 +226,17 @@ class KeuanganController extends Controller
         
         // Detail Jurnal (Kredit) - loop berdasarkan jumlah item biaya
         $count = count($biaya_ids);
-        for ($i = 0; $i < $count; $i++) {
+            for ($i = 0; $i < count($nominal); $i++) {
+            // Lewati baris kosong atau nol
+            if (empty($nominal[$i]) || $nominal[$i] == 0) continue;
+
             Jurnal::create([
                 'coa_id' => 5,
                 'nomor' => $nomor,
                 'tgl' => $tgl_jurnal,
                 'keterangan' => 'Pelunasan Piutang ' . ($customer[$i] ?? '-'),
                 'keterangan_buku_besar_pembantu' => $nomor,
-                'debit' => $nominal[$i] ?? 0,
+                'debit' => $nominal[$i],
                 'kredit' => 0,
                 'invoice' => $invoice[$i] ?? null,
                 'invoice_external' => null,
@@ -243,6 +245,7 @@ class KeuanganController extends Controller
                 'tipe' => 'BBM',
                 'no' => $no,
             ]);
+
             Jurnal::create([
                 'coa_id' => 8,
                 'nomor' => $nomor,
@@ -250,7 +253,7 @@ class KeuanganController extends Controller
                 'keterangan' => 'Pelunasan Piutang ' . ($customer[$i] ?? '-'),
                 'keterangan_buku_besar_pembantu' => $nomor,
                 'debit' => 0,
-                'kredit' => $nominal[$i] ?? 0,
+                'kredit' => $nominal[$i],
                 'invoice' => $invoice[$i] ?? null,
                 'invoice_external' => null,
                 'id_transaksi' => $id_trans[$i] ?? null,
@@ -259,7 +262,7 @@ class KeuanganController extends Controller
                 'no' => $no,
             ]);
         }
-    
+
         // Update kolom 'jurnal' pada BiayaInv
         BiayaInv::whereIn('id', $biaya_ids)->update(['jurnal' => $nomor]);
     

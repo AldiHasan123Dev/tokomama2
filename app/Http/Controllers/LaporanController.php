@@ -51,35 +51,55 @@ class LaporanController extends Controller
 
     
         $mergedResults = [];
-        foreach ($invoices as $invoice) {
-            if (!isset($mergedResults[$invoice->customer_id])) {
-                $mergedResults[$invoice->customer_id] = [
-                    'customer_name' => $invoice->customer_nama,
-                    'years' => []
-                ];
-            }
-    
-            if (!isset($mergedResults[$invoice->customer_id]['years'][$invoice->year])) {
-                $mergedResults[$invoice->customer_id]['years'][$invoice->year] = [];
-            }
-    
-            $mergedResults[$invoice->customer_id]['years'][$invoice->year][$invoice->month] = [
-                'month' => $invoice->month,
-                'year' => $invoice->year,
-                'invoice_count' => $invoice->invoice_count,
-                'omzet' => $invoice->omzet / 1000
-            ];
-            if (!isset($monthlyTotals[$invoice->year][$invoice->month])) {
-                $monthlyTotals[$invoice->year][$invoice->month] = 0;
-            }
-            $monthlyTotals[$invoice->year][$invoice->month] += $invoice->omzet / 1000;
-        }
-    
-        $months = [
-            'January', 'February', 'March', 'April', 'May', 
-            'June', 'July', 'August', 'September', 
-            'October', 'November', 'December'
+$monthlyTotals = [];
+$totalOmzetPerCustomer = [];
+
+foreach ($invoices as $invoice) {
+    // Inisialisasi customer
+    if (!isset($mergedResults[$invoice->customer_id])) {
+        $mergedResults[$invoice->customer_id] = [
+            'customer_name' => $invoice->customer_nama,
+            'years' => []
         ];
+        $totalOmzetPerCustomer[$invoice->customer_id] = 0;
+    }
+
+    // Inisialisasi tahun
+    if (!isset($mergedResults[$invoice->customer_id]['years'][$invoice->year])) {
+        $mergedResults[$invoice->customer_id]['years'][$invoice->year] = [];
+    }
+
+    // Masukkan data bulan
+    $omzetRibuan = $invoice->omzet / 1000;
+    $mergedResults[$invoice->customer_id]['years'][$invoice->year][$invoice->month] = [
+        'month' => $invoice->month,
+        'year' => $invoice->year,
+        'invoice_count' => $invoice->invoice_count,
+        'omzet' => $omzetRibuan
+    ];
+
+    // Hitung total omzet per customer
+    $totalOmzetPerCustomer[$invoice->customer_id] += $omzetRibuan;
+
+    // Hitung total omzet bulanan (jika masih ingin dipakai)
+    if (!isset($monthlyTotals[$invoice->year][$invoice->month])) {
+        $monthlyTotals[$invoice->year][$invoice->month] = 0;
+    }
+    $monthlyTotals[$invoice->year][$invoice->month] += $omzetRibuan;
+}
+
+// 👉 Urutkan hasil berdasarkan total omzet customer (descending)
+uksort($mergedResults, function($a, $b) use ($totalOmzetPerCustomer) {
+    return $totalOmzetPerCustomer[$b] <=> $totalOmzetPerCustomer[$a];
+});
+
+// (Opsional) nama-nama bulan
+$months = [
+    'January', 'February', 'March', 'April', 'May',
+    'June', 'July', 'August', 'September',
+    'October', 'November', 'December'
+];
+
     
         return view('laporan.lap-omzet-customer', compact('mergedResults', 'months', 'years','monthlyTotals'));
     }
@@ -395,18 +415,19 @@ foreach ($invoices as $inv) {
 
     $totalBayar = $biayaInvList->sum('nominal');
     $tglPembayar = $biayaInvList->pluck('tgl_pembayar');
-   $num1 = number_format((float) $totalBayar, 2, '.', '');
-$num2 = number_format((float) $inv->total_subtotal, 2, '.', '');
+$selisih = (int)$totalBayar - (int)$inv->total_subtotal;
 
-  if (bccomp($num1, $num2, 2) === 1) {
-        $invoiceLebihBayar[] = [
-            'invoice'       => $inv->invoice,
-            'tgl_pembayar' => $tglPembayar,
-            'total_tagihan' => number_format($inv->total_subtotal, 0, ',', '.'),
-            'total_bayar'   => number_format($totalBayar, 0, ',', '.'),
-            'selisih'       => number_format($totalBayar - $inv->total_subtotal, 0, ',', '.'),
-        ];
-    }
+if ($selisih > 1) {
+    $invoiceLebihBayar[] = [
+        'invoice'       => $inv->invoice,
+        'tgl_pembayar'  => $tglPembayar,
+        'total_tagihan' => number_format($inv->total_subtotal, 0, ',', '.'),
+        'total_bayar'   => number_format($totalBayar, 0, ',', '.'),
+        'selisih'       => number_format($selisih, 0, ',', '.'),
+    ];
+}
+
+
 }
         
             return view('laporan.lap-monitor-invoice',compact('invoices','invoiceLebihBayar'));
@@ -1067,7 +1088,7 @@ public function lapPiutang()
     ->join('transaksi as t', 'i.id_transaksi', '=', 't.id')
     ->join('surat_jalan as sj', 't.id_surat_jalan', '=', 'sj.id')
     ->join('customer as c', 'sj.id_customer', '=', 'c.id')
-    ->join('barang as b', 't.id_barang', '=', 'b.id')
+    ->join('barang as b', 't.id_barang', '=', 'b.id') 
     ->whereYear('i.tgl_invoice', request('year') ?? 2025)
     ->when(request('customers'), function ($query) {
         $query->where('c.id', request('customers'));
@@ -1090,76 +1111,95 @@ $jurnals = Jurnal::withTrashed()
     ->get()
     ->groupBy('invoice');
 
-
     $mergedResults = [];
-    $monthlyTotals = [];
-    $monthlyInvoiceCounts = [];
-    $monthlySelisihInvoice = [];
+$monthlyTotals = [];
+$monthlyInvoiceCounts = [];
+$monthlySelisihInvoice = [];
 
-    foreach ($invoiceData as $invoice) {
-        $invoiceNumber = $invoice->invoice;
-        $omzet = $invoice->total_omzet;
+foreach ($invoiceData as $invoice) {
+    $invoiceNumber = $invoice->invoice;
+    $omzet = $invoice->total_omzet;
 
-        // Jumlah jurnal yang cocok
-        $jurnalInvoiceCount = $jurnals->has($invoiceNumber) ? 1 : 0;
-        $selisihInvoice = $invoice->invoice_count - $jurnalInvoiceCount;
+    // Jumlah jurnal yang cocok
+    $jurnalInvoiceCount = $jurnals->has($invoiceNumber) ? 1 : 0;
+    $selisihInvoice = $invoice->invoice_count - $jurnalInvoiceCount;
 
-        $debitValue = $jurnals->has($invoiceNumber) ? $jurnals[$invoiceNumber]->sum('debit') : 0;
-        $netOmzet = ($omzet - $debitValue) / 1000;
+    $debitValue = $jurnals->has($invoiceNumber) ? $jurnals[$invoiceNumber]->sum('debit') : 0;
+    $netOmzet = ($omzet - $debitValue) / 1000;
 
-        // Buat struktur data
-        $custId = $invoice->customer_id;
-        $year = $invoice->year;
-        $month = $invoice->month;
+    // Buat struktur data
+    $custId = $invoice->customer_id;
+    $year = $invoice->year;
+    $month = $invoice->month;
 
-        if (!isset($mergedResults[$custId])) {
-            $mergedResults[$custId] = [
-                'customer_name' => $invoice->customer_nama,
-                'years' => []
-            ];
-        }
-
-        if (!isset($mergedResults[$custId]['years'][$year])) {
-            $mergedResults[$custId]['years'][$year] = [];
-        }
-
-        if (!isset($mergedResults[$custId]['years'][$year][$month])) {
-            $mergedResults[$custId]['years'][$year][$month] = [
-                'month' => $month,
-                'year' => $year,
-                'invoice_count' => 0,
-                'omzet' => 0,
-                'selisih_invoice' => 0,
-            ];
-        }
-
-        // Tambahkan data per customer
-        $mergedResults[$custId]['years'][$year][$month]['omzet'] += $netOmzet;
-        $mergedResults[$custId]['years'][$year][$month]['invoice_count'] += $invoice->invoice_count;
-        $mergedResults[$custId]['years'][$year][$month]['selisih_invoice'] += $selisihInvoice;
-
-        // Akumulasi total per bulan
-        if (!isset($monthlyTotals[$year][$month])) {
-            $monthlyTotals[$year][$month] = 0;
-        }
-        $monthlyTotals[$year][$month] += $netOmzet;
-
-        if (!isset($monthlyInvoiceCounts[$year][$month])) {
-            $monthlyInvoiceCounts[$year][$month] = 0;
-        }
-        $monthlyInvoiceCounts[$year][$month] += $invoice->invoice_count;
-
-        if (!isset($monthlySelisihInvoice[$year][$month])) {
-            $monthlySelisihInvoice[$year][$month] = 0;
-        }
-        $monthlySelisihInvoice[$year][$month] += $selisihInvoice;
+    if (!isset($mergedResults[$custId])) {
+        $mergedResults[$custId] = [
+            'customer_name' => $invoice->customer_nama,
+            'years' => []
+        ];
     }
 
-    $months = [
-        'January', 'February', 'March', 'April', 'May',
-        'June', 'July', 'August', 'September',
-        'October', 'November', 'December'
-    ];
+    if (!isset($mergedResults[$custId]['years'][$year])) {
+        $mergedResults[$custId]['years'][$year] = [];
+    }
+
+    if (!isset($mergedResults[$custId]['years'][$year][$month])) {
+        $mergedResults[$custId]['years'][$year][$month] = [
+            'month' => $month,
+            'year' => $year,
+            'invoice_count' => 0,
+            'omzet' => 0,
+            'selisih_invoice' => 0,
+        ];
+    }
+
+    // Tambahkan data per customer
+    $mergedResults[$custId]['years'][$year][$month]['omzet'] += $netOmzet;
+    $mergedResults[$custId]['years'][$year][$month]['invoice_count'] += $invoice->invoice_count;
+    $mergedResults[$custId]['years'][$year][$month]['selisih_invoice'] += $selisihInvoice;
+
+    // Akumulasi total per bulan
+    if (!isset($monthlyTotals[$year][$month])) {
+        $monthlyTotals[$year][$month] = 0;
+    }
+    $monthlyTotals[$year][$month] += $netOmzet;
+
+    if (!isset($monthlyInvoiceCounts[$year][$month])) {
+        $monthlyInvoiceCounts[$year][$month] = 0;
+    }
+    $monthlyInvoiceCounts[$year][$month] += $invoice->invoice_count;
+
+    if (!isset($monthlySelisihInvoice[$year][$month])) {
+        $monthlySelisihInvoice[$year][$month] = 0;
+    }
+    $monthlySelisihInvoice[$year][$month] += $selisihInvoice;
+}
+
+// 🔽 Hitung total omzet per customer
+$customerOmzetTotals = [];
+
+foreach ($mergedResults as $custId => $data) {
+    $totalOmzet = 0;
+    foreach ($data['years'] as $yearData) {
+        foreach ($yearData as $monthData) {
+            $totalOmzet += $monthData['omzet'];
+        }
+    }
+    $customerOmzetTotals[$custId] = $totalOmzet;
+}
+
+// 🔽 Urutkan berdasarkan total omzet (descending)
+uksort($mergedResults, function ($a, $b) use ($customerOmzetTotals) {
+    return $customerOmzetTotals[$b] <=> $customerOmzetTotals[$a];
+});
+
+
+$months = [
+    'January', 'February', 'March', 'April', 'May',
+    'June', 'July', 'August', 'September',
+    'October', 'November', 'December'
+];
+
 
     return view('jurnal.lap-piutang', compact(
         'customers',

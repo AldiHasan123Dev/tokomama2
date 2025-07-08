@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Coa;
 use App\Models\Invoice;
+use App\Models\BiayaInv;
 use App\Models\Jurnal;
 use App\Models\Nopol;
 use App\Models\Supplier;
@@ -184,7 +185,11 @@ class JurnalController extends Controller
             'nomor' => $tujuan->nomor,
             'no' => $tujuan->no,
             'tipe' => $tujuan->tipe,
-            'tgl' => $tujuan->tgl
+            'tgl' => $tujuan->tgl,
+            'keterangan_buku_besar_pembantu' => $tujuan->keterangan_buku_besar_pembantu
+        ]);
+        BiayaInv::where('jurnal', $request->jurnal_awal)->update([
+            'jurnal' => $tujuan->nomor,
         ]);
 
         return to_route('jurnal.index')->with('success', 'Merge No. Jurnal berhasil');
