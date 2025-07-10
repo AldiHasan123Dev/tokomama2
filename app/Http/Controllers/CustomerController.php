@@ -17,6 +17,11 @@ class CustomerController extends Controller
         return view('masters.customer');
     }
 
+        public function blokir_cust()
+    {
+        return view('masters.blokir_cust');
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -54,6 +59,17 @@ class CustomerController extends Controller
     {
         //
     }
+
+    public function blokir(Request $request)
+{
+    if ($request->ajax() && $request->has('is_block')) {
+
+        Customer::where('id', $request->id)->update(['is_blokir' => $request->is_block]);
+
+        return response()->json(['message' => 'Status berhasil diperbarui.']);
+    }
+}
+
 
     /**
      * Update the specified resource in storage.
@@ -97,23 +113,48 @@ class CustomerController extends Controller
     }
 
 
-    public function datatable()
-    {
-        $data = Customer::query()->orderBy('id', 'desc');
+public function datatable()
+{
+    $data = Customer::query()->orderBy('id', 'desc');
 
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('aksi', function ($row) {
-                return '<div class="flex gap-3 mt-2">
-           <button onclick="getData(' . $row->id . ', \'' . addslashes($row->nama) . '\', \'' . addslashes($row->npwp) . '\', \'' . addslashes($row->nama_npwp) . '\', \'' . addslashes($row->email) . '\', \'' . addslashes($row->no_telp) . '\', \'' . addslashes($row->alamat) . '\', \'' . addslashes($row->alamat_npwp) . '\', \'' . addslashes($row->kota) . '\', ' . $row->top . ', \'' . addslashes($row->sales) . '\')" id="delete-faktur-all" class="text-yellow-300 font-semibold mb-3 self-end">
-    <i class="fa-solid fa-pencil"></i>
-</button>
+  return DataTables::of($data)
+    ->addIndexColumn()
+    ->addColumn('status', function ($row) {
+        $checkedAktif = $row->is_blokir == 0 ? 'checked' : '';
+        $checkedNonAktif = $row->is_blokir == 1 ? 'checked' : '';
+
+        $customerName = addslashes($row->nama); // hindari error JS jika nama ada tanda kutip
+return '
+<div class="flex items-center gap-2">
+    <label class="inline-flex items-center cursor-pointer">
+        <input type="checkbox" class="status-switch sr-only" 
+            data-id="' . $row->id . '" 
+            data-name="' . addslashes($row->nama) . '" 
+            ' . ($row->is_blokir == 0 ? 'checked' : '') . '>
+        <div class="status-wrapper w-11 h-6 rounded-full relative transition-all duration-300 ' . ($row->is_blokir == 0 ? 'bg-green-500' : 'bg-red-500') . '">
+            <div class="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 transform ' . ($row->is_blokir == 0 ? 'translate-x-5' : '') . '"></div>
+        </div>
+        <span class="status-text ml-2 text-sm font-semibold ' . ($row->is_blokir == 0 ? 'text-green-600' : 'text-red-600') . '">' . ($row->is_blokir == 0 ? 'Aktif' : 'Blokir') . '</span>
+    </label>
+</div>
+';
 
 
-            <button onclick="deleteData(' . $row->id . ')" id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end" ><i class="fa-solid fa-trash"></i></button>
+
+    })
+
+        ->addColumn('aksi', function ($row) {
+            return '<div class="flex gap-3 mt-2">
+                <button onclick="getData(' . $row->id . ', \'' . addslashes($row->nama) . '\', \'' . addslashes($row->npwp) . '\', \'' . addslashes($row->nama_npwp) . '\', \'' . addslashes($row->email) . '\', \'' . addslashes($row->no_telp) . '\', \'' . addslashes($row->alamat) . '\', \'' . addslashes($row->alamat_npwp) . '\', \'' . addslashes($row->kota) . '\', ' . $row->top . ', \'' . addslashes($row->sales) . '\')" class="text-yellow-500 font-semibold">
+                    <i class="fa-solid fa-pencil"></i>
+                </button>
+                <button onclick="deleteData(' . $row->id . ')" class="text-red-600 font-semibold">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </div>';
-            })
-            ->rawColumns(['aksi'])
-            ->make();
-    }
+        })
+        ->rawColumns(['aksi', 'status']) // penting agar HTML tidak di-escape
+        ->make();
+}
+
 }

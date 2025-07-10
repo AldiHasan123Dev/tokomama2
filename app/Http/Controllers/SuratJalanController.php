@@ -55,7 +55,7 @@ class SuratJalanController extends Controller
         ->get();
 
         $nopol = Nopol::where('status', 'aktif')->get();
-        $customer = Customer::all();
+        $customer = Customer::where('is_blokir',0)->get();
         $ekspedisi = Ekspedisi::all();
         $satuan = Satuan::all();
         $supplier = Supplier::all();
@@ -82,7 +82,7 @@ class SuratJalanController extends Controller
         ->get();
 
         $nopol = Nopol::where('status', 'aktif')->get();
-        $customer = Customer::all();
+        $customer = Customer::where('is_blokir',0)->get();
         $ekspedisi = Ekspedisi::all();
         $satuan = Satuan::all();
         $supplier = Supplier::all();
