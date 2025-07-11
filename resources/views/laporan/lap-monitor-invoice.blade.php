@@ -216,7 +216,7 @@
 
     <!-- JS jqGrid -->
     <script src="https://cdn.jsdelivr.net/npm/free-jqgrid@4.15.5/js/jquery.jqgrid.min.js"></script>
-
+.
 
     <!-- Card untuk tampilan laporan piutang -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
@@ -260,7 +260,8 @@
                                     <option value="" selected></option>
                                     @foreach ($invoices as $item)
                                         <option value="{{ $item->id }}" data-subtotal="{{ $item->total_subtotal }}">
-                                            {{ $item->invoice }} || {{ number_format($item->total_subtotal) }} || {{ $item->customer }}
+                                            {{ $item->invoice }} || {{ number_format($item->total_subtotal) }} ||
+                                            {{ $item->customer }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -300,7 +301,13 @@
                     id="tanggal_bayar1" name="tanggal_bayar1" autocomplete="off" />
             </label>
         </div> --}}
-        @if (count($invoiceLebihBayar) > 0)
+        @php
+            $filteredLebihBayar = collect($invoiceLebihBayar)->filter(function ($item) {
+                return $item['selisih'] > 0;
+            });
+        @endphp
+
+        @if ($filteredLebihBayar->count())
             <h3 style="margin-top: 20px; color: #c0392b;">Kelebihan Bayar</h3>
 
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -343,9 +350,9 @@
                 </div>
                 <input type="date"
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
-                    id="tanggal_bayar1" name="tanggal_bayar1" autocomplete="off" value="{{ date('Y-m-d') }}"/>
+                    id="tanggal_bayar1" name="tanggal_bayar1" autocomplete="off" value="{{ date('Y-m-d') }}" />
             </label>
-                        <label class="form-control w-full max-w-xs mb-1">
+            <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
                     <span class="label-text">Cek invoice di tgl tersebut</span>
                 </div>
@@ -391,99 +398,108 @@
     });
 </script>
 <script>
-  $(function () {
-    function resizeGrid() {
-        $("#biayaGrid").setGridWidth($('#biayaGrid').closest(".ui-jqgrid").parent().width(), true);
-    }
+    $(function() {
+        function resizeGrid() {
+            $("#biayaGrid").setGridWidth($('#biayaGrid').closest(".ui-jqgrid").parent().width(), true);
+        }
 
-    $("#biayaGrid").jqGrid({
-        url: '{{ route('biaya.monitoring.data') }}',
-        datatype: "json",
-        mtype: "GET",
-        postData: {
-            tgl_pembayar: function () {
-                return $('#tanggal_bayar1').val();
-            },
-            inv: function () {
-                return $('#inv').val();
-            }
-        },
-        colModel: [
-            {
-               
-                label: 'Tanggal Masuk Rekening',
-                name: 'tgl_pembayar',
-                align: 'center',
-                width: 100,
-                formatter: 'date',
-                formatoptions: { newformat: 'd/m/Y' }
-            },
-            { label: 'Customer', name: 'customer', width: 150,  },
-            { label: 'Invoice', name: 'invoice', width: 120,  },
-            {
-                
-                label: 'Terbayar',
-                name: 'bayar',
-                width: 120,
-                align: 'right',
-                formatter: 'currency',
-                formatoptions: {
-                    thousandsSeparator: ".",
-                    decimalSeparator: ",",
-                    decimalPlaces: 0,
+        $("#biayaGrid").jqGrid({
+            url: '{{ route('biaya.monitoring.data') }}',
+            datatype: "json",
+            mtype: "GET",
+            postData: {
+                tgl_pembayar: function() {
+                    return $('#tanggal_bayar1').val();
                 },
-                summaryType: 'sum'
+                inv: function() {
+                    return $('#inv').val();
+                }
             },
-           {
-            
-                label: 'Aksi',
-                name: 'aksi',
-                width: 100,
-                align: 'center',
-                sortable: false,
-                formatter: function(cellValue, options, rowObject) {
-                    if (rowObject.jurnal === 'Belum Terjurnal') {
-                        return `<button class="bg-red-500 hover:bg-red-300 text-white font-semibold py-1 px-2 rounded btn-delete" data-id="${rowObject.id}">Hapus</button>`;
-                    } else {
-                        return ''; // atau return '—';
+            colModel: [{
+
+                    label: 'Tanggal Masuk Rekening',
+                    name: 'tgl_pembayar',
+                    align: 'center',
+                    width: 100,
+                    formatter: 'date',
+                    formatoptions: {
+                        newformat: 'd/m/Y'
+                    }
+                },
+                {
+                    label: 'Customer',
+                    name: 'customer',
+                    width: 150,
+                },
+                {
+                    label: 'Invoice',
+                    name: 'invoice',
+                    width: 120,
+                },
+                {
+
+                    label: 'Terbayar',
+                    name: 'bayar',
+                    width: 120,
+                    align: 'right',
+                    formatter: 'currency',
+                    formatoptions: {
+                        thousandsSeparator: ".",
+                        decimalSeparator: ",",
+                        decimalPlaces: 0,
+                    },
+                    summaryType: 'sum'
+                },
+                {
+
+                    label: 'Aksi',
+                    name: 'aksi',
+                    width: 100,
+                    align: 'center',
+                    sortable: false,
+                    formatter: function(cellValue, options, rowObject) {
+                        if (rowObject.jurnal === 'Belum Terjurnal') {
+                            return `<button class="bg-red-500 hover:bg-red-300 text-white font-semibold py-1 px-2 rounded btn-delete" data-id="${rowObject.id}">Hapus</button>`;
+                        } else {
+                            return ''; // atau return '—';
+                        }
                     }
                 }
+            ],
+            jsonReader: {
+                root: "rows",
+                page: "page",
+                total: "total",
+                records: "records",
+                repeatitems: false,
+                id: "id",
+                userdata: "userdata"
+            },
+            pager: "#biayaPager",
+            rowNum: 10,
+            rowList: [10, 20, 50],
+            height: '100%',
+            autowidth: true,
+            shrinkToFit: true,
+            viewrecords: true,
+            footerrow: true,
+            userDataOnFooter: true, // Aktifkan userdata ke footer
+            caption: "Data Pembayaran Invoice",
+            loadComplete: function() {
+                resizeGrid();
             }
-        ],
-        jsonReader: {
-            root: "rows",
-            page: "page",
-            total: "total",
-            records: "records",
-            repeatitems: false,
-            id: "id",
-            userdata: "userdata"
-        },
-        pager: "#biayaPager",
-        rowNum: 10,
-        rowList: [10, 20, 50],
-        height: '100%',
-        autowidth: true,
-        shrinkToFit: true,
-        viewrecords: true,
-        footerrow: true,
-        userDataOnFooter: true, // Aktifkan userdata ke footer
-        caption: "Data Pembayaran Invoice",
-        loadComplete: function () {
+        });
+
+        $(window).on('resize', function() {
             resizeGrid();
-        }
-    });
+        });
 
-    $(window).on('resize', function () {
-        resizeGrid();
+        //   $("#biayaGrid").jqGrid('filterToolbar', {
+        //     searchOperators: false,
+        //     searchOnEnter: false,
+        //     defaultSearch: "cn"
+        // });
     });
-
-    //   $("#biayaGrid").jqGrid('filterToolbar', {
-    //     searchOperators: false,
-    //     searchOnEnter: false,
-    //     defaultSearch: "cn"
-    // });
-});
 
 
 
@@ -507,60 +523,107 @@
             });
         }
     });
-    $(function () {
-    function resizeGrid() {
-        $("#biayaGrid1").setGridWidth($('#biayaGrid1').closest(".ui-jqgrid").parent().width(), true);
-    }
-
-    $("#biayaGrid1").jqGrid({
-        url: '{{ route('list.inv.data') }}',
-        datatype: "json",
-        mtype: "GET",
-        colModel: [
-            { label: 'No', name: 'DT_RowIndex', width: 50, key: true, align: 'center', search: true },
-            { label: 'Invoice', name: 'invoice', align: 'center', width: 150, search: true },
-            { label: 'Customer', name: 'customer', align: 'center', width: 150, search: true },
-            { label: 'Tgl Invoice', name: 'tgl_inv', align: 'center', width: 150, search: true },
-            { label: 'Nilai Inv', name: 'total', width: 150, align: 'right', search: true },
-            { label: 'Tgl Masuk Rekening', name: 'tgl_pembayar', align: 'center', width: 150, search: true },
-            { label: '(Rp) Bayar', name: 'nominal', align: 'right', width: 150, search: true },
-            { label: 'Sisa', name: 'sisa', width: 150, align: 'right', search: true }
-        ],
-        jsonReader: {
-            root: "rows",
-            page: "page",
-            total: "total",
-            records: "records",
-            repeatitems: false,
-            id: "id"
-        },
-        pager: "#biayaPager1",
-        rowNum: 10,
-        rowList: [10, 20, 50],
-        height: 'auto',       // Jika ingin tinggi dinamis
-        autowidth: true,      // Otomatis sesuaikan lebar
-        shrinkToFit: true,    // Kolom menyesuaikan grid
-        viewrecords: true,
-        multiselect: false,
-        caption: "Data Pembayaran Invoice",
-        loadComplete: function () {
-            resizeGrid();
+    $(function() {
+        function resizeGrid() {
+            $("#biayaGrid1").setGridWidth($('#biayaGrid1').closest(".ui-jqgrid").parent().width(), true);
         }
-    });
 
-    // Toolbar filter
-    $("#biayaGrid1").jqGrid('filterToolbar', {
-        searchOperators: false,
-        searchOnEnter: false,
-        defaultSearch: "cn"
-    });
+        $("#biayaGrid1").jqGrid({
+            url: '{{ route('list.inv.data') }}',
+            datatype: "json",
+            mtype: "GET",
+            colModel: [{
+                    label: 'No',
+                    name: 'DT_RowIndex',
+                    width: 50,
+                    key: true,
+                    align: 'center',
+                    search: true
+                },
+                {
+                    label: 'Invoice',
+                    name: 'invoice',
+                    align: 'center',
+                    width: 150,
+                    search: true
+                },
+                {
+                    label: 'Customer',
+                    name: 'customer',
+                    align: 'center',
+                    width: 150,
+                    search: true
+                },
+                {
+                    label: 'Tgl Invoice',
+                    name: 'tgl_inv',
+                    align: 'center',
+                    width: 150,
+                    search: true
+                },
+                {
+                    label: 'Nilai Inv',
+                    name: 'total',
+                    width: 150,
+                    align: 'right',
+                    search: true
+                },
+                {
+                    label: 'Tgl Masuk Rekening',
+                    name: 'tgl_pembayar',
+                    align: 'center',
+                    width: 150,
+                    search: true
+                },
+                {
+                    label: '(Rp) Bayar',
+                    name: 'nominal',
+                    align: 'right',
+                    width: 150,
+                    search: true
+                },
+                {
+                    label: 'Sisa',
+                    name: 'sisa',
+                    width: 150,
+                    align: 'right',
+                    search: true
+                }
+            ],
+            jsonReader: {
+                root: "rows",
+                page: "page",
+                total: "total",
+                records: "records",
+                repeatitems: false,
+                id: "id"
+            },
+            pager: "#biayaPager1",
+            rowNum: 10,
+            rowList: [10, 20, 50],
+            height: 'auto', // Jika ingin tinggi dinamis
+            autowidth: true, // Otomatis sesuaikan lebar
+            shrinkToFit: true, // Kolom menyesuaikan grid
+            viewrecords: true,
+            multiselect: false,
+            caption: "Data Pembayaran Invoice",
+            loadComplete: function() {
+                resizeGrid();
+            }
+        });
 
-    // Otomatis resize saat window diubah
-    $(window).bind('resize', function () {
-        resizeGrid();
-    });
-});
+        // Toolbar filter
+        $("#biayaGrid1").jqGrid('filterToolbar', {
+            searchOperators: false,
+            searchOnEnter: false,
+            defaultSearch: "cn"
+        });
 
+        // Otomatis resize saat window diubah
+        $(window).bind('resize', function() {
+            resizeGrid();
+        });
+    });
 </script>
 <script>
     function formatRibuan(input) {
