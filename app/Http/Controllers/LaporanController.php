@@ -432,6 +432,62 @@ if ($selisih > 1) {
         
             return view('laporan.lap-monitor-invoice',compact('invoices','invoiceLebihBayar'));
         }
+
+        public function dashMonitor(){
+    $currentMonth = now()->month;
+    $currentYear = now()->year;
+
+    // Get the month and year from the request, or use the current month and year as defaults
+    $bulan = date('m');
+    $tahun = date('Y');
+
+    // Define the start date as January 2023
+    $startDate = '2023-01-01';
+    $tahunCo = $tahun;
+    $dateCo = now()->create($tahunCo . '-' . '01' . '-01')->startOfMonth()->toDateString();
+    // Define the end date based on the selected month and year
+    $endDate = now()->create($tahun . '-' . $bulan . '-01')->endOfMonth()->toDateString();
+
+    // Get COA data based on account numbers
+    $coa1 = Coa::whereIn('id',[8,89,91,90])->orderBy('no_akun')->get();
+    $coa2 = Coa::whereIn('id',[35,98])->orderBy('no_akun')->get();
+
+    // Initialize totals array
+    $totals = [];
+    $coaId1 = $coa1->pluck('id')->toArray();
+    $coaId2 = $coa2->pluck('id')->toArray();
+
+    // Merge all COA IDs into a single array
+    $allCoaIds = array_merge($coaId1, $coaId2);
+
+    foreach ($allCoaIds as $coaId) {
+        // Calculate debit and credit totals within the date range
+        $debit = Jurnal::where('coa_id', $coaId)
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->sum('debit');
+
+        $kredit = Jurnal::where('coa_id', $coaId)
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->sum('kredit');
+        if (in_array($coaId, $coaId1)) {
+            $selisih = $debit - $kredit;
+        } else {
+            $selisih = $kredit - $debit;
+        }
+        // Store the totals in the array
+        $totals[$coaId] = [
+            'debit' => $debit,
+            'kredit' => $kredit,
+            'selisih' => $selisih,
+        ];
+        }
+    return view('laporan.ds-monitor', compact(
+        'coa1', 'coa2', 
+        'totals',
+        'bulan', 'tahun', 'startDate', 'endDate'
+    ));
+    }
+
         public function listInv(Request $request)
         {
             $searchTerm   = $request->get('searchString', '');
