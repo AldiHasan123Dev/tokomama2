@@ -83,7 +83,7 @@ class SalesController extends Controller
     }
     public function datatable()
 {
-    $data = Sales::query()->orderBy('id', 'desc');
+    $data = Sales::query()->orderBy('id', 'asc');
 
   return DataTables::of($data)
     ->addIndexColumn()
