@@ -120,7 +120,7 @@
                         @endif
                     </td>
 
-                    <td class="header-cell" style="padding-right:80px">Sales :
+                    <td class="header-cell" style="padding-right:50px">Sales :
                         {{ $data->first()->transaksi->suratJalan->customer->id_sales }}</td>
                 </tr>
                 <tr>
@@ -394,7 +394,8 @@
                     </tr>
                     <tr>
                         <th style="text-align: left; padding-right: 50px; font-style: italic;"> Bank Mandiri <br>
-                            14.000.45006.005</th>
+                            {{-- 14.000.45006.005 --}}
+                        15.400.45006.008</th>
                         <th></th>
                     </tr>
                     <tr>
