@@ -121,7 +121,7 @@
                     </td>
 
                     <td class="header-cell" style="padding-right:80px">Sales :
-                        {{ $data->first()->transaksi->suratJalan->customer->sales }}</td>
+                        {{ $data->first()->transaksi->suratJalan->customer->id_sales }}</td>
                 </tr>
                 <tr>
                     <td style="text-align:left ;padding-left:40px; margin-top20px">
