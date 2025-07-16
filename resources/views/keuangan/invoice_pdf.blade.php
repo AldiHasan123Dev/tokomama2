@@ -211,11 +211,16 @@
                         $item = $data[$i];
                     @endphp
                     @endfor
+                     @php
+    $tampilKolomKonversi = collect($data)->contains(function($item) {
+        return $item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan;
+    });
+@endphp
                     <tr>
                         <th class="border border-black">No.</th>
                         <th class="border border-black">Nama Barang</th>
                         <th class="border border-black">PO</th>
-                        @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan || $data[0]->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
+                        @if ($tampilKolomKonversi)
                         <th class="border border-black">QTY A</th>
                         <th class="border border-black">QTY B</th>
                         @else
@@ -225,11 +230,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php
-    $tampilKolomKonversi = collect($data)->contains(function($item) {
-        return $item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan;
-    });
-@endphp
 
                     @for ($i = $start_item; $i < $end_item; $i++)
                         @php
@@ -303,7 +303,7 @@
                                 $dpp = ($total * 11) / 12;
                                 $ppn = ($barang->value_ppn / 100) * $dpp;
                             @endphp
-                            @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan || $data[0]->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
+                            @if ($tampilKolomKonversi)
                             <td colspan="5" class="border border-black" style="text-align: right;">
                                 <b>TOTAL</b>
                             </td>
