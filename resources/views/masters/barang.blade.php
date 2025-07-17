@@ -95,6 +95,7 @@
                       <th>Status PPN</th>
                       <th>Status Barang</th>
                       <th>(%)PPN</th>
+                      <th>Minimum Stock</th>
                       <th>Aksi</th>
                   </tr>
               </thead>
@@ -164,6 +165,13 @@
                   <option value="NON-AKTIF">NON-AKTIF</option>
               </select>
           </label>
+           <label class="form-control w-full max-w-xs col-start-2">
+              <div class="label">
+                  <span class="label-text">Minimum Stock <span class="text-red-500">*</span></span>
+              </div>
+              <input id="nama" type="number" placeholder="Masukkan minimum stock barang" name="minimum_stock"
+                  class="input input-bordered w-full max-w-xs rounded-md" required />
+          </label>
           <div class="col-span-3 mt-8 text-center">
               <button type="submit" class="btn text-semibold text-white bg-green-500 w-1/3 mx-auto">Simpan Data
                   Barang</button>
@@ -215,6 +223,12 @@
                       data: 'value_ppn',
                       name: 'value_ppn'
                   },
+
+                  {
+                      data: 'minimum_stock',
+                      name: 'minimum_stock'
+                  },
+
                   {
                       data: 'aksi',
                       name: 'aksi'
@@ -244,7 +258,7 @@
               $('#nama_singkat').val(this.value);
           });
 
-          function getData(id, kode_objek, nama, nama_singkat, value, status_ppn, status, value_ppn, nama_satuan, id_satuan) {
+          function getData(id, kode_objek, nama, nama_singkat, value, status_ppn, status, value_ppn, nama_satuan, id_satuan, minimum_stock) {
               $('#dialog').html(`<dialog id="my_modal_6" class="modal">
           <div class="modal-box  w-11/12 max-w-2xl pl-10 py-9 ">
           <form method="dialog">
@@ -284,6 +298,8 @@
               </select>
             <label class="form-label">Nilai (%)PPN:</label>
               <input type="number" name="value_ppn" value="${value_ppn}" class="input-field" />
+               <label class="form-label">Minimum Stock:</label>
+              <input type="number" name="minimum_stock" value="${minimum_stock}" class="input-field" />
             <button type="submit" class="submit-button">Edit</button>
           </form>
           </div>

@@ -146,6 +146,36 @@
             background-color: #f2f2f2;
             /* Warna latar belakang header */
         }
+
+     #reminders-stock-table {
+    font-size: 8px;
+    margin: 10px 0;
+    width: 100%;
+}
+
+#reminders-stock-table th,
+#reminders-stock-table td {
+    padding: 4px 6px !important;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    font-size: 12px;
+    padding: 4px;
+    height: auto;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    font-size: 12px;
+    padding: 2px;
+    height: auto;
+}
+
+
+
+        
     </style>
 
     {{-- <x-keuangan.card-keuangan>
@@ -208,6 +238,36 @@
             </div>
         </div>
     </x-keuangan.card-keuangan>
+
+    @if(count($combinedData) > 0)
+<x-keuangan.card-keuangan>
+    <x-slot:tittle>Reminders Stock</x-slot:tittle>
+    <div class="container">
+            <table id="reminders-stock-table" class="table-custom table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Barang</th>
+                        <th>Sisa Stock</th>
+                        <th>Minimum Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($combinedData as $index => $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item['nama'] }}</td>
+                            <td>{{ number_format($item['sisa']) }}</td>
+                            <td>{{ number_format($item['minimum_stock']) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
+</x-keuangan.card-keuangan>
+
+
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Kartu Stock Jayapura</x-slot:tittle>
         <div class="card bg-white shadow-sm">
@@ -421,6 +481,13 @@
                     scrollX: true,
                 });
             });
+
+            $('#reminders-stock-table').DataTable({
+    pageLength: 20,
+    scrollX: true,
+    ordering: false, // urutkan berdasarkan nama barang
+});
+
 
 
             $(function() {

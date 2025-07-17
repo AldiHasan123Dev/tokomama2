@@ -852,17 +852,15 @@ $months = [
     return view('laporan.lap-piutang-customer',compact('mergedResults', 'data' ,'months', 'summaryData'));
         }
 
-public function dataLapPiutang(Request $request)
+
+        public function dataLapPiutang(Request $request)
 {
-    // Ambil parameter pencarian kolom
     $searchField = $request->input('searchField');
     $searchString = $request->input('searchString');
+    $nominalInput = $request->input('nominal');
+    $inputVal = preg_replace('/[^\d]/', '', $nominalInput ?? '');
 
-    // Ambil data dari invoice
-    $query = Invoice::query();
-    if ($searchField && $searchString) {
-        $query->where($searchField, 'like', "%$searchString%");
-    }
+    $tahunIni = Carbon::now()->startOfYear()->format('Y-m-d');
 
     // Ambil jurnal BBM
     $jurnals = Jurnal::withTrashed()
@@ -886,14 +884,28 @@ public function dataLapPiutang(Request $request)
         'transaksi.barang'
     ]);
 
+    // Filter berdasarkan request
     if ($request->filled('tgl_inv') || $request->filled('inv')) {
         $invoices->where('tgl_invoice', 'like', '%' . $request->tgl_inv . '%')
                  ->where('invoice.invoice', 'like', '%' . $request->inv . '%');
+    } elseif ($inputVal !== '') {
+        // Jika hanya nominal yang diisi → batasi tgl_invoice ke tahun ini
+        $invoices->where('tgl_invoice', '>=', $tahunIni);
+    } else {
+        // Tidak ada filter sama sekali, kosongkan
+        return response()->json([
+            'rows' => [],
+            'current_page' => 1,
+            'last_page' => 0,
+            'total' => 0,
+            'records' => 0,
+            'debug_warna' => [],
+        ]);
     }
 
     $invoices = $invoices->orderBy('created_at', 'desc')->get();
 
-    // Kelompokkan dan hitung data invoice
+    // Group dan hitung per invoice
     $data = $invoices->groupBy('invoice')->map(function ($group) {
         $subtotal = $group->sum('subtotal');
         $ppn = 0;
@@ -903,10 +915,12 @@ public function dataLapPiutang(Request $request)
                 $ppn += $invoice->subtotal * ($barang->value_ppn / 100);
             }
         }
+
         $jumlah_harga = round($subtotal + $ppn);
         $first = $group->first();
         $customer = $first->transaksi->suratJalan->customer->nama ?? null;
         $top = Customer::where('nama', $customer)->pluck('top')->first();
+
         return [
             'tanggal' => now()->format('Y-m-d'),
             'invoice' => $first->invoice,
@@ -918,11 +932,11 @@ public function dataLapPiutang(Request $request)
             'hitung_tempo' => Carbon::parse($first->tgl_invoice)->addDays((int) $top),
             'dibayar_tgl' => null,
             'sebesar' => 0,
-            'kurang_bayar' => $jumlah_harga,
+            'kurang_bayar' => (int) $jumlah_harga,
         ];
     });
 
-    // Gabungkan data jurnal
+    // Gabungkan data jurnal ke invoice
     foreach ($jurnals as $jurnal) {
         if ($data->has($jurnal->invoice)) {
             $current = $data->get($jurnal->invoice);
@@ -934,15 +948,16 @@ public function dataLapPiutang(Request $request)
                     $ppn += $invoice->subtotal * ($barang->value_ppn / 100);
                 }
             }
+
             $total = round($subtotal + $ppn);
             $current['dibayar_tgl'] = $jurnal->daftar_tanggal;
             $current['sebesar'] = $jurnal->total_debit;
-            $current['kurang_bayar'] = $total - $jurnal->total_debit;
+            $current['kurang_bayar'] = (int) ($total - $jurnal->total_debit);
             $data->put($jurnal->invoice, $current);
         }
     }
 
-    // Konversi ke array dan beri nomor
+    // Tambahkan nomor urut
     $result = [];
     $i = 1;
     foreach ($data as $item) {
@@ -952,8 +967,7 @@ public function dataLapPiutang(Request $request)
 
     $data = collect($result)->sortBy('customer')->values();
 
-
-    // Filter berdasarkan tgl invoice jika ada
+    // Filter ditagih_tgl
     if ($request->filled('ditagih_tgl')) {
         $data = $data->filter(fn($row) => Str::contains($row['ditagih_tgl'], $request->ditagih_tgl))->values();
     }
@@ -962,8 +976,7 @@ public function dataLapPiutang(Request $request)
     $data = $data->map(function ($row) {
         $today = now()->format('Y-m-d');
         $tempoDate = Carbon::parse($row['tempo'])->format('Y-m-d');
-        $daysDiff = Carbon::parse($row['tempo'])->diffInDays($today, true); // selalu positif
-
+        $daysDiff = Carbon::parse($row['tempo'])->diffInDays($today, true);
 
         $warna = '';
         if ((float) $row['kurang_bayar'] == 0) {
@@ -971,21 +984,20 @@ public function dataLapPiutang(Request $request)
         } elseif ((int) $row['top'] === 0 && $tempoDate === $today) {
             $warna = '';
         } elseif (Carbon::parse($row['tempo'])->isFuture()) {
-    if ($daysDiff > 0 && $daysDiff <= 4) {
-        $warna = 'kuning'; // <-- ini yang benar
-    }
-}
- elseif ($daysDiff > 0) {
+            if ($daysDiff > 0 && $daysDiff <= 4) {
+                $warna = 'kuning';
+            }
+        } elseif ($daysDiff > 0) {
             $warna = 'merah';
         }
+
         $row['warna_status'] = $warna;
         return $row;
     });
 
     // Filter warna_status dari jqGrid
-    $filters = $request->input('filters');
-    if ($filters) {
-        $filterRules = json_decode($filters, true)['rules'] ?? [];
+    if ($request->filled('filters')) {
+        $filterRules = json_decode($request->filters, true)['rules'] ?? [];
         foreach ($filterRules as $rule) {
             if ($rule['field'] === 'warna_status') {
                 $value = $rule['data'];
@@ -994,7 +1006,14 @@ public function dataLapPiutang(Request $request)
         }
     }
 
-    // Pagination setelah semua filter
+    // 🔍 Filter nominal jika ada
+    if ($inputVal !== '') {
+        $data = $data->filter(function ($row) use ($inputVal) {
+            return (int) $row['kurang_bayar'] == (int) $inputVal;
+        })->values();
+    }
+
+    // Pagination
     $currentPage = $request->input('page', 1);
     $perPage = $request->input('rows', 20);
     $totalRecords = $data->count();
@@ -1005,16 +1024,16 @@ public function dataLapPiutang(Request $request)
         return $row;
     });
 
-    // Kembalikan response untuk jqGrid
     return response()->json([
         'rows' => $paginated,
         'current_page' => $currentPage,
         'last_page' => ceil($totalRecords / $perPage),
         'total' => $totalRecords,
         'records' => $totalRecords,
-        'debug_warna' => $paginated->pluck('warna_status')
+        'debug_warna' => $paginated->pluck('warna_status'),
     ]);
 }
+
 
 
 public function dataLapPiutangTotal(Request $request)

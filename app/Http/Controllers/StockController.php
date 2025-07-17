@@ -455,7 +455,49 @@ public function stockCSV19()
         return $transaction->harga_beli * $transaction->sisa;
     });
 
-    $barang = Barang::with('satuan')->where('status', 'aktif')->orderBy('nama', 'asc')->get();
+   $barang = Barang::with('satuan')
+    ->where('status', 'aktif')
+    ->orderBy('nama', 'asc')
+    ->get();
+
+$minimumStocks = $barang->pluck('minimum_stock', 'id')->toArray();
+
+// Ambil total sisa per id_barang
+$stockQuantities = Transaction::selectRaw('id_barang, SUM(sisa) as total_sisa')
+    ->whereNull('id_surat_jalan')
+    ->whereNotNull('no_bm')
+    ->where('harga_beli', '>', 0)
+    ->groupBy('id_barang')
+    ->pluck('total_sisa', 'id_barang')
+    ->toArray();
+
+// Ambil no_bm terakhir per id_barang
+
+$combinedData = [];
+
+foreach ($barang as $barangItem) {
+    $id_barang = $barangItem->id;
+    $minStock = (int) ($minimumStocks[$id_barang] ?? 0);
+    $sisa = (int) ($stockQuantities[$id_barang] ?? 0);
+
+    // Abaikan jika minimum stock 0
+    if ($minStock === 0) {
+        continue;
+    }
+
+    // Tampilkan jika sisa kurang dari atau sama dengan minimum stock
+    if ($sisa <= $minStock) {
+        $combinedData[$id_barang] = [
+            'nama' => $barangItem->nama,
+            'minimum_stock' => $minStock,
+            'sisa' => $sisa,
+        ];
+    }
+}
+
+
+
+
 
     // Ambil parameter dari request
     $barang_id = $request->get('barang') ?? null;
@@ -724,7 +766,7 @@ foreach ($gabungan as $item) {
 
 }
 
-    return view('toko.monitor-stock', compact('data', 'hasil1','data1','hasil', 'barang_id','jayapura','barang', 'month', 'year', 'perjalanan','perjalanan1','perjalanan2'));
+    return view('toko.monitor-stock', compact('combinedData','data', 'hasil1','data1','hasil', 'barang_id','jayapura','barang', 'month', 'year', 'perjalanan','perjalanan1','perjalanan2'));
     }
 
     public function stocks(){
