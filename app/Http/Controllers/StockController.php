@@ -355,74 +355,72 @@ public function stockCSV19()
         return $response;
     }
 
-    public function dataStock2()
-    {
-        // Ambil parameter pagination
-        
-        // Query dengan groupBy untuk mengelompokkan data berdasarkan barang
-        $stocks = Transaction::selectRaw(
-            'transaksi.*'
-        )
-        ->with('jurnals')
+  public function dataStock2(Request $request)
+{
+    $perPage = $request->input('rows', 20);
+    $currentPage = $request->input('page', 1);
+    $offset = ($currentPage - 1) * $perPage;
+
+    // Query builder awal
+    $query = Transaction::selectRaw('transaksi.*')
+        ->with('jurnals', 'barang', 'suppliers')
         ->whereNull('id_surat_jalan')
-        ->where('harga_beli', '>', 0)
-        ->orderBy('no_bm', 'desc') // Pastikan harga_beli lebih dari 0 // Grup berdasarkan kondisi // Urutkan berdasarkan created_at
-        ->get();
-        
-        // Hitung total records
-        $totalRecords = $stocks->count();
-        $perPage = request('per_page', $totalRecords);
-        $currentPage = request('page', 1);
-    
-        // Tentukan offset untuk pagination
-        $offset = ($currentPage - 1) * $perPage;
-    
-        // Data paginasi
-        $paginatedData = $stocks->slice($offset, $perPage);
-    
-        // Format data untuk ditampilkan
-        $index = $offset + 1; // Mulai nomor urut sesuai offset
-        $formattedStocks = $paginatedData->map(function ($stock) use (&$index) {
-            return [
-                'id' => $stock->transaksi_ids,
-                'satuans' => $stock->satuans,
-                'barangs' => $stock->barangs,
-                'jumlah_belis' => $stock->jumlah_belis,
-                'lock' => $stock->stts ?? $this->getJumlahBeli($stock),
-                'status' => $stock->stts ?? '-',
-                'tgl_jurnal' =>  optional($stock->jurnals->firstWhere('coa_id', 89))->tgl ?? '-' ?? '-',
-                'jurnal' =>  optional($stock->jurnals->firstWhere('coa_id', 89))->nomor ?? '-' ?? '-',
-                'invoice_external' => $stock->invoice_external,
-                'no_bm' => $stock->no_bm,
-              'gudang' => $stock->stts === null ? '-' : $stock->gudang,
-                'satuan_beli' => $stock->satuan_beli,
-                'satuan_jual' => $stock->satuan_jual,
-                'supplier' => $stock->suppliers->nama ?? '-',
-                'barang.nama' => $stock->barang->nama ?? '-', // Nama barang
-                'total_beli' => $stock->jumlah_beli, // Total jumlah beli
-                'total_jual' => $stock->jumlah_jual,
-                'total_harga_beli' => $stock->harga_beli,
-                'total_harga_jual' => $stock->harga_jual,
-                'total_profit' => $stock->total_profit, // Total jumlah jual
-                'sisa' => $stock->sisa, // Stok tersisa
-                'index' => $index++ // Nomor urut
-            ];
-        });
-    
-        // Hitung total halaman
-        $totalPages = ceil($totalRecords / $perPage);
-    
-        // Format data untuk jqGrid
-        $data = [
-            'page' => $currentPage,
-            'total' => $totalPages,
-            'records' => $totalRecords,
-            'rows' => $formattedStocks
-        ];
-    
-        // Return JSON response
-        return response()->json($data);
+        ->where('harga_beli', '>', 0);
+
+   
+    if ($request->input('sisa_asc')) {
+        $query->orderBy('sisa', 'asc');
+    } elseif ($request->input('sisa_desc')) {
+        $query->orderBy('sisa', 'desc');
+    } else {
+        $query->orderBy('no_bm', 'desc');
     }
+
+    // Total data untuk pagination (tanpa limit)
+    $totalRecords = $query->count();
+
+    // Ambil data sesuai page & limit
+    $data = $query->skip($offset)->take($perPage)->get();
+
+    // Proses mapping data seperti gayamu
+    $paginated = $data->values()->map(function ($row, $idx) use ($offset) {
+        return [
+            'id' => $row->transaksi_ids,
+            'satuans' => $row->satuans,
+            'barangs' => $row->barangs,
+            'jumlah_belis' => $row->jumlah_belis,
+            'lock' => $row->stts ?? $row->jumlah_beli,
+            'status' => $row->stts ?? '-',
+            'tgl_jurnal' => optional($row->jurnals->firstWhere('coa_id', 89))->tgl ?? '-',
+            'jurnal' => optional($row->jurnals->firstWhere('coa_id', 89))->nomor ?? '-',
+            'invoice_external' => $row->invoice_external,
+            'no_bm' => $row->no_bm,
+            'gudang' => $row->stts === null ? '-' : $row->gudang,
+            'satuan_beli' => $row->satuan_beli,
+            'satuan_jual' => $row->satuan_jual,
+            'supplier' => $row->suppliers->nama ?? '-',
+            'barang.nama' => $row->barang->nama ?? '-',
+            'total_beli' => $row->jumlah_beli,
+            'total_jual' => $row->jumlah_jual,
+            'total_harga_beli' => $row->harga_beli,
+            'total_harga_jual' => $row->harga_jual,
+            'total_profit' => $row->total_profit,
+            'sisa' => $row->sisa,
+            'index' => $offset + $idx + 1 // sesuai nomor urut global
+        ];
+    });
+
+    // Total halaman
+    $totalPages = ceil($totalRecords / $perPage);
+
+    return response()->json([
+        'page' => $currentPage,
+        'total' => $totalPages,
+        'records' => $totalRecords,
+        'rows' => $paginated
+    ]);
+}
+
 
     public function cetak_nota(){
         return view('toko.list-barang');

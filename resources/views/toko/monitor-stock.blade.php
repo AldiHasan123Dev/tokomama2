@@ -172,6 +172,29 @@
     padding: 2px;
     height: auto;
 }
+.sort-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.sort-button {
+    padding: 8px 14px;
+    background-color: #ffffff;
+    border: 2px solid #00ff44;
+    color: #2eb86a;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sort-button:hover {
+    background-color: #179e3d;
+    color: rgb(255, 255, 255);
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+}
 
 
 
@@ -204,6 +227,18 @@
             <div class="overflow-x-auto mt-5">
                 <div class="table-responsive">
                     <!-- Checkbox "Select All" di luar tabel -->
+<div class="sort-buttons">
+    <button id="sortSisaAsc" class="sort-button">
+         {{-- ↑  --}}
+        Urutkan Sisa Terkecil
+    </button>
+    <button id="sortSisaDesc" class="sort-button">
+        {{-- ↓  --}}
+        Urutkan Sisa Terbesar
+    </button>
+</div>
+
+
                     <table class="table" id="table-getfaktur"></table>
                     <div id="jqGridPager"></div>
                 </div>
@@ -483,11 +518,32 @@
             });
 
             $('#reminders-stock-table').DataTable({
-    pageLength: 20,
-    scrollX: true,
-    ordering: false, // urutkan berdasarkan nama barang
+                pageLength: 20,
+                scrollX: true,
+                ordering: false, // urutkan berdasarkan nama barang
+            });
+
+            $('#sortSisaAsc').on('click', function () {
+    $("#jqGrid1").jqGrid('setGridParam', {
+        datatype: 'json',
+        postData: {
+            sisa_asc: true,
+            sisa_desc: null // reset jika sebelumnya di klik descending
+        },
+        page: 1
+    }).trigger('reloadGrid');
 });
 
+$('#sortSisaDesc').on('click', function () {
+    $("#jqGrid1").jqGrid('setGridParam', {
+        datatype: 'json',
+        postData: {
+            sisa_desc: true,
+            sisa_asc: null // reset jika sebelumnya di klik ascending
+        },
+        page: 1
+    }).trigger('reloadGrid');
+});
 
 
             $(function() {
@@ -495,6 +551,10 @@
                     url: "{{ route('stock.data2') }}", // URL untuk data JSON dari controller
                     datatype: "json",
                     mtype: "GET",
+                    postData: {
+    sisa_asc: function() { return $('#sortSisaAsc').val(); },
+    sisa_desc: function() { return $('#sortSisaDesc').val(); }
+},
                     colModel: [{
                             label: 'No',
                             name: 'index',
@@ -608,7 +668,7 @@
                     viewrecords: true, // Menampilkan jumlah total data
                     autowidth: true, // Menyesuaikan lebar tabel dengan kontainer
                     caption: "Data Stock", // Judul tabel
-                    loadonce: true, // Memuat semua data hanya sekali
+                    loadonce: false, // ✅ agar jqGrid ambil ulang data dari server saat reload // Memuat semua data hanya sekali
                     search: true, // Mengaktifkan toolbar pencarian
                     toolbar: [true, "top"], // Menampilkan toolbar di bagian atas tabel
                     filterToolbar: true, // Mengaktifkan filter toolbar
