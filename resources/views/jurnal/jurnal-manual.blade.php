@@ -289,6 +289,12 @@
                                     <option value="{{ $no_BBM }}/{{ 'BBM' }}-TM/{{ date('y') }}">
                                         Bank Masuk - {{ $no_BBM }}/{{ 'BBM' }}-TM/{{ date('y') }}
                                     </option>
+                                    <option value="{{ $no_BBKN }}/{{ 'BBKN' }}-TM/{{ date('y') }}">
+                                        Bank Keluar Baru - {{ $no_BBKN }}/{{ 'BBKN' }}-TM/{{ date('y') }}
+                                    </option>
+                                    <option value="{{ $no_BBMN }}/{{ 'BBMN' }}-TM/{{ date('y') }}">
+                                        Bank Masuk Baru - {{ $no_BBMN }}/{{ 'BBMN' }}-TM/{{ date('y') }}
+                                    </option>
                                     <option value="{{ $no_BBMO }}/{{ 'BBMO' }}-TM/{{ date('y') }}">
                                         Bank Masuk OCBC - {{ $no_BBMO }}/{{ 'BBMO' }}-TM/{{ date('y') }}
                                     </option>

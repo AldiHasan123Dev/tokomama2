@@ -42,6 +42,10 @@ class JurnalManualController extends Controller
         session(['no_BBK' => $no_BBK]);
         $noBBM = Jurnal::where('tipe', 'BBM')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBM = $noBBM ? $noBBM->no + 1 : 1;
+        $noBBMN = Jurnal::where('tipe', 'BBMN')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBMN = $noBBMN ? $noBBMN->no + 1 : 1;
+        $noBBKN = Jurnal::where('tipe', 'BBKN')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBKN = $noBBKN ? $noBBKN->no + 1 : 1;
         $noBBMO = Jurnal::where('tipe', 'BBMO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBMO = $noBBMO ? $noBBMO->no + 1 : 1;
         $noBBKO = Jurnal::where('tipe', 'BBKO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
@@ -103,7 +107,7 @@ class JurnalManualController extends Controller
         ->pluck('nomor');
 
         // dd($procTransactions);
-        return view('jurnal.jurnal-manual', compact('templates', 'nopol', 'coa', 'no_BBMO', 'no_BBKO', 'no_JNL', 'no_BKK', 'no_BKM', 'no_BBK', 'no_BBM', 'invoices', 'processedInvoices', 'procTransactions', 'transaksi','uniqueNomors', 'transaksi'));
+        return view('jurnal.jurnal-manual', compact('templates', 'nopol', 'coa', 'no_BBMO', 'no_BBKO', 'no_JNL', 'no_BKK', 'no_BKM', 'no_BBK', 'no_BBKN', 'no_BBM', 'no_BBMN', 'invoices', 'processedInvoices', 'procTransactions', 'transaksi','uniqueNomors', 'transaksi'));
     }
 
     /**
