@@ -236,6 +236,11 @@
         {{-- ↓  --}}
         Urutkan Sisa Terbesar
     </button>
+
+    <button id="reset" class="sort-button">
+        {{-- ↓  --}}
+        Reset
+    </button>
 </div>
 
 
@@ -528,6 +533,17 @@
         datatype: 'json',
         postData: {
             sisa_asc: true,
+            sisa_desc: null // reset jika sebelumnya di klik descending
+        },
+        page: 1
+    }).trigger('reloadGrid');
+});
+
+$('#reset').on('click', function () {
+    $("#jqGrid1").jqGrid('setGridParam', {
+        datatype: 'json',
+        postData: {
+            sisa_asc: null,
             sisa_desc: null // reset jika sebelumnya di klik descending
         },
         page: 1
