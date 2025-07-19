@@ -365,6 +365,7 @@ public function stockCSV19()
     $invoice_external = $request->invoice_external;
     $jurnal = $request->jurnal;
     $no_bm = $request->no_bm;
+    $tgl_jurnal = $request->tgl_jurnal;
 
     // Query builder awal
     $query = Transaction::selectRaw('transaksi.*')
@@ -385,6 +386,12 @@ public function stockCSV19()
      if($jurnal){
         $query->whereHas('jurnals', function ($q) use ($jurnal) {
         $q->where('nomor', 'like', '%' . $jurnal. '%');
+    });
+    }
+
+    if($tgl_jurnal){
+        $query->whereHas('jurnals', function ($q) use ($tgl_jurnal) {
+        $q->where('tgl', 'like', '%' . $tgl_jurnal. '%');
     });
     }
 
