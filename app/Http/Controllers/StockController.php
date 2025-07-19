@@ -360,6 +360,11 @@ public function stockCSV19()
     $perPage = $request->input('rows', 20);
     $currentPage = $request->input('page', 1);
     $offset = ($currentPage - 1) * $perPage;
+    $barang = $request->barang_nama;
+    $barang = $request->barang_nama;
+    $invoice_external = $request->invoice_external;
+    $jurnal = $request->jurnal;
+    $no_bm = $request->no_bm;
 
     // Query builder awal
     $query = Transaction::selectRaw('transaksi.*')
@@ -367,7 +372,26 @@ public function stockCSV19()
         ->whereNull('id_surat_jalan')
         ->where('harga_beli', '>', 0);
 
-   
+    if ($barang) {
+    $query->whereHas('barang', function ($q) use ($barang) {
+        $q->where('nama', 'like', '%' . $barang . '%');
+    });
+    }
+
+    if($invoice_external){
+        $query->where('invoice_external', 'like', '%' . $invoice_external . '%');
+    }
+
+     if($jurnal){
+        $query->whereHas('jurnals', function ($q) use ($jurnal) {
+        $q->where('nomor', 'like', '%' . $jurnal. '%');
+    });
+    }
+
+     if($no_bm){
+        $query->where('no_bm', 'like', '%' . $no_bm . '%');
+    }
+
     if ($request->input('sisa_asc')) {
         $query->orderBy('sisa', 'asc');
     } elseif ($request->input('sisa_desc')) {
@@ -399,7 +423,7 @@ public function stockCSV19()
             'satuan_beli' => $row->satuan_beli,
             'satuan_jual' => $row->satuan_jual,
             'supplier' => $row->suppliers->nama ?? '-',
-            'barang.nama' => $row->barang->nama ?? '-',
+            'barang_nama' => $row->barang->nama ?? '-',
             'total_beli' => $row->jumlah_beli,
             'total_jual' => $row->jumlah_jual,
             'total_harga_beli' => $row->harga_beli,

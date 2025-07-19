@@ -617,7 +617,7 @@ $('#sortSisaDesc').on('click', function () {
                         {
                             search: true,
                             label: 'Barang',
-                            name: 'barang.nama',
+                            name: 'barang_nama',
                             width: 100
                         },
                         {
