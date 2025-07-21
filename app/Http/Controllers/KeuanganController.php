@@ -152,6 +152,7 @@ class KeuanganController extends Controller
     public function cari(Request $request)
     {
         $tanggal = $request->tanggal_bayar;
+        $tipe = $request->tipe;
          $tahun = date('y');
          $year = date('Y');
     
@@ -159,12 +160,14 @@ class KeuanganController extends Controller
         $biayaInvs = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
             ->whereDate('tgl_pembayar', $tanggal)
             ->whereNull('jurnal')
+            ->where('tipe','BBMN')
             ->where('nominal', '>', 0)
             ->get();
         
          $last = Jurnal::where('tipe', 'BBM')->whereYear('tgl', $year)->orderBy('no', 'desc')->first() ?? 0;
          $nextNo = $last ? $last->no + 1 : 1;
-    
+         $bbmn = Jurnal::where('tipe', 'BBMN')->whereYear('tgl',$year)->orderBy('no','desc')->first() ?? 0;
+         $bbmn_no = $bbmn ? $bbmn->no + 1 : 1;
         // Jika kosong, kirim respon dengan pesan error
         if ($biayaInvs->isEmpty()) {
             return response()->json([
@@ -181,7 +184,11 @@ class KeuanganController extends Controller
             'nominal'  => $biayaInvs->pluck('nominal'),
             'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
             'no' => $nextNo,
-           'nomor' => "{$nextNo}/BBM-TM/{$tahun}"
+           'nomor' => "{$nextNo}/BBM-TM/{$tahun}",
+           'no1' => "$bbmn_no",
+           'nomor1' => "{$bbmn_no}/BBMN-TM/{$tahun}",
+           'bbmn' => "BBMN",
+           'bbm' => "BBM",
         ];
     
         return response()->json([
@@ -189,6 +196,73 @@ class KeuanganController extends Controller
             'data' => $result,
         ]);
     }
+
+    public function cari1(Request $request)
+    {
+        $tanggal = $request->tanggal_bayar;
+         $tahun = date('y');
+         $year = date('Y');
+    
+        // Ambil transaksi dengan filter tanggal bayar
+        $biayaInvs = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
+            ->whereDate('tgl_pembayar', $tanggal)
+            ->whereNull('jurnal')
+            ->where('tipe','BBM')
+            ->where('nominal', '>', 0)
+            ->get();
+        
+         $last = Jurnal::where('tipe', 'BBM')->whereYear('tgl', $year)->orderBy('no', 'desc')->first() ?? 0;
+         $nextNo = $last ? $last->no + 1 : 1;
+         $bbmn = Jurnal::where('tipe', 'BBMN')->whereYear('tgl',$year)->orderBy('no','desc')->first() ?? 0;
+         $bbmn_no = $bbmn ? $bbmn->no + 1 : 1;
+        // Jika kosong, kirim respon dengan pesan error
+        if ($biayaInvs->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pembayaran tanggal tersebut sudah terjurnal.',
+            ], 404);
+        }
+    
+        // Jika ada data, siapkan response data
+        $result = [
+            'id'       => $biayaInvs->pluck('id'),
+            'id_transaksi' => $biayaInvs->pluck('invoice.id_transaksi'),
+            'invoice'  => $biayaInvs->pluck('invoice.invoice'),
+            'nominal'  => $biayaInvs->pluck('nominal'),
+            'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
+            'no' => $nextNo,
+           'nomor' => "{$nextNo}/BBM-TM/{$tahun}",
+           'no1' => "$bbmn_no",
+           'nomor1' => "{$bbmn_no}/BBMN-TM/{$tahun}",
+           'bbmn' => "BBMN",
+           'bbm' => "BBM",
+        ];
+    
+        return response()->json([
+            'status' => 'success',
+            'data' => $result,
+        ]);
+    }
+
+    public function updateTipeJurnal(Request $request)
+{
+    $request->validate([
+        'id' => 'required|integer',
+        'tipe' => 'required|in:BBM,BBMN'
+    ]);
+
+    $biayaInv = BiayaInv::find($request->id);
+
+    if (!$biayaInv) {
+        return response()->json(['message' => 'Data tidak ditemukan'], 404);
+    }
+
+    $biayaInv->tipe = $request->tipe;
+    $biayaInv->save();
+
+    return response()->json(['message' => 'Berhasil diperbarui']);
+}
+
     public function jurnal(Request $request)
     {
         $data = $request->all();
@@ -219,8 +293,10 @@ class KeuanganController extends Controller
         $invoice = $data['invoice'];
         $customer = $data['customer'];
         $nomor = $data['nomor'];
+        $tipe = $data['tipe'];
         $tgl_jurnal = Carbon::parse($data['tanggal'])->format('Y-m-d');
         $no = (int) $data['no'];
+        $coaId = $tipe === 'BBMN' ? 99 : 5;
     
         // Header Jurnal (Debit)
         
@@ -231,7 +307,7 @@ class KeuanganController extends Controller
             if (empty($nominal[$i]) || $nominal[$i] == 0) continue;
 
             Jurnal::create([
-                'coa_id' => 5,
+                'coa_id' => $coaId,
                 'nomor' => $nomor,
                 'tgl' => $tgl_jurnal,
                 'keterangan' => 'Pelunasan Piutang ' . ($customer[$i] ?? '-'),
@@ -242,7 +318,7 @@ class KeuanganController extends Controller
                 'invoice_external' => null,
                 'id_transaksi' => $id_trans[$i] ?? null,
                 'nopol' => null,
-                'tipe' => 'BBM',
+                'tipe' => $tipe,
                 'no' => $no,
             ]);
 
@@ -258,7 +334,7 @@ class KeuanganController extends Controller
                 'invoice_external' => null,
                 'id_transaksi' => $id_trans[$i] ?? null,
                 'nopol' => null,
-                'tipe' => 'BBM',
+                'tipe' => $tipe,
                 'no' => $no,
             ]);
         }
@@ -497,7 +573,7 @@ class KeuanganController extends Controller
                                  YEAR(i.tgl_invoice) as year, 
                                  COUNT(i.invoice) as invoice_count, 
                                  SUM(t.harga_beli) as total_harga_beli, 
-                                 SUM(t.harga_jual) as total_harga_jual')
+                                 SUM(t.harga_jual) as total_harga_jual') 
     ->from('invoice as i')
     ->join('transaksi as t', 'i.id', '=', 't.id')
     ->groupBy('month', 'year') // Tambahkan 'year' di sini

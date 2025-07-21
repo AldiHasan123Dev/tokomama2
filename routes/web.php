@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/surat-jalan-data', [SuratJalanController::class, 'dataTable'])->name('surat-jalan.data');
     Route::post('/surat-jalan-supplier-data', [SuratJalanController::class, 'dataTableSupplier'])->name('surat-jalan-supplier.data');
     Route::post('/surat-jalan-edit', [SuratJalanController::class, 'update'])->name('surat-jalan.data.edit');
+    Route::post('/update-tipe-jurnal-bayar-inv', [KeuanganController::class, 'updateTipeJurnal']);
     Route::post('/surat-jalan-external-edit', [SuratJalanController::class, 'updateInvoiceExternal'])->name('surat-jalan-external.data.edit');
     Route::post('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
     // Route::delete('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
@@ -177,7 +178,8 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::get('data-omzet-total', 'dataOmzeTotal')->name('keuangan.data-omzet-total');
     Route::get('omzet-list', 'dataTableOmzet')->name('keuangan.omzet.datatable');
     Route::post('omzet-export', 'OmzetExportExcel')->name('keuangan.omzet.exportexcel');
-    Route::post('cari-transaksi-by-tanggal', 'cari')->name('keuangan.cari'); 
+    Route::post('cari-transaksi-by-tanggal', 'cari')->name('keuangan.cari');
+    Route::post('cari-transaksi-by-tanggal1', 'cari1')->name('keuangan.cari1');  
     Route::post('jurnal-simpan', 'jurnal')->name('keuangan.jurnal-inv'); 
 });
 

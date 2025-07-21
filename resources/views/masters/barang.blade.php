@@ -169,7 +169,7 @@
               <div class="label">
                   <span class="label-text">Minimum Stock <span class="text-red-500">*</span></span>
               </div>
-              <input id="nama" type="number" placeholder="Masukkan minimum stock barang" name="minimum_stock"
+              <input id="nama" type="number" value="0" placeholder="Masukkan minimum stock barang" name="minimum_stock"
                   class="input input-bordered w-full max-w-xs rounded-md" required />
           </label>
           <div class="col-span-3 mt-8 text-center">
