@@ -322,7 +322,8 @@ if (request('non_tarif') && !request('tarif')) {
     private function getActionButton($row)
 {
     // Cek apakah transaksi ini terhubung ke Invoice
-    $invoiceExists = Transaction::where('id', $row->id)->whereNotNull('stts')->exists();
+    $invoiceExists = Transaction::where('id', $row->id)->whereNotNull('invoice_external')->exists();
+    //   $invoiceExists = Transaction::where('id', $row->id)->whereNotNull('stts')->exists();
 
     if (!$invoiceExists) {
         // Encode nilai teks yang rawan karakter khusus
