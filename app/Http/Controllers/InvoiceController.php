@@ -39,7 +39,7 @@ class InvoiceController extends Controller
         $invoice_count = request('invoice_count');
 
         $currentMonth = Carbon::now()->month;
-        $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->orderBy('no', 'desc')->first() ?? 0;
+        $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->whereYear('tgl',date('Y'))->orderBy('no', 'desc')->first() ?? 0;
         $no_JNL =  $noJNL ? $noJNL->no + 1 : 1;
 
         
