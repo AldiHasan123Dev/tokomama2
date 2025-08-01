@@ -316,7 +316,7 @@ $validatedData = $request->validate([
        
       
 
-        $sort = Jurnal::whereMonth('tgl', $bulan)->where('tipe', 'JNL')->get();
+        $sort = Jurnal::whereMonth('tgl', $bulan)->where('tipe', 'JNL')->whereYear('tgl',date('Y'))->get();
         $nomorArray = $sort->pluck('no')->toArray();
         if ($nomorArray == []){
             $nomorArray = [0];
