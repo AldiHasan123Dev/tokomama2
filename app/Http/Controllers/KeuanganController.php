@@ -85,6 +85,7 @@ class KeuanganController extends Controller
     ->get();
     $dateTime = new DateTime($data[0]->tgl_invoice);
     $formattedDate = $dateTime->format('d F Y');
+    $jatuhTempo = Carbon::parse($data[0]->tgl_invoice)->addDays((int) $data[0]->transaksi->suratJalan->customer->top)->format('d-m-Y');
     
     $id_transaksi = $data[0]->transaksi->id;
     $transaksi = Transaction::where('id', $id_transaksi) ->first(); //keteran
@@ -106,7 +107,7 @@ class KeuanganController extends Controller
     $satuan = Satuan::where('id', $barang->id_satuan)->first();
     
     // Pass $no_count ke view
-    $pdf = Pdf::loadView('keuangan/invoice_pdf', compact('data', 'invoice', 'barang', 'formattedDate', 'transaksi', 'satuan', 'po'))->setPaper('a4', 'potrait');
+    $pdf = Pdf::loadView('keuangan/invoice_pdf', compact('jatuhTempo','data', 'invoice', 'barang', 'formattedDate', 'transaksi', 'satuan', 'po'))->setPaper('a4', 'potrait');
     return $pdf->stream('invoice_pdf.pdf');
 }
 
