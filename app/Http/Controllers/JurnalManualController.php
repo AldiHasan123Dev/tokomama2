@@ -31,7 +31,7 @@ class JurnalManualController extends Controller
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
-        $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->orderBy('no', 'desc')->first() ?? 0;
+        $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->whereYear('tgl',date('Y'))->orderBy('no', 'desc')->first() ?? 0;
         $no_JNL = $noJNL ? $noJNL->no + 1 : 1;
         $noBKK = Jurnal::where('tipe', 'BKK')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BKK = $noBKK ? $noBKK->no + 1 : 1;
@@ -162,7 +162,7 @@ class JurnalManualController extends Controller
     
         //pemecahan nomor jurnal
         if ($tipe === 'JNL'){
-            $jurnalsort = Jurnal::whereMonth('tgl', $bulan)->where('tipe', 'JNL')->get();
+            $jurnalsort = Jurnal::whereMonth('tgl', $bulan)->whereYear('tgl',date('Y'))->where('tipe', 'JNL')->get();
         }
         $nomorArray = $jurnalsort->pluck('no')->toArray();
         if ($nomorArray == []) {
