@@ -273,6 +273,44 @@
             color: rgb(0, 0, 0);
             font-weight: bold;
         }
+
+            #customer.select2-hidden-accessible + .select2-container .select2-selection--single {
+        height: 45px !important;
+    }
+
+    #customer.select2-hidden-accessible + .select2-container .select2-selection--single .select2-selection__rendered {
+        line-height: 45px !important;
+    }
+
+    #customer.select2-hidden-accessible + .select2-container .select2-selection--single .select2-selection__arrow {
+        height: 45px !important;
+    }
+
+        .loading-wrapper {
+        padding: 40px;
+        text-align: center;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3; /* Light grey */
+        border-top: 4px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
     </style>
     <!-- Link CSS untuk jqGrid dan jQuery UI -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
@@ -325,12 +363,27 @@
 
             <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
-                    <span class="label-text">Cari Invoice di bulan tersebut</span>
+                    <span class="label-text">Cari No Invoice di bulan tersebut</span>
                 </div>
                 <input type="text"
                     class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
                     id="inv" name="inv" autocomplete="off" />
             </label>
+
+             <label class="form-control w-full max-w-xs mb-1">
+                <div class="label">
+                    <span class="label-text">Cari Customer</span>
+                </div>
+                 <select name="customer" id="customer" class="select2">
+                        <option></option>
+                        @foreach ($customers as $c)
+                            <option value="{{ $c->id }}" {{ request('customer') == $c->id ? 'selected' : '' }}>
+                                {{ $c->nama }}
+                            </option>
+                        @endforeach
+                    </select>
+            </label>
+
             <div class="col-md-6 mb-5 text-end">
                 <label class="form-label d-block">&nbsp;</label> {{-- spacing --}}
                 <div class="d-flex gap-2 mb-2">
@@ -384,117 +437,51 @@
         <x-slot:tittle>Monitoring Piutang Customer</x-slot:tittle>
 
         <!-- Dropdown untuk memilih tahun -->
-        <form action="{{ route('laporan.Piutang') }}" method="GET">
-            <div class="form-filter">
-                {{-- Pilih Tahun --}}
-                <div class="form-group">
-                    <label for="year">Pilih Tahun</label>
-                    <select name="year" id="year">
-                        <option value="" disabled {{ request('year') ? '' : 'selected' }}>Pilih Tahun</option>
-                        @foreach ($years as $year)
-                            <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
-                                {{ $year }}</option>
-                        @endforeach
-                    </select>
-                </div>
+        <form id="filterForm">
+    <div class="form-filter">
+        {{-- Pilih Tahun --}}
+        <div class="form-group">
+            <label for="year">Pilih Tahun</label>
+            <select name="year" id="year">
+                <option value="" disabled {{ request('year') ? '' : 'selected' }}>Pilih Tahun</option>
+                @foreach ($years as $year)
+                    <option value="{{ $year }}">{{ $year }}</option>
+                @endforeach
+            </select>
+        </div>
 
-                {{-- Pilih Customer --}}
-                <div class="form-group">
-                    <label for="customers">Cari Berdasarkan Customer</label>
-                    <select name="customers" id="customers" class="select2">
-                        <option></option>
-                        @foreach ($customers as $c)
-                            <option value="{{ $c->id }}" {{ request('customers') == $c->id ? 'selected' : '' }}>
-                                {{ $c->nama }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+        {{-- Pilih Customer --}}
+        <div class="form-group">
+            <label for="customers">Cari Berdasarkan Customer</label>
+            <select name="customer" id="customers" class="select2">
+                <option></option>
+                @foreach ($customers as $c)
+                    <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                @endforeach
+            </select>
+        </div>
 
-                {{-- Tombol Filter --}}
-                <div class="form-group">
-                    <button type="submit" class="btn btn-gray-filter">Filter</button>
-                </div>
-            </div>
-        </form>
+        {{-- Tombol Filter --}}
+        <div class="form-group">
+            <button type="button" class="btn btn-gray-filter" id="applyFilter">Filter</button>
+        </div>
+    </div>
+</form>
 
 
 
 
         <div class="table-container">
-            <table class="table-cus">
-                <thead>
-                    <tr>
-                        <th class="bg-thn" rowspan="3">Customer</th>
-                        <th class="bg-thn" colspan="{{ count($months) * 2 }}">Bulan</th>
-                        <th class="bg-total" rowspan="3">Total</th>
-                    </tr>
-                    <tr>
-                        @foreach ($months as $month)
-                            <th class="text-center sticky-footer" colspan="2">{{ $month }}</th>
-                        @endforeach
-                    </tr>
-                    <tr>
-                        @foreach ($months as $month)
-                            <th>Inv</th>
-                            <th>Total</th>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($mergedResults as $customer_id => $customerData)
-                        @php $totalOmzet = 0; @endphp
-                        <tr>
-                            <td class="bg-thn">{{ $customerData['customer_name'] }}</td>
-
-                            @foreach ($months as $month)
-                                @php
-                                    $data = $customerData['years'][request('year') ?? 2025][$month] ?? null;
-
-                                    $inv = isset($data['selisih_invoice']) ? (int) $data['selisih_invoice'] : 0;
-                                    $omzet = isset($data['omzet']) ? (int) $data['omzet'] : 0;
-
-                                    $totalOmzet += $omzet;
-
-                                    // Tandai warna hanya jika selisih_invoice == 0 dan omzet > 0
-                                    $warningClass = $inv === 0 && $omzet > 0 ? 'kurang-bayar' : '';
-                                @endphp
-
-                                <td class="text-center {{ $warningClass }}">
-                                    {{ $inv === 0 ? '-' : $inv }}
-                                </td>
-                                <td class="text-end {{ $warningClass }}">
-                                    {{ number_format($omzet, 0, ',', '.') }}
-                                </td>
-                            @endforeach
-
-                            <td class="bg-total text-end">{{ number_format($totalOmzet, 0, ',', '.') }}</td>
-                        </tr>
-                    @endforeach
-
-                    {{-- Footer Total Per Bulan --}}
-                    <tr class="sticky-footer">
-                        <td class="bg-total-thn">{{ request('year') ?? 2025 }}</td>
-                        @php
-                            $totalYearlyOmzet = 0;
-                            $totalInvoiceCount = 0;
-                        @endphp
-                        @foreach ($months as $month)
-                            @php
-                                $monthlyOmzet = $monthlyTotals[request('year') ?? 2025][$month] ?? 0;
-                                $invoiceCount = $monthlySelisihInvoice[request('year') ?? 2025][$month] ?? 0;
-                                $totalYearlyOmzet += $monthlyOmzet;
-                                $totalInvoiceCount += $invoiceCount;
-                            @endphp
-                            <td class="bg-total-monthly1 text-end">
-                                {{ $invoiceCount == 0 ? '-' : $invoiceCount }}
-                            </td>
-                            <td class="bg-total-monthly text-end">{{ number_format($monthlyOmzet, 0, ',', '.') }}</td>
-                        @endforeach
-                        <td class="bg-total1 text-end">{{ number_format($totalYearlyOmzet, 0, ',', '.') }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="table-container">
+                @include('jurnal.partials.lap-piutang-table', [
+                    'mergedResults' => $mergedResults,
+                    'monthlyInvoiceCounts' => $monthlyInvoiceCounts,
+                    'monthlySelisihInvoice' => $monthlySelisihInvoice,
+                    'monthlyTotals' => $monthlyTotals,
+                    'months' => $months,
+                    'year' => request('year') ?? 2025
+                ])
+            </div>
         </div>
     </x-keuangan.card-keuangan>
 
@@ -512,6 +499,55 @@
                 });
             });
         </script>
+
+  <script>
+            $(document).ready(function() {
+                $('#customer').select2({
+                    placeholder: 'Pilih Customer',
+                    allowClear: true
+                });
+            });
+        </script>
+<script>
+    $(document).ready(function () {
+        $('#applyFilter').on('click', function () {
+            const year = $('#year').val();
+            const customer = $('#customers').val();
+
+            // Munculkan animasi loading
+            $('#table-container').fadeOut(200, function () {
+                $('#table-container').html(`
+                    <div class="loading-wrapper">
+                        <div class="spinner"></div>
+                        <div style="margin-top:10px;">Memuat data...</div>
+                    </div>
+                `).fadeIn(200);
+            });
+
+            // Kirim AJAX setelah jeda (delay 500ms)
+            setTimeout(function () {
+                $.ajax({
+                    url: "{{ route('laporan.Piutang') }}",
+                    type: "GET",
+                    data: {
+                        year: year,
+                        customers: customer
+                    },
+                    success: function (response) {
+                        $('#table-container').fadeOut(100, function () {
+                            $(this).html(response.tableHtml).fadeIn(300);
+                        });
+                    },
+                    error: function () {
+                        $('#table-container').html('<p style="color:red; text-align:center;">Terjadi kesalahan saat memuat data.</p>');
+                    }
+                });
+            }, 500);
+        });
+    });
+</script>
+
+
 
         <script>
         $(document).ready(function () {
@@ -607,6 +643,21 @@
         </script>
 
         <script>
+            $(document).ready(function() {
+                // Trigger filter saat tanggal bayar diubah
+                $('#customer').on('change', function() {
+                    $("#table-lp").jqGrid('setGridParam', {
+                        datatype: 'json',
+                        postData: {
+                            customer: $(this).val()
+                        },
+                        page: 1
+                    }).trigger('reloadGrid');
+                });
+            });
+        </script>
+
+        <script>
             function filterWarna(warna) {
                 let grid = $("#table-lp");
                 let postData = grid.jqGrid('getGridParam', 'postData');
@@ -638,6 +689,10 @@
 
                         inv: function() {
                             return $('#inv').val();
+                        },
+
+                        customer: function() {
+                            return $('#customer').val();
                         }
                     },
                     mtype: "GET",

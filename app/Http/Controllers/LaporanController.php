@@ -904,9 +904,16 @@ $months = [
     ]);
 
     // Filter berdasarkan request
-    if ($request->filled('tgl_inv') || $request->filled('inv')) {
-        $invoices->where('tgl_invoice', 'like', '%' . $request->tgl_inv . '%')
-                 ->where('invoice.invoice', 'like', '%' . $request->inv . '%');
+    if ($request->filled('tgl_inv') || $request->filled('inv') || $request->filled('customer')) {
+      $invoices = Invoice::where('tgl_invoice', 'like', '%' . $request->tgl_inv . '%')
+    ->where('invoice', 'like', '%' . $request->inv . '%');
+    
+    if ($request->filled('customer')) {
+        $invoices = $invoices->whereHas('transaksi.suratJalan.customer', function ($query) use ($request) {
+            $query->where('id', $request->customer);
+        });
+    }
+
     } elseif ($inputVal !== '') {
         // Jika hanya nominal yang diisi → batasi tgl_invoice ke tahun ini
         $invoices->where('tgl_invoice', '>=', $tahunIni);
@@ -1293,7 +1300,18 @@ $months = [
     'June', 'July', 'August', 'September',
     'October', 'November', 'December'
 ];
+    if (request()->ajax()) {
+        $html = view('jurnal.partials.lap-piutang-table', [
+            'mergedResults' => $mergedResults,
+            'monthlyInvoiceCounts' => $monthlyInvoiceCounts,
+            'monthlySelisihInvoice' => $monthlySelisihInvoice,
+            'monthlyTotals' => $monthlyTotals,
+            'months' => $months,
+            'year' => request('year') ?? 2025
+        ])->render();
 
+        return response()->json(['tableHtml' => $html]);
+    }
 
     return view('jurnal.lap-piutang', compact(
         'customers',
