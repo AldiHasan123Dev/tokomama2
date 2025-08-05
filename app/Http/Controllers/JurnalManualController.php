@@ -42,13 +42,6 @@ class JurnalManualController extends Controller
         session(['no_BBK' => $no_BBK]);
         $noBBM = Jurnal::where('tipe', 'BBM')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBM = $noBBM ? $noBBM->no + 1 : 1;
-<<<<<<< HEAD
-        // $noBBMN = Jurnal::where('tipe', 'BBMN')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
-        // $no_BBMN = $noBBMN ? $noBBMN->no + 1 : 1;
-        // $noBBKN = Jurnal::where('tipe', 'BBKN')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
-        // $no_BBKN = $noBBKN ? $noBBKN->no + 1 : 1;
-=======
->>>>>>> c88a07ea135941806eb909110a3ec5f7e3d4ea04
         $noBBMO = Jurnal::where('tipe', 'BBMO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBMO = $noBBMO ? $noBBMO->no + 1 : 1;
         $noBBKO = Jurnal::where('tipe', 'BBKO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
