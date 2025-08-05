@@ -432,6 +432,62 @@ if ($selisih > 1) {
         
             return view('laporan.lap-monitor-invoice',compact('invoices','invoiceLebihBayar'));
         }
+
+        public function dashMonitor(){
+    $currentMonth = now()->month;
+    $currentYear = now()->year;
+
+    // Get the month and year from the request, or use the current month and year as defaults
+    $bulan = date('m');
+    $tahun = date('Y');
+
+    // Define the start date as January 2023
+    $startDate = '2023-01-01';
+    $tahunCo = $tahun;
+    $dateCo = now()->create($tahunCo . '-' . '01' . '-01')->startOfMonth()->toDateString();
+    // Define the end date based on the selected month and year
+    $endDate = now()->create($tahun . '-' . $bulan . '-01')->endOfMonth()->toDateString();
+
+    // Get COA data based on account numbers
+    $coa1 = Coa::whereIn('id',[8,89,91,90])->orderBy('no_akun')->get();
+    $coa2 = Coa::whereIn('id',[35,98])->orderBy('no_akun')->get();
+
+    // Initialize totals array
+    $totals = [];
+    $coaId1 = $coa1->pluck('id')->toArray();
+    $coaId2 = $coa2->pluck('id')->toArray();
+
+    // Merge all COA IDs into a single array
+    $allCoaIds = array_merge($coaId1, $coaId2);
+
+    foreach ($allCoaIds as $coaId) {
+        // Calculate debit and credit totals within the date range
+        $debit = Jurnal::where('coa_id', $coaId)
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->sum('debit');
+
+        $kredit = Jurnal::where('coa_id', $coaId)
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->sum('kredit');
+        if (in_array($coaId, $coaId1)) {
+            $selisih = $debit - $kredit;
+        } else {
+            $selisih = $kredit - $debit;
+        }
+        // Store the totals in the array
+        $totals[$coaId] = [
+            'debit' => $debit,
+            'kredit' => $kredit,
+            'selisih' => $selisih,
+        ];
+        }
+    return view('laporan.ds-monitor', compact(
+        'coa1', 'coa2', 
+        'totals',
+        'bulan', 'tahun', 'startDate', 'endDate'
+    ));
+    }
+
         public function listInv(Request $request)
         {
             $searchTerm   = $request->get('searchString', '');
@@ -585,23 +641,28 @@ private function calculateSisa($row)
             $sidx    = request('sidx', 'biaya_inv.id');
             $sord    = request('sord', 'asc');
             $search  = request('_search') === 'true';
+            $tipe_null = request('tipe_null');
+            $tipe_bbmn = request('tipe_bbmn');
+            $tipe_bbm = request('tipe_bbm');
         
 $query = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
     ->join('invoice', 'biaya_inv.id_inv', '=', 'invoice.id')
     ->select('biaya_inv.*')
     ->where('biaya_inv.nominal', '>', 0);
 
+
 // Filter tgl_pembayar (wajib / selalu ada)
+if ($tipe_null){
 if (request()->filled('tgl_pembayar') || request()->filled('tgl_pembayar') && request()->filled('inv')) {
     $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar'))->where('invoice.invoice', 'LIKE', '%' . request('inv') . '%');
 }
-
-
-// Filter invoice
-if (request()->filled('invoice')) {
-    $query->where('invoice.invoice', 'LIKE', '%' . request('invoice') . '%');
 }
 
+if (request()->filled('tgl_pembayar3') || request()->filled('tgl_pembayar3') && request()->filled('inv3')) {
+    $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar3'))->where('invoice.invoice', 'LIKE', '%' . request('inv3') . '%');
+}
+
+// Filter invoice
 // Filter customer
 if (request()->filled('customer')) {
     $query->whereHas('transaksi.suratJalan.customer', function ($q) {
@@ -610,8 +671,21 @@ if (request()->filled('customer')) {
 }
 
 // Filter tanggal invoice
-if (request()->filled('tgl_inv')) {
-    $query->whereDate('invoice.tgl_invoice', request('tgl_inv'));
+
+if ($tipe_bbmn){
+    $query->where('tipe','BBMN');
+if (request()->filled('tgl_pembayar1') || request()->filled('tgl_pembayar1') && request()->filled('inv1')) {
+    $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar1'))->where('invoice.invoice', 'LIKE', '%' . request('inv1') . '%');
+}
+
+}
+
+if ($tipe_bbm){
+    $query->where('tipe','BBM');
+if (request()->filled('tgl_pembayar2') || request()->filled('tgl_pembayar2') && request()->filled('inv2')) {
+    $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar2'))->where('invoice.invoice', 'LIKE', '%' . request('inv2') . '%');
+}
+
 }
 
 // Ambil semua data
@@ -640,6 +714,7 @@ $invoices = $query->get();
             
                 return [
                     'id'           => $ids,
+                    'tipe'         => $first->tipe,
                     'jurnal'       => $first->jurnal ?? 'Belum Terjurnal',
                     'tgl_pembayar' => $tgl_pembayar,
                     'customer'     => optional(optional($first->transaksi)->suratJalan)->customer->nama ?? '-',
@@ -796,21 +871,19 @@ $months = [
     return view('laporan.lap-piutang-customer',compact('mergedResults', 'data' ,'months', 'summaryData'));
         }
 
-public function dataLapPiutang(Request $request)
+
+        public function dataLapPiutang(Request $request)
 {
-    // Ambil parameter pencarian kolom
     $searchField = $request->input('searchField');
     $searchString = $request->input('searchString');
+    $nominalInput = $request->input('nominal');
+    $inputVal = preg_replace('/[^\d]/', '', $nominalInput ?? '');
 
-    // Ambil data dari invoice
-    $query = Invoice::query();
-    if ($searchField && $searchString) {
-        $query->where($searchField, 'like', "%$searchString%");
-    }
+    $tahunIni = Carbon::now()->startOfYear()->format('Y-m-d');
 
     // Ambil jurnal BBM
     $jurnals = Jurnal::withTrashed()
-        ->where('tipe', 'BBM')
+        ->whereIn('tipe', ['BBM','BBMN'])
         ->whereNull('deleted_at')
         ->where('debit', '!=', 0)
         ->where('tgl', '>', '2024-08-01')
@@ -830,14 +903,35 @@ public function dataLapPiutang(Request $request)
         'transaksi.barang'
     ]);
 
-    if ($request->filled('tgl_inv') || $request->filled('inv')) {
-        $invoices->where('tgl_invoice', 'like', '%' . $request->tgl_inv . '%')
-                 ->where('invoice.invoice', 'like', '%' . $request->inv . '%');
+    // Filter berdasarkan request
+    if ($request->filled('tgl_inv') || $request->filled('inv') || $request->filled('customer')) {
+      $invoices = Invoice::where('tgl_invoice', 'like', '%' . $request->tgl_inv . '%')
+    ->where('invoice', 'like', '%' . $request->inv . '%');
+    
+    if ($request->filled('customer')) {
+        $invoices = $invoices->whereHas('transaksi.suratJalan.customer', function ($query) use ($request) {
+            $query->where('id', $request->customer);
+        });
+    }
+
+    } elseif ($inputVal !== '') {
+        // Jika hanya nominal yang diisi → batasi tgl_invoice ke tahun ini
+        $invoices->where('tgl_invoice', '>=', $tahunIni);
+    } else {
+        // Tidak ada filter sama sekali, kosongkan
+        return response()->json([
+            'rows' => [],
+            'current_page' => 1,
+            'last_page' => 0,
+            'total' => 0,
+            'records' => 0,
+            'debug_warna' => [],
+        ]);
     }
 
     $invoices = $invoices->orderBy('created_at', 'desc')->get();
 
-    // Kelompokkan dan hitung data invoice
+    // Group dan hitung per invoice
     $data = $invoices->groupBy('invoice')->map(function ($group) {
         $subtotal = $group->sum('subtotal');
         $ppn = 0;
@@ -847,10 +941,12 @@ public function dataLapPiutang(Request $request)
                 $ppn += $invoice->subtotal * ($barang->value_ppn / 100);
             }
         }
+
         $jumlah_harga = round($subtotal + $ppn);
         $first = $group->first();
         $customer = $first->transaksi->suratJalan->customer->nama ?? null;
         $top = Customer::where('nama', $customer)->pluck('top')->first();
+
         return [
             'tanggal' => now()->format('Y-m-d'),
             'invoice' => $first->invoice,
@@ -862,11 +958,11 @@ public function dataLapPiutang(Request $request)
             'hitung_tempo' => Carbon::parse($first->tgl_invoice)->addDays((int) $top),
             'dibayar_tgl' => null,
             'sebesar' => 0,
-            'kurang_bayar' => $jumlah_harga,
+            'kurang_bayar' => (int) $jumlah_harga,
         ];
     });
 
-    // Gabungkan data jurnal
+    // Gabungkan data jurnal ke invoice
     foreach ($jurnals as $jurnal) {
         if ($data->has($jurnal->invoice)) {
             $current = $data->get($jurnal->invoice);
@@ -878,15 +974,16 @@ public function dataLapPiutang(Request $request)
                     $ppn += $invoice->subtotal * ($barang->value_ppn / 100);
                 }
             }
+
             $total = round($subtotal + $ppn);
             $current['dibayar_tgl'] = $jurnal->daftar_tanggal;
             $current['sebesar'] = $jurnal->total_debit;
-            $current['kurang_bayar'] = $total - $jurnal->total_debit;
+            $current['kurang_bayar'] = (int) ($total - $jurnal->total_debit);
             $data->put($jurnal->invoice, $current);
         }
     }
 
-    // Konversi ke array dan beri nomor
+    // Tambahkan nomor urut
     $result = [];
     $i = 1;
     foreach ($data as $item) {
@@ -896,8 +993,7 @@ public function dataLapPiutang(Request $request)
 
     $data = collect($result)->sortBy('customer')->values();
 
-
-    // Filter berdasarkan tgl invoice jika ada
+    // Filter ditagih_tgl
     if ($request->filled('ditagih_tgl')) {
         $data = $data->filter(fn($row) => Str::contains($row['ditagih_tgl'], $request->ditagih_tgl))->values();
     }
@@ -906,8 +1002,7 @@ public function dataLapPiutang(Request $request)
     $data = $data->map(function ($row) {
         $today = now()->format('Y-m-d');
         $tempoDate = Carbon::parse($row['tempo'])->format('Y-m-d');
-        $daysDiff = Carbon::parse($row['tempo'])->diffInDays($today, true); // selalu positif
-
+        $daysDiff = Carbon::parse($row['tempo'])->diffInDays($today, true);
 
         $warna = '';
         if ((float) $row['kurang_bayar'] == 0) {
@@ -915,21 +1010,20 @@ public function dataLapPiutang(Request $request)
         } elseif ((int) $row['top'] === 0 && $tempoDate === $today) {
             $warna = '';
         } elseif (Carbon::parse($row['tempo'])->isFuture()) {
-    if ($daysDiff > 0 && $daysDiff <= 4) {
-        $warna = 'kuning'; // <-- ini yang benar
-    }
-}
- elseif ($daysDiff > 0) {
+            if ($daysDiff > 0 && $daysDiff <= 4) {
+                $warna = 'kuning';
+            }
+        } elseif ($daysDiff > 0) {
             $warna = 'merah';
         }
+
         $row['warna_status'] = $warna;
         return $row;
     });
 
     // Filter warna_status dari jqGrid
-    $filters = $request->input('filters');
-    if ($filters) {
-        $filterRules = json_decode($filters, true)['rules'] ?? [];
+    if ($request->filled('filters')) {
+        $filterRules = json_decode($request->filters, true)['rules'] ?? [];
         foreach ($filterRules as $rule) {
             if ($rule['field'] === 'warna_status') {
                 $value = $rule['data'];
@@ -938,7 +1032,14 @@ public function dataLapPiutang(Request $request)
         }
     }
 
-    // Pagination setelah semua filter
+    // 🔍 Filter nominal jika ada
+    if ($inputVal !== '') {
+        $data = $data->filter(function ($row) use ($inputVal) {
+            return (int) $row['kurang_bayar'] == (int) $inputVal;
+        })->values();
+    }
+
+    // Pagination
     $currentPage = $request->input('page', 1);
     $perPage = $request->input('rows', 20);
     $totalRecords = $data->count();
@@ -949,16 +1050,16 @@ public function dataLapPiutang(Request $request)
         return $row;
     });
 
-    // Kembalikan response untuk jqGrid
     return response()->json([
         'rows' => $paginated,
         'current_page' => $currentPage,
         'last_page' => ceil($totalRecords / $perPage),
         'total' => $totalRecords,
         'records' => $totalRecords,
-        'debug_warna' => $paginated->pluck('warna_status')
+        'debug_warna' => $paginated->pluck('warna_status'),
     ]);
 }
+
 
 
 public function dataLapPiutangTotal(Request $request)
@@ -982,7 +1083,7 @@ public function dataLapPiutangTotal(Request $request)
 
     // Ambil jurnal invoice
     $jurnals = Jurnal::withTrashed()
-        ->where('tipe', 'BBM')
+        ->whereIn('tipe', ['BBM','BBMN'])
         ->whereNull('deleted_at')
         ->where('debit', '!=', 0)
         ->where('tgl', '>', '2025-01-01')
@@ -1097,7 +1198,7 @@ public function lapPiutang()
     ->get();
 
 $jurnals = Jurnal::withTrashed()
-    ->where('tipe', 'BBM')
+    ->whereIn('tipe', ['BBM','BBMN'])
     ->whereNull('deleted_at')
     ->where('debit', '!=', 0)
     ->where('tgl', '>', (request('year') ?? 2025) . '-01-01')
@@ -1199,7 +1300,18 @@ $months = [
     'June', 'July', 'August', 'September',
     'October', 'November', 'December'
 ];
+    if (request()->ajax()) {
+        $html = view('jurnal.partials.lap-piutang-table', [
+            'mergedResults' => $mergedResults,
+            'monthlyInvoiceCounts' => $monthlyInvoiceCounts,
+            'monthlySelisihInvoice' => $monthlySelisihInvoice,
+            'monthlyTotals' => $monthlyTotals,
+            'months' => $months,
+            'year' => request('year') ?? 2025
+        ])->render();
 
+        return response()->json(['tableHtml' => $html]);
+    }
 
     return view('jurnal.lap-piutang', compact(
         'customers',

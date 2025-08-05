@@ -5,6 +5,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BukuBesarController;
 use App\Http\Controllers\BukuBesarPembantuController;
 use App\Http\Controllers\CoaController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\InvoiceController;
@@ -79,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/surat-jalan-data', [SuratJalanController::class, 'dataTable'])->name('surat-jalan.data');
     Route::post('/surat-jalan-supplier-data', [SuratJalanController::class, 'dataTableSupplier'])->name('surat-jalan-supplier.data');
     Route::post('/surat-jalan-edit', [SuratJalanController::class, 'update'])->name('surat-jalan.data.edit');
+    Route::post('/update-tipe-jurnal-bayar-inv', [KeuanganController::class, 'updateTipeJurnal']);
     Route::post('/surat-jalan-external-edit', [SuratJalanController::class, 'updateInvoiceExternal'])->name('surat-jalan-external.data.edit');
     Route::post('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
     // Route::delete('/surat-jalan-delete', [SuratJalanController::class, 'destroy'])->name('surat-jalan.data.delete');
@@ -176,7 +178,8 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::get('data-omzet-total', 'dataOmzeTotal')->name('keuangan.data-omzet-total');
     Route::get('omzet-list', 'dataTableOmzet')->name('keuangan.omzet.datatable');
     Route::post('omzet-export', 'OmzetExportExcel')->name('keuangan.omzet.exportexcel');
-    Route::post('cari-transaksi-by-tanggal', 'cari')->name('keuangan.cari'); 
+    Route::post('cari-transaksi-by-tanggal', 'cari')->name('keuangan.cari');
+    Route::post('cari-transaksi-by-tanggal1', 'cari1')->name('keuangan.cari1');  
     Route::post('jurnal-simpan', 'jurnal')->name('keuangan.jurnal-inv'); 
 });
 
@@ -266,9 +269,18 @@ Route::prefix('master')->controller(SupplierController::class)->middleware('auth
     Route::post('supplier-delete', 'destroy')->name('master.supplier.delete');
 });
 
+Route::prefix('master')->controller(SalesController::class)->middleware('auth')->group(function () {
+    Route::get('sales', 'index')->name('master.sales');
+    Route::get('sales-list', 'datatable')->name('master.sales.list');
+    Route::post('sales-add', 'store')->name('master.sales.add');
+    Route::post('sales-edit', 'update')->name('master.sales.edit');
+    Route::post('sales-delete', 'destroy')->name('master.sales.delete');
+});
+
 
 Route::prefix('laporan')->controller(LaporanController::class)->middleware('auth')->group(function () {
     Route::get('hutang-vendor', 'dataLHV')->name('laporan.LHV');
+    Route::get('dash-monitor', 'dashMonitor')->name('laporan.dash.monitor');
     Route::get('lap-fee-sales', 'dataFLS')->name('laporan.FLS');
     Route::get('lap-sales', 'dataLS')->name('laporan.LS');
     Route::get('lap-omzet-cust', 'dataLOC')->name('laporan.LOC');

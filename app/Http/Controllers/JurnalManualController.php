@@ -31,7 +31,7 @@ class JurnalManualController extends Controller
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
-        $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->orderBy('no', 'desc')->first() ?? 0;
+        $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->whereYear('tgl',date('Y'))->orderBy('no', 'desc')->first() ?? 0;
         $no_JNL = $noJNL ? $noJNL->no + 1 : 1;
         $noBKK = Jurnal::where('tipe', 'BKK')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BKK = $noBKK ? $noBKK->no + 1 : 1;
@@ -42,6 +42,10 @@ class JurnalManualController extends Controller
         session(['no_BBK' => $no_BBK]);
         $noBBM = Jurnal::where('tipe', 'BBM')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBM = $noBBM ? $noBBM->no + 1 : 1;
+        // $noBBMN = Jurnal::where('tipe', 'BBMN')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        // $no_BBMN = $noBBMN ? $noBBMN->no + 1 : 1;
+        // $noBBKN = Jurnal::where('tipe', 'BBKN')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        // $no_BBKN = $noBBKN ? $noBBKN->no + 1 : 1;
         $noBBMO = Jurnal::where('tipe', 'BBMO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBMO = $noBBMO ? $noBBMO->no + 1 : 1;
         $noBBKO = Jurnal::where('tipe', 'BBKO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
@@ -158,7 +162,7 @@ class JurnalManualController extends Controller
     
         //pemecahan nomor jurnal
         if ($tipe === 'JNL'){
-            $jurnalsort = Jurnal::whereMonth('tgl', $bulan)->where('tipe', 'JNL')->get();
+            $jurnalsort = Jurnal::whereMonth('tgl', $bulan)->whereYear('tgl',date('Y'))->where('tipe', 'JNL')->get();
         }
         $nomorArray = $jurnalsort->pluck('no')->toArray();
         if ($nomorArray == []) {

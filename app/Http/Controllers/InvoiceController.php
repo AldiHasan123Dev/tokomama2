@@ -39,7 +39,7 @@ class InvoiceController extends Controller
         $invoice_count = request('invoice_count');
 
         $currentMonth = Carbon::now()->month;
-        $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->orderBy('no', 'desc')->first() ?? 0;
+        $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->whereYear('tgl',date('Y'))->orderBy('no', 'desc')->first() ?? 0;
         $no_JNL =  $noJNL ? $noJNL->no + 1 : 1;
 
         
@@ -316,7 +316,7 @@ $validatedData = $request->validate([
        
       
 
-        $sort = Jurnal::whereMonth('tgl', $bulan)->where('tipe', 'JNL')->get();
+        $sort = Jurnal::whereMonth('tgl', $bulan)->where('tipe', 'JNL')->whereYear('tgl',date('Y'))->get();
         $nomorArray = $sort->pluck('no')->toArray();
         if ($nomorArray == []){
             $nomorArray = [0];
