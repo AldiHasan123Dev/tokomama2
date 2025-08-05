@@ -85,7 +85,6 @@ class KeuanganController extends Controller
     ->get();
     $dateTime = new DateTime($data[0]->tgl_invoice);
     $formattedDate = $dateTime->format('d F Y');
-    $jatuhTempo = Carbon::parse($data[0]->tgl_invoice)->addDays((int) $data[0]->transaksi->suratJalan->customer->top)->format('d-m-Y');
     
     $id_transaksi = $data[0]->transaksi->id;
     $transaksi = Transaction::where('id', $id_transaksi) ->first(); //keteran
@@ -107,7 +106,7 @@ class KeuanganController extends Controller
     $satuan = Satuan::where('id', $barang->id_satuan)->first();
     
     // Pass $no_count ke view
-    $pdf = Pdf::loadView('keuangan/invoice_pdf', compact('jatuhTempo','data', 'invoice', 'barang', 'formattedDate', 'transaksi', 'satuan', 'po'))->setPaper('a4', 'potrait');
+    $pdf = Pdf::loadView('keuangan/invoice_pdf', compact('data', 'invoice', 'barang', 'formattedDate', 'transaksi', 'satuan', 'po'))->setPaper('a4', 'potrait');
     return $pdf->stream('invoice_pdf.pdf');
 }
 
@@ -153,7 +152,6 @@ class KeuanganController extends Controller
     public function cari(Request $request)
     {
         $tanggal = $request->tanggal_bayar;
-        $tipe = $request->tipe;
          $tahun = date('y');
          $year = date('Y');
     
@@ -161,14 +159,12 @@ class KeuanganController extends Controller
         $biayaInvs = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
             ->whereDate('tgl_pembayar', $tanggal)
             ->whereNull('jurnal')
-            ->where('tipe','BBMN')
             ->where('nominal', '>', 0)
             ->get();
         
          $last = Jurnal::where('tipe', 'BBM')->whereYear('tgl', $year)->orderBy('no', 'desc')->first() ?? 0;
          $nextNo = $last ? $last->no + 1 : 1;
-         $bbmn = Jurnal::where('tipe', 'BBMN')->whereYear('tgl',$year)->orderBy('no','desc')->first() ?? 0;
-         $bbmn_no = $bbmn ? $bbmn->no + 1 : 1;
+    
         // Jika kosong, kirim respon dengan pesan error
         if ($biayaInvs->isEmpty()) {
             return response()->json([
@@ -185,11 +181,15 @@ class KeuanganController extends Controller
             'nominal'  => $biayaInvs->pluck('nominal'),
             'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
             'no' => $nextNo,
+<<<<<<< HEAD
            'nomor' => "{$nextNo}/BBM-TM/{$tahun}",
            'no1' => "$bbmn_no",
            'nomor1' => "{$bbmn_no}/BBMN-TM/{$tahun}",
            'bbmn' => "BBMN",
            'bbm' => "BBM",
+=======
+           'nomor' => "{$nextNo}/BBM-TMR1/{$tahun}"
+>>>>>>> c88a07ea135941806eb909110a3ec5f7e3d4ea04
         ];
     
         return response()->json([
@@ -197,6 +197,7 @@ class KeuanganController extends Controller
             'data' => $result,
         ]);
     }
+<<<<<<< HEAD
 
     public function cari1(Request $request)
     {
@@ -260,6 +261,8 @@ class KeuanganController extends Controller
     return response()->json(['message' => 'Berhasil diperbarui']);
 }
 
+=======
+>>>>>>> c88a07ea135941806eb909110a3ec5f7e3d4ea04
     public function jurnal(Request $request)
     {
         $data = $request->all();
@@ -290,10 +293,8 @@ class KeuanganController extends Controller
         $invoice = $data['invoice'];
         $customer = $data['customer'];
         $nomor = $data['nomor'];
-        $tipe = $data['tipe'];
         $tgl_jurnal = Carbon::parse($data['tanggal'])->format('Y-m-d');
         $no = (int) $data['no'];
-        $coaId = $tipe === 'BBMN' ? 99 : 5;
     
         // Header Jurnal (Debit)
         
@@ -304,7 +305,7 @@ class KeuanganController extends Controller
             if (empty($nominal[$i]) || $nominal[$i] == 0) continue;
 
             Jurnal::create([
-                'coa_id' => $coaId,
+                'coa_id' => 5,
                 'nomor' => $nomor,
                 'tgl' => $tgl_jurnal,
                 'keterangan' => 'Pelunasan Piutang ' . ($customer[$i] ?? '-'),
@@ -315,7 +316,7 @@ class KeuanganController extends Controller
                 'invoice_external' => null,
                 'id_transaksi' => $id_trans[$i] ?? null,
                 'nopol' => null,
-                'tipe' => $tipe,
+                'tipe' => 'BBM',
                 'no' => $no,
             ]);
 
@@ -331,7 +332,7 @@ class KeuanganController extends Controller
                 'invoice_external' => null,
                 'id_transaksi' => $id_trans[$i] ?? null,
                 'nopol' => null,
-                'tipe' => $tipe,
+                'tipe' => 'BBM',
                 'no' => $no,
             ]);
         }
@@ -570,7 +571,7 @@ class KeuanganController extends Controller
                                  YEAR(i.tgl_invoice) as year, 
                                  COUNT(i.invoice) as invoice_count, 
                                  SUM(t.harga_beli) as total_harga_beli, 
-                                 SUM(t.harga_jual) as total_harga_jual') 
+                                 SUM(t.harga_jual) as total_harga_jual')
     ->from('invoice as i')
     ->join('transaksi as t', 'i.id', '=', 't.id')
     ->groupBy('month', 'year') // Tambahkan 'year' di sini

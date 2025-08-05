@@ -15,11 +15,5 @@ class Customer extends Model
     {
         return $this->hasMany(SuratJalan::class, 'id_customer'); // Sesuaikan dengan nama kolom yang tepat
     }
-
-    public function sales()
-{
-    return $this->belongsTo(Sales::class, 'sales_id');
-}
-
     
 }

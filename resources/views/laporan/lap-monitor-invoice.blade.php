@@ -375,7 +375,7 @@
             $("#biayaGrid").jqGrid('setGridParam', {
                 datatype: 'json',
                 postData: {
-                    tgl_pembayar3: $(this).val()
+                    tgl_pembayar: $(this).val()
                 },
                 page: 1
             }).trigger('reloadGrid');
@@ -390,7 +390,7 @@
             $("#biayaGrid").jqGrid('setGridParam', {
                 datatype: 'json',
                 postData: {
-                    inv3: $(this).val()
+                    inv: $(this).val()
                 },
                 page: 1
             }).trigger('reloadGrid');
@@ -408,10 +408,10 @@
             datatype: "json",
             mtype: "GET",
             postData: {
-                tgl_pembayar3: function() {
+                tgl_pembayar: function() {
                     return $('#tanggal_bayar1').val();
                 },
-                inv3: function() {
+                inv: function() {
                     return $('#inv').val();
                 }
             },

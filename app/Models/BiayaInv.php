@@ -19,7 +19,6 @@ class BiayaInv extends Model
         'id_inv',
         'nominal',
         'tgl_pembayar',
-        'tipe',
     ];
 
     // Relasi dengan tabel transaksi (many to one)

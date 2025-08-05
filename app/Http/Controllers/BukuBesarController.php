@@ -43,7 +43,7 @@ class BukuBesarController extends Controller
                 $data = Jurnal::whereMonth('jurnal.tgl', $month)
                     ->whereYear('jurnal.tgl', $year)
                     ->orderBy('tgl', 'asc')
-                    ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL', 'BBMN', 'BBKN') ASC")
+                    ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
                     ->orderBy('created_at', 'asc')
                     ->orderBy('no', 'asc')
                     ->get();
@@ -53,7 +53,7 @@ class BukuBesarController extends Controller
                     ->whereYear('jurnal.tgl', $year)
                     ->where('jurnal.coa_id', $coa_id)
                     ->orderBy('tgl', 'asc')
-                    ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL', 'BBMN', 'BBKN') ASC")
+                    ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
                     ->orderBy('created_at', 'asc')
                     ->orderBy('no', 'asc')
                     ->get();
@@ -63,7 +63,7 @@ class BukuBesarController extends Controller
             $data = Jurnal::whereMonth('jurnal.tgl', $month)
                 ->whereYear('jurnal.tgl', $year)
                 ->orderBy('tgl', 'asc')
-                ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL','BBMN', 'BBKN') ASC")
+                ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
                 ->orderBy('created_at', 'asc')
                 ->orderBy('no', 'asc')
                 ->get();
