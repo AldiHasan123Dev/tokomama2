@@ -272,7 +272,7 @@
 
         @if ($satuanJual != $satuanBarang)
             @php
-                $konversiQty = $item->jumlah * $item->transaksi->barang->value;
+                $konversiQty = $item->jumlah * $item->transaksi->barang->value; 
                 $totalHarga = $item->harga * $item->jumlah;
                 $hargaPerKonversi = $item->transaksi->barang->status_ppn == 'ya'
                     ? ($totalHarga * 1.11) / $konversiQty
