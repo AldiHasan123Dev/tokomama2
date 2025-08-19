@@ -98,7 +98,6 @@ class JurnalManualController extends Controller
         }
         $uniqueNomors = DB::table('jurnal')
         ->whereNotNull('nomor')
-      
         ->distinct()
         ->pluck('nomor');
 

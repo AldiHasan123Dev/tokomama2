@@ -81,8 +81,8 @@
         <table style="margin-top: -40px">
             <thead>
                 <tr>
-                    <th rowspan="4" style="width: 15%; margin-bottom:40px;">
-                        {{-- <img src="{{ public_path('tokomama.svg') }}" class="logo" style="width: 60%; height: 50%;"> --}}
+                    <th rowspan="4" style="width: 20%; margin-left:30px; margin-bottom:40px;">
+                        <img src="{{ public_path('Logomama2.png') }}" class="logo" style="width: 80%; height: 80%;">
                     </th>
                     <td style="font-weight: bold; font-size: 1rem;">
                         {{-- MAMA BAHAGIA 2 --}}
