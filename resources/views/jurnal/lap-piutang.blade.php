@@ -240,6 +240,7 @@ thead tr:nth-child(3) th {
             Tanggal dan Waktu Server : <span id="server-time">{{ now()->format('Y-m-d H:i:s') }}</span>
         </p>
         <div class="card shadow-sm border-0" style="background-color: #f8f9fa;">
+<<<<<<< HEAD
                             <div class="card-body">
                                 <strong class="mb-2 d-block">Keterangan Warna:</strong>
                                 <ul style="list-style: none; padding-left: 0; font-size: 0.85rem; margin: 0;">
@@ -266,6 +267,29 @@ thead tr:nth-child(3) th {
     <label class="form-control w-full max-w-xs mb-1">
         <div class="label">
             <span class="label-text">Bulan Inv</span>
+=======
+            <div class="card-body">
+                <strong class="mb-2 d-block">Keterangan Warna:</strong>
+                <ul style="list-style: none; padding-left: 0; font-size: 0.85rem; margin: 0;">
+                    <li class="mb-1">
+                        <span
+                            style="display:inline-block;width:15px;height:15px;background-color:#3fae43;border-radius:3px;margin-right:5px;"></span>
+                        <span>Hijau - Lunas</span>
+                        
+                    </li>
+                    <li class="mb-1">
+                        <span
+                            style="display:inline-block;width:15px;height:15px;background-color:#ffd503;border-radius:3px;margin-right:5px;"></span>
+                        <span>Kuning - Jatuh Tempo Dalam 1-4 Hari</span>
+                    </li>
+                    <li>
+                        <span
+                            style="display:inline-block;width:15px;height:15px;background-color:red;border-radius:3px;margin-right:5px;"></span>
+                        <span>Merah - Lewat Jatuh Tempo</span>
+                    </li>
+                </ul>
+            </div>
+>>>>>>> upstream/main
         </div>
         <input type="month"
             class="input input-sm input-bordered w-full max-w-xs rounded-lg bg-transparent dark:text-white"
