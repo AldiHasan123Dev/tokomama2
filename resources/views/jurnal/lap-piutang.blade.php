@@ -336,6 +336,7 @@
                         <span
                             style="display:inline-block;width:15px;height:15px;background-color:#3fae43;border-radius:3px;margin-right:5px;"></span>
                         <span>Hijau - Lunas</span>
+                        
                     </li>
                     <li class="mb-1">
                         <span
