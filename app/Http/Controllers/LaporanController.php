@@ -1097,7 +1097,7 @@ public function lapPiutang()
     ->get();
 
 $jurnals = Jurnal::withTrashed()
-    ->where('tipe', 'BBM')
+    ->whereIn('tipe', ['BBM','BBMN'])
     ->whereNull('deleted_at')
     ->where('debit', '!=', 0)
     ->where('tgl', '>', (request('year') ?? 2025) . '-01-01')
@@ -1199,7 +1199,18 @@ $months = [
     'June', 'July', 'August', 'September',
     'October', 'November', 'December'
 ];
+    if (request()->ajax()) {
+        $html = view('jurnal.partials.lap-piutang-table', [
+            'mergedResults' => $mergedResults,
+            'monthlyInvoiceCounts' => $monthlyInvoiceCounts,
+            'monthlySelisihInvoice' => $monthlySelisihInvoice,
+            'monthlyTotals' => $monthlyTotals,
+            'months' => $months,
+            'year' => request('year') ?? 2025
+        ])->render();
 
+        return response()->json(['tableHtml' => $html]);
+    }
 
     return view('jurnal.lap-piutang', compact(
         'customers',
