@@ -103,10 +103,10 @@
                     </td>
                     <td style="text-align: center; font-size: 0.8rem">NO : {{ $invoice ?? '-' }}</td>
                 </tr>
-                <tr>
+                  <tr>
                     <td></td>
-                    <td style="text-align: center; font-size: 0.8rem">TOP :
-                        {{ $data->first()->transaksi->suratJalan->customer->top }}</td>
+                    <td style="text-align: center; font-size: 0.8rem">JTH Tempo :
+                        {{ $data->first()->transaksi->suratJalan->customer->top }} Hari ({{ $jatuhTempo }})</td>
                 </tr>
             </thead>
         </table>

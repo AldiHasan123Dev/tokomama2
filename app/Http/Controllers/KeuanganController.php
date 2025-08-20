@@ -92,7 +92,7 @@ class KeuanganController extends Controller
     
     // Mencari id_surat_jalan dari transaksi
     $id_surat_jalan = $transaksi->id_surat_jalan;
-    
+    $jatuhTempo = Carbon::parse($data[0]->tgl_invoice)->addDays((int) $data[0]->transaksi->suratJalan->customer->top)->format('d-m-Y');
     // Mencari no_count dari tabel surat_jalan berdasarkan id_surat_jalan
     $suratJalan = SuratJalan::where('id', $id_surat_jalan)
     
