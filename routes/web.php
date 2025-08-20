@@ -5,6 +5,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BukuBesarController;
 use App\Http\Controllers\BukuBesarPembantuController;
 use App\Http\Controllers\CoaController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\InvoiceController;
@@ -264,6 +265,14 @@ Route::prefix('master')->controller(SupplierController::class)->middleware('auth
     Route::post('supplier-add', 'store')->name('master.supplier.add');
     Route::post('supplier-edit', 'update')->name('master.supplier.edit');
     Route::post('supplier-delete', 'destroy')->name('master.supplier.delete');
+});
+
+Route::prefix('master')->controller(SalesController::class)->middleware('auth')->group(function () {
+    Route::get('sales', 'index')->name('master.sales');
+    Route::get('sales-list', 'datatable')->name('master.sales.list');
+    Route::post('sales-add', 'store')->name('master.sales.add');
+    Route::post('sales-edit', 'update')->name('master.sales.edit');
+    Route::post('sales-delete', 'destroy')->name('master.sales.delete');
 });
 
 

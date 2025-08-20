@@ -126,9 +126,8 @@
                         @endif
                     </td>
 
-                    <td class="header-cell" style="padding-right:80px">Sales :
-                        {{ $data->first()->transaksi->suratJalan->customer->sales }}</td>
-                </tr>
+                    <td class="header-cell" style="padding-right:70px">Sales :
+                        {{ $data->first()->transaksi->suratJalan->customer->id_sales }}</td>
                 <tr>
                     <td style="text-align:left ;padding-left:40px; margin-top20px">
                         {{ $data->first()->transaksi->suratJalan->customer->alamat }}</td>
