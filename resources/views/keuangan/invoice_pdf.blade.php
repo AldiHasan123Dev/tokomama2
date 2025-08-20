@@ -216,11 +216,16 @@
                         $item = $data[$i];
                     @endphp
                     @endfor
+                     @php
+    $tampilKolomKonversi = collect($data)->contains(function($item) {
+        return $item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan;
+    });
+@endphp
                     <tr>
                         <th class="border border-black">No.</th>
                         <th class="border border-black">Nama Barang</th>
                         <th class="border border-black">PO</th>
-                        @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
+                      @if ($tampilKolomKonversi)
                         <th class="border border-black">QTY A</th>
                         <th class="border border-black">QTY B</th>
                         @else
@@ -230,7 +235,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for ($i = $start_item; $i < $end_item; $i++)
+                                       @for ($i = $start_item; $i < $end_item; $i++)
                         @php
                             $item = $data[$i];
                             $total += $item->harga * $item->jumlah;
@@ -240,7 +245,7 @@
                             <td class="border border-black">
                                 {{ $item->transaksi->barang->nama }} <br>
                                 @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
-                                    (Total {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
+                                    (Total {{ $item->jumlah * $item->transaksi->barang->value }}
                                     {{ $item->transaksi->barang->satuan->nama_satuan }}
                                     {{ $item->transaksi->keterangan != '' || !is_null($item->transaksi->keterangan) ? '= ' . $item->transaksi->keterangan : '' }})
                                 @else
@@ -255,7 +260,7 @@
                                     -
                                 @endif
                             </td>
-                            <td class="text-center border border-black">{{ number_format($item->jumlah, 0, ',', '.') }}
+                            <td class="text-center border border-black">{{ $item->jumlah }}
                                 {{ $item->transaksi->satuan_jual }} X
                                 @if ($barang->status_ppn == 'ya')
                                     {{ number_format($item->harga * 1.11, 0, ',', '.') }}
@@ -263,47 +268,30 @@
                                     {{ number_format($item->harga, 0, ',', '.') }}
                                 @endif
                             </td>
-                            @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan )
-                            <td class="border border-black text-center">
-                                @if ($item->transaksi->satuan_jual == 'KG' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
-                                    {{-- Tampilkan jumlah dalam satuan --}}
-                                    {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
-                                    {{ $item->transaksi->barang->satuan->nama_satuan }}
-                            
-                                    {{-- Tampilkan konversi harga per KG --}}
-                                    @php
-                                        $totalHarga = $item->harga * $item->jumlah;
-                                        $konversi = $item->jumlah * $item->transaksi->barang->value;
-                                    @endphp
-                                    X
-                            
-                                    @if ($item->transaksi->barang->status_ppn == 'ya')
-                                        {{ number_format(($totalHarga * 1.11) / $konversi) }}
-                                    @else
-                                        {{ number_format($totalHarga / $konversi) }}
-                                    @endif
-                                    @elseif ($item->transaksi->satuan_jual == 'KWT' && $item->transaksi->barang->satuan->nama_satuan == 'ZAK')
-                                      {{-- Tampilkan jumlah dalam satuan --}}
-                                      {{ number_format($item->jumlah * $item->transaksi->barang->value) }}
-                                      {{ $item->transaksi->barang->satuan->nama_satuan }}
-                              
-                                      {{-- Tampilkan konversi harga per KG --}}
-                                      @php
-                                          $totalHarga = $item->harga * $item->jumlah;
-                                          $konversi = $item->jumlah * $item->transaksi->barang->value;
-                                      @endphp
-                                      X
-                              
-                                      @if ($item->transaksi->barang->status_ppn == 'ya')
-                                          {{ number_format(($totalHarga * 1.11) / $konversi) }}
-                                      @else
-                                          {{ number_format($totalHarga / $konversi) }}
-                                      @endif
-                                    @else
+                         @if ($tampilKolomKonversi)
+        @php
+            $satuanJual = $item->transaksi->satuan_jual;
+            $satuanBarang = $item->transaksi->barang->satuan->nama_satuan;
+        @endphp
 
-                                @endif
-                            </td>
-                            @endif
+        @if ($satuanJual != $satuanBarang)
+            @php
+                $konversiQty = $item->jumlah * $item->transaksi->barang->value; 
+                $totalHarga = $item->harga * $item->jumlah;
+                $hargaPerKonversi = $item->transaksi->barang->status_ppn == 'ya'
+                    ? ($totalHarga * 1.11) / $konversiQty
+                    : $totalHarga / $konversiQty;
+            @endphp
+            <td class="border border-black text-center">
+                {{ $konversiQty }} {{ $satuanBarang }}
+                X {{ number_format($hargaPerKonversi) }}
+            </td>
+        @else
+            <td class="border border-black text-center">-</td>
+        @endif
+    @endif
+
+                            
                             <td class="border border-black" style="text-align: right;">
                                 @if ($barang->status_ppn == 'ya')
                                     {{ number_format($item->harga * 1.11 * $item->jumlah, 0, ',', '.') }}
@@ -319,15 +307,15 @@
                         $dpp = $total * 11/12;
                         $ppn = ($barang->value_ppn / 100) * $dpp;
                     @endphp
-                       @if ($item->transaksi->satuan_jual != $item->transaksi->barang->satuan->nama_satuan)
-                       <td colspan="5" class="border border-black" style="text-align: right;">
-                           <b>TOTAL</b>
-                       </td>
-                       @else
-                       <td colspan="4" class="border border-black" style="text-align: right;">
-                           <b>TOTAL</b>
-                       </td>
-                       @endif
+                       @if ($tampilKolomKonversi)
+                            <td colspan="5" class="border border-black" style="text-align: right;">
+                                <b>TOTAL</b>
+                            </td>
+                            @else
+                            <td colspan="4" class="border border-black" style="text-align: right;">
+                                <b>TOTAL</b>
+                            </td>
+                            @endif
                         <td class="border border-black" style="text-align: right;" >
                         @if($barang->status_ppn == 'ya')
                             <b>{{ number_format($total * 1.11, 0, ',', '.') }}</b>
