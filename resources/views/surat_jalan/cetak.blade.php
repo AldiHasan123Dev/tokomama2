@@ -92,7 +92,7 @@
             <thead>
                 <tr>
                     <th rowspan="4" style="width: 15%; text-align: left; margin-bottom:20px">
-                        {{-- <img src="{{ public_path('tokomama.svg') }}" class="logo"> --}}
+                        <img src="{{ public_path('Logomama2.png') }}" class="logo">
                     </th>
                     <td style="font-weight: bold">
                         {{-- MAMA BAHAGIA 2 --}}
