@@ -242,13 +242,13 @@
                             <!-- Input untuk Tambah -->
                             <div id="tambahInput" style="display: none;">
                                 <label class="form-label">Isikan tambahannya (Bukan jadinya):</label>
-                                <input type="number" name="tambah" class="input-field" placeholder="Masukkan nilai yang ditambahkan">
+                                <input type="number" name="tambah" step="any" class="input-field" placeholder="Masukkan nilai yang ditambahkan">
                             </div>
 
                             <!-- Input untuk Kurangi -->
                             <div id="kurangiInput" style="display: none;">
                                 <label class="form-label">Isikan pengurangnya (Bukan jadinya)</label>
-                                <input type="number" name="kurangi" class="input-field" placeholder="Masukkan nilai yang dikurangi">
+                                <input type="number" name="kurangi" class="input-field" step="any" onchange="inputBarang()" placeholder="Masukkan nilai yang dikurangi">
                             </div> 
                             <label class="form-label">Keterangan:</label>
                             <input type="text" name="keterangan" class="input-field" value="${keterangan}" />
