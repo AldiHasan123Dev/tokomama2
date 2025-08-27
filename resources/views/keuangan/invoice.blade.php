@@ -47,6 +47,12 @@
                     },
                     {
                         search: true,
+                        label: 'Customer',
+                        name: 'customer',
+                        width: 150
+                    },
+                    {
+                        search: true,
                         label: 'NSFP',
                         name: 'nsfp',
                         width: 150

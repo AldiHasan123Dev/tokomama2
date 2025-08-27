@@ -344,6 +344,7 @@ class KeuanganController extends Controller
     
             return [
                 'DT_RowIndex' => $index,
+                'customer' => $row->first()->transaksi->suratJalan->customer->nama ?? '-',
                 'tgl_inv' => $row->first()->tgl_invoice ?? '-',
                 'nsfp' => $row->first()->nsfp->nomor ?? '-',
                 'invoice' => $row->first()->invoice ?? '-',
