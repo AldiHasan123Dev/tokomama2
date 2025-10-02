@@ -180,6 +180,9 @@ class JurnalController extends Controller
 
     function merger_store(Request $request)
     {
+        if($request->jurnal_awal === null || $request->jurnal_tujuan === null){
+             return back()->with('error', 'Jurnal awal dan tujuan wajib dipilih!');
+        }
         $tujuan = Jurnal::where('nomor', $request->jurnal_tujuan)->first();
         Jurnal::where('nomor', $request->jurnal_awal)->update([
             'nomor' => $tujuan->nomor,
