@@ -164,7 +164,7 @@
                                             class="select2 form-control my-0" style="width: 318px; border:none">
                                             <option value=""></option>
                                             @foreach ($customer as $item)
-                                                <option value="{{ $item->nama }}">{{ $item->nama }}</option>
+                                                <option value="{{ $item->nama }}">{{ $item->nama }} / {{ $item->sales}}</option>
                                             @endforeach
                                         </select>
                                 </label>
