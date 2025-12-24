@@ -11,7 +11,7 @@ class CustomerAbController extends Controller
 {
     public function index()
     {
-        return view('masters.customer-ab');
+        return views('masters.customer-ab');
     }
         public function store(Request $request)
     {

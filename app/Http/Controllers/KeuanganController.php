@@ -55,6 +55,11 @@ class KeuanganController extends Controller
         return view('keuangan.pre-invoice');
     }
 
+    function preInvoiceAb()
+    {
+        return view('keuangan.pre-invoice-Ab');
+    }
+
     function invoiceDraf(SuratJalan $surat_jalan)
     {
         return view('keuangan.draf_invoice', compact('surat_jalan'));
