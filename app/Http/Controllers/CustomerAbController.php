@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CustomersAb;
+use App\Models\CustomersAB;
 use Illuminate\Http\Request;
 use PHPUnit\Event\Code\Throwable;
 use Yajra\DataTables\DataTables;
@@ -17,7 +17,7 @@ class CustomerAbController extends Controller
     {
         $data = $request->all();
         // Contoh: menyimpan ke tabel customer (atau jurnal kalau kamu simpan di sana)
-        $customer = new CustomersAb();
+        $customer = new CustomersAB();
         $customer->nama = $data['nama'];
         $customer->npwp = $data['npwp'];
         $customer->nama_npwp = $data['nama_npwp'];
@@ -34,7 +34,7 @@ class CustomerAbController extends Controller
      public function update(Request $request, CustomersAb $customer)
     {
         // dd($request);
-        $data = CustomersAb::find($request->id);
+        $data = CustomersAB::find($request->id);
         $data->nama = $request->nama;
         $data->nama_npwp = $request->nama_npwp;
         $data->npwp = $request->npwp;
@@ -55,7 +55,7 @@ class CustomerAbController extends Controller
 
      public function destroy()
     {
-        $data = CustomersAb::destroy(request('id'));
+        $data = CustomersAB::destroy(request('id'));
 
         if ($data) {
             return redirect()->route('master.customer')->with('success', 'Data Master Customer berhasil dihapus!');
@@ -66,7 +66,7 @@ class CustomerAbController extends Controller
 
         public function datatable()
     {
-        $data = CustomersAb::query()->orderBy('id', 'desc');
+        $data = CustomersAB::query()->orderBy('id', 'desc');
 
         return DataTables::of($data)
             ->addIndexColumn()
