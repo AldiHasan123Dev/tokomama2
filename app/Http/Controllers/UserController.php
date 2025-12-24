@@ -87,9 +87,9 @@ class UserController extends Controller
     {
         $data = User::destroy(request('id'));
         if ($data) {
-            return redirect()->route('master.user')->with('success', 'Data Master User berhasil dihapus!');
+            return redirect()->route('user.index')->with('success', 'Data Master User berhasil dihapus!');
         } else {
-            return redirect()->route('master.user')->with('error', 'Data Master User gagal dihapus!');
+            return redirect()->route('user.index')->with('error', 'Data Master User gagal dihapus!');
         }
     }
 
@@ -104,7 +104,7 @@ class UserController extends Controller
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
                 return '<div class="flex gap-3 mt-2">
-            <button onclick="getData(' . $row['id_user'] . ', \'' . addslashes($row['name_user']) . '\', \'' . addslashes($row['email']) . '\', \'' . addslashes($row['id_role']) . '\', \'' . addslashes($row['phone']) . '\', \'' . addslashes($row['address']) . '\', \'' . addslashes($row['name_role']) . '\')" class="text-yellow-300 font-semibold mb-3 self-end" ><i class="fa-solid fa-pencil"></i></button> |
+            <button onclick="getData(' . $row['id_user'] . ', \'' . addslashes($row['name_user']) . '\', \'' . addslashes($row['email']) . '\', \'' . addslashes($row['id_role']) . '\', \'' . addslashes($row['phone']) . '\', \'' . addslashes($row['address']) . '\', \'' . addslashes($row['name_role']) . '\', \'' . addslashes($row['password']) . '\')" class="text-yellow-300 font-semibold mb-3 self-end" ><i class="fa-solid fa-pencil"></i></button> |
             <button onclick="deleteData(' . $row['id_user'] . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>
             </div>';
             })

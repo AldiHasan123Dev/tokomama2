@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
@@ -14,12 +17,41 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): View
+   public function edit()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        // Ambil user yang sedang login
+        $user = auth()->user();
+
+        // Ambil semua role dari tabel roles
+        $roles = Role::all();
+
+        // Kirim data ke view
+        return view('profile.edit', compact('user', 'roles'));
     }
+
+     public function update1(Request $request, $id) {
+        // Validasi input
+        $request->validate([
+            'password'=> 'nullable|string|min:6',
+        ]);
+
+        // Ambil user dari database
+        $user = User::findOrFail($id);
+
+        // Jika password diisi, update password
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        // Simpan perubahan
+        $user->save();
+
+        // Redirect kembali ke halaman edit dengan pesan sukses
+        return redirect()
+            ->route('profile.edit')
+            ->with('success', 'Profil berhasil diperbarui.');
+    }
+
 
     /**
      * Update the user's profile information.

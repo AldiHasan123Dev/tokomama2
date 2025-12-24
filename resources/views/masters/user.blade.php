@@ -162,6 +162,10 @@
                     <input type="text" name="email" value="${email}" class="border-none" />
                   </label>
                   <label class="input border flex items-center gap-2 mt-3">
+                    Password:
+                    <input type="text" name="password" value="" class="border-none" />
+                  </label>
+                  <label class="input border flex items-center gap-2 mt-3">
                     Phone :
                     <input type="text" name="phone" value="${phone}" class="border-none" />
                   </label>

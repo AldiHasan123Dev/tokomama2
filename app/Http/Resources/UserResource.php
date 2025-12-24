@@ -4,6 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Hash;
+
 
 class UserResource extends JsonResource
 {
@@ -18,6 +20,7 @@ class UserResource extends JsonResource
         return [
             'id_user' => $this->id,
             'name_user' => $this->name ?? '-',
+             'password' => $this->password ? Hash::make($this->password) : '-', // atau null
             'email' => $this->email ?? '-',
             'phone' => $this->phone ?? '-',
             'address' => $this->address ?? '-',
