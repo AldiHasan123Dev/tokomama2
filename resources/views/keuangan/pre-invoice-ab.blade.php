@@ -176,7 +176,7 @@
             <form action="{{ route('invoice-ab.form') }}" method="get" id="form">
                 <input type="hidden" name="id" id="id">
                 <div class="flex gap-2">
-                    <div class="flex-gap-2">
+                    <div class="flex-gap-2"> 
                         <input type="hidden" name="invoice_count" id="count" value="1"
                             class="rounded-md form-control text-center" min="1" style="height: 28px">
                     </div>
