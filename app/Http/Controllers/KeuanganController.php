@@ -11,6 +11,11 @@ use App\Models\Invoice;
 use App\Models\Jurnal;
 use App\Models\NSFP;
 use App\Models\Satuan;
+use App\Models\Tarif;
+use App\Models\Orders;
+use Illuminate\Support\Facades\DB;
+use App\Models\CustomersAB;
+use App\Models\Mob;
 use Carbon\Carbon;
 use App\Models\SuratJalan;
 use App\Models\Transaction;
@@ -155,6 +160,54 @@ class KeuanganController extends Controller
         return view('keuangan.jurnal-bayar-inv', compact('noBBM','no_BBM'));
     }
 
+     public function customer(Request $request)
+    {
+        $q = $request->q;
+
+        $data = CustomersAB::query()
+            ->when($q, function ($query) use ($q) {
+                $query->where('nama', 'like', "%{$q}%");
+            })
+            ->limit(20)
+            ->get();
+
+        return response()->json(
+            $data->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'nama_customer' => $item->nama,
+                ];
+            })
+        );
+    }
+
+        public function tarifAlatBerat(Request $request)
+    {
+        $q = $request->q;
+
+        $data = Tarif::query()
+            ->where('status', 1) // 🔥 FILTER STATUS TARIF
+            ->whereHas('alatBerat', function ($sub) use ($q) {
+                if ($q) {
+                    $sub->where('nama_alat', 'like', "%{$q}%");
+                }
+            })
+            ->with('alatBerat')
+            ->limit(20)
+            ->get();
+
+        return response()->json(
+            $data->map(function ($item) {
+                return [
+                    'id'        => $item->id,
+                    'nama_alat' => $item->alatBerat->nama_alat ?? '-',
+                    'tarif'     => number_format($item->tarif, 0, ',', '.'),
+                ];
+            })
+        );
+    }
+
+
     public function cari(Request $request)
     {
         $tanggal = $request->tanggal_bayar;
@@ -213,6 +266,70 @@ class KeuanganController extends Controller
 
     return response()->json(['message' => 'Berhasil diperbarui']);
 }
+
+public function mobByOrder(Request $request)
+{
+    $data = Mob::where('id_order', $request->order_id)->get();
+
+    return response()->json([
+        'data' => $data
+    ]);
+}
+
+public function hpsMob(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:mob,id'
+        ]);
+
+        $mob = Mob::find($request->id);
+
+        if (!$mob) {
+            return response()->json([
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        $mob->delete();
+
+        return response()->json([
+            'message' => 'Data berhasil dihapus'
+        ]);
+    }
+
+public function tambahTagihan(Request $request)
+{
+    $request->validate([
+        'keterangan' => 'required|string',
+        'nominal'    => 'required|numeric',
+    ]);
+
+    DB::beginTransaction();
+    try {
+
+        Mob::create([
+            'id_order'    => $request->id_order,
+            'ket' => $request->keterangan,
+            'nominal'    => $request->nominal,
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Tambah Tagihan order berhasil disimpan'
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'status'  => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+
 
     public function jurnal(Request $request)
     {
@@ -296,6 +413,23 @@ class KeuanganController extends Controller
         return redirect()->back()->with('success', 'Jurnal ' . $nomor . ' berhasil dibuat');
     }
 
+    public function simpanOrder(Request $request) {
+         DB::beginTransaction(); 
+         try { 
+            $order = Orders::create([ 
+                'tarif_id' => $request->tarif_id, 
+                'customers_id' => $request->customer_id, 
+                'tanggal_order'=> $request->tanggal, 
+                'keterangan'=> $request->keterangan,
+                'barang'=> $request->barang,
+                'kode_invoice' => null, 
+                'created_by' => auth()->id() ?? null, 
+            ]);
+                DB::commit(); 
+            return response()->json([ 'status' => true, 'message' => 'Order berhasil disimpan', 'data' => $order ]); } catch (\Exception $e) { DB::rollBack(); return response()->json([ 'status' => false, 'message' => 'Gagal menyimpan order', 'error' => $e->getMessage() ], 500); 
+            } 
+        }
+
     public function dataTable(Request $request)
     {
         // Ambil parameter pencarian
@@ -372,6 +506,8 @@ class KeuanganController extends Controller
     // Fungsi untuk menghitung PPN
     private function calculatePPN($row)
     {
+
+
         $barang = $row->first()->transaksi->barang ?? null; // Ambil data barang
         if ($barang && $barang->status_ppn === 'ya') {
             return number_format($row->sum('subtotal') * ($barang->value_ppn / 100), 0, ',', '.');

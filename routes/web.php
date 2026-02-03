@@ -117,9 +117,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/mob/hapus', [KeuanganController::class, 'hpsMob'])->name('mob.destroy');
     Route::match(['get', 'post'], '/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
     Route::match(['get', 'post'], '/keuangan/invoice-pending/pre-draft-invoice', [KeuanganController::class, 'previewDraftInv'])->name('pending.invoice.preview_DraftInv');
-    Route::get('/keuangan/form-inv-ab', [KeuanganController::class, 'formInvoiceAb'])->name('invoice-ab.form');
+    Route::get('/keuangan/form-inv-ab', [InvoiceController::class, 'preInvoiceAb'])->name('invoice-ab.form');
     Route::resource('jurnal', JurnalController::class);
     Route::get('/stock/cetak/{id}', [StockController::class, 'cetak'])->name('stock.cetak');
+    Route::match(['get', 'post'],'keuangan/previewAb', [InvoiceController::class, 'previewAb'])->name('invoice-ab.preview');
     Route::get('/select2/tarif-ab', [KeuanganController::class, 'tarifAlatBerat'])
     ->name('tarif-ab.select2');
     Route::get('/select2/customer', [KeuanganController::class, 'customer'])
@@ -154,13 +155,16 @@ Route::middleware('auth')->group(function () {
     Route::post('transaction-data1', [TransactionController::class, 'dataTable1'])->name('transaksi.data1');
     Route::put('transaction-update', [TransactionController::class, 'update'])->name('transaksi.update');
     Route::put('transaction-update1', [TransactionController::class, 'update1'])->name('transaksi.update1');
-    // Route::get('coa', [CoaController::class,'index'])->name('jurnal.coa');
-    // Route::post('coa', [CoaController::class,'statusCoa'])->name('jurnal.coa');
+    Route::post('/keuangan/invoice-ab/simpan-invoice-ab', [InvoiceController::class, 'simpanInvoiceAb'])->name('simpan-invoice-ab.store');
     Route::get('coa', [CoaController::class,'index'])->name('jurnal.coa');
     Route::post('coa', [CoaController::class,'store'])->name('jurnal.coa.store');
     Route::put('coa/{coa}', [CoaController::class,'update'])->name('jurnal.coa.update');
     Route::delete('coa/{coa}', [CoaController::class,'destroy'])->name('jurnal.coa.destroy');
     Route::get('coa/data', [CoaController::class, 'dataTable'])->name('jurnal.coa.data');
+Route::get('/invoice-ab/cetak', [InvoiceController::class, 'cetakInvAb'])
+    ->name('invoice-ab.cetak');
+
+
 
     Route::post('coa', [CoaController::class,'store'])->name('jurnal.coa.store');
     Route::put('coa/{coa}', [CoaController::class,'update'])->name('jurnal.coa.update');
@@ -209,7 +213,7 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::post('invoice-pending/cetak-draft-invoice', 'storeDraftInv')->name('pending.invoice.draft_invoice.cetak');
     Route::get('invoice', 'invoice')->name('keuangan.invoice');
     Route::get('pre-invoice', 'preInvoice')->name('keuangan.pre-invoice');
-    Route::get('pre-invoice-ab', 'preInvoiceAb')->name('keuangan.pre-invoice-ab');
+    Route::get('order-ab', 'preInvoiceAb')->name('keuangan.pre-invoice-ab');
     Route::get('jurnal-bayar', 'jurnalBayar')->name('keuangan.jurnal-bayar');
     Route::post('draf-invoice/{surat_jalan}', 'submitInvoice')->name('keuangan.invoice.submit');
     Route::get('draf-invoice/{surat_jalan}', 'invoiceDraf')->name('keuangan.invoice.draf');

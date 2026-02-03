@@ -118,51 +118,48 @@
         }
 
         /* ===== jqGrid row reset ===== */
-#table-mob tr.jqgrow td {
-    padding: 0 !important;
-    vertical-align: middle !important;
-}
-
-/* ===== wrapper penentu posisi ===== */
-.aksi-center {
-    display: flex;
-    align-items: center;        /* center vertikal */
-    justify-content: center;    /* center horizontal */
-    height: 100%;
-}
-
-/* ===== tombol ===== */
-.btn-hapus-mob {
-    display: flex;
-    align-items: center;        /* teks center */
-    justify-content: center;
-
-    height: 26px;
-    padding: 0 14px;
-
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-
-    font-size: 12px;
-    font-weight: 500;
-    line-height: normal;        /* 🔴 JANGAN diubah */
-    cursor: pointer;
-}
-
-.btn-hapus-mob:hover {
-    background-color: #b02a37;
-}
+        /* ===== FIX tinggi baris jqGrid ===== */
 
 
+        /* ===== wrapper penentu posisi ===== */
+        .aksi-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
 
 
+        /* ===== tombol ===== */
+        .btn-hapus-mob {
+            height: 26px;
+            padding: 0 14px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-hapus-mob:hover {
+            background-color: #b02a37;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
         integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
 
     <x-keuangan.card-keuangan>
         <x-slot:tittle>Pre-Invoice untuk Alat Berat</x-slot:tittle>
@@ -176,12 +173,13 @@
             <form action="{{ route('invoice-ab.form') }}" method="get" id="form">
                 <input type="hidden" name="id" id="id">
                 <div class="flex gap-2">
-                    <div class="flex-gap-2"> 
+                    <div class="flex-gap-2">
                         <input type="hidden" name="invoice_count" id="count" value="1"
                             class="rounded-md form-control text-center" min="1" style="height: 28px">
                     </div>
-                    <button type="button" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">Buat
-                        Invoice Alat Berat</button>
+                    <button type="submit" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">
+                        Buat Invoice Alat Berat
+                    </button>
                 </div>
             </form>
         </x-slot:button>
@@ -201,7 +199,7 @@
         <div id="modal-action" class="modal-overlay">
             <div class="modal-box">
                 <div class="modal-header">
-                    <h3>Detail Order</h3>
+                    <h3>Tambah Tagihan</h3>
                     <span class="modal-close" data-target="modal-action">&times;</span>
                 </div>
 
@@ -253,8 +251,18 @@
                         <select id="order_customer" style="width:100%"></select>
                     </div>
                     <div class="form-group">
+                        <label>Barang</label>
+                        <input type="text" id="order_barang" style="width:100%">
+                    </div>
+                    <div class="form-group">
                         <label>Tanggal Order</label>
                         <input type="date" id="order_tanggal">
+                    </div>
+                    <div class="form-group">
+                        <label>Keterangan</label>
+                        <textarea id="order_keterangan" class="form-control" style="width:100%; height:50%"
+                            placeholder="Masukkan keterangan tambahan (opsional)">
+        </textarea>
                     </div>
                 </div>
 
@@ -270,7 +278,7 @@
 
     <div id="mob-wrapper" style="display:none; margin-top:20px;">
         <x-keuangan.card-keuangan>
-            <x-slot:tittle>Detail MOB</x-slot:tittle>
+            <x-slot:tittle>Detail Tambahan Tagihan</x-slot:tittle>
             <div class="table-responsive">
                 <div class="overflow-x-auto mt-5">
                     <table id="table-mob"></table>
@@ -279,6 +287,22 @@
             </div>
 
     </div>
+
+
+    </x-keuangan.card-keuangan>
+
+    <x-keuangan.card-keuangan>
+        <button type="button" id="btn-cetak-invoice" class="btn font-semibold bg-green-600 btn-sm text-white mt-4">
+            Cetak Invoice
+        </button>
+        <x-slot:tittle>Order sudah Invoice</x-slot:tittle>
+        <div class="table-responsive">
+            <div class="overflow-x-auto mt-5">
+                <table id="table-invoice-ab"></table>
+                <div id="pager-invoice-ab"></div>
+            </div>
+        </div>
+
 
     </x-keuangan.card-keuangan>
 
@@ -289,6 +313,71 @@
         <script type="text/ecmascript" src="{{ asset('assets/js/jquery.jqGrid.min.js') }}"></script>
 
         <script>
+            let selectedKodeInvoice = null;
+
+            $("#table-invoice-ab").jqGrid({
+                url: "{{ route('invoice-ab.list') }}",
+                datatype: "json",
+                mtype: "GET",
+                colModel: [{
+                        name: 'id',
+                        hidden: true
+                    },
+                    {
+                        name: 'kode_invoice',
+                        label: 'Kode Invoice',
+                        width: 150
+                    },
+                    {
+                        name: 'nama_customer',
+                        label: 'Customer',
+                        width: 200
+                    },
+                    {
+                        name: 'tgl_invoice',
+                        label: 'Tanggal',
+                        width: 120,
+                        align: 'center'
+                    }
+                ],
+                pager: "#pager-invoice-ab",
+                rowNum: 20,
+                viewrecords: true,
+                autowidth: true,
+                height: 'auto',
+
+                onSelectRow: function(rowid) {
+                    const rowData = $("#table-invoice-ab")
+                        .jqGrid('getRowData', rowid);
+
+                    // simpan KODE INVOICE
+                    selectedKodeInvoice = rowData.kode_invoice || null;
+
+                    // highlight baris terpilih
+                    $("#table-invoice-ab tr").removeClass('selected');
+                    $("#" + rowid).addClass('selected');
+                },
+
+                jsonReader: {
+                    root: "data",
+                    id: "id"
+                }
+            });
+
+            $('#btn-cetak-invoice').on('click', function() {
+
+                if (!selectedKodeInvoice) {
+                    alert('Silakan pilih invoice terlebih dahulu');
+                    return;
+                }
+
+                const url = "{{ route('invoice-ab.cetak') }}" +
+                    "?kode_invoice=" + encodeURIComponent(selectedKodeInvoice);
+
+                window.open(url, '_blank');
+            });
+
+
             $(document).ready(function() {
                 let table = $("#table-getfaktur").jqGrid({
                     url: "{{ route('invoice.pre-invoice-ab') }}",
@@ -303,6 +392,11 @@
                             formatter: function() {
                                 return '<input type="checkbox" class="row-checkbox" />';
                             }
+                        },
+                        {
+                            name: 'customers_id',
+                            index: 'customers_id',
+                            hidden: true
                         },
                         {
                             search: true,
@@ -361,14 +455,24 @@
                     serverPaging: true,
                     onSelectRow: function(rowid) {
 
-                        $("#table-getfaktur tr").removeClass("selected");
-                        $("#" + rowid).addClass("selected");
+                        // ambil data BARU
+                        let rowData = $("#table-getfaktur").jqGrid('getRowData', rowid);
 
-                        selectedRowData = $("#table-getfaktur").jqGrid('getRowData', rowid);
+                        // proteksi (jqGrid kadang return kosong saat reload)
+                        if (!rowData || !rowData.id) {
+                            console.warn('Row data kosong', rowData);
+                            return;
+                        }
 
-                        // 🔥 PANGGIL GRID MOB
-                        initMobGrid(selectedRowData.id);
+                        // simpan ke global
+                        selectedRowData = rowData;
+
+                        // baru dipakai
+                        $('#id').val(rowData.id);
+
+                        initMobGrid(rowData.id);
                     },
+
 
                     loadComplete: function(data) {},
                     jsonReader: {
@@ -390,26 +494,65 @@
                 });
                 $("#table-getfaktur").jqGrid('filterToolbar');
 
-                // Menghandle checkbox "Select All"
+                // Menghandle checkbox "Select All"1
                 $('#select-all').change(function() {
                     var checked = $(this).is(':checked');
                     $('.row-checkbox').prop('checked', checked);
                 });
             });
 
-            $('#form').submit(function(e) {
+            $('#form').on('submit', function(e) {
                 e.preventDefault();
-                var ids = $("#table-getfaktur input:checkbox:checked").map(function() {
-                    return $(this).closest('tr').find('td:last-child')
-                        .text();
-                }).get();
-                if (ids.length === 0) {
-                    alert('Silakan pilih item data terlebih dahulu.');
-                } else {
-                    $('#id').val(ids);
-                    this.submit();
+
+                let selectedRows = [];
+                let customerSet = new Set();
+
+                // 🔥 AMBIL LANGSUNG CHECKBOX YANG DICENTANG
+                let checkedBoxes = $('#table-getfaktur .row-checkbox:checked');
+
+                console.log('Checkbox tercentang:', checkedBoxes.length);
+
+                // ❌ TIDAK ADA YANG DIPILIH
+                if (checkedBoxes.length === 0) {
+                    console.warn('Tidak ada order yang dipilih');
+                    alert('Silakan pilih order terlebih dahulu');
+                    return;
                 }
+
+                checkedBoxes.each(function() {
+                    let rowId = $(this).closest('tr.jqgrow').attr('id');
+                    let rowData = $("#table-getfaktur").jqGrid('getRowData', rowId);
+
+                    console.log('Row dipilih:', {
+                        id: rowData.id,
+                        customers_id: rowData.customers_id,
+                        nama: rowData.nama_customers
+                    });
+
+                    selectedRows.push(rowData.id);
+                    customerSet.add(rowData.customers_id);
+                });
+
+                // ❌ CUSTOMER BERBEDA
+                if (customerSet.size > 1) {
+                    console.error('VALIDASI GAGAL: customer berbeda');
+                    alert('❌ Tidak bisa membuat invoice.\nOrder yang dipilih memiliki customer yang berbeda.');
+                    return;
+                }
+
+                console.log('VALIDASI LOLOS ✅');
+                console.log('Customer dipakai:', [...customerSet][0]);
+
+                // kirim ke backend
+                $('#id').val(selectedRows);
+                console.log('Submit form dengan ID:', selectedRows);
+
+                this.submit();
             });
+
+
+
+
             let selectedRowData = null;
 
             $('#btn-order').on('click', function() {
@@ -491,7 +634,8 @@
                 let tarif = $('#order_tarif').val();
                 let customer = $('#order_customer').val();
                 let tanggal = $('#order_tanggal').val();
-
+                let keterangan = $('#order_keterangan').val();
+                let barang = $('#order_barang').val();
                 if (!tarif || !customer || !tanggal) {
                     alert('Semua field wajib diisi');
                     return;
@@ -504,7 +648,9 @@
                         _token: "{{ csrf_token() }}",
                         tarif_id: tarif,
                         customer_id: customer,
-                        tanggal: tanggal
+                        tanggal: tanggal,
+                        keterangan: keterangan,
+                        barang: barang
                     },
                     success: function(res) {
                         if (res.status) {
@@ -512,6 +658,8 @@
                             $('#order_tarif').val(null).trigger('change');
                             $('#order_customer').val(null).trigger('change');
                             $('#order_tanggal').val('');
+                            $('#order_keterangan').val('');
+                            $('#order_barang').val('');
                             $('#modal-order').removeClass('active');
                             $("#table-getfaktur").trigger('reloadGrid');
                         } else {
@@ -520,7 +668,6 @@
                     },
                     error: function(xhr) {
                         alert('Terjadi kesalahan saat menyimpan data');
-                        console.error(xhr.responseText);
                     }
                 });
             });
@@ -554,13 +701,13 @@
 
                             $('#modal-action').removeClass('active');
                             $("#table-getfaktur").trigger('reloadGrid');
+                            $("#table-mob").trigger('reloadGrid');
                         } else {
                             alert(res.message);
                         }
                     },
                     error: function(xhr) {
                         alert('Gagal menyimpan data');
-                        console.error(xhr.responseText);
                     }
                 });
             });
@@ -577,55 +724,56 @@
                         postData: {
                             order_id: orderId
                         },
-                            colModel: [{
-                            search: true,
-                            name: 'DT_RowIndex',
-                            index: 'DT_RowIndex',
-                            width: 20,
-                            label: 'No.',
-                            align: 'center'
+                        colModel: [{
+                                search: true,
+                                name: 'id',
+                                width: 20,
+                                label: 'ID',
+                                align: 'center'
                             },
                             {
                                 label: 'Keterangan',
-                                witdh: 80,
+                                witdh: 50,
                                 name: 'ket'
                             },
                             {
                                 label: 'Nominal',
                                 name: 'nominal',
-                                width: 80,
+                                width: 20,
                                 align: 'right',
                                 formatter: 'number'
                             },
                             {
                                 label: 'Aksi',
                                 name: 'aksi',
-                                width: 30,
+                                width: 20,
                                 align: 'center',
-                                
                                 sortable: false,
-                                formatter: function (cellValue, options, rowObject) {
+                                search: false,
+                                formatter: function(cellvalue, options, rowObject) {
                                     return `
-                                        <div class="aksi-center">
-                                            <button type="button"
-                                                class="btn-hapus-mob"
-                                                onclick="hapusMob(${rowObject.id})">
-                                                Hapus
-                                            </button>
-                                        </div>
-                                    `;
+        <button 
+            type="button"
+            class="btn btn-sm btn-danger btn-hapus-mob"
+            data-id="${rowObject.id}"
+            title="Hapus">
+            <i class="bi bi-trash"></i>
+        </button>
+    `;
                                 }
+
                             }
+
                         ],
 
-                    pager: "#pager-mob",
-                    rowNum: 20,
-                    rowList: [10, 20, 50],
-                    viewrecords: true,
-                    autowidth: true,
-                    height: 'auto',
-                    loadonce: false,
-                    serverPaging: true,
+                        pager: "#pager-mob",
+                        rowNum: 20,
+                        rowList: [10, 20, 50],
+                        viewrecords: true,
+                        autowidth: true,
+                        height: 'auto',
+                        loadonce: false,
+                        serverPaging: true,
 
                         jsonReader: {
                             root: "data"
@@ -649,46 +797,59 @@
                 } else {
 
 
-    // 🔥 WAJIB: kosongkan data lama
-    $("#table-mob").jqGrid('clearGridData', true);
+                    // 🔥 WAJIB: kosongkan data lama
+                    $("#table-mob").jqGrid('clearGridData', true);
 
-    $("#table-mob")
-        .jqGrid('setGridParam', {
-            postData: { order_id: orderId },
-            page: 1,
-            datatype: 'json'
-        })
-        .trigger('reloadGrid');
+                    $("#table-mob")
+                        .jqGrid('setGridParam', {
+                            postData: {
+                                order_id: orderId
+                            },
+                            page: 1,
+                            datatype: 'json'
+                        })
+                        .trigger('reloadGrid');
 
-    let parentWidth = $('#mob-wrapper').width();
-    $("#table-mob").jqGrid('setGridWidth', parentWidth);
+                    let parentWidth = $('#mob-wrapper').width();
+                    $("#table-mob").jqGrid('setGridWidth', parentWidth);
 
-                }
-
-                function hapusMob(id) {
-                    if (!confirm('Yakin ingin menghapus data ini?')) return;
-
-                    $.ajax({
-                        url: "{{ route('mob.destroy') }}", // 🔴 sesuaikan route
-                        type: "POST",
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            id: id
-                        },
-                        success: function(res) {
-
-                            // Reload grid
-                            $("#table-mob").jqGrid('setGridParam', {
-                                datatype: 'json'
-                            }).trigger('reloadGrid');
-
-                        },
-                        error: function() {
-                            alert('Gagal menghapus data');
-                        }
-                    });
                 }
             }
+            $(document).on('click', '.btn-hapus-mob', function() {
+                let id = $(this).data('id');
+
+                if (!id) {
+                    alert('ID tidak ditemukan');
+                    return;
+                }
+
+                if (!confirm('Yakin ingin menghapus data ini?')) return;
+
+                $.ajax({
+                    url: "{{ route('mob.destroy') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id: id
+                    },
+                    success: function() {
+                        $("#table-mob").trigger('reloadGrid');
+                    },
+                    error: function() {
+                        alert('Gagal menghapus data');
+                    }
+                });
+            });
+
+            $('#form').on('submit', function(e) {
+                let id = $('#id').val();
+
+                if (!id) {
+                    e.preventDefault();
+                    alert('Silakan pilih order terlebih dahulu');
+                    return false;
+                }
+            });
         </script>
     </x-slot:script>
 </x-Layout.layout>

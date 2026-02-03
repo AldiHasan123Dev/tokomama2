@@ -14,22 +14,33 @@ class InvoiceAbResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-       return [
-            'id' => $this->id,
-            'id_ab' => $this->id_ab ?? '-',
-            'nama_alat' => $this->alatBerat->nama_alat ?? '-',
-            'tarif' => $this->tarif,
-            'tarif_id' => $this->tarif_id ?? '-',
-            'customers_id' => $this->customers_id ?? '-',
+        return [
+            'id'        => $this->id,
+            'id_ab'     => $this->id_ab ?? '-',
+
+            // ===== ORDER / TARIF / ALAT =====
+            'nama_alat' => $this->orders?->tarif?->alatBerat?->nama_alat ?? '-',
+            'tarif'     => $this->orders?->tarif?->tarif ?? '-',
+            'tarif_id'  => $this->orders?->tarif_id ?? '-',
+
+            // ===== INVOICE =====
+            'customers_id' => $this->penerima ?? '-',
             'tanggal_dari' => $this->tanggal_order ?? '-',
-            'nama_customers' => $this->customers->nama ?? '-',
-            'nama_customers_npwp' => $this->customers->nama_npwp ?? '-',
-            'alamat_customers' => $this->customers->alamat ?? '-',
-            'alamat_customers_npwp' => $this->customers->alamat_npwp ?? '-',
-            'customers_npwp' => $this->customers->npwp ?? '-',
-            'customers_kota' => $this->customers->kota ?? '-',
-            'customers_nik' => $this->customers->nik ?? '-',
-            'customers_no_telp' => $this->customers->no_telp ?? '-',
+            'kode_invoice' => $this->kode_invoice ?? '-',
+            'no'           => $this->no ?? '-',
+            'total'        => $this->total ?? '-',
+            'tgl_invoice'  => $this->tgl_invoice ?? '-',
+            'sampai'       => $this->sampai ?? '-',
+
+            // ===== CUSTOMER =====
+            'nama_customers'           => $this->customerAb?->nama ?? '-',
+            'nama_customers_npwp'      => $this->customerAb?->nama_npwp ?? '-',
+            'alamat_customers'         => $this->customerAb?->alamat ?? '-',
+            'alamat_customers_npwp'    => $this->customerAb?->alamat_npwp ?? '-',
+            'customers_npwp'           => $this->customerAb?->npwp ?? '-',
+            'customers_kota'           => $this->customerAb?->kota ?? '-',
+            'customers_nik'            => $this->customerAb?->nik ?? '-',
+            'customers_no_telp'        => $this->customerAb?->no_telp ?? '-',
         ];
     }
 }

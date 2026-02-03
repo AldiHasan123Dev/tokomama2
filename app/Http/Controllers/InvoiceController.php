@@ -7,17 +7,71 @@ use App\Models\Jurnal;
 use App\Models\NSFP;
 use App\Models\Transaction;
 use App\Models\Barang;
+use App\Models\Orders;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\SuratJalan;
+use App\Models\InvoiceAb;
+use App\Models\Mob;
 use App\Models\Satuan;
-use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    public function preInvoiceAb() {
+    // id → array integer
+    $ids = array_map('intval', explode(',', request('id')));
+
+    $orders = Orders::with(['tarif', 'customersAb'])
+        ->whereIn('id', $ids)
+        ->get()
+        ->map(function ($o) {
+            return [
+                'order_id' => $o->id,
+                'tanggal_order' => $o->tanggal_order,
+                'keterangan' => $o->keterangan,
+                'barang' => $o->barang,
+                'customer_id'   => $o->customersAb->id ?? null,
+                'customer_nama' => $o->customersAb->nama ?? null,
+                'customer_alamat' => $o->customersAb->alamat ?? null,
+                'tarif_id'   => $o->tarif->id ?? null,
+                'nama_alat'  => $o->tarif->alatBerat->nama_alat ?? null,
+                'tarif'      => (int) ($o->tarif->tarif ?? 0),
+            ];
+        })
+        ->toArray();
+        $ordersCount = $orders ? count($orders) : 0;
+        $noInvoice = InvoiceAb::whereYear('sampai', date('Y'))->max('no') + 1;
+        $kode = sprintf('%03d', $noInvoice) . '/KJG/' . date('Y');
+
+    return view('invoice.form-preview-invoice-ab', compact('ids', 'orders', 'ordersCount', 'noInvoice', 'kode'));
+    }
+
+    public function cetakInvAb(Request $request)
+{
+    $kodeInvoice = $request->kode_invoice;
+
+    if (!$kodeInvoice) {
+        abort(400, 'Kode invoice tidak ditemukan');
+    }
+
+    $data = InvoiceAb::with('customersAb','order','order.tarif','order.tarif.alatBerat',  'order.mobs')
+        ->where('kode_invoice', $kodeInvoice)
+        ->get();
+
+    if ($data->isEmpty()) {
+        abort(404, 'Invoice tidak ditemukan');
+    }
+    return view('keuangan.invoice_ab_pdf', [
+        'kodeInvoice' => $kodeInvoice,
+        'invoices'    => $data
+    ]);
+}
+
+
     public function index()
     {
         $ids = explode(',', request('id_transaksi'));
@@ -37,23 +91,138 @@ class InvoiceController extends Controller
         }
         $array_jumlah = json_encode($array_jumlah);
         $invoice_count = request('invoice_count');
-
         $currentMonth = Carbon::now()->month;
         $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $currentMonth)->orderBy('no', 'desc')->first() ?? 0;
         $no_JNL =  $noJNL ? $noJNL->no + 1 : 1;
-
-        
         return view('invoice.index', compact('transaksi','ids','invoice_count','array_jumlah', 'no_JNL'));
     }
 
-    public function preview(Request $request)
-    {
-       if ($request->isMethod('get')) {
-    return redirect()
-        ->route('keuangan.pre-invoice')
-        ->with('error',);
+public function simpanInvoiceAb(Request $r) {
+    DB::beginTransaction();
+
+    try {
+           $kodeInvoice = $r->orders[1]['kode_invoice'] ?? null;
+        foreach ($r->orders as $item) {
+
+            InvoiceAb::create([
+                'id_order'     => $item['order_id'],
+                'tgl_invoice'  => $item['tgl_invoice'],
+                'no'           => $item['no'],
+                'kode_invoice' => $item['kode_invoice'],
+                'penerima'     => $item['penerima'],
+                'sampai'       => $item['sampai'],
+                'total_jam'    => $item['total_jam'],
+                'total'        => $item['total'],
+            ]);
+            $order = Orders::find($item['order_id']);
+            $order->update([
+                'kode_invoice' => $item['kode_invoice'],
+            ]);
+        }
+        DB::commit();
+       return redirect()
+    ->route('keuangan.pre-invoice-ab')
+    ->with('success', 'Invoice Alat Berat berhasil disimpan. Kode Invoice: ' . $kodeInvoice);
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage());
+    }
 }
 
+    
+
+   public function previewAb(Request $request)
+{
+    if ($request->isMethod('get')) {
+        return redirect()
+            ->route('keuangan.pre-invoice-ab')
+            ->with('error', 'Akses tidak valid');
+    }
+    $dataOrders   = $request->input('orders', []);
+    $KodeInvoice  = $request->input('kode');
+    $noInvoice    = (int) $request->input('no');
+    $InvoiceCount = (int) $request->input('invoice_count');
+    $tgl_invoice  = $request->input('tgl_invoice');
+    $customerId = collect($dataOrders)->pluck('customer_id')->first();
+    $noInvoice = InvoiceAb::whereYear('sampai', date('Y'))->max('no') + 1;   
+    $customerNama = \App\Models\CustomersAB::where('id', $customerId)
+        ->value('nama');
+    $tarifIds = collect($dataOrders)
+        ->pluck('tarif_id')
+        ->unique()
+        ->filter()
+        ->toArray();
+    $tarifs = \App\Models\Tarif::whereIn('id', $tarifIds)
+        ->pluck('tarif', 'id');
+    $idOrders = collect($dataOrders)
+        ->pluck('order_id')
+        ->filter()
+        ->toArray();
+    $orders = Orders::whereIn('id', $idOrders)
+        ->get(['keterangan', 'id',
+            'tanggal_order', 'id',
+            'barang', 'id']);
+    foreach ($dataOrders as $index => $order) {
+
+    $order_id = (int) ($order['order_id'] ?? 0);
+    // =============================
+    // Ambil ORDER + relasi ALAT BERAT
+    // =============================
+   $orderModel = Orders::with('tarif.alatBerat')
+    ->where('id', $order_id)
+    ->first();
+
+$dataOrders[$index]['jenis_alat'] =
+    $orderModel?->tarif?->alatBerat?->nama_alat ?? '-';
+
+
+    $dataOrders[$index]['barang'] =
+        $orderModel->barang ?? '-';
+     $dataOrders[$index]['tanggal_order'] =
+        $orderModel->tanggal_order ?? '-';
+    $dataOrders[$index]['keterangan'] =
+        $orderModel->keterangan ?? '-';
+
+    // =============================
+    // MOB
+    // =============================
+    $mobs = Mob::where('id_order', $order_id)
+        ->get(['id', 'nominal', 'ket']);
+
+    $dataOrders[$index]['id_mob'] = [];
+
+    foreach ($mobs as $mob) {
+        $dataOrders[$index]['id_mob'][] = [
+            'id'         => $mob->id,
+            'keterangan' => $mob->ket,
+            'nominal'    => $mob->nominal,
+        ];
+    }
+}
+
+
+    return view('invoice.preview-inv-ab', compact(
+        'InvoiceCount',
+        'KodeInvoice',
+        'noInvoice',
+        'tgl_invoice',
+        'dataOrders',
+        'customerNama',
+        'tarifs',
+        'orders',
+        'noInvoice'
+    ));
+}
+
+
+    public function preview(Request $request)
+    {
+        if ($request->isMethod('get')) {
+        return redirect()
+            ->route('keuangan.pre-invoice')
+            ->with('error',);
+        } 
+        
         foreach ($request->harga_jual as $id_transaksi => $harga_jual) {
             foreach ($harga_jual as $idx => $item) {
                 $data[$id_transaksi]['harga_jual'][$idx] = $item; 
@@ -87,24 +256,20 @@ class InvoiceController extends Controller
         $array_invoice = array();
         $invoice_count = $request->invoice_count;
         $nsfp = NSFP::where('available', '1')->orderBy('nomor')->take($invoice_count)->get();
-        
         if ($nsfp->count() < $invoice_count) {
             return back()->with('error', 'NSFP Belum Tersedia, pastikan nomor NSFP tersedia.');
         }
-        
         $no = Invoice::whereYear('created_at', date('Y'))->max('no') + 1;
         foreach ($nsfp as $item) {
             $roman_numerals = array("", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII");
             $month_number = $monthNumber;
             $month_roman = $roman_numerals[$month_number];
             $inv = sprintf('%03d', $no) . '/INV/TMR1-' . $month_roman . '/' . date('Y');
-            
             array_push($array_invoice, [
                 'id_nsfp' => $item->id,
                 'invoice' => $inv,
                 'no' => $no
             ]);
-            
             $no++;
         }
         foreach ($request->invoice as $id_transaksi => $invoice) {

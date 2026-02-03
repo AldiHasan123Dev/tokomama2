@@ -15,15 +15,13 @@ return new class extends Migration
             $table->id();
             // Relasi ke tarif alat berat
             $table->foreignId('id_order')
-                  ->constrained('order')
+                  ->constrained('orders')
                   ->cascadeOnDelete();
             // Data invoice
             $table->integer('no')->nullable(); // nomor invoice otomatis
             $table->string('kode_invoice')->nullable();
             $table->string('penerima')->nullable();
-            $table->date('tanggal_invoice')->nullable();
             $table->date('sampai')->nullable();
-            $table->string('barang')->nullable();
             $table->integer('total_jam')->nullable();
             // Jumlah total
             $table->double('total')->default(0);
