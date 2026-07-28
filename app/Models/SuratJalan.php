@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class SuratJalan extends Model
 {
@@ -11,6 +12,17 @@ class SuratJalan extends Model
 
     protected $guarded = ['id'];
     protected $table = 'surat_jalan';
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            $model->created_by = Auth::id();
+            $model->updated_by = Auth::id();
+        });
+        static::saving(function ($model) {
+            $model->updated_by = Auth::id();
+        });
+    }
 
     public function nsfp()
     {
