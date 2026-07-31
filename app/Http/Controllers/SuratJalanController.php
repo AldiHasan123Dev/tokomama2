@@ -701,10 +701,14 @@ class SuratJalanController extends Controller
                 </button>';                
                                 // <button onclick="deleteData(' . $row->id . ')"  id="delete-faktur-all" class="text-red-600 font-semibold mb-3 self-end"><i class="fa-solid fa-trash"></i></button>';
                 }
+                // return '<div class="flex gap-3 mt-2">
+                //                 <a target="_blank" href="' . route('surat-jalan.cetak', $row) . '" class="text-green-500 font-semibold mb-3 self-end"><i class="fa-solid fa-print mt-2"></i></a>
+                //                 ' . $action . '
+                //             </div>';
                 return '<div class="flex gap-3 mt-2">
-                                <a target="_blank" href="' . route('surat-jalan.cetak', $row) . '" class="text-green-500 font-semibold mb-3 self-end"><i class="fa-solid fa-print mt-2"></i></a>
-                                ' . $action . '
-                            </div>';
+                    
+                    ' . $action . '
+                </div>';
             })
             ->rawColumns(['profit'])
             ->rawColumns(['aksi'])
