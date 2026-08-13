@@ -54,7 +54,7 @@
                 box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             }
     </style>
-    <form action="{{ route('surat-jalan.store') }}" target="_blank" method="post" id="reset" onsubmit="return validateForm()">
+    <form action="{{ route('surat-jalan.store') }}" method="post" id="reset" onsubmit="return validateForm()">
         @csrf
         <div class="center-container" id="print">
             <div class="card bg-base-100 shadow-xl mb-5">

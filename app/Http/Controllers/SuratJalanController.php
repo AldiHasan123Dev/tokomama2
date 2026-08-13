@@ -238,7 +238,7 @@ class SuratJalanController extends Controller
             return back()->with('error', 'ID Surat Jalan tidak valid');
         }
     
-        return redirect()->route('surat-jalan.cetak', $sj);
+        return redirect()->route('keuangan.pre-invoice');
     }
     
     
