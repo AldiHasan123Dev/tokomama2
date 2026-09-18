@@ -10,9 +10,9 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>SJ ready to invoice</x-slot:tittle>
+        <x-slot:tittle>SJ siapp draft invoice</x-slot:tittle>
         <x-slot:button>
-            <form action="{{ route('invoice-transaksi.index') }}" method="get" id="form">
+            <form action="{{ route('pending.invoice.harga_jual') }}" method="get" id="form">
                 <input type="hidden" name="id_transaksi" id="id_transaksi">
                 <div class="flex gap-2">
                     <div class="flex-gap-2">
@@ -45,7 +45,7 @@
             $(document).ready(function() {
                 // Inisialisasi jqGrid
                 let table = $("#table-getfaktur").jqGrid({
-                    url: "{{ route('invoice.pre-invoice1') }}", // Ganti dengan URL API yang benar
+                    url: "{{ route('invoice.pre-invoice') }}", // Ganti dengan URL API yang benar
                     mtype: "GET",
                     datatype: "json",
                     colModel: [{
@@ -163,8 +163,8 @@
                             align: 'center'
                         },
                         {
-                            name: 'id_transaksi',
-                            index: 'id_transaksi',
+                            name: 'id',
+                            index: 'id',
                             hidden: true
                         },
                     ],

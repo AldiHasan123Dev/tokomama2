@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TransactionResource;
 use App\Http\Resources\OrdersResource;
 use App\Http\Resources\InvoiceAbResource;
+use App\Http\Resources\DraftInvoiceResource;
 use App\Models\NSFP;
 use App\Models\SuratJalan;
 use App\Models\Transaction;
+use App\Models\DraftInvoice;
 use App\Models\InvoiceAb;
 use App\Models\Orders;
 use Carbon\Carbon;
@@ -21,24 +23,52 @@ class InvoiceController extends Controller
     public function dataTable()
     {
         // $data = SuratJalan::query()->whereNull('invoice');
-        $query = Transaction::query()
-        ->leftJoin('invoice', 'transaksi.id', '=', 'invoice.id_transaksi') 
-        ->whereNull('invoice.id_transaksi')
-        ->whereNotNull('id_surat_jalan')
-        ->where('harga_beli', '>', 0)
-        ->where('sisa', '>',0)
-        ->orderBy('transaksi.created_at', 'desc')
-        ->select([
-            'transaksi.id', // Gunakan alias agar tidak tertimpa oleh invoice.id
-            'transaksi.*' // Pilih semua kolom dari transaksi
-        ])
-        ->get();
+               $query = Transaction::query()
+                        ->leftJoin('invoice', 'transaksi.id', '=', 'invoice.id_transaksi')
+                        ->leftJoin('draft_invoices', 'transaksi.id', '=', 'draft_invoices.id_transaksi') // join ke draft_invoices
+                        ->whereNull('invoice.id_transaksi')          // belum ada invoice
+                        ->whereNull('draft_invoices.draft_no')       // belum ada draft_no
+                        ->whereNotNull('id_surat_jalan')
+                        ->where('harga_beli', '>', 0)
+                        ->where('sisa', '>', 0)
+                        ->orderBy('transaksi.created_at', 'desc')
+                        ->select([
+                            'transaksi.id as transaksi_id', // kasih alias biar tidak ketimpa
+                            'transaksi.*',
+                            'draft_invoices.draft_no'
+                        ])
+                        ->get();
     
     $data = TransactionResource::collection($query);
     $res = $data->toArray(request());
     
 
         $data = TransactionResource::collection($query);
+        $res =  $data->toArray(request());
+
+
+        return DataTables::of($res)
+            ->addIndexColumn()
+            ->addColumn('checkbox', function ($row) {
+                return '<input type="checkbox" name="id_transaksi[]" id="id" value="' . $row['id'] . '">';
+            })
+            ->addColumn('aksi', function ($row) {
+                return '<form method=' . 'GET' . ' action = ""><button class="btn btn-xs btn-success" type=submit>Ambil</button></form>';
+            })
+            ->rawColumns(['aksi','checkbox'])
+            ->make(true);
+    }
+
+     public function dataTable1()
+    {
+        // $data = SuratJalan::query()->whereNull('invoice');
+        $query = DraftInvoice::whereNull('invoice_id')->get();
+    
+        $data = DraftInvoiceResource::collection($query);
+        $res = $data->toArray(request());
+    
+
+        $data = DraftInvoiceResource::collection($query);
         $res =  $data->toArray(request());
 
 
