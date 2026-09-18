@@ -81,20 +81,21 @@
         <table style="margin-top: -40px">
             <thead>
                 <tr>
-                    <th rowspan="4" style="width: 15%; margin-bottom:40px;">
-                        <img src="{{ public_path('Logomama2.png') }}" class="logo" style="width: 60%; height: 50%;">
+                    <th rowspan="4" style="width: 20%; margin-left:30px; margin-bottom:40px;">
+                        <img src="{{ public_path('Logomama2.png') }}" class="logo" style="width: 80%; height: 80%;">
                     </th>
-                    <td style="font-weight: bold; font-size: 1rem;">MAMA BAHAGIA</td>
+                    <td style="font-weight: bold; font-size: 1rem;">
+                        {{-- MAMA BAHAGIA 2 --}}
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem; font-weight: bold;">Jl. Baru - Melati (Ruko depan PLN)
-                        <br> Abepura, Jayapura
+                    <td>
                     </td>
                     <td style="font-weight: bold; font-size: 1rem; text-align: center;"><u>SALES ORDER</u></td>
                 </tr>
                 <tr>
-                    <td style="font-size: 0.8rem; font-weight: bold;">HP: 08112692861 / 08112692859</td>
+                    <td></td>
                     <td style="text-align: center; font-size: 0.8rem">SO : {{ $draft_no ?? '-' }}</td>
                 </tr>
                 <tr>
@@ -391,10 +392,10 @@
                             <br>
                             <span style="font-style:italic;">Pembayaran ke rekening :</span>
                             <br>
-                            <strong>CV. SARANA BAHAGIA</strong><br>
+                            <strong>ACHMAD RASID</strong><br>
                             Bank Mandiri
                             <br>
-                            154.004.5006.008
+                            1410.0958.99902
                         </td>
 
                         <td style="padding:2px 5px; text-align:center;">
@@ -422,7 +423,7 @@
                         </td>
 
                         <td style="padding-top:50px; text-align:center;">
-                            <b>(MAMA BAHAGIA)</b>
+                            <b>(ADMIN)</b>
                         </td>
                     </tr>
 
