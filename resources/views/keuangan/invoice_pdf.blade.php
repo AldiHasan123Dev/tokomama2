@@ -396,7 +396,7 @@
                         <td style="align-items:left ;text-align: center;">Jayapura, {{ $formattedDate }}</td>
                     </tr>
                     <tr>
-                        <th style="text-align: left; padding-right: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
+                        <th style="text-align: left; padding-right: 50px; font-style: italic;">ACHMAD RASID</th>
                         <td></td>
                         <td style="text-align: center;">Hormat Kami</td>
                     </tr>
