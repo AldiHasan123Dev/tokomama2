@@ -404,7 +404,7 @@
                         <th style="text-align: left; padding-right: 50px; font-style: italic;"> Bank Mandiri <br>
                             {{-- 14.000.45006.005 --}}
                         {{-- 15.400.45006.008 --}}
-                    154.004.5006.008</th>
+                    1410.0958.99902</th>
                         <th></th>
                     </tr>
                     <tr>
