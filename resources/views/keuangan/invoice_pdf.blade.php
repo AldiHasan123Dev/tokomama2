@@ -388,61 +388,33 @@
                 <p style="font-weight: bold;padding-left:30px; font-size: 0.8rem">
                     Admin Gudang (Nama dan Paraf) :
                 </p>
-                <table style="width:85%; margin:-100px auto 10; font-size:0.8rem; border-collapse:collapse;">
+                <table style="font-size: 0.8rem;">
                     <tr>
-                        <td
-                            style="text-align: left;  margin:-100px auto 10; padding:4px 4px 4px 4px; font-style:italic;">
-                            <br>
-                            <br>
-                            <br>
-                            <span style="font-style:italic;">Pembayaran ke rekening :</span>
-                            <br>
-                            <strong>ACHMAD RASID</strong><br>
-                            Bank Mandiri
-                            <br>
-                            1410.0958.99902
-                        </td>
-
-                        <td style="padding:2px 5px; text-align:center;">
-                            Pengirim
-                        </td>
-
-                        <td style="padding:2px 5px; text-align:center;">
-                            Penerima
-                        </td>
-
-                        <td style="padding:2px 5px; text-align:right;">
-                            Jayapura, {{ $formattedDate }}
-                        </td>
+                        <th style="text-align: left; padding-right: 50px; font-style: italic;">Pembayaran ke rekening:
+                        </th>
+                        <td style="padding-left: 40px;">Penerima</td>
+                        <td style="align-items:left ;text-align: center;">Jayapura, {{ $formattedDate }}</td>
                     </tr>
-
                     <tr>
-                        <td style="padding-top:50px;"></td>
-
-                        <td style="padding-top:50px; text-align:center;">
-                            _________________
-                        </td>
-
-                        <td style="padding-top:50px; text-align:center;">
-                            _________________
-                        </td>
-
-                        <td style="padding-top:50px; text-align:center;">
-                            <b>(ADMIN)</b>
-                        </td>
+                        <th style="text-align: left; padding-right: 50px; font-style: italic;">CV. SARANA BAHAGIA</th>
+                        <td></td>
+                        <td style="text-align: center;">Hormat Kami</td>
                     </tr>
-
+                    <tr>
+                        <th style="text-align: left; padding-right: 50px; font-style: italic;"> Bank Mandiri <br>
+                            {{-- 14.000.45006.005 --}}
+                        {{-- 15.400.45006.008 --}}
+                    154.004.5006.008</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-left: 50px;"></th>
+                        <td style="padding-top:30px;">_____________________</td>
+                        <th style="padding-top:30px">(ADMIN)</th>
+                    </tr>
                     <tr>
                         <td></td>
-
-                        <td style="text-align:center;">
-                            {{ $suratJalan->nama_pengirim }}
-                        </td>
-
-                        <td style="text-align:center;">
-                            Paraf & Nama
-                        </td>
-
+                        <td>TD. Tgn & Nama Terang</td>
                         <td></td>
                     </tr>
                 </table>
