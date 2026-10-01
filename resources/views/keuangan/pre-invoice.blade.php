@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/ui.jqgrid-bootstrap5.css') }}" />
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>SJ ready to invoice</x-slot:tittle>
+        <x-slot:tittle>Draft Invoice ready to Invoice Final</x-slot:tittle>
         <x-slot:button>
             <form action="{{ route('invoice-transaksi.index') }}" method="get" id="form">
                 <input type="hidden" name="id_transaksi" id="id_transaksi">
@@ -19,7 +19,7 @@
                         <input type="hidden" name="invoice_count" id="count" value="1"
                             class="rounded-md form-control text-center" min="1" style="height: 28px">
                     </div>
-                    <button type="submit" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">Buat Draf
+                    <button type="submit" class="btn font-semibold bg-green-500 btn-sm text-white mt-4">Buat
                         Invoice</button>
                 </div>
             </form>
@@ -33,6 +33,15 @@
                 </div>
                 <table class="table" id="table-getfaktur"></table>
                 <div id="jqGridPager"></div>
+            </div>
+        </div>
+        <div class="card border rounded-lg shadow-sm p-4">
+            <div class="text-sm text-gray-500">
+                Total Harga Beli
+            </div>
+
+            <div id="total-harga-beli" class="text-xl font-bold mt-2">
+                0
             </div>
         </div>
     </x-keuangan.card-keuangan>
@@ -68,8 +77,8 @@
                         },
                         {
                             search: true,
-                            name: 'nomor_surat',
-                            index: 'nomor_surat',
+                            name: 'draft_no',
+                            index: 'draft_no',
                             width: 130,
                             label: 'Nomor Surat',
                             align: 'center'
@@ -101,6 +110,32 @@
                             name: 'harga_jual',
                             index: 'harga_jual',
                             label: 'Harga Jual',
+                            width: 100,
+                            formatoptions: {
+                                decimalPlaces: 4,
+                                thousandsSeparator: ',',
+                            },
+                            align: 'right',
+                            formatter: function(cellValue) {
+                                if (!isNaN(cellValue)) {
+                                    let parts = cellValue.toString().split('.');
+                                    let formattedInteger = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,
+                                        ",");
+                                    if (parts.length > 1) {
+                                        if (parseInt(parts[1]) !== 0) {
+                                            return `${formattedInteger}.<span style="color: red;">${parts[1]}</span>`;
+                                        }
+                                    }
+                                    return formattedInteger + (parts[1] ? '.' + parts[1] : '');
+                                }
+                                return cellValue;
+                            }
+                        },
+                        {
+                            search: true,
+                            name: 'harga_beli',
+                            index: 'harga_beli',
+                            label: 'Harga Beli',
                             width: 100,
                             formatoptions: {
                                 decimalPlaces: 4,
@@ -177,9 +212,26 @@
                     loadonce: true,
                     serverPaging: true,
                     loadComplete: function(data) {
-                        console.log('Data received from server:', data);
-                        console.log('Data structure:', data.data);
-                    },
+    let totalHargaBeli = 0;
+
+    (data.data || []).forEach(function(item) {
+        let sisa = parseFloat(item.sisa) || 0;
+        let hargaBeli = parseFloat(item.harga_beli) || 0;
+
+        let subtotalHargaBeli = hargaBeli * sisa;
+
+        totalHargaBeli += subtotalHargaBeli;
+    });
+
+    // Bulatkan hasil akhir
+    totalHargaBeli = Math.round(totalHargaBeli);
+
+    $('#total-harga-beli').text(
+        totalHargaBeli.toLocaleString('id-ID')
+    );
+
+    console.log('Total Harga Beli:', totalHargaBeli);
+},
                     jsonReader: {
                         root: "data",
                         page: "current_page",
@@ -211,7 +263,7 @@
                 e.preventDefault(); // Mencegah form untuk submit otomatis
                 var ids = $("#table-getfaktur input:checkbox:checked").map(function() {
                     return $(this).closest('tr').find('td:last-child')
-                .text(); // Mengambil ID dari kolom terakhir
+                        .text(); // Mengambil ID dari kolom terakhir
                 }).get();
 
                 // Cek apakah ids kosong
@@ -224,11 +276,6 @@
                     this.submit();
                 }
             });
-
-
-            // Menampilkan versi jQuery dan mengecek apakah jqGrid telah dimuat
-            console.log('jQuery version:', $.fn.jquery);
-            console.log('jqGrid loaded:', typeof $.fn.jqGrid !== 'undefined');
         </script>
     </x-slot:script>
 </x-Layout.layout>
