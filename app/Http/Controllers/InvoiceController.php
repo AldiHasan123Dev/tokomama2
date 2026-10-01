@@ -434,6 +434,10 @@ $validatedData = $request->validate([
             // Hitung subtotal
             $subtotal = $jumlah * $harga_jual;
     
+           $draft_inv = DraftInvoice::where('id_sj',$id_sj)
+            ->where('id_transaksi',$id_transaksi)
+            ->first();
+    
             // Simpan Invoice
             $invoiceRecord = Invoice::create([
                 'id_transaksi' => $id_transaksi,
@@ -444,6 +448,13 @@ $validatedData = $request->validate([
                 'subtotal' => $subtotal,
                 'no' => $no,
                 'tgl_invoice' => $tgl_invoice,
+            ]);
+
+            $draft_inv->update([
+                'invoice_id' => $invoiceRecord->id,
+                'jumlah' => $jumlah,
+                'harga' => $harga_jual,
+                'subtotal' => $subtotal
             ]);
     
             // Update transaksi
