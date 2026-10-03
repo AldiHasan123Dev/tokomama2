@@ -8,6 +8,7 @@ use App\Models\NSFP;
 use App\Models\Transaction;
 use App\Models\Barang;
 use App\Models\Orders;
+use App\Models\DraftInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
