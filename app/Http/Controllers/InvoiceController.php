@@ -298,7 +298,8 @@ $dataOrders[$index]['jenis_alat'] =
                     $data[$id_transaksi]['jumlah_jual'][$idx] = $trx->jumlah_jual;
                     $data[$id_transaksi]['keterangan'][$idx] = $trx->keterangan;
 
-                    if ($suratJalan){
+                   if ($suratJalan){
+                        $data[$id_transaksi]['id_sj'][$idx] = $suratJalan->id;
                         $data[$id_transaksi]['no_cont'][$idx] = $suratJalan->no_cont;
                         $data[$id_transaksi]['no_po'][$idx] = $suratJalan->no_po;
                         $data[$id_transaksi]['tgl_sj'][$idx] = $suratJalan->tgl_sj;
