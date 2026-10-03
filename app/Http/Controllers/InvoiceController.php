@@ -409,6 +409,7 @@ $validatedData = $request->validate([
             'data.*.satuan' => 'nullable|array',
             'data.*.id_nsfp' => 'required|string',
             'data.*.no' => 'required|string',
+            'data.*.id_sj' => 'required',
         ]);
 
         
@@ -427,6 +428,7 @@ $validatedData = $request->validate([
                 // Mengambil data dari items
                 $jumlah = $items['jumlah'][0]; // Ambil nilai pertama
                 $satuan_jual = $items['satuan_jual'][0];
+                $id_sj = $items['id_sj'][0] ?? null;
                 $harga_jual = $items['harga_jual'][0];
                 $keterangan = $items['keterangan'][0] ?? null;
                 $id_nsfp = $items['id_nsfp'];

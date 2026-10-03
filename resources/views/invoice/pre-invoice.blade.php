@@ -490,6 +490,8 @@
                             <input type="hidden" name="invoice_count" value="{{ $invoice_count }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][jumlah][]"
                                 value="{{ $items['jumlah'][$idx] ?? 0 }}">
+                            <input type="hidden" name="data[{{ $id_transaksi }}][id_sj][]"
+                                value="{{ $items['id_sj'][$idx] ?? 0 }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][satuan_jual][]"
                                 value="{{ $items['satuan_jual'][$idx] ?? '' }}">
                             <input type="hidden" name="data[{{ $id_transaksi }}][harga_jual][]"
