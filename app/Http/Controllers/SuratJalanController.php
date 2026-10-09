@@ -938,12 +938,6 @@ public function getStock($id)
     public function hapusBarang(Request $request)
     {
         $trx = Transaction::find($request->id);
-        $draftInv = DraftInvoice::whereNull('invoice_id')
-            ->where('id_transaksi', $request->id)
-            ->first();
-        if ($draftInv) {
-            $draftInv->forceDelete();
-        }
         $stock = Transaction::whereNull('id_surat_jalan')
             ->where('no_bm', $trx->no_bm)
             ->where('id_barang', $trx->id_barang)
