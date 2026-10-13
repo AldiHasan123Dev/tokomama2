@@ -941,10 +941,8 @@ public function getStock($id)
         $draftInv = DraftInvoice::whereNull('invoice_id')
             ->where('id_transaksi', $request->id)
             ->first();
-        dd($draftInv);
-
         if ($draftInv) {
-            $draftInv->delete();
+            $draftInv->forceDelete();
         }
         $stock = Transaction::whereNull('id_surat_jalan')
             ->where('no_bm', $trx->no_bm)
