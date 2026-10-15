@@ -1046,39 +1046,46 @@ public function dataLapPiutangTotal(Request $request)
     });
 
     // Menambahkan nomor urut + summary
+    
+    // Menambahkan nomor urut ke seluruh data
     $result = [];
     $index = 1;
-    $totalTelahBayar = 0;
-    $totalBelumBayar = 0;
-    $totalInvoice = 0;
-    $nilaiInvoice = 0;
 
     foreach ($data as $item) {
         $item['no'] = $index++;
-        $totalTelahBayar += $item['telah_bayar'];
-        $totalBelumBayar += $item['belum_dibayar'];
-        $totalInvoice += $item['total_invoice'];
-        $nilaiInvoice += $item['nilai_invoice'];
         $result[] = $item;
     }
 
     // Pagination
     $indexStart = ($page - 1) * $rows;
-    $paginatedData = collect($result)->slice($indexStart, $rows)->values();
+
+    $paginatedData = collect($result)
+        ->slice($indexStart, $rows)
+        ->values();
+
     $totalRecords = count($result);
-    $totalPages = ceil($totalRecords / $rows);
+    $totalPages = $rows > 0
+        ? (int) ceil($totalRecords / $rows)
+        : 0;
+
+    // Summary hanya dari data pada halaman aktif
+    $totalTelahBayar = $paginatedData->sum('telah_bayar');
+    $totalBelumBayar = $paginatedData->sum('belum_dibayar');
+    $totalInvoice = $paginatedData->sum('total_invoice');
+    $nilaiInvoice = $paginatedData->sum('nilai_invoice');
 
     return response()->json([
         'rows' => $paginatedData,
-        'current_page' => $page,
+        'current_page' => (int) $page,
         'last_page' => $totalPages,
         'total' => $totalPages,
         'records' => $totalRecords,
         'sum_telah_bayar' => $totalTelahBayar,
         'sum_belum_bayar' => $totalBelumBayar,
         'count_invoice' => $totalInvoice,
-        'sum_nilai_invoice' => $nilaiInvoice
+        'sum_nilai_invoice' => $nilaiInvoice,
     ]);
+
 }
 
 
