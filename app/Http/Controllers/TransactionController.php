@@ -74,9 +74,10 @@ class TransactionController extends Controller
     
             // Ambil nomor terakhir BBK sekali saja di awal
             $lastJNL = Jurnal::where('tipe', 'JNL')
-                ->whereMonth('tgl', date('m'))
-                ->orderBy('no', 'desc')
-                ->first();
+            ->whereMonth('tgl', date('m'))
+            ->whereYear('tgl', date('Y'))
+            ->orderBy('no', 'desc')
+            ->first();
             $no_JNL = $lastJNL ? $lastJNL->no + 1 : 1;
             // Nomor Surat BBK (tetap sama untuk semua jurnal dalam transaksi ini)
             $nomor_surat = "$month-$no_JNL/TMR1/$year";
