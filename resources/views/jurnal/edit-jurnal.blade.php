@@ -129,7 +129,6 @@
         .select2-container--open .select2-dropdown--below {
             display: block !important;
         }
-        
     </style>
     <input type="hidden" id="nj" value="{{ $data[0]->nomor }}">
     <input type="hidden" id="tgl" value="{{ $tgl }}">
@@ -151,7 +150,7 @@
     </x-jurnal.card-jurnal>
     <x-jurnal.card-jurnal>
         <x-slot:tittle>Edit Jurnal</x-slot:tittle>
-    </form>
+        </form>
         <div class="overflow-x-auto">
             <form action="{{ route('jurnal.edit.tglupdate') }}" method="post">
                 @csrf
@@ -160,12 +159,23 @@
                     class="mb-8 rounded-md bg-gray-100" id="nomor_jurnal">
                 <button type="submit" style="margin-bottom: 20px;"
                     class="btn bg-green-500 font-semibold text-white">Simpan Tanggal</button>
-                </form>
-                <button id="tambah_g" style="margin-bottom: 20px;"
-            class="btn bg-blue-500 font-semibold text-white">Tambah Baris</button>
+            </form>
+            <div class="flex justify-between items-center mb-5">
+                <button id="tambah_g" class="btn bg-blue-500 font-semibold text-white">
+                    Tambah Baris
+                </button>
+
+                <button id="hapusJurnal" class="btn bg-red-500 font-semibold text-white">
+                    <i class="fa-solid fa-trash"></i>
+                    Hapus Item Jurnal
+                </button>
+            </div>
             <table id="table-editj" class="cell-border hover display nowrap text-sm">
                 <thead>
                     <tr>
+                        <th>
+                            <input type="checkbox" id="checkAll">
+                        </th>
                         <th>Aksi</th>
                         <th>ID</th>
                         <th>Nomor Jurnal</th>
@@ -185,6 +195,9 @@
                 <tbody>
                     @foreach ($data as $item)
                         <tr>
+                            <td class="text-center">
+                                <input type="checkbox" class="check-jurnal" value="{{ $item->id }}">
+                            </td>
                             <td><button class="text-yellow-400"
                                     onclick="editJurnal( '{{ addslashes($item->id) }}',
             '{{ addslashes($item->nomor) }}',
@@ -201,10 +214,8 @@
             '{{ addslashes($item->no_akun) }}',
             '{{ addslashes($item->keterangan_buku_besar_pembantu) }}', 
               '{{ addslashes($item->id_transaksi) }}')"><i
-                                        class="fa-solid fa-pencil"></i></button> |
-                                <button id="delete-faktur-all" onclick="deleteItemJurnal('{{ $item->id }}')"
-                                    class="text-red-600 font-semibold mb-3 self-end"><i
-                                        class="fa-solid fa-trash"></i></button>
+                                        class="fa-solid fa-pencil"></i></button>
+
                             </td>
                             <td> {{ $item->id }}</td>
                             <td>{{ $item->nomor ?? '-' }}</td>
@@ -233,23 +244,26 @@
             // Menghitung total voucher dengan nilai absolut
             $total_voucher = abs($cekVoucher_k_total - $cekVoucher_d_total);
         @endphp
-       <table class="table-auto w-full border-collapse">
-        <tbody>
-            <tr>
-                <td class="px-4 py-2 border-b font-bold">Total Debet</td>
-                <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_debet, 2, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td class="px-4 py-2 border-b font-bold">Total Kredit</td>
-                <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_kredit, 2, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td class="px-4 py-2 border-b font-bold">Cek Voucher</td>
-                <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_voucher, 2, ',', '.') }}</td>
-            </tr>
-        </tbody>
-    </table>
-    
+        <table class="table-auto w-full border-collapse">
+            <tbody>
+                <tr>
+                    <td class="px-4 py-2 border-b font-bold">Total Debet</td>
+                    <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_debet, 2, ',', '.') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 border-b font-bold">Total Kredit</td>
+                    <td class="px-4 py-2 border-b text-right font-bold">{{ number_format($total_kredit, 2, ',', '.') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 border-b font-bold">Cek Voucher</td>
+                    <td class="px-4 py-2 border-b text-right font-bold">
+                        {{ number_format($total_voucher, 2, ',', '.') }}</td>
+                </tr>
+            </tbody>
+        </table>
+
     </x-jurnal.card-jurnal>
 
     <x-slot:script>
@@ -264,13 +278,16 @@
             $("#nomor_jurnal").val(nomorJurnal);
 
             let table = $(`#table-editj`).DataTable({
-            pageLength: 25,
-            width: 100,
-            scrollX: true,  // Menentukan jumlah baris per halaman
-        });
+                pageLength: 25,
+                width: 100,
+                scrollX: true,
+                ordering: false,
+                searching: false,
+                paging: false
+            });
 
             function editJurnal(id, nomor, tgl, debit, kredit, keterangan, invoice, invoice_external, nopol, tipe, coa_id,
-                nama_akun, no_akun, keterangan_buku_besar_pembantu,id_transaksi) {
+                nama_akun, no_akun, keterangan_buku_besar_pembantu, id_transaksi) {
                 invoice = (invoice === '0') ? '' : invoice;
                 invoice_external = (invoice_external === '0') ? '' : invoice_external;
                 $("#dialog").html(`
@@ -361,7 +378,7 @@
                     width: '100%',
                     appendTo: 'body'
                 });
-                
+
                 $('#invoices').select2({
                     dropdownParent: $('#my_modal_3'),
                     dropdownAutoWidth: true,
@@ -382,8 +399,9 @@
                 });
             }
 
-            
-            function tambahJurnal(id, nomor, tipe, tgl, invoice, invoice_external, nopol, keterangan, no, keterangan_buku_besar_pembantu, id_transaksi) {
+
+            function tambahJurnal(id, nomor, tipe, tgl, invoice, invoice_external, nopol, keterangan, no,
+                keterangan_buku_besar_pembantu, id_transaksi) {
                 invoice = (invoice === '0') ? '' : invoice;
                 invoice_external = (invoice_external === '0') ? '' : invoice_external;
                 $("#dialog").html(`
@@ -474,7 +492,7 @@
                     width: '100%',
                     appendTo: 'body'
                 });
-                
+
                 $('#invoices').select2({
                     dropdownParent: $('#my_modal_3'),
                     dropdownAutoWidth: true,
@@ -535,19 +553,19 @@
             }
             let latestId = {{ $latestId + 1 }}; // Ambil nilai awal dari server Laravel
 
-$('#tambah_g').on('click', function() {
-    let no = $(`#counter`).val();
-    console.log("no_first: " + no);
-    no++;
-    $(`#counter`).val(no);
-    let newRowId = no;
+            $('#tambah_g').on('click', function() {
+                let no = $(`#counter`).val();
+                console.log("no_first: " + no);
+                no++;
+                $(`#counter`).val(no);
+                let newRowId = no;
 
-    // Tambahkan baris baru dengan `latestId` yang bertambah
-    let html = `<tr>
+                // Tambahkan baris baru dengan `latestId` yang bertambah
+                let html = `<tr>
                    <td class="text-center align-middle">
                         <button class="text-green-500"
                                 onclick="tambahJurnal('${latestId}','{{ $item->nomor }}', '{{ $item->tipe }}', '{{ $item->tgl }}', '{{ $item->invoice }}', '{{ $item->invoice_external }}', 
-                                 '{{ $item->nopol }}', '{{ ($item->keterangan) }}', {{ $item->no }}, '{{ $item->keterangan_buku_besar_pembantu }}', {{ $item->id_transaksi }})">
+                                 '{{ $item->nopol }}', '{{ $item->keterangan }}', {{ $item->no }}, '{{ $item->keterangan_buku_besar_pembantu }}', {{ $item->id_transaksi }})">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </td>
@@ -565,12 +583,96 @@ $('#tambah_g').on('click', function() {
                     <td class="text-end">{{ $item->keterangan_buku_besar_pembantu ?? '-' }}</td>
                 </tr>`;
 
-    $(`#table-editj`).append(html);
+                $(`#table-editj`).append(html);
 
-    // Increment `latestId` untuk baris berikutnya
-    latestId++;
+                // Increment `latestId` untuk baris berikutnya
+                latestId++;
+            });
+
+            $('#hapusJurnal').on('click', function() {
+
+    let ids = [];
+
+    $('.check-jurnal:checked').each(function() {
+        ids.push($(this).val());
+    });
+
+    // Tidak ada yang dipilih
+    if (ids.length === 0) {
+        alert('Silakan pilih item jurnal yang ingin dihapus.');
+        return;
+    }
+
+    // Tidak boleh menghapus seluruh item jurnal
+    let totalItem = $('.check-jurnal').length;
+
+    if (ids.length === totalItem) {
+        alert('Tidak dapat menghapus semua item jurnal. Minimal harus menyisakan 1 item jurnal.');
+        return;
+    }
+
+    if (!confirm(
+            'Apakah anda yakin ingin menghapus ' +
+            ids.length +
+            ' item jurnal yang dipilih?'
+        )) {
+        return;
+    }
+
+    $.ajax({
+        method: 'POST',
+        url: "{{ route('jurnal.items.delete') }}",
+        data: {
+            ids: ids
+        },
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+
+        beforeSend: function() {
+            $('#hapusJurnal').prop('disabled', true);
+
+            $('#hapusJurnal').html(
+                '<i class="fa-solid fa-spinner fa-spin"></i> Menghapus...'
+            );
+        },
+
+        success: function(response) {
+
+            if (response.success) {
+                alert(response.message);
+                location.reload();
+            } else {
+                alert(response.message);
+
+                $('#hapusJurnal').prop('disabled', false);
+
+                $('#hapusJurnal').html(
+                    '<i class="fa-solid fa-trash"></i> Hapus Item Jurnal'
+                );
+            }
+        },
+
+        error: function(xhr) {
+
+            console.log(xhr);
+
+            let message = 'Terjadi kesalahan saat menghapus jurnal.';
+
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+
+            alert(message);
+
+            $('#hapusJurnal').prop('disabled', false);
+
+            $('#hapusJurnal').html(
+                '<i class="fa-solid fa-trash"></i> Hapus Item Jurnal'
+            );
+        }
+    });
 });
-
         </script>
     </x-slot:script>
 </x-Layout.layout>

@@ -200,6 +200,36 @@ class JurnalController extends Controller
     /**
      * Update the specified resource in storage.
      */
+
+    public function deleteItems(Request $request)
+{
+    $ids = $request->input('ids', []);
+
+    if (empty($ids)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Tidak ada item jurnal yang dipilih.'
+        ], 422);
+    }
+
+    try {
+        $deleted = Jurnal::whereIn('id', $ids)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => $deleted . ' item jurnal berhasil dihapus.',
+            'deleted' => $deleted
+        ]);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menghapus item jurnal.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
     public function update(Request $request, Jurnal $jurnal)
     {
         $data = Jurnal::find($request->id);
