@@ -419,7 +419,7 @@ class SuratJalanController extends Controller
     $date = new DateTime($currentYear);
     $month = $date->format('m');
     $year = $date->format('y');
-    $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $month)->orderBy('no', 'desc')->first() ?? 0;
+    $noJNL = Jurnal::where('tipe', 'JNL')->whereMonth('tgl', $month)->whereYear('tgl', date('Y'))->orderBy('no', 'desc')->first() ?? 0;
     $no_JNL =  $noJNL ? $noJNL->no + 1 : 1;   
     $no_JNL1 =  $no_JNL + 1;   
     $nomor_surat = "$month-$no_JNL/TMR1/$year";
