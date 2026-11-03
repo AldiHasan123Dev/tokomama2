@@ -204,11 +204,15 @@ Route::get('/invoice-ab/cetak', [InvoiceController::class, 'cetakInvAb'])
     Route::resource('invoice-external', InvoiceExternalController::class);
     Route::post('/jurnal/delete-items', [JurnalController::class, 'deleteItems'])
     ->name('jurnal.items.delete');
+    Route::delete('/invoice/hapus-forced/{id}', [InvoiceController::class, 'hapusForced'])
+    ->whereNumber('id')
+    ->name('invoice.hapus-forced');
 });
 
 Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('auth')->group(function () {
     Route::get('', 'index')->name('keuangan');
     Route::get('invoice-pending', 'pendingInvoice')->name('pending.invoice');
+    Route::get('tarik-so', 'TarikSo')->name('keuangan.tarik-so');
     Route::get('invoice-pending/harga-jual', 'inputHargaJual')->name('pending.invoice.harga_jual');
     Route::get('surat-jalan', 'suratJalan')->name('keuangan.surat-jalan');
     Route::post('surat-jalan', 'suratJalanStore')->name('keuangan.surat-jalan');

@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\Barang;
 use App\Models\Orders;
 use App\Models\DraftInvoice;
+use Illuminate\Http\JsonResponse; 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -1071,6 +1072,35 @@ $validatedData = $request->validate([
             }
 }
 
+public function hapusForced(int $id): JsonResponse
+{
+    try {
+        DB::transaction(function () use ($id) {
+            $data = DraftInvoice::withTrashed()->findOrFail($id);
+            $data->forceDelete();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'SO Berhasil ditarik, Silahkan cek di menu draft invoice.',
+        ]);
+    } catch (ModelNotFoundException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Data tidak ditemukan.',
+        ], 404);
+    } catch (Throwable $e) {
+        Log::error('Hapus forced gagal', [
+            'id' => $id,
+            'message' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menghapus data.',
+        ], 500);
+    }
+}
     /**
      * Display the specified resource.
      */

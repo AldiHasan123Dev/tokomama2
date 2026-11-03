@@ -60,6 +60,11 @@ class KeuanganController extends Controller
         return view('keuangan.invoice');
     }
 
+        function TarikSo()
+    {
+        return view('keuangan.so_batal');
+    }
+
     function preInvoice()
     {
         return view('keuangan.pre-invoice');
@@ -600,6 +605,7 @@ public function mobByOrder(Request $request)
         'data' => $data
     ]);
 }
+
 
 public function hpsMob(Request $request)
     {
