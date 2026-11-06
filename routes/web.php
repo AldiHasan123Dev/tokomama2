@@ -232,7 +232,8 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::get('omzet-list', 'dataTableOmzet')->name('keuangan.omzet.datatable');
     Route::post('omzet-export', 'OmzetExportExcel')->name('keuangan.omzet.exportexcel');
     Route::post('cari-transaksi-by-tanggal', 'cari')->name('keuangan.cari');
-    Route::post('cari-transaksi-by-tanggal1', 'cari1')->name('keuangan.cari1');  
+    Route::post('cari-transaksi-by-tanggal1', 'cari1')->name('keuangan.cari1');
+    Route::post('cari-transaksi-by-tanggal2', 'cari2')->name('keuangan.cari2');  
     Route::post('jurnal-simpan', 'jurnal')->name('keuangan.jurnal-inv'); 
 });
 

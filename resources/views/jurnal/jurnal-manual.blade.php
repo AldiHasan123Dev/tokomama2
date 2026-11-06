@@ -295,6 +295,18 @@
                                     <option value="{{ $no_BBKO }}/{{ 'BBKO' }}-TM/{{ date('y') }}">
                                         Bank Keluar OCBC - {{ $no_BBKO }}/{{ 'BBKO' }}-TMR1/{{ date('y') }}
                                     </option>
+                                    <option value="{{ $no_BBM_DWS }}/{{ 'BBMDWS' }}-TM/{{ date('y') }}">
+                                        Bank Masuk DWS - {{ $no_BBM_DWS }}/{{ 'BBMDWS' }}-TMR1/{{ date('y') }}
+                                    </option>
+                                    <option value="{{ $no_BBK_DWS }}/{{ 'BBKDWS' }}-TM/{{ date('y') }}">
+                                        Bank Keluar DWS - {{ $no_BBK_DWS }}/{{ 'BBKDWS' }}-TMR1/{{ date('y') }}
+                                    </option>
+                                     <option value="{{ $no_BBM_AR }}/{{ 'BBMAR' }}-TM/{{ date('y') }}">
+                                        Bank Masuk AR - {{ $no_BBM_AR }}/{{ 'BBMAR' }}-TMR1/{{ date('y') }}
+                                    </option>
+                                    <option value="{{ $no_BBK_AR }}/{{ 'BBKAR' }}-TM/{{ date('y') }}">
+                                        Bank Keluar AR - {{ $no_BBK_AR }}/{{ 'BBKAR' }}-TMR1/{{ date('y') }}
+                                    </option>
                                 </select>
                             </label>
                         </div>
@@ -644,7 +656,6 @@
                         }
 
                         $(`#check${currentNo - 1}`).click(function() {
-                            console.log('clicked' + (currentNo - 1));
                             if ($(`#check${currentNo - 1}`).is(':checked')) {
                                 $(`#invoice-${currentNo}`).prop('disabled', false);
                                 $(`#nopol-${currentNo}`).prop('disabled', false);
@@ -699,9 +710,6 @@
                 const procdata = $(this).val();
                 let datainv = procdata.split('_')[0];
                 let no = procdata.split('_')[2] - 1;
-                console.log('procdata:', procdata);
-        console.log('datainv:', datainv);
-        console.log('no:', no);
                 
                 $.ajax({
                     method: 'post',
@@ -713,7 +721,6 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
-                        console.log(response)
                         $(`#param1-${rowId}`).val(response.customer[no]);
                         $(`#param2-${rowId}`).val(response.supplier[no]);
                         $(`#param3-${rowId}`).val(response.barang[no]);
@@ -740,11 +747,6 @@
         let datainvext = parts[0];
         let no = parseInt(parts[1]) - 1; // Konversi ke integer dan sesuaikan index
 
-        console.log('procdata:', procdata); // Menampilkan data sebelum '|'
-        console.log('parts:', parts); // Menampilkan hasil pemisahan dengan '_'
-        console.log('data:', datainvext); // Menampilkan data sebelum '|'
-        console.log('no:', no);
-
         // Lakukan AJAX untuk mendapatkan data
         $.ajax({
             method: 'post',
@@ -756,8 +758,6 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-                        console.log(response)
-                       
                     $(`#param1-${rowId}`).val(response.customer[no]);
                     $(`#param2-${rowId}`).val(response.supplier[no]);
                     $(`#param3-${rowId}`).val(response.barang[no]);
@@ -825,7 +825,7 @@
         if (coa_debit != 0) {
             totaltd += nominal;
             // Tambahkan ke totalVoucherDebit jika COA adalah 3, 4, atau 5
-            if (coa_debit == 3 || coa_debit == 4 || coa_debit == 5) {
+            if (coa_debit == 3 || coa_debit == 4 || coa_debit == 5 || coa_debit == 92 || coa_debit == 93) {
                 totalVoucherDebit += nominal;
             }
         }
@@ -834,7 +834,7 @@
         if (coa_credit != 0) {
             totaltc += nominal;
             // Tambahkan ke totalVoucherCredit jika COA adalah 3, 4, atau 5
-            if (coa_credit == 6 || coa_credit == 2 || coa_credit == 5) {
+            if (coa_credit == 6 || coa_credit == 2 || coa_credit == 5 || coa_credit == 92 || coa_credit == 93) {
                 totalVoucherCredit += nominal;
             }
         }
@@ -851,19 +851,12 @@
     $('#total_voucher_debit').html(totalVoucherDebit.toLocaleString('en-US')); // Tampilkan total voucher debit
     $('#total_voucher_credit').html(totalVoucherCredit.toLocaleString('en-US')); // Tampilkan total voucher credit
     $('#cek_voucher').html(cekVoucher.toLocaleString('en-US')); // Tampilkan cek voucher (selisih)\
-    console.log('Total Debit: ', totaltd);
-    console.log('Total Credit: ', totaltc);
-    console.log('Total Voucher Debit (COA 3,4,5): ', totalVoucherDebit);
-    console.log('Total Voucher Credit (COA 3,4,5): ', totalVoucherCredit);
-    console.log('Cek Voucher (Absolut): ', cekVoucher);
 }
 
 
         function doTotal() {
-            console.log('total running')
             totaltc = 0;
             totaltd = 0;
-            console.log("no : " + no);
             for (let i = 0; i < no; i++) {
                 let coa_debit = $(".debit-" + i + "").val();
                 let coa_credit = $(".credit-" + i + "").val();
@@ -875,9 +868,6 @@
                 if (coa_credit != 0) {
                     totaltc += nominal;
                 }
-                console.log("Coa Debit: " + i + ": " + coa_debit);
-                console.log("Coa Kredit: " + i + ": " + coa_debit);
-                console.log("Nominal: " + i + ": " + coa_debit);
             }
             $('#total_debit').val(totaltd);
             $('#total_credit').val(totaltc);
@@ -894,7 +884,6 @@
 
         $('#addRow').on('click', function() {
             no = $(`#counter`).val();
-            console.log("no_first: " + no);
             no++;
             num++;
             $(`#counter`).val(no);
@@ -1130,7 +1119,6 @@
                             };
                         },
                         processResults: function(data) {
-                            console.log(data); // Cek apa yang diterima dari server
 
                             // Sortir data berdasarkan nomor_surat secara alfabetis
                             data.sort(function(a, b) {
@@ -1179,11 +1167,6 @@
                     }
 
                     // Menampilkan data yang dipilih
-                    console.log('ID :', data.id);
-                    console.log('ID Surat Jalan:', data.id_surat_jalan);
-                    console.log('Nomor Surat:', data.text); // Ambil nomor surat
-                    console.log('ID Supplier:', data.id_supplier);
-                    console.log('Nama Supplier:', data.nama_supplier); // Ambil nama supplier
 
                     // Masukkan nama supplier ke dalam input
                     $('#nama-supplier').val(data.nama_supplier);

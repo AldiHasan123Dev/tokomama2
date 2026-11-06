@@ -568,7 +568,91 @@ class KeuanganController extends Controller
             'nominal'  => $biayaInvs->pluck('nominal'),
             'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
             'no' => $nextNo,
-           'nomor' => "{$nextNo}/BBM-TMR1/{$tahun}"
+            'nomor' => "{$nextNo}/BBM-TMR1/{$tahun}"
+        ];
+    
+        return response()->json([
+            'status' => 'success',
+            'data' => $result,
+        ]);
+    }
+
+     public function cari1(Request $request)
+    {
+        $tanggal = $request->tanggal_bayar;
+         $tahun = date('y');
+         $year = date('Y');
+    
+        // Ambil transaksi dengan filter tanggal bayar
+        $biayaInvs = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
+            ->whereDate('tgl_pembayar', $tanggal)
+            ->whereNull('jurnal')
+            ->where('tipe','BBMDWS')
+            ->where('nominal', '>', 0)
+            ->get();
+        
+         $last = Jurnal::where('tipe', 'BBMDWS')->whereYear('tgl', $year)->orderBy('no', 'desc')->first() ?? 0;
+         $nextNo = $last ? $last->no + 1 : 1;
+        // Jika kosong, kirim respon dengan pesan error
+        if ($biayaInvs->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pembayaran tanggal tersebut sudah terjurnal.',
+            ], 404);
+        }
+    
+        // Jika ada data, siapkan response data
+        $result = [
+            'id'       => $biayaInvs->pluck('id'),
+            'id_transaksi' => $biayaInvs->pluck('invoice.id_transaksi'),
+            'invoice'  => $biayaInvs->pluck('invoice.invoice'),
+            'nominal'  => $biayaInvs->pluck('nominal'),
+            'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
+            'no' => $nextNo,
+            'nomor' => "{$nextNo}/BBMDWS-TMR1/{$tahun}",
+            'bbmdws' => "BBMDWS",
+        ];
+    
+        return response()->json([
+            'status' => 'success',
+            'data' => $result,
+        ]);
+    }
+
+    public function cari2(Request $request)
+    {
+        $tanggal = $request->tanggal_bayar;
+         $tahun = date('y');
+         $year = date('Y');
+    
+        // Ambil transaksi dengan filter tanggal bayar
+        $biayaInvs = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
+            ->whereDate('tgl_pembayar', $tanggal)
+            ->whereNull('jurnal')
+            ->where('tipe','BBMAR')
+            ->where('nominal', '>', 0)
+            ->get();
+        
+         $last = Jurnal::where('tipe', 'BBMAR')->whereYear('tgl', $year)->orderBy('no', 'desc')->first() ?? 0;
+         $nextNo = $last ? $last->no + 1 : 1;
+        // Jika kosong, kirim respon dengan pesan error
+        if ($biayaInvs->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pembayaran tanggal tersebut sudah terjurnal.',
+            ], 404);
+        }
+    
+        // Jika ada data, siapkan response data
+        $result = [
+            'id'       => $biayaInvs->pluck('id'),
+            'id_transaksi' => $biayaInvs->pluck('invoice.id_transaksi'),
+            'invoice'  => $biayaInvs->pluck('invoice.invoice'),
+            'nominal'  => $biayaInvs->pluck('nominal'),
+            'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
+            'no' => $nextNo,
+            'nomor' => "{$nextNo}/BBMAR-TMR1/{$tahun}",
+            'bbmar' => "BBMAR",
         ];
     
         return response()->json([
@@ -582,7 +666,7 @@ class KeuanganController extends Controller
 {
     $request->validate([
         'id' => 'required|integer',
-        'tipe' => 'required|in:BBM,BBMN'
+        'tipe' => 'required|in:BBM,BBMDWS,BBMAR'
     ]);
 
     $biayaInv = BiayaInv::find($request->id);
@@ -662,7 +746,7 @@ public function tambahTagihan(Request $request)
 }
 
 
-    public function jurnal(Request $request)
+     public function jurnal(Request $request)
     {
         $data = $request->all();
         // Bersihkan array dari nilai null
@@ -691,15 +775,24 @@ public function tambahTagihan(Request $request)
         $id_trans = $data['id_transaksi'];
         $invoice = $data['invoice'];
         $customer = $data['customer'];
-        $nomor = $data['nomor'];
-        $tipe = 'BBM';
+        $tahun = date('Y', strtotime($data['tanggal']));
+        $thn = date('y', strtotime($data['tanggal']));
+        $tipe = $data['tipe'];
+        $jurnalsort = Jurnal::whereYear('tgl', $tahun)  // Menambahkan kondisi untuk tahun
+        ->where('tipe', $tipe)
+        ->get();
+        $nomorArray = $jurnalsort->pluck('no')->toArray();
+        if ($nomorArray == []) {
+            $nomorArray = [0];
+        }
+        $no = max($nomorArray) + 1;
+        $nomor = $no . '/' . $tipe .'-TMR1/' . $thn;
         $tgl_jurnal = Carbon::parse($data['tanggal'])->format('Y-m-d');
-        $no = (int) $data['no'];
-        $coaId = $tipe === 'BBMN' ? 99 : 5;
-    
-        // Header Jurnal (Debit)
-        
-        // Detail Jurnal (Kredit) - loop berdasarkan jumlah item biaya
+        $coaId = match ($tipe) {
+            'BBMAR'  => 92,
+            'BBMDWS' => 93,
+            default  => 5,
+        };
         $count = count($biaya_ids);
             for ($i = 0; $i < count($nominal); $i++) {
             // Lewati baris kosong atau nol

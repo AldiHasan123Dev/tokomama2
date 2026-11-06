@@ -578,44 +578,89 @@ private function calculateSisa($row)
                 return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $th->getMessage());
             }
         }
-        public function jqgrid1()
+         public function jqgrid1()
         {
             $page    = request('page', 1);
             $limit   = request('rows', 10);
             $sidx    = request('sidx', 'biaya_inv.id');
             $sord    = request('sord', 'asc');
             $search  = request('_search') === 'true';
+            $tipe_null = request('tipe_null');
+            $tipe_bbmdws = request('tipe_bbmdws');
+            $tipe_bbm = request('tipe_bbm');
+            $tipe_bbmar = request('tipe_bbmar');
+            $tipe_bbm1 = request('tipe_bbm1');
+            $tipe_bbmn1 = request('tipe_bbmn1');
         
-$query = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
-    ->join('invoice', 'biaya_inv.id_inv', '=', 'invoice.id')
-    ->select('biaya_inv.*')
-    ->where('biaya_inv.nominal', '>', 0);
-
-// Filter tgl_pembayar (wajib / selalu ada)
-if (request()->filled('tgl_pembayar') || request()->filled('tgl_pembayar') && request()->filled('inv')) {
-    $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar'))->where('invoice.invoice', 'LIKE', '%' . request('inv') . '%');
-}
+            $query = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
+                ->join('invoice', 'biaya_inv.id_inv', '=', 'invoice.id')
+                ->select('biaya_inv.*')
+                ->where('biaya_inv.nominal', '>', 0);
 
 
-// Filter invoice
-if (request()->filled('invoice')) {
-    $query->where('invoice.invoice', 'LIKE', '%' . request('invoice') . '%');
-}
+        // Filter tgl_pembayar (wajib / selalu ada)
+        if ($tipe_null){
+        if (request()->filled('tgl_pembayar') || request()->filled('tgl_pembayar') && request()->filled('inv')) {
+            $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar'))->where('invoice.invoice', 'LIKE', '%' . request('inv') . '%');
+        }
+        }
 
-// Filter customer
-if (request()->filled('customer')) {
-    $query->whereHas('transaksi.suratJalan.customer', function ($q) {
-        $q->where('nama', 'LIKE', '%' . request('customer') . '%');
-    });
-}
+        if (request()->filled('tgl_pembayar3') || request()->filled('tgl_pembayar3') && request()->filled('inv3')) {
+            $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar3'))->where('invoice.invoice', 'LIKE', '%' . request('inv3') . '%');
+        }
 
-// Filter tanggal invoice
-if (request()->filled('tgl_inv')) {
-    $query->whereDate('invoice.tgl_invoice', request('tgl_inv'));
-}
+        // Filter invoice
+        // Filter customer
+        if (request()->filled('customer')) {
+            $query->whereHas('transaksi.suratJalan.customer', function ($q) {
+                $q->where('nama', 'LIKE', '%' . request('customer') . '%');
+            });
+        }
 
-// Ambil semua data
-$invoices = $query->get();
+        // Filter tanggal invoice
+
+        if ($tipe_bbmdws){
+            $query->where('tipe','BBMDWS');
+        if (request()->filled('tgl_pembayar2') || request()->filled('tgl_pembayar2') && request()->filled('inv2')) {
+            $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar2'))->where('invoice.invoice', 'LIKE', '%' . request('inv2') . '%');
+        }
+        }
+
+        if ($tipe_bbm){
+            $query->where('tipe','BBM');
+        if (request()->filled('tgl_pembayar1') || request()->filled('tgl_pembayar1') && request()->filled('inv1')) {
+            $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar1'))->where('invoice.invoice', 'LIKE', '%' . request('inv1') . '%');
+        }
+
+        }
+
+        if ($tipe_bbmar){
+            $query->where('tipe','BBMAR');
+        if (request()->filled('tgl_pembayar3') || request()->filled('tgl_pembayar3') && request()->filled('inv3')) {
+            $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar3'))->where('invoice.invoice', 'LIKE', '%' . request('inv3') . '%');
+        }
+
+        }
+
+
+        if ($tipe_bbm1) {
+            $query->where('tipe','BBM');
+            if (request()->filled('tgl_pembayar3') && request()->filled('inv3')) {
+                $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar3'))
+                    ->where('invoice.invoice', 'LIKE', '%' . request('inv3') . '%');
+            }
+        }
+
+        if ($tipe_bbmn1) {
+            $query->where('tipe','BBMN');
+            if (request()->filled('tgl_pembayar5') || request()->filled('inv5')) {
+                    $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar5'))
+                    ->where('invoice.invoice', 'LIKE', '%' . request('inv5') . '%');
+            }
+        }
+
+        // Ambil semua data
+        $invoices = $query->get();
 
         
             // Group berdasarkan tgl_pembayar
@@ -637,14 +682,17 @@ $invoices = $query->get();
                 $totalNominal = $items->sum('nominal');
                 $ids = $items->pluck('id')->implode(',');
                 $nominal = $items->pluck('nominal')->implode(',');
+                $noRek = $first->tipe === 'BBM' ? 'Rekening Lama / xxx.xxx.xxxx6.005' : 'Rekening Baru / xxx.xxx.xxxx6.008';
             
                 return [
                     'id'           => $ids,
+                    'tipe'         => $first->tipe,
                     'jurnal'       => $first->jurnal ?? 'Belum Terjurnal',
                     'tgl_pembayar' => $tgl_pembayar,
                     'customer'     => optional(optional($first->transaksi)->suratJalan)->customer->nama ?? '-',
                     'invoice'      => $invoice,
                     'bayar'        => $totalNominal,
+                    'no_rek'       => $noRek,
                     'list_nominal' => $nominal,
                 ];
             })->values();
@@ -807,7 +855,7 @@ $months = [
 
     // Ambil jurnal BBM
     $jurnals = Jurnal::withTrashed()
-        ->whereIn('tipe', ['BBM','BBMN'])
+        ->whereIn('tipe', ['BBM','BBMDWS','BBMAR'])
         ->whereNull('deleted_at')
         ->where('debit', '!=', 0)
         ->where('tgl', '>', '2024-08-01')
@@ -1005,7 +1053,7 @@ public function dataLapPiutangTotal(Request $request)
 
     // Ambil jurnal invoice
     $jurnals = Jurnal::withTrashed()
-        ->where('tipe', 'BBM')
+          ->whereIn('tipe', ['BBM','BBMDWS','BBMAR'])
         ->whereNull('deleted_at')
         ->where('debit', '!=', 0)
         ->where('tgl', '>', '2025-01-01')
@@ -1127,7 +1175,7 @@ public function lapPiutang()
     ->get();
 
 $jurnals = Jurnal::withTrashed()
-    ->whereIn('tipe', ['BBM','BBMN'])
+    ->whereIn('tipe', ['BBM','BBMDWS','BBMAR'])
     ->whereNull('deleted_at')
     ->where('debit', '!=', 0)
     ->where('tgl', '>', (request('year') ?? 2025) . '-01-01')
