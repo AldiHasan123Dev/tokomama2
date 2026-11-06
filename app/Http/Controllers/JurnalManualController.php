@@ -46,10 +46,10 @@ class JurnalManualController extends Controller
         $no_BBMO = $noBBMO ? $noBBMO->no + 1 : 1;
         $noBBKO = Jurnal::where('tipe', 'BBKO')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBKO = $noBBKO ? $noBBKO->no + 1 : 1;
-        $noBBM_DWS = Jurnal::where('tipe', 'BBMDWS')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
-        $no_BBM_DWS = $noBBM_DWS ? $noBBM_DWS->no + 1 : 1;
-        $noBBK_DWS = Jurnal::where('tipe','BBKDWS')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
-        $no_BBK_DWS = $noBBK_DWS ? $noBBK_DWS->no + 1 : 1;
+        $noBBM_DSW = Jurnal::where('tipe', 'BBMDSW')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBM_DSW = $noBBM_DSW ? $noBBM_DSW->no + 1 : 1;
+        $noBBK_DSW = Jurnal::where('tipe','BBKDSW')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBK_DSW = $noBBK_DSW ? $noBBK_DSW->no + 1 : 1;
         $noBBM_AR = Jurnal::where('tipe', 'BBMAR')->whereYear('tgl',$currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBM_AR = $noBBM_AR ? $noBBM_AR->no + 1 : 1;
         $noBBK_AR = Jurnal::where('tipe','BBKAR')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
@@ -112,7 +112,7 @@ class JurnalManualController extends Controller
         return view('jurnal.jurnal-manual', compact('templates', 'nopol', 'coa', 'no_BBMO', 'no_BBKO', 
         'no_JNL', 'no_BKK', 'no_BKM', 'no_BBK', 'no_BBM', 'invoices', 
         'processedInvoices', 'procTransactions', 'transaksi','uniqueNomors', 'transaksi',
-        'no_BBK_AR', 'no_BBM_AR', 'no_BBK_DWS',  'no_BBM_DWS'));
+        'no_BBK_AR', 'no_BBM_AR', 'no_BBK_DSW',  'no_BBM_DSW'));
     }
 
     /**

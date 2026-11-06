@@ -586,7 +586,7 @@ private function calculateSisa($row)
             $sord    = request('sord', 'asc');
             $search  = request('_search') === 'true';
             $tipe_null = request('tipe_null');
-            $tipe_bbmdws = request('tipe_bbmdws');
+            $tipe_bbmdsw = request('tipe_bbmdsw');
             $tipe_bbm = request('tipe_bbm');
             $tipe_bbmar = request('tipe_bbmar');
             $tipe_bbm1 = request('tipe_bbm1');
@@ -619,8 +619,8 @@ private function calculateSisa($row)
 
         // Filter tanggal invoice
 
-        if ($tipe_bbmdws){
-            $query->where('tipe','BBMDWS');
+        if ($tipe_bbmdsw){
+            $query->where('tipe','BBMDSW');
         if (request()->filled('tgl_pembayar2') || request()->filled('tgl_pembayar2') && request()->filled('inv2')) {
             $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar2'))->where('invoice.invoice', 'LIKE', '%' . request('inv2') . '%');
         }
@@ -855,7 +855,7 @@ $months = [
 
     // Ambil jurnal BBM
     $jurnals = Jurnal::withTrashed()
-        ->whereIn('tipe', ['BBM','BBMDWS','BBMAR'])
+        ->whereIn('tipe', ['BBM','BBMDSW','BBMAR'])
         ->whereNull('deleted_at')
         ->where('debit', '!=', 0)
         ->where('tgl', '>', '2024-08-01')
@@ -1053,7 +1053,7 @@ public function dataLapPiutangTotal(Request $request)
 
     // Ambil jurnal invoice
     $jurnals = Jurnal::withTrashed()
-          ->whereIn('tipe', ['BBM','BBMDWS','BBMAR'])
+          ->whereIn('tipe', ['BBM','BBMDSW','BBMAR'])
         ->whereNull('deleted_at')
         ->where('debit', '!=', 0)
         ->where('tgl', '>', '2025-01-01')
@@ -1175,7 +1175,7 @@ public function lapPiutang()
     ->get();
 
 $jurnals = Jurnal::withTrashed()
-    ->whereIn('tipe', ['BBM','BBMDWS','BBMAR'])
+    ->whereIn('tipe', ['BBM','BBMDSW','BBMAR'])
     ->whereNull('deleted_at')
     ->where('debit', '!=', 0)
     ->where('tgl', '>', (request('year') ?? 2025) . '-01-01')

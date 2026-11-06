@@ -295,11 +295,11 @@
                                     <option value="{{ $no_BBKO }}/{{ 'BBKO' }}-TM/{{ date('y') }}">
                                         Bank Keluar OCBC - {{ $no_BBKO }}/{{ 'BBKO' }}-TMR1/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBM_DWS }}/{{ 'BBMDWS' }}-TM/{{ date('y') }}">
-                                        Bank Masuk DWS - {{ $no_BBM_DWS }}/{{ 'BBMDWS' }}-TMR1/{{ date('y') }}
+                                    <option value="{{ $no_BBM_DSW }}/{{ 'BBMDSW' }}-TM/{{ date('y') }}">
+                                        Bank Masuk DSW - {{ $no_BBM_DSW }}/{{ 'BBMDSW' }}-TMR1/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBK_DWS }}/{{ 'BBKDWS' }}-TM/{{ date('y') }}">
-                                        Bank Keluar DWS - {{ $no_BBK_DWS }}/{{ 'BBKDWS' }}-TMR1/{{ date('y') }}
+                                    <option value="{{ $no_BBK_DSW }}/{{ 'BBKDSW' }}-TM/{{ date('y') }}">
+                                        Bank Keluar DSW - {{ $no_BBK_DSW }}/{{ 'BBKDSW' }}-TMR1/{{ date('y') }}
                                     </option>
                                      <option value="{{ $no_BBM_AR }}/{{ 'BBMAR' }}-TM/{{ date('y') }}">
                                         Bank Masuk AR - {{ $no_BBM_AR }}/{{ 'BBMAR' }}-TMR1/{{ date('y') }}

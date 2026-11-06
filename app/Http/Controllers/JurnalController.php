@@ -36,7 +36,7 @@ class JurnalController extends Controller
         ->whereYear('tgl', $year)
         ->when($request->filled('tipe'), fn($q) => $q->where('tipe', $request->tipe))
         ->when($request->query('kas') === 'kas', fn($q) => $q->whereIn('tipe', ['BKM', 'BKK']))
-        ->when($request->query('bank') === 'bank', fn($q) => $q->whereIn('tipe', ['BBK', 'BBM','BBMDWS','BBKDWS','BBKAR','BBMAR']))
+        ->when($request->query('bank') === 'bank', fn($q) => $q->whereIn('tipe', ['BBK', 'BBM','BBMDSW','BBKDSW','BBKAR','BBMAR']))
         ->when($request->query('ocbc') === 'ocbc', fn($q) => $q->whereIn('tipe', ['BBKO', 'BBMO']))
         ->orderByRaw("jurnal.no DESC, jurnal.id ASC, jurnal.created_at DESC, jurnal.tgl DESC");
     

@@ -587,11 +587,11 @@ class KeuanganController extends Controller
         $biayaInvs = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
             ->whereDate('tgl_pembayar', $tanggal)
             ->whereNull('jurnal')
-            ->where('tipe','BBMDWS')
+            ->where('tipe','BBMDSW')
             ->where('nominal', '>', 0)
             ->get();
         
-         $last = Jurnal::where('tipe', 'BBMDWS')->whereYear('tgl', $year)->orderBy('no', 'desc')->first() ?? 0;
+         $last = Jurnal::where('tipe', 'BBMDSW')->whereYear('tgl', $year)->orderBy('no', 'desc')->first() ?? 0;
          $nextNo = $last ? $last->no + 1 : 1;
         // Jika kosong, kirim respon dengan pesan error
         if ($biayaInvs->isEmpty()) {
@@ -609,8 +609,8 @@ class KeuanganController extends Controller
             'nominal'  => $biayaInvs->pluck('nominal'),
             'customer' => $biayaInvs->pluck('transaksi.suratJalan.customer.nama'),
             'no' => $nextNo,
-            'nomor' => "{$nextNo}/BBMDWS-TMR1/{$tahun}",
-            'bbmdws' => "BBMDWS",
+            'nomor' => "{$nextNo}/BBMDSW-TMR1/{$tahun}",
+            'bbmdsw' => "BBMDSW",
         ];
     
         return response()->json([
@@ -666,7 +666,7 @@ class KeuanganController extends Controller
 {
     $request->validate([
         'id' => 'required|integer',
-        'tipe' => 'required|in:BBM,BBMDWS,BBMAR'
+        'tipe' => 'required|in:BBM,BBMDSW ,BBMAR'
     ]);
 
     $biayaInv = BiayaInv::find($request->id);
@@ -790,7 +790,7 @@ public function tambahTagihan(Request $request)
         $tgl_jurnal = Carbon::parse($data['tanggal'])->format('Y-m-d');
         $coaId = match ($tipe) {
             'BBMAR'  => 92,
-            'BBMDWS' => 93,
+            'BBMDSW' => 93,
             default  => 5,
         };
         $count = count($biaya_ids);

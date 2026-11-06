@@ -144,7 +144,7 @@
     </x-keuangan.card-keuangan>
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Kelompok Jurnal BBMDWS</x-slot:tittle>
+        <x-slot:tittle>Kelompok Jurnal BBMDSW</x-slot:tittle>
 
         <div class="grid grid-cols-2 gap-2 justify-items-start mt-4 mb-4">
             <label class="form-control w-full max-w-xs mb-1">
@@ -164,7 +164,7 @@
                     id="inv2" name="inv2" autocomplete="off" />
             </label>
             <button id="btn-jurnalkan1" class="btn font-semibold bg-orange-500 btn-sm text-white">Jurnalkan
-                BBMDWS</button>
+                BBMDSW</button>
         </div>
         <table id="biayaGrid2"></table>
         <div id="biayaPager2"></div>
@@ -541,7 +541,7 @@
 
                     // Clear existing list in modal
                     $('#nominal-id1').empty();
-                    $('#tipe1').val(data.bbmdws);
+                    $('#tipe1').val(data.bbmdsw);
                     $('#customer-id1').empty();
                     $('#no-jurnal-text1').text(data.nomor); // untuk ditampilkan
                     $('#input-nomor1').val(data.nomor); // untuk dikirim ke backend
@@ -740,7 +740,7 @@
                         editable: true,
                         edittype: 'select',
                         editoptions: {
-                            value: ":Pilih;BBM:BBM;BBMDWS:BBMDWS,BBMAR:BBMAR"
+                            value: ":Pilih;BBM:BBM;BBMDSW:BBMDSW,BBMAR:BBMAR"
                         },
                         formatter: function(cellValue, options, rowObject) {
                             const value = (cellValue || '').toString();
@@ -749,7 +749,7 @@
                             // Jika jurnal sudah ada atau bernilai 'Belum Terjurnal', tampilkan sebagai teks biasa
                             if (jurnal && jurnal !== 'Belum Terjurnal') {
                                 return value ||
-                                    jurnal; // Menampilkan nilai BBM / BBMDWS atau teks jurnal
+                                    jurnal; // Menampilkan nilai BBM / BBMDSW atau teks jurnal
                             }
 
                             // Jika jurnal kosong atau "-", tampilkan select
@@ -758,8 +758,8 @@
                                 '<option value="">Pilih</option>' +
                                 '<option value="BBM" ' + (value === 'BBM' ? 'selected' : '') +
                                 '>BBM</option>' +
-                                '<option value="BBMDWS" ' + (value === 'BBMDWS' ? 'selected' : '') +
-                                '>BBMDWS</option>' +
+                                '<option value="BBMDSW" ' + (value === 'BBMDSW' ? 'selected' : '') +
+                                '>BBMDSW</option>' +
                                 '<option value="BBMAR" ' + (value === 'BBMAR' ? 'selected' : '') +
                                 '>BBMAR</option>' +
                                 '</select>';
@@ -1074,7 +1074,7 @@
                     inv2: function() {
                         return $('#inv2').val();
                     },
-                    tipe_bbmdws: true
+                    tipe_bbmdsw: true
                 },
                 colModel: [{
                         label: 'Tipe Jurnal',
