@@ -546,8 +546,6 @@ private function calculateSisa($row)
 }
 
 
-    
-        
         public function monitorSave(Request $request)
         {
             DB::beginTransaction();
@@ -562,11 +560,13 @@ private function calculateSisa($row)
                     }
 
                     $nominal = preg_replace('/[^0-9]/', '', $request->nominal[$key]);
+                    $tipe = $request->tipe[$key];
 
                     BiayaInv::create([
                         'id_inv'       => $invoiceId,
                         'id_trans'     => $invoice->id_transaksi, // ✅ pastikan field ini dikirim
                         'tgl_pembayar' => $request->tanggal_bayar,
+                        'tipe' => $tipe,
                         'nominal'      => $nominal,
                     ]);
                 }
