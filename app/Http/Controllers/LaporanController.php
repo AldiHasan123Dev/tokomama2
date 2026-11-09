@@ -589,8 +589,8 @@ private function calculateSisa($row)
             $tipe_bbmdsw = request('tipe_bbmdsw');
             $tipe_bbm = request('tipe_bbm');
             $tipe_bbmar = request('tipe_bbmar');
-            $tipe_bbm1 = request('tipe_bbm1');
-            $tipe_bbmn1 = request('tipe_bbmn1');
+            $tipe_bbmar1 = request('tipe_bbmar1');
+            $tipe_bbmdsw1 = request('tipe_bbmdsw1');
         
             $query = BiayaInv::with(['invoice', 'transaksi.suratJalan.customer'])
                 ->join('invoice', 'biaya_inv.id_inv', '=', 'invoice.id')
@@ -643,16 +643,16 @@ private function calculateSisa($row)
         }
 
 
-        if ($tipe_bbm1) {
-            $query->where('tipe','BBM');
+        if ($tipe_bbmar1) {
+            $query->where('tipe','BBMAR');
             if (request()->filled('tgl_pembayar3') && request()->filled('inv3')) {
                 $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar3'))
                     ->where('invoice.invoice', 'LIKE', '%' . request('inv3') . '%');
             }
         }
 
-        if ($tipe_bbmn1) {
-            $query->where('tipe','BBMN');
+        if ($tipe_bbmdsw1) {
+            $query->where('tipe','BBMDSW');
             if (request()->filled('tgl_pembayar5') || request()->filled('inv5')) {
                     $query->whereDate('biaya_inv.tgl_pembayar', request('tgl_pembayar5'))
                     ->where('invoice.invoice', 'LIKE', '%' . request('inv5') . '%');
@@ -682,7 +682,11 @@ private function calculateSisa($row)
                 $totalNominal = $items->sum('nominal');
                 $ids = $items->pluck('id')->implode(',');
                 $nominal = $items->pluck('nominal')->implode(',');
-                $noRek = $first->tipe === 'BBM' ? 'Rekening Lama / xxx.xxx.xxxx6.005' : 'Rekening Baru / xxx.xxx.xxxx6.008';
+               $noRek = match ($first->tipe) {
+    'BBMDSW' => 'Rekening DSW / xxx.xxx.xxxx1.962',
+    'BBMAR'  => 'Rekening AR / xxx.xxx.xxxx9.902',
+    default  => 'Rekening Lama / xxx.xxx.xxxx6.005',
+};
             
                 return [
                     'id'           => $ids,

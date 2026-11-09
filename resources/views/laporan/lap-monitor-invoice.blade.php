@@ -277,8 +277,8 @@
                             </td>
                             <td>
                                 <select name="tipe[0]" class="select select-bordered w-full">
-                                    <option value="BBMDSW" selected>Rekening DSW</option>
-                                    <option value="BBMAR">Rekening AR</option>
+                                    <option value="BBMDSW" selected>Rekening DSW / xxx.xxx.xxxx1.962</option>
+                                    <option value="BBMAR">Rekening AR / xxx.xxx.xxxx9.902</option>
                                 </select>
                             </td>
                             <td>
@@ -349,7 +349,7 @@
     </x-keuangan.card-keuangan>
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Detail Rekap Harian dengan tujuan rekening baru</x-slot:tittle>
+        <x-slot:tittle>Detail Rekap Harian dengan tujuan rekening DSW</x-slot:tittle>
         <div class="grid grid-cols-2 gap-4 justify-items-start mt-5 mb-5">
             <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
@@ -373,7 +373,7 @@
     </x-keuangan.card-keuangan>
 
     <x-keuangan.card-keuangan>
-        <x-slot:tittle>Detail Rekap Harian dengan tujuan rekening lama</x-slot:tittle>
+        <x-slot:tittle>Detail Rekap Harian dengan tujuan rekening AR</x-slot:tittle>
         <div class="grid grid-cols-2 gap-4 justify-items-start mt-5 mb-5">
             <label class="form-control w-full max-w-xs mb-1">
                 <div class="label">
@@ -487,7 +487,7 @@
                 inv3: function() {
                     return $('#inv').val();
                 },
-                tipe_bbm1: true
+                tipe_bbmar1: true
             },
             colModel: [{
 
@@ -722,7 +722,7 @@
                 inv5: function() {
                     return $('#inv5').val();
                 },
-                tipe_bbmn1: true
+                tipe_bbmdsw1: true
             },
             colModel: [{
                     label: 'Tanggal Masuk Rekening',
