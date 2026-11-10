@@ -922,9 +922,8 @@
         </td>
         <td>
             <select name="tipe[${rowIndex}]" class="select select-bordered w-full">
-                                    <option value="" selected>Pilih Pembayaran Rekening</option>
-                                     <option value="BBM">Rekening Lama / xxx.xxx.xxx6.005</option>
-                                    <option value="BBMN">Rekening Baru / xxx.xxx.xxx6.008</option>
+                                     <option value="BBMDSW" selected>Rekening DSW / xxx.xxx.xxxx1.962</option>
+                                    <option value="BBMAR">Rekening AR / xxx.xxx.xxxx9.902</option>
                                 </select>
         </td>
         <td>
