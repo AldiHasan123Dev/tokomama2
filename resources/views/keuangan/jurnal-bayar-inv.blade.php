@@ -466,8 +466,8 @@
                     $('#nominal-id').empty();
                     $('#customer-id').empty();
                     $('#tipe').val(data.bbm);
-                    $('#no-jurnal-text').text(data.nomor1); // untuk ditampilkan
-                    $('#input-nomor').val(data.nomor1); // untuk dikirim ke backend
+                    $('#no-jurnal-text').text(data.nomor); // untuk ditampilkan
+                    $('#input-nomor').val(data.nomor); // untuk dikirim ke backend
                     $('#input-no').val(data.no1); // untuk dikirim ke backend
 
                     // Loop through the data and append to modal
