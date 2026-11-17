@@ -178,6 +178,47 @@ class JurnalController extends Controller
         return view('jurnal.jurnal-merger', compact('jurnal'));
     }
 
+    public function SummaryJurnal(Request $request)
+{
+    // Default tanggal hari ini
+    $tanggal = $request->input('date', now()->toDateString());
+
+    $query = DB::table('jurnal')
+        ->join('coa', 'jurnal.coa_id', '=', 'coa.id')
+        ->select(
+            'jurnal.tipe',
+            'jurnal.coa_id',
+            'coa.no_akun',
+            'coa.nama_akun'
+        )
+        ->selectRaw('SUM(jurnal.debit) as total_debit')
+        ->selectRaw('SUM(jurnal.kredit) as total_kredit')
+        ->whereNotNull('jurnal.nomor')
+        ->whereDate('jurnal.tgl', $tanggal);
+
+    $summary = $query
+        ->groupBy(
+            'jurnal.tipe',
+            'jurnal.coa_id',
+            'coa.no_akun',
+            'coa.nama_akun'
+        )
+        ->orderBy('jurnal.tipe')
+        ->orderBy('coa.no_akun')
+        ->get()
+        ->groupBy('tipe');
+
+    $grandDebit = $summary->flatten(1)->sum('total_debit');
+$grandKredit = $summary->flatten(1)->sum('total_kredit');
+
+return view('jurnal.summary-jurnal', compact(
+    'summary',
+    'tanggal',
+    'grandDebit',
+    'grandKredit'
+));
+}
+
     function merger_store(Request $request)
     {
         if($request->jurnal_awal === null || $request->jurnal_tujuan === null){

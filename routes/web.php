@@ -118,6 +118,8 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/preview-invoice', [InvoiceController::class, 'preview'])->name('preview.invoice');
     Route::match(['get', 'post'], '/keuangan/invoice-pending/pre-draft-invoice', [KeuanganController::class, 'previewDraftInv'])->name('pending.invoice.preview_DraftInv');
     Route::get('/keuangan/form-inv-ab', [InvoiceController::class, 'preInvoiceAb'])->name('invoice-ab.form');
+     Route::get('/jurnal/summary-jurnal', [JurnalController::class, 'SummaryJurnal'])
+    ->name('jurnal.summary-jurnal');
     Route::resource('jurnal', JurnalController::class);
     Route::get('/stock/cetak/{id}', [StockController::class, 'cetak'])->name('stock.cetak');
     Route::match(['get', 'post'],'keuangan/previewAb', [InvoiceController::class, 'previewAb'])->name('invoice-ab.preview');
@@ -207,6 +209,8 @@ Route::get('/invoice-ab/cetak', [InvoiceController::class, 'cetakInvAb'])
     Route::delete('/invoice/hapus-forced/{id}', [InvoiceController::class, 'hapusForced'])
     ->whereNumber('id')
     ->name('invoice.hapus-forced');
+    Route::get('/jurnal/summary-jurnal', [JurnalController::class, 'SummaryJurnal'])
+    ->name('jurnal.summary-jurnal');
 });
 
 Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('auth')->group(function () {
@@ -234,7 +238,7 @@ Route::prefix('keuangan')->controller(KeuanganController::class)->middleware('au
     Route::post('cari-transaksi-by-tanggal', 'cari')->name('keuangan.cari');
     Route::post('cari-transaksi-by-tanggal1', 'cari1')->name('keuangan.cari1');
     Route::post('cari-transaksi-by-tanggal2', 'cari2')->name('keuangan.cari2');  
-    Route::post('jurnal-simpan', 'jurnal')->name('keuangan.jurnal-inv'); 
+    Route::post('jurnal-simpan', 'jurnal')->name('keuangan.jurnal-inv');
 });
 
 Route::prefix('toko')->controller(StockController::class)->middleware('auth')->group(function () {
