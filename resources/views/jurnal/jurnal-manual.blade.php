@@ -289,24 +289,42 @@
                                     <option value="{{ $no_BBM }}/{{ 'BBM' }}-TMR1/{{ date('y') }}">
                                         Bank Masuk - {{ $no_BBM }}/{{ 'BBM' }}-TMR1/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBMO }}/{{ 'BBMO' }}-TM/{{ date('y') }}">
+                                    <option value="{{ $no_BBMO }}/{{ 'BBMO' }}-TMR1/{{ date('y') }}">
                                         Bank Masuk OCBC - {{ $no_BBMO }}/{{ 'BBMO' }}-TMR1/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBKO }}/{{ 'BBKO' }}-TM/{{ date('y') }}">
+                                    <option value="{{ $no_BBKO }}/{{ 'BBKO' }}-TMR1/{{ date('y') }}">
                                         Bank Keluar OCBC - {{ $no_BBKO }}/{{ 'BBKO' }}-TMR1/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBM_DSW }}/{{ 'BBMDSW' }}-TM/{{ date('y') }}">
-                                        Bank Masuk DSW - {{ $no_BBM_DSW }}/{{ 'BBMDSW' }}-TMR1/{{ date('y') }}
+                                    <option value="{{ $no_BBM_DSW }}/{{ 'BBMDSW' }}-TMR1/{{ date('y') }}">
+                                        Bank Masuk DSW 1962 - {{ $no_BBM_DSW }}/{{ 'BBMDSW' }}-TMR1/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBK_DSW }}/{{ 'BBKDSW' }}-TM/{{ date('y') }}">
-                                        Bank Keluar DSW - {{ $no_BBK_DSW }}/{{ 'BBKDSW' }}-TMR1/{{ date('y') }}
+                                    <option value="{{ $no_BBK_DSW }}/{{ 'BBKDSW' }}-TMR1/{{ date('y') }}">
+                                        Bank Keluar DSW 1962 - {{ $no_BBK_DSW }}/{{ 'BBKDSW' }}-TMR1/{{ date('y') }}
                                     </option>
-                                     <option value="{{ $no_BBM_AR }}/{{ 'BBMAR' }}-TM/{{ date('y') }}">
-                                        Bank Masuk AR - {{ $no_BBM_AR }}/{{ 'BBMAR' }}-TMR1/{{ date('y') }}
+                                    <option value="{{ $no_BBM_AR }}/{{ 'BBMAR' }}-TMR1/{{ date('y') }}">
+                                        Bank Masuk AR 9902 - {{ $no_BBM_AR }}/{{ 'BBMAR' }}-TMR1/{{ date('y') }}
                                     </option>
-                                    <option value="{{ $no_BBK_AR }}/{{ 'BBKAR' }}-TM/{{ date('y') }}">
-                                        Bank Keluar AR - {{ $no_BBK_AR }}/{{ 'BBKAR' }}-TMR1/{{ date('y') }}
+                                    <option value="{{ $no_BBK_AR }}/{{ 'BBKAR' }}-TMR1/{{ date('y') }}">
+                                        Bank Keluar AR 9902 - {{ $no_BBK_AR }}/{{ 'BBKAR' }}-TMR1/{{ date('y') }}
                                     </option>
+                                    {{-- <option value="{{ $no_BBM_AR00 }}/{{ 'BBMAR00' }}-TMR1/{{ date('y') }}">
+                                        Bank Masuk AR 9900 - {{ $no_BBM_AR00 }}/{{ 'BBMAR00' }}-TMR1/{{ date('y') }}
+                                    </option>
+                                    <option value="{{ $no_BBK_AR00 }}/{{ 'BBKAR00' }}-TMR1/{{ date('y') }}">
+                                        Bank Keluar AR 9900 - {{ $no_BBK_AR00 }}/{{ 'BBKAR00' }}-TMR1/{{ date('y') }}
+                                    </option>
+                                     <option value="{{ $no_BBM_AR01 }}/{{ 'BBMAR01' }}-TMR1/{{ date('y') }}">
+                                        Bank Masuk AR 9901 - {{ $no_BBM_AR01 }}/{{ 'BBMAR01' }}-TMR1/{{ date('y') }}
+                                    </option>
+                                    <option value="{{ $no_BBK_AR00 }}/{{ 'BBKAR01' }}-TMR1/{{ date('y') }}">
+                                        Bank Keluar AR 9901 - {{ $no_BBK_AR01 }}/{{ 'BBKAR01' }}-TMR1/{{ date('y') }}
+                                    </option>
+                                    <option value="{{ $no_BBM_AR00 }}/{{ 'BBMAR00' }}-TMR1/{{ date('y') }}">
+                                        Bank Masuk BCA 7999 - {{ $no_BBM_AR00 }}/{{ 'BBMAR00' }}-TMR1/{{ date('y') }}
+                                    </option>
+                                    <option value="{{ $no_BBK_BCA7999 }}/{{ 'BBKBCA7999' }}-TMR1/{{ date('y') }}">
+                                        Bank Keluar BCA 7999 - {{ $no_BBK_BCA7999 }}/{{ 'BBKBCA7999' }}-TMR1/{{ date('y') }}
+                                    </option> --}}
                                 </select>
                             </label>
                         </div>

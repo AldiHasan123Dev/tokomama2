@@ -34,7 +34,8 @@ class JurnalSheetExport implements FromView, WithTitle
             })
             ->where('coa_id', $this->coa->id)
             ->orderBy('tgl', 'asc')
-            ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
+            ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL','BBMAR','BBKAR','BBMAR00','BBKAR00',
+            'BBMAR01','BBKAR01','BBMBCA7999','BBKBCA7999') ASC")
             ->orderBy('created_at', 'asc')
             ->orderBy('no', 'asc')
             ->get();

@@ -54,6 +54,18 @@ class JurnalManualController extends Controller
         $no_BBM_AR = $noBBM_AR ? $noBBM_AR->no + 1 : 1;
         $noBBK_AR = Jurnal::where('tipe','BBKAR')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
         $no_BBK_AR = $noBBK_AR ? $noBBK_AR->no + 1 : 1;
+        $noBBM_AR00 = Jurnal::where('tipe', 'BBMAR00')->whereYear('tgl',$currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBM_AR00 = $noBBM_AR00 ? $noBBM_AR00->no + 1 : 1;
+        $noBBK_AR00 = Jurnal::where('tipe','BBKAR00')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBK_AR00 = $noBBK_AR00 ? $noBBK_AR00->no + 1 : 1;
+        $noBBM_AR01 = Jurnal::where('tipe', 'BBMAR01')->whereYear('tgl',$currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBM_AR01 = $noBBM_AR01 ? $noBBM_AR01->no + 1 : 1;
+        $noBBK_AR01 = Jurnal::where('tipe','BBKAR01')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBK_AR01 = $noBBK_AR01 ? $noBBK_AR01->no + 1 : 1;
+        $noBBM_BCA7999 = Jurnal::where('tipe', 'BBMBCA7999')->whereYear('tgl',$currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBM_BCA7999 = $noBBM_BCA7999 ? $noBBM_BCA7999->no + 1 : 1;
+        $noBBK_BCA7999 = Jurnal::where('tipe','BBKBCA7999')->whereYear('tgl', $currentYear)->orderBy('no', 'desc')->first() ?? 0;
+        $no_BBK_BCA7999 = $noBBK_BCA7999 ? $noBBK_BCA7999->no + 1 : 1;
 
         // $invoices = DB::table('jurnal as j1')
         // ->where('j1.tipe', 'JNL') // Kondisi tipe JNL
@@ -112,7 +124,8 @@ class JurnalManualController extends Controller
         return view('jurnal.jurnal-manual', compact('templates', 'nopol', 'coa', 'no_BBMO', 'no_BBKO', 
         'no_JNL', 'no_BKK', 'no_BKM', 'no_BBK', 'no_BBM', 'invoices', 
         'processedInvoices', 'procTransactions', 'transaksi','uniqueNomors', 'transaksi',
-        'no_BBK_AR', 'no_BBM_AR', 'no_BBK_DSW',  'no_BBM_DSW'));
+        'no_BBK_AR', 'no_BBM_AR', 'no_BBK_DSW',  'no_BBM_DSW' ,'no_BBK_AR00', 'no_BBM_AR00','no_BBK_AR01', 'no_BBM_AR01',
+        'no_BBK_BCA7999', 'no_BBM_BCA7999',));
     }
 
     /**
