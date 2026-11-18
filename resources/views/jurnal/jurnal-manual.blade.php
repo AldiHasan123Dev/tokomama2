@@ -284,10 +284,10 @@
                                         Kas Masuk - {{ $no_BKM }}/{{ 'BKM' }}-TMR1/{{ date('y') }}
                                     </option>
                                     <option value="{{ $no_BBK }}/{{ 'BBK' }}-TMR1/{{ date('y') }}">
-                                        Bank Keluar 0005 - {{ $no_BBK }}/{{ 'BBK' }}-TMR1/{{ date('y') }}
+                                        Bank Keluar 6005 - {{ $no_BBK }}/{{ 'BBK' }}-TMR1/{{ date('y') }}
                                     </option>
                                     <option value="{{ $no_BBM }}/{{ 'BBM' }}-TMR1/{{ date('y') }}">
-                                        Bank Masuk 0005 - {{ $no_BBM }}/{{ 'BBM' }}-TMR1/{{ date('y') }}
+                                        Bank Masuk 6005 - {{ $no_BBM }}/{{ 'BBM' }}-TMR1/{{ date('y') }}
                                     </option>
                                     <option value="{{ $no_BBMO }}/{{ 'BBMO' }}-TMR1/{{ date('y') }}">
                                         Bank Masuk OCBC - {{ $no_BBMO }}/{{ 'BBMO' }}-TMR1/{{ date('y') }}
