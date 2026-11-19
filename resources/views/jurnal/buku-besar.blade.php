@@ -290,8 +290,7 @@
                             <td>{{ $item->nopol }}</td>
                             <td>{{ $item->invoice }}</td>
                             <td>{{ $item->keterangan }}</td>
-                            <td>{{ $item->no_bm }}</td>
-                            <td style="text-align: right;">{{ number_format($item->debit, 2, ',', '.') }}</td>
+                            <td>{{ $item->no_bm ?? '-' }}</td>                            <td style="text-align: right;">{{ number_format($item->debit, 2, ',', '.') }}</td>
                             <td style="text-align: right;">{{ number_format($item->kredit, 2, ',', '.') }}</td>
                             <td style="text-align: right;">{{ number_format($saldo_awal, 2, ',', '.') }}</td>
                         </tr>
