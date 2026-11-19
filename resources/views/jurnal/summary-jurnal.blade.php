@@ -243,10 +243,10 @@
 
                 <div class="overflow-x-auto border rounded-lg">
 
-                    {{-- JUDUL TABEL --}}
-                    <div class="bg-green-600 text-white font-bold px-4 py-3">
-                        SUMMARY JURNAL {{ $tipeJurnal }}
-                    </div>
+                  <div class="bg-green-600 text-white font-bold px-4 py-3">
+    SUMMARY JURNAL {{ $tipeJurnal }}
+    {{ in_array($tipeJurnal, ['BBMAR', 'BBKAR']) ? '02' : '' }}
+</div>
 
                     <table class="w-full border-collapse border border-gray-300 text-sm">
 

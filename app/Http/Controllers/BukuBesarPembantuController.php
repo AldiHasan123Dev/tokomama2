@@ -33,179 +33,347 @@ class BukuBesarPembantuController extends Controller
      */
     public function index(Request $request)
 {
-   
     $coa = Coa::where('status', 'aktif')->get();
 
-   
     $selectedYear = $request->input('year', date('Y'));
     $selectedMonth = $request->input('month', date('m'));
     $selectedCoaId = $request->input('coa_id', 8);
     $selectedState = $request->input('state', 'customer');
 
-    
     $startDate = '2023-01-01';
-    $endDate = Carbon::create($selectedYear, $selectedMonth)->endOfMonth()->toDateString();
+    $endDate = Carbon::create($selectedYear, $selectedMonth)
+        ->endOfMonth()
+        ->toDateString();
 
-   
-    $customers = collect(); 
-    $suppliers = collect(); 
+    $customers = collect();
+    $suppliers = collect();
     $ncsDetails = [];
-    $ncsDebitTotal = 0; 
-    $ncsKreditTotal = 0; 
+    $ncsDebitTotal = 0;
+    $ncsKreditTotal = 0;
 
-    // Logika untuk pelanggan (customers)
+    /*
+    |--------------------------------------------------------------------------
+    | CUSTOMER
+    |--------------------------------------------------------------------------
+    */
     if ($selectedState == 'customer') {
-        $customers = Customer::all(); // Menggunakan all() untuk mendapatkan koleksi
-        foreach ($customers as $customer) {
-            $suratJalan = SuratJalan::where('id_customer', $customer->id)->get();
-            $debitTotal = 0;
-            $kreditTotal = 0;
 
-            foreach ($suratJalan as $sj) {
-                $transaksi = Transaction::where('id_surat_jalan', $sj->id)->get();
-                $processedInvoices = [];
+        // Ambil semua jurnal lebih dulu
+        $jurnals = Jurnal::query()
+            ->select('invoice', DB::raw('SUM(debit) as total_debit'), DB::raw('SUM(kredit) as total_kredit'))
+            ->where('coa_id', $selectedCoaId)
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->whereNotNull('invoice')
+            ->groupBy('invoice')
+            ->get()
+            ->keyBy('invoice');
 
-                foreach ($transaksi as $tr) {
-                    $invoices = Invoice::where('id_transaksi', $tr->id)->get();
+        // Ambil semua invoice + relasi transaksi dan surat jalan
+        $invoices = Invoice::query()
+            ->select('invoice', 'id_transaksi')
+            ->with([
+                'transaksi:id,id_surat_jalan',
+                'transaksi.suratJalan:id,id_customer'
+            ])
+            ->get();
 
-                    foreach ($invoices as $inv) {
-                        if (in_array($inv->invoice, $processedInvoices)) {
-                            continue;
-                        }
+        $customerTotals = [];
 
-                        $jurnals = Jurnal::where('invoice', $inv->invoice)
-                            ->where('coa_id', $selectedCoaId)
-                            ->whereBetween('tgl', [$startDate, $endDate])
-                            ->get();
+        foreach ($invoices as $inv) {
 
-                        foreach ($jurnals as $j) {
-                            if ($j->debit > 0 || $j->kredit > 0) {
-                                $debitTotal += $j->debit;
-                                $kreditTotal += $j->kredit;
-                            }
-                        }
-
-                        $processedInvoices[] = $inv->invoice;
-                    }
-                }
+            if (
+                !$inv->transaksi ||
+                !$inv->transaksi->suratJalan
+            ) {
+                continue;
             }
 
-            $customer->debit = $debitTotal;
-            $customer->kredit = $kreditTotal;
-            $customers = $customers->sortByDesc(function ($customer) {
-                return [$customer->debit, $customer->kredit]; 
-            });
+            $customerId = $inv->transaksi->suratJalan->id_customer;
+
+            if (!isset($jurnals[$inv->invoice])) {
+                continue;
+            }
+
+            if (!isset($customerTotals[$customerId])) {
+                $customerTotals[$customerId] = [
+                    'debit' => 0,
+                    'kredit' => 0,
+                    'processed_invoice' => []
+                ];
+            }
+
+            // Hindari invoice double
+            if (in_array($inv->invoice, $customerTotals[$customerId]['processed_invoice'])) {
+                continue;
+            }
+
+            $customerTotals[$customerId]['debit'] += $jurnals[$inv->invoice]->total_debit;
+            $customerTotals[$customerId]['kredit'] += $jurnals[$inv->invoice]->total_kredit;
+            $customerTotals[$customerId]['processed_invoice'][] = $inv->invoice;
         }
+
+        $customers = Customer::query()
+            ->get()
+            ->map(function ($customer) use ($customerTotals) {
+
+                $customer->debit = $customerTotals[$customer->id]['debit'] ?? 0;
+                $customer->kredit = $customerTotals[$customer->id]['kredit'] ?? 0;
+
+                return $customer;
+            })
+            ->sortByDesc(function ($customer) {
+                return [$customer->debit, $customer->kredit];
+            })
+            ->values();
     }
 
-    // Logika untuk pemasok (suppliers)
+    /*
+    |--------------------------------------------------------------------------
+    | SUPPLIER
+    |--------------------------------------------------------------------------
+    */
     if ($selectedState == 'supplier') {
-        $suppliers = Supplier::all(); 
-        foreach ($suppliers as $supplier) {
-            $debitTotal = 0;
-            $kreditTotal = 0;
 
-            $jurnals = Jurnal::where('coa_id', $selectedCoaId)
-                ->whereBetween('tgl', [$startDate, $endDate])
-                ->whereNotNull('invoice_external') 
-                ->where(function($query) {
-                    $query->whereNull('invoice')
-                          ->orWhere('invoice', '')
-                          ->orWhere('invoice', '-')
-                          ->orWhere('invoice', 0);
-                })
-                ->orderBy('debit', 'asc') 
-                ->orderBy('kredit', 'asc') 
-                ->orderBy('tgl', 'asc') 
-                ->get();
-    
-            foreach ($jurnals as $j) {
-                $transaksi = Transaction::where('invoice_external', $j->invoice_external)
-                    ->where('id_supplier', $supplier->id)
-                    ->first();
-    
-                if ($transaksi && ($j->debit > 0 || $j->kredit > 0)) {
-                    $debitTotal += $j->debit;
-                    $kreditTotal += $j->kredit;
-                }
+        // Ambil jurnal sekali saja
+        $jurnals = Jurnal::query()
+            ->select(
+                'invoice_external',
+                DB::raw('SUM(debit) as total_debit'),
+                DB::raw('SUM(kredit) as total_kredit')
+            )
+            ->where('coa_id', $selectedCoaId)
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->whereNotNull('invoice_external')
+            ->where(function ($query) {
+                $query->whereNull('invoice')
+                    ->orWhere('invoice', '')
+                    ->orWhere('invoice', '-')
+                    ->orWhere('invoice', 0);
+            })
+            ->groupBy('invoice_external')
+            ->get()
+            ->keyBy('invoice_external');
+
+        // Mapping transaksi supplier
+        $transactions = Transaction::query()
+            ->select('id_supplier', 'invoice_external')
+            ->whereNotNull('invoice_external')
+            ->get();
+
+        $supplierTotals = [];
+
+        foreach ($transactions as $tr) {
+
+            if (!isset($jurnals[$tr->invoice_external])) {
+                continue;
             }
-    
-            // Menyimpan nilai debit dan kredit ke supplier
-            $supplier->debit = $debitTotal;
-            $supplier->kredit = $kreditTotal;
+
+            if (!isset($supplierTotals[$tr->id_supplier])) {
+                $supplierTotals[$tr->id_supplier] = [
+                    'debit' => 0,
+                    'kredit' => 0,
+                    'processed_invoice' => []
+                ];
+            }
+
+            // Hindari double invoice_external
+            if (in_array($tr->invoice_external, $supplierTotals[$tr->id_supplier]['processed_invoice'])) {
+                continue;
+            }
+
+            $supplierTotals[$tr->id_supplier]['debit'] += $jurnals[$tr->invoice_external]->total_debit;
+            $supplierTotals[$tr->id_supplier]['kredit'] += $jurnals[$tr->invoice_external]->total_kredit;
+
+            $supplierTotals[$tr->id_supplier]['processed_invoice'][] = $tr->invoice_external;
         }
-        $suppliers = $suppliers->sortByDesc(function ($supplier) {
-            return [$supplier->debit, $supplier->kredit]; 
-        });
+
+        $suppliers = Supplier::query()
+            ->get()
+            ->map(function ($supplier) use ($supplierTotals) {
+
+                $supplier->debit = $supplierTotals[$supplier->id]['debit'] ?? 0;
+                $supplier->kredit = $supplierTotals[$supplier->id]['kredit'] ?? 0;
+
+                return $supplier;
+            })
+            ->sortByDesc(function ($supplier) {
+                return [$supplier->debit, $supplier->kredit];
+            })
+            ->values();
     }
-    
-    
-   
+
+    /*
+    |--------------------------------------------------------------------------
+    | NCS
+    |--------------------------------------------------------------------------
+    */
     if ($selectedState == 'ncs') {
-       $ncsRecords = Jurnal::where('coa_id', $selectedCoaId)
-        ->whereBetween('tgl', [$startDate, $endDate])
-        ->whereNull('invoice_external')
-        ->whereNull('invoice')
-        ->whereNotNull('keterangan_buku_besar_pembantu')
-        ->orderBy('tgl', 'asc')
-        ->get(['tgl', 'nomor', 'keterangan', 'debit', 'kredit', 'keterangan_buku_besar_pembantu']);
 
-    
-        $ncsDetails = [];
-        $ncsDebitTotal = 0;
-        $ncsKreditTotal = 0;
-    
-        foreach ($ncsRecords as $j) {
-            // Menggunakan keterangan_buku_besar_pembantu sebagai key
-            $key = $j->keterangan_buku_besar_pembantu;
-    
-            // Jika keterangan_buku_besar_pembantu belum ada dalam ncsDetails
-            if (!isset($ncsDetails[$key])) {
-                $ncsDetails[$key] = [
-                    'tgl' => $j->tgl,
-                    'nomor' => $j->nomor,
-                    'keterangan' => $j->keterangan,
-                    'debit' => $j->debit,
-                    'kredit' => $j->kredit,
-                    'details' => []
-                ];
-            } else {
-                // Jika sudah ada, tambahkan detail ke dalam details
-                $ncsDetails[$key]['details'][] = [
-                    'tgl' => $j->tgl,
-                    'nomor' => $j->nomor,
-                    'keterangan' => $j->keterangan
-                ];
-    
-                // Akumulasikan debit dan kredit
-                $ncsDetails[$key]['debit'] += $j->debit;
-                $ncsDetails[$key]['kredit'] += $j->kredit;
-            }
-    
-            // Hitung total debit dan kredit untuk keseluruhan
-            $ncsDebitTotal += $j->debit;
-            $ncsKreditTotal += $j->kredit;
+        $ncsRecords = Jurnal::query()
+            ->where('coa_id', $selectedCoaId)
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->whereNull('invoice_external')
+            ->whereNull('invoice')
+            ->whereNotNull('keterangan_buku_besar_pembantu')
+            ->orderBy('tgl', 'asc')
+            ->get([
+                'tgl',
+                'nomor',
+                'keterangan',
+                'debit',
+                'kredit',
+                'keterangan_buku_besar_pembantu'
+            ]);
+
+        $grouped = $ncsRecords->groupBy('keterangan_buku_besar_pembantu');
+
+        foreach ($grouped as $key => $items) {
+
+            $first = $items->first();
+
+            $ncsDetails[] = [
+                'tgl' => $first->tgl,
+                'nomor' => $first->nomor,
+                'keterangan' => $first->keterangan,
+                'debit' => $items->sum('debit'),
+                'kredit' => $items->sum('kredit'),
+                'details' => $items->skip(1)->map(function ($item) {
+                    return [
+                        'tgl' => $item->tgl,
+                        'nomor' => $item->nomor,
+                        'keterangan' => $item->keterangan,
+                    ];
+                })->values()->toArray()
+            ];
+
+            $ncsDebitTotal += $items->sum('debit');
+            $ncsKreditTotal += $items->sum('kredit');
         }
-    
-        // Ubah $ncsDetails menjadi array numerik untuk kemudahan penanganan di view
-        $ncsDetails = array_values($ncsDetails);
     }
-    
-    // Tentukan tipe (tipe) untuk perhitungan saldo
-    $akun = Coa::where('id', $selectedCoaId)
+
+    /*
+    |--------------------------------------------------------------------------
+    | TIPE AKUN
+    |--------------------------------------------------------------------------
+    */
+    $akun = Coa::query()
+        ->where('id', $selectedCoaId)
         ->orWhere('no_akun', $selectedCoaId)
         ->get();
 
     $tipe = 'D';
+
     foreach ($akun as $item) {
         if (in_array(substr($item->no_akun, 0, 1), ['2', '3', '5'])) {
             $tipe = 'K';
         }
     }
 
-    return view('jurnal.buku-besar-pembantu', compact('customers', 'suppliers',  'coa', 'selectedYear', 'selectedMonth', 'selectedCoaId', 'tipe', 'selectedState', 'ncsDetails', 'ncsDebitTotal', 'ncsKreditTotal'));
+    return view(
+        'jurnal.buku-besar-pembantu',
+        compact(
+            'customers',
+            'suppliers',
+            'coa',
+            'selectedYear',
+            'selectedMonth',
+            'selectedCoaId',
+            'tipe',
+            'selectedState',
+            'ncsDetails',
+            'ncsDebitTotal',
+            'ncsKreditTotal'
+        )
+    );
 }
 
+
+public function detail(Request $request)
+{
+    $coa = Coa::where('status', 'aktif')->get();
+
+    $selectedYear = $request->input('year', date('Y'));
+    $selectedMonth = $request->input('month', date('m'));
+    $selectedCoaId = $request->input('coa_id', 8);
+
+    $startDate = '2023-01-01';
+    $endDate = Carbon::create($selectedYear, $selectedMonth)->endOfMonth();
+
+    $totalDebit = 0;
+    $totalKredit = 0;
+    $details = [];
+
+    // ambil semua id customer
+    $customerIds = Customer::whereNull('deleted_at')->pluck('id');
+
+    // ambil semua surat jalan
+    $suratJalanIds = SuratJalan::whereIn('id_customer', $customerIds)->pluck('id');
+
+    // ambil transaksi
+    $transaksiIds = Transaction::whereIn('id_surat_jalan', $suratJalanIds)->pluck('id');
+
+    // ambil invoice
+    $invoices = Invoice::whereIn('id_transaksi', $transaksiIds)
+        ->pluck('invoice')
+        ->unique();
+ 
+    // ambil jurnal
+    $jurnals = Jurnal::whereIn('invoice', $invoices)
+        ->where('coa_id', $selectedCoaId)
+        ->whereNotNull('id_transaksi')
+        ->whereBetween('tgl', [$startDate, $endDate])
+        ->get();
+
+   $jurnalsGrouped = $jurnals->groupBy('invoice');
+
+foreach ($jurnalsGrouped as $invoice => $rows) {
+
+    $debitRows = $rows->where('debit', '>', 0);
+    $kreditRows = $rows->where('kredit', '>', 0);
+
+    $debit = $debitRows->sum('debit');
+    $kredit = $kreditRows->sum('kredit');
+
+    $debitRow = $debitRows->first();
+    $kreditRow = $kreditRows->first();
+
+    // hanya ambil yang debit dan kredit tidak sama
+    if ($debit != $kredit) {
+
+        $details[] = [
+    'tgl_debit' => $debitRows->pluck('tgl')->implode(', '),
+    'nomor_debit' => $debitRows->pluck('nomor')->implode(', '),
+
+    'tgl_kredit' => $kreditRows->pluck('tgl')->implode(', '),
+    'nomor_kredit' => $kreditRows->pluck('nomor')->implode(', '),
+
+    'invoice' => $invoice,
+
+    'debit' => $debit,
+    'kredit' => $kredit,
+
+    'keterangan' => trim(
+        $debitRows->pluck('keterangan')->implode(', ')
+        . ', ' .
+        $kreditRows->pluck('keterangan')->implode(', ')
+    ),
+];
+
+        $totalDebit += $debit;
+        $totalKredit += $kredit;
+    }
+}
+
+    return view('jurnal.buku-besar-pembantu-detail', compact(
+        'details',
+        'totalDebit',
+        'totalKredit',
+        'coa',
+        'selectedYear',
+        'selectedMonth',
+        'selectedCoaId'
+    ));
+}
 
 
 public function showDetail($id, Request $request)
