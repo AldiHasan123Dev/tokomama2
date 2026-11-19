@@ -36,38 +36,29 @@ class BukuBesarController extends Controller
         $month = $_GET['month'] ?? date('m');
         $year = $_GET['year'] ?? date('Y');
 
-        if ($coa_id) {
-            // Jika coa_id ada
-            if ($coa_id == null) {
-                // Jika coa_id adalah 1, query tanpa filter coa_id
-                $data = Jurnal::whereMonth('jurnal.tgl', $month)
-                    ->whereYear('jurnal.tgl', $year)
-                    ->orderBy('tgl', 'asc')
-                    ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
-                    ->orderBy('created_at', 'asc')
-                    ->orderBy('no', 'asc')
-                    ->get();
-            } else {
-                // Jika coa_id tidak sama dengan 1, filter berdasarkan coa_id
-                $data = Jurnal::whereMonth('jurnal.tgl', $month)
-                    ->whereYear('jurnal.tgl', $year)
-                    ->where('jurnal.coa_id', $coa_id)
-                    ->orderBy('tgl', 'asc')
-                    ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
-                    ->orderBy('created_at', 'asc')
-                    ->orderBy('no', 'asc')
-                    ->get();
-            }
-        } else {
-            // Jika coa_id tidak ada (null), query tanpa filter coa_id
-            $data = Jurnal::whereMonth('jurnal.tgl', $month)
-                ->whereYear('jurnal.tgl', $year)
-                ->orderBy('tgl', 'asc')
-                ->orderByRaw("FIELD(tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
-                ->orderBy('created_at', 'asc')
-                ->orderBy('no', 'asc')
-                ->get();
-        }
+       $query = Jurnal::leftJoin('transaksi', 'jurnal.id_transaksi', '=', 'transaksi.id')
+    ->select('jurnal.*', 'transaksi.no_bm');
+
+if ($coa_id) {
+    $data = $query
+        ->whereMonth('jurnal.tgl', $month)
+        ->whereYear('jurnal.tgl', $year)
+        ->where('jurnal.coa_id', $coa_id)
+        ->orderBy('jurnal.tgl', 'asc')
+        ->orderByRaw("FIELD(jurnal.tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
+        ->orderBy('jurnal.created_at', 'asc')
+        ->orderBy('jurnal.no', 'asc')
+        ->get();
+} else {
+    $data = $query
+        ->whereMonth('jurnal.tgl', $month)
+        ->whereYear('jurnal.tgl', $year)
+        ->orderBy('jurnal.tgl', 'asc')
+        ->orderByRaw("FIELD(jurnal.tipe, 'BBM', 'BBK', 'BKM', 'BKK', 'BBMO', 'BBKO', 'JNL') ASC")
+        ->orderBy('jurnal.created_at', 'asc')
+        ->orderBy('jurnal.no', 'asc')
+        ->get();
+}
         
         
 

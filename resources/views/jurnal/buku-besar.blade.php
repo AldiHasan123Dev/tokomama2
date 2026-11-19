@@ -258,6 +258,7 @@
                         <th>Nopol</th>
                         <th>Invoice</th>
                         <th>Keterangan</th>
+                        <th>No BM</th>
                         <th>Debit</th>
                         <th>Credit</th>
                         <th>Saldo</th>
@@ -289,6 +290,7 @@
                             <td>{{ $item->nopol }}</td>
                             <td>{{ $item->invoice }}</td>
                             <td>{{ $item->keterangan }}</td>
+                            <td>{{ $item->no_bm }}</td>
                             <td style="text-align: right;">{{ number_format($item->debit, 2, ',', '.') }}</td>
                             <td style="text-align: right;">{{ number_format($item->kredit, 2, ',', '.') }}</td>
                             <td style="text-align: right;">{{ number_format($saldo_awal, 2, ',', '.') }}</td>
