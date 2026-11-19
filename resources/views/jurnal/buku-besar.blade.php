@@ -45,6 +45,15 @@
                 color: #155724;
                 /* Hijau gelap untuk teks */
             }
+            #table-buku-besar {
+    width: 100%;
+}
+
+#table-buku-besar th,
+#table-buku-besar td {
+    white-space: nowrap;
+    box-sizing: border-box;
+}
 
                 .table-custom {
                     width: 100%;
@@ -287,9 +296,9 @@
                             <td>{{ $item->nomor }}</td>
                             <td>{{ $item->coa->no_akun }}</td>
                             <td>{{ $item->coa->nama_akun }}</td>
-                            <td>{{ $item->nopol }}</td>
-                            <td>{{ $item->invoice }}</td>
-                            <td>{{ $item->keterangan }}</td>
+                            <td>{{ $item->nopol ?? '-' }}</td>
+                            <td>{{ $item->invoice ?? '-' }}</td>
+                            <td>{{ $item->keterangan ?? '-' }}</td>
                             <td>{{ $item->no_bm ?? '-' }}</td>                            <td style="text-align: right;">{{ number_format($item->debit, 2, ',', '.') }}</td>
                             <td style="text-align: right;">{{ number_format($item->kredit, 2, ',', '.') }}</td>
                             <td style="text-align: right;">{{ number_format($saldo_awal, 2, ',', '.') }}</td>
@@ -355,10 +364,26 @@
             let coa = searchParams.get("coa");
 console.log(month, year, coa);
 
-            var table = $('#table-buku-besar').DataTable({
-                pageLength: 10,
-                scrollX: true, 
-            });
+           var table = $('#table-buku-besar').DataTable({
+    pageLength: 10,
+    scrollX: true,
+    autoWidth: false,
+    scrollCollapse: true,
+    columnDefs: [
+        { width: '40px', targets: 0 },
+        { width: '100px', targets: 1 },
+        { width: '130px', targets: 2 },
+        { width: '80px', targets: 3 },
+        { width: '150px', targets: 4 },
+        { width: '80px', targets: 5 },
+        { width: '120px', targets: 6 },
+        { width: '200px', targets: 7 },
+        { width: '150px', targets: 8 },
+        { width: '100px', targets: 9 },
+        { width: '100px', targets: 10 },
+        { width: '120px', targets: 11 }
+    ]
+});
 
             function submitForm() {
                 var form = document.getElementById('myForm');

@@ -36,7 +36,8 @@ class BukuBesarController extends Controller
         $month = $_GET['month'] ?? date('m');
         $year = $_GET['year'] ?? date('Y');
 
-       $query = Jurnal::leftJoin('transaksi', 'jurnal.id_transaksi', '=', 'transaksi.id')
+$query = Jurnal::query()
+    ->leftJoin('transaksi', 'jurnal.id_transaksi', '=', 'transaksi.id')
     ->select('jurnal.*', 'transaksi.no_bm');
 
 if ($coa_id) {
