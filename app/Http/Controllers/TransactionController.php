@@ -86,7 +86,7 @@ class TransactionController extends Controller
             // Pecah string invoice_external untuk mendapatkan angka terakhir
             // Ambil invoice_external terakhir
             
-            $newInvoiceExternal = "InvSupp/" . mt_rand(100, 999) . "/BM";
+            $newInvoiceExternal = "InvSupp/" . mt_rand(100, 999) . date('ymd') . "/BM";
             foreach ($request->id as $key => $id) {
                 $transaksi = Transaction::find($id);
                 if (!$transaksi) continue; // Pastikan transaksi ditemukan
